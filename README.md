@@ -3,7 +3,7 @@
 Help active retail investors know which changes deserve attention across Vietnamese equities.
 The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
 
-## Status: Section 1 — Data & Analytics Foundation
+## Status: Section 1.5 — UI Refresh
 
 Working vertical slice: dynamic ticker → vnstock → normalized schemas → deterministic
 analytics → FastAPI → Explore UI. Live market and annual financial data were verified for
@@ -14,7 +14,7 @@ TCB, FPT and HPG remain initial seeds, not a hardcoded supported universe.
 
 ## Run locally
 
-Requirements: Python 3.12+, uv, Node.js 20.9+ and npm. From repository root:
+Requirements: Python 3.12+, uv, Node.js 24+ and npm (Node 24.16 tested; frontend tests use native TypeScript support). From repository root:
 
 ```powershell
 uv --system-certs sync --frozen
@@ -39,6 +39,17 @@ Open http://127.0.0.1:3000 and select a stock, or enter another ticker to valida
 Backend API docs: http://127.0.0.1:8000/docs.
 The browser only calls the Next.js backend proxy. Its optional server-side BACKEND_URL
 environment variable defaults to http://127.0.0.1:8000. No browser CORS workaround is required.
+
+## Interface and language
+
+The responsive dashboard uses Tailwind CSS, shadcn/ui, Lucide, Recharts and persistent
+dark/light themes. Global search can validate and add new tickers. Stock detail includes
+daily prices, technical metrics, grouped fundamentals, raw data and labeled sample news.
+
+The interface is permanently English-only. Only trusted display_name_en metadata is
+shown as a company name; otherwise the ticker is displayed. Raw company_name is retained
+in the backend but is never a UI fallback. New tickers do not require frontend branches.
+The seed command applies the additive display-name migration idempotently.
 
 ## Architecture
 
@@ -155,10 +166,13 @@ uv run python -m scripts.smoke_vnstock FPT TCB HPG VNM
 cd frontend
 npm run build
 npm run typecheck
+npm test
 ```
 
-The default 41-test suite is offline; SDK calls are mocked. Smoke is explicitly opt-in,
+The default 43-test backend suite is offline; SDK calls are mocked. Smoke is explicitly opt-in,
 uses the real provider and exits nonzero on failure.
+Four frontend presentation tests cover English names, missing values, signed percentages and safe links.
+See [UI refresh report](docs/UI_REFRESH_REPORT.md) for screenshots and browser QA.
 See [Section 1 report](docs/SECTION1_REPORT.md) for observed results and limitations.
 
 ## MVP roadmap and boundaries
@@ -176,6 +190,7 @@ Full VN30 coverage and tick-level streaming remain outside the initial MVP.
 - [Original product brief](docs/PRODUCT_BRIEF.md)
 - [Day 0 plan](docs/DAY0_PLAN.md) and [historical Day 0 report](docs/DAY0_REPORT.md)
 - [Section 1 plan](docs/SECTION1_PLAN.md) and [Section 1 report](docs/SECTION1_REPORT.md)
+- [UI refresh report and screenshots](docs/UI_REFRESH_REPORT.md)
 - [Official references](docs/reference_repos.md)
 
 .env, local databases, dependencies, build artifacts, logs, editor state and private data/
