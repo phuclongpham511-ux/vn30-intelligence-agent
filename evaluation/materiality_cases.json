@@ -1,0 +1,26 @@
+[
+  {
+    "case_id": "case_001",
+    "symbol": "FPT",
+    "event": {
+      "dimension": "technical",
+      "type": "price_breakdown"
+    },
+    "user_context": {
+      "technical_priority": "primary"
+    },
+    "expected_level": "high"
+  },
+  {
+    "case_id": "case_002",
+    "symbol": "FPT",
+    "event": {
+      "dimension": "technical",
+      "type": "price_breakdown"
+    },
+    "user_context": {
+      "technical_priority": "low"
+    },
+    "expected_level": "medium"
+  }
+]
