@@ -21,6 +21,9 @@ def create_tables(engine=None):
     from src import models  # noqa: F401 - register tables
     target = engine if engine is not None else get_engine()
     SQLModel.metadata.create_all(target)
+    if "display_name_en" not in {column["name"] for column in inspect(target).get_columns("stock")}:
+        with target.begin() as connection:
+            connection.execute(text("ALTER TABLE stock ADD COLUMN display_name_en VARCHAR(255)"))
     # Minimal additive migration for existing Day 0 databases.
     if "updated_at" not in {column["name"] for column in inspect(target).get_columns("stock")}:
         with target.begin() as connection:

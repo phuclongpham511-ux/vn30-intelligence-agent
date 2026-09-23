@@ -13,9 +13,14 @@ SEEDS = [
 def seed_stocks(session: Session) -> int:
     added = 0
     for values in SEEDS:
-        if session.exec(select(Stock).where(Stock.symbol == values["symbol"])).first() is None:
-            session.add(Stock(**values))
+        existing = session.exec(select(Stock).where(Stock.symbol == values["symbol"])).first()
+        # Seed names are curated English metadata, unlike unverified provider names.
+        if existing is None:
+            session.add(Stock(**values, display_name_en=values["company_name"]))
             added += 1
+        elif existing.display_name_en is None:
+            existing.display_name_en = values["company_name"]
+            session.add(existing)
     session.commit()
     return added
 

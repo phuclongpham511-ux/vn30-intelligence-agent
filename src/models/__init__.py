@@ -24,6 +24,7 @@ class Stock(Timestamped, table=True):
     symbol: str = Field(unique=True, index=True, max_length=20)
     exchange: str | None = Field(default=None, max_length=30)
     company_name: str | None = Field(default=None, max_length=255)
+    display_name_en: str | None = Field(default=None, max_length=255)
     sector: str | None = Field(default=None, max_length=100)
     industry: str | None = Field(default=None, max_length=100)
     is_active: bool = True

@@ -1,12 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { englishCompanyName } from "@/lib/presentation";
 
 type Bar = { date: string; close: number };
 type Market = { ticker: string; as_of: string | null; close: number | null; source: string } & Record<string, string | number | null>;
 type Fundamental = { period: string | null; source: string } & Record<string, string | number | null>;
 type News = { id: string; published_at: string; title: string; source: string; is_fixture: boolean; url: string | null };
-type Overview = { stock: { symbol: string; company_name: string | null }; history: Bar[]; market: Market; fundamentals: Fundamental; news: News[] };
+type Overview = { stock: { symbol: string; company_name: string | null; display_name_en?: string | null }; history: Bar[]; market: Market; fundamentals: Fundamental; news: News[] };
 
 function number(value: unknown, percent = false) {
   return typeof value === "number" ? (percent ? new Intl.NumberFormat("en", { style: "percent", maximumFractionDigits: 2 }).format(value) : new Intl.NumberFormat("en", { maximumFractionDigits: 2 }).format(value)) : "—";
@@ -51,7 +52,7 @@ export default function Explore({ ticker }: { ticker: string }) {
     ["net_profit_growth_yoy", "Profit growth · YoY", true], ["gross_margin", "Gross margin", true], ["net_margin", "Net margin", true], ["roe", "ROE", true],
     ["gross_margin_change", "Gross margin change · pp", false], ["net_margin_change", "Net margin change · pp", false], ["roe_change", "ROE change · pp", false],
   ];
-  return <><Link href="/">← Change ticker</Link><p className="eyebrow">{stock.company_name || "Stock explore"}</p><h1>{stock.symbol}</h1>
+  return <><Link href="/">← Change ticker</Link><p className="eyebrow">{englishCompanyName(stock) || "Stock explore"}</p><h1>{stock.symbol}</h1>
     <p className="price">{number(market.close)} VND <small>Daily {number(market.daily_return, true)}</small></p>
     <p>As of {market.as_of || "unavailable"} · {market.source} · Daily data, not realtime</p>
     <section><h2>Price history</h2><Chart bars={history}/></section>

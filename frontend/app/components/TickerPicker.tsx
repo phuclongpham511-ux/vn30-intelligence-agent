@@ -1,39 +1,20 @@
 "use client";
-import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-
-type Stock = { symbol: string; company_name: string | null };
+import { ArrowUpRight, Database, ArrowRight, RefreshCw } from "lucide-react";
+import { useStocks } from "./stock/StockUniverse";
+import { englishCompanyName } from "@/lib/presentation";
+import { Button } from "./ui/button";
+import { Skeleton } from "./ui/skeleton";
 export default function TickerPicker() {
-  const [stocks, setStocks] = useState<Stock[]>([]);
-  const [ticker, setTicker] = useState("");
-  const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const router = useRouter();
-  useEffect(() => {
-    fetch("/api/stocks").then(async response => {
-      if (!response.ok) throw new Error("Could not load stocks. Check the backend.");
-      setStocks(await response.json());
-    }).catch(error => setError(error.message));
-  }, []);
-  async function open(event: FormEvent) {
-    event.preventDefault(); setError(""); setBusy(true);
-    const symbol = ticker.trim().toUpperCase();
-    try {
-      const response = await fetch("/api/stocks", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ticker: symbol }) });
-      const body = await response.json();
-      if (!response.ok) throw new Error(typeof body.detail === "string" ? body.detail : "Enter a valid ticker.");
-      router.push("/stocks/" + encodeURIComponent(body.symbol));
-    } catch (error) { setError(error instanceof Error ? error.message : "Unable to open stock."); }
-    finally { setBusy(false); }
-  }
-  return <section><h2>Explore a stock</h2>
-    <form onSubmit={open}><label htmlFor="ticker">Ticker</label>{" "}
-      <input id="ticker" value={ticker} onChange={event => setTicker(event.target.value)} placeholder="Enter a ticker" maxLength={20} required pattern="[A-Za-z0-9 ]+" />
-      <button disabled={busy}>{busy ? "Validating…" : "Open / add stock"}</button>
-    </form>
-    {error && <p role="alert" className="error">{error}</p>}
-    <div className="tickers">{stocks.filter(stock => stock.symbol.includes(ticker.trim().toUpperCase())).map(stock =>
-      <Link key={stock.symbol} href={"/stocks/" + stock.symbol}>{stock.symbol}<small>{stock.company_name}</small></Link>)}</div>
+  const { stocks, loading, error, refresh } = useStocks();
+  return <section aria-labelledby="available-title">
+    <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-3"><h2 id="available-title">Available stocks</h2><span className="rounded-md border px-2 py-0.5 text-[11px] text-muted-foreground">{loading ? "â€¦" : stocks.length}</span></div><span className="hidden text-xs text-muted-foreground sm:block">Your market starting points</span></div>
+    {loading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{[0,1,2].map(i => <Skeleton key={i} className="h-40 rounded-xl"/>)}</div>
+      : error ? <div role="alert" className="panel p-6"><p>{error}</p><Button variant="outline" onClick={refresh} className="mt-4"><RefreshCw/>Retry</Button></div>
+      : stocks.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{stocks.map(stock => <Link key={stock.id} href={"/stocks/" + stock.symbol} className="group panel p-5 transition-colors hover:border-primary/60 hover:bg-muted/30">
+        <div className="flex items-start justify-between"><span className="flex h-11 min-w-11 items-center justify-center rounded-lg border bg-muted/40 px-2 text-sm font-semibold tracking-wide">{stock.symbol}</span><ArrowUpRight size={17} className="text-muted-foreground transition-colors group-hover:text-primary"/></div>
+        <h3 className="mt-4 text-base">{stock.symbol}</h3>{englishCompanyName(stock) && <p className="mt-1 truncate text-xs text-muted-foreground">{englishCompanyName(stock)}</p>}
+        <div className="mt-5 flex items-center justify-between border-t pt-3 text-[11px] text-muted-foreground"><span>{stock.exchange || "Vietnam equity"}</span><span className="flex items-center gap-1.5">Open overview<ArrowRight size={12}/></span></div>
+      </Link>)}</div> : <div className="panel p-8 text-center"><Database className="mx-auto mb-3 text-muted-foreground"/><h3>No stocks added yet</h3><p className="mt-2 text-sm text-muted-foreground">Use the search above to validate and add a ticker.</p></div>}
   </section>;
 }

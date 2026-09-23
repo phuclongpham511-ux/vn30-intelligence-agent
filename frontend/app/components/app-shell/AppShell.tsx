@@ -4,6 +4,8 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { ChartNoAxesCombined, Compass, Bookmark, Layers, PanelLeft, Moon, Sun, Search, Database, ArrowUpRight } from "lucide-react";
+import TickerSearch from "../stock/TickerSearch";
+import { StockUniverse } from "../stock/StockUniverse";
 import { Button } from "../ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "../ui/sheet";
 
@@ -50,7 +52,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <Sheet open={open} onOpenChange={setOpen}><SheetTrigger asChild><Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation"><PanelLeft size={19}/></Button></SheetTrigger>
           <SheetContent side="left" className="w-72 gap-0 p-0"><SheetTitle className="sr-only">Navigation</SheetTitle><SheetDescription className="sr-only">Explore and watchlist workspace</SheetDescription><Navigation close={() => setOpen(false)}/></SheetContent>
         </Sheet>
-        <div className="min-w-0 flex-1"><Link href="/" className="flex max-w-md items-center gap-3 rounded-lg border bg-card px-3 py-2 text-sm text-muted-foreground"><Search size={16}/><span>Search stocks</span><ArrowUpRight size={14} className="ml-auto"/></Link></div>
+        <div className="min-w-0 flex-1"><TickerSearch/></div>
         <span className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex"><Database size={14}/> Daily data</span>
         <div className="ml-1 border-l pl-2"><ThemeToggle/></div>
       </header>
@@ -61,5 +63,5 @@ function Shell({ children }: { children: React.ReactNode }) {
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  return <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange><Shell>{children}</Shell></ThemeProvider>;
+  return <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange><StockUniverse><Shell>{children}</Shell></StockUniverse></ThemeProvider>;
 }
