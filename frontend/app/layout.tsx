@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import AppShell from "./components/app-shell/AppShell";
 import "./globals.css";
-
 export const metadata: Metadata = {
-  title: "VN30 Intelligence Agent",
-  description: "Know what deserves your attention.",
+  title: "VN30 Intelligence",
+  description: "Vietnamese equity data, fundamentals and evidence in one focused workspace.",
 };
-
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en"><body>
-    <header><Link href="/">VN30 Intelligence</Link><nav><Link href="/watchlist">Watchlist</Link></nav></header>
-    <main>{children}</main>
-    <footer>Daily market data · Annual fundamentals · Sample news</footer>
-  </body></html>;
+  return <html lang="en" suppressHydrationWarning><body><AppShell>{children}</AppShell></body></html>;
 }
