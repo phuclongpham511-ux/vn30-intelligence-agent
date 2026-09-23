@@ -55,7 +55,7 @@ export default function TickerSearch() {
         {canAdd && <li role="option" aria-selected={active === matches.length} id={id + "-" + matches.length}><button type="button" onMouseDown={event => event.preventDefault()} onClick={() => void navigate(symbol, false)} className={`flex w-full items-center gap-2 rounded-lg p-3 text-left text-sm text-primary hover:bg-muted ${active === matches.length ? "bg-muted" : ""}`}><Plus size={16}/>Validate and add {symbol}</button></li>}
         {!count && <li className="p-4 text-sm text-muted-foreground">Type a ticker to get started.</li>}
       </ul>
-      <div className="border-t px-4 py-2 text-[10px] text-muted-foreground">â†‘ â†“ to navigate Â· Enter to open Â· Esc to close</div>
+      <div className="border-t px-4 py-2 text-[10px] text-muted-foreground">↑ ↓ to navigate · Enter to open · Esc to close</div>
     </div>}
     {error && <p role="alert" className="absolute top-full z-50 mt-2 w-full rounded-lg border bg-card p-3 text-xs">{error}</p>}
     {busy && <span role="status" className="sr-only">Validating ticker</span>}

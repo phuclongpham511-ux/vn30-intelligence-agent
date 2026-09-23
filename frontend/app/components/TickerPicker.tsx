@@ -8,7 +8,7 @@ import { Skeleton } from "./ui/skeleton";
 export default function TickerPicker() {
   const { stocks, loading, error, refresh } = useStocks();
   return <section aria-labelledby="available-title">
-    <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-3"><h2 id="available-title">Available stocks</h2><span className="rounded-md border px-2 py-0.5 text-[11px] text-muted-foreground">{loading ? "â€¦" : stocks.length}</span></div><span className="hidden text-xs text-muted-foreground sm:block">Your market starting points</span></div>
+    <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-3"><h2 id="available-title">Available stocks</h2><span className="rounded-md border px-2 py-0.5 text-[11px] text-muted-foreground">{loading ? "…" : stocks.length}</span></div><span className="hidden text-xs text-muted-foreground sm:block">Your market starting points</span></div>
     {loading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{[0,1,2].map(i => <Skeleton key={i} className="h-40 rounded-xl"/>)}</div>
       : error ? <div role="alert" className="panel p-6"><p>{error}</p><Button variant="outline" onClick={refresh} className="mt-4"><RefreshCw/>Retry</Button></div>
       : stocks.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{stocks.map(stock => <Link key={stock.id} href={"/stocks/" + stock.symbol} className="group panel p-5 transition-colors hover:border-primary/60 hover:bg-muted/30">

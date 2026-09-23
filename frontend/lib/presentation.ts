@@ -4,11 +4,11 @@ export function englishCompanyName(stock: { display_name_en?: string | null; com
 }
 export function formatNumber(value: unknown, decimals = 2): string {
   return typeof value === "number" && Number.isFinite(value)
-    ? new Intl.NumberFormat("en-US", { maximumFractionDigits: decimals }).format(value) : "â€”";
+    ? new Intl.NumberFormat("en-US", { maximumFractionDigits: decimals }).format(value) : "—";
 }
 export function formatPercent(value: unknown, signed = false): string {
   return typeof value === "number" && Number.isFinite(value)
-    ? new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 2, signDisplay: signed ? "exceptZero" : "auto" }).format(value) : "â€”";
+    ? new Intl.NumberFormat("en-US", { style: "percent", maximumFractionDigits: 2, signDisplay: signed ? "exceptZero" : "auto" }).format(value) : "—";
 }
 export function formatDate(value: string | null, short = false): string {
   if (!value) return "Unavailable";

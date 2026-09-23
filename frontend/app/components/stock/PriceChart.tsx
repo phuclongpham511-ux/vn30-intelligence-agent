@@ -9,7 +9,7 @@ import { Card } from "../ui/card";
 export default function PriceChart({ bars, source }: { bars: Bar[]; source: string }) {
   const gradient = "price-" + useId().replaceAll(":", "");
   return <Card className="min-w-0 gap-0 overflow-hidden py-0 shadow-none">
-    <div className="flex items-center justify-between gap-3 px-5 pb-2 pt-5"><div><h2>Price history</h2><p className="mt-1 text-xs text-muted-foreground">Daily closing price Â· VND</p></div><span className="rounded-md border bg-muted/40 px-2.5 py-1 text-[10px] text-muted-foreground">180-day window</span></div>
+    <div className="flex items-center justify-between gap-3 px-5 pb-2 pt-5"><div><h2>Price history</h2><p className="mt-1 text-xs text-muted-foreground">Daily closing price · VND</p></div><span className="rounded-md border bg-muted/40 px-2.5 py-1 text-[10px] text-muted-foreground">180-day window</span></div>
     <div className="h-[310px] min-w-0 px-2 pt-5 sm:h-[330px]" aria-label="Daily closing price chart">
       {!bars.length ? <div className="flex h-full flex-col items-center justify-center gap-3 text-muted-foreground"><ChartNoAxesCombined/><p className="text-sm">No price history available.</p></div> :
       <ResponsiveContainer width="100%" height="100%" minWidth={0} initialDimension={{ width: 600, height: 300 }}>
@@ -23,6 +23,6 @@ export default function PriceChart({ bars, source }: { bars: Bar[]; source: stri
         </AreaChart>
       </ResponsiveContainer>}
     </div>
-    <div className="flex flex-wrap justify-between gap-2 border-t px-5 py-3 text-[10px] text-muted-foreground"><span>{bars.length ? `${formatDate(bars[0].date,true)} â€” ${formatDate(bars[bars.length-1].date)}` : "No reporting dates"}</span><span>{bars.length} sessions Â· {source}</span></div>
+    <div className="flex flex-wrap justify-between gap-2 border-t px-5 py-3 text-[10px] text-muted-foreground"><span>{bars.length ? `${formatDate(bars[0].date,true)} — ${formatDate(bars[bars.length-1].date)}` : "No reporting dates"}</span><span>{bars.length} sessions · {source}</span></div>
   </Card>;
 }

@@ -57,7 +57,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div className="ml-1 border-l pl-2"><ThemeToggle/></div>
       </header>
       <main id="main-content" className="mx-auto max-w-[1600px] p-4 md:p-8">{children}</main>
-      <footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>VN30 Intelligence Â· Vietnamese equities</span><span>Daily market data Â· Sample news</span></footer>
+      <footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>VN30 Intelligence · Vietnamese equities</span><span>Daily market data · Sample news</span></footer>
     </div>
   </div>;
 }
