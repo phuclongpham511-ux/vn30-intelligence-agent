@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import Enum
-from sqlalchemy import Column, DateTime, Enum as SAEnum, UniqueConstraint
+from sqlalchemy import Column, DateTime, Enum as SAEnum, UniqueConstraint, CheckConstraint
 from sqlmodel import Field, SQLModel
 
 
@@ -19,6 +19,7 @@ class User(Timestamped, table=True):
 
 
 class Stock(Timestamped, table=True):
+    __table_args__ = (CheckConstraint("symbol = upper(trim(symbol))", name="stock_symbol_normalized"),)
     id: int | None = Field(default=None, primary_key=True)
     symbol: str = Field(unique=True, index=True, max_length=20)
     exchange: str | None = Field(default=None, max_length=30)
@@ -26,6 +27,7 @@ class Stock(Timestamped, table=True):
     sector: str | None = Field(default=None, max_length=100)
     industry: str | None = Field(default=None, max_length=100)
     is_active: bool = True
+    updated_at: datetime = Field(default_factory=utc_now, sa_column=Column(DateTime(timezone=True), nullable=False, onupdate=utc_now))
 
 
 class Watchlist(Timestamped, table=True):

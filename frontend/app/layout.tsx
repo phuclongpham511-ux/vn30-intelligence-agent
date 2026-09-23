@@ -11,6 +11,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return <html lang="en"><body>
     <header><Link href="/">VN30 Intelligence</Link><nav><Link href="/watchlist">Watchlist</Link></nav></header>
     <main>{children}</main>
-    <footer>Day 0 foundation · No live market data yet</footer>
+    <footer>Daily market data · Annual fundamentals · Sample news</footer>
   </body></html>;
 }

@@ -5,6 +5,8 @@ from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, create_engine
 from main import app
 from src.db.session import create_tables, get_session
+from src.services.stocks import get_market_provider
+from src.providers.base import ProviderNotReadyError
 
 
 @pytest.fixture
@@ -21,9 +23,13 @@ def session():
 
 @pytest.fixture
 def client(session):
+    class UnconfiguredProvider:
+        def validate_symbol(self, symbol):
+            raise ProviderNotReadyError("Test provider is not configured")
     def override_session():
         yield session
     app.dependency_overrides[get_session] = override_session
+    app.dependency_overrides[get_market_provider] = lambda: UnconfiguredProvider()
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()

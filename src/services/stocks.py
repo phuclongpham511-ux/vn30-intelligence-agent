@@ -1,3 +1,4 @@
+from functools import lru_cache
 from sqlmodel import Session, select
 from src.models import Stock
 from src.providers.base import MarketDataProvider, ProviderNotReadyError
@@ -5,6 +6,7 @@ from src.providers.vnstock import VnstockMarketDataProvider
 from src.schemas.stocks import SymbolValidation
 
 
+@lru_cache
 def get_market_provider() -> MarketDataProvider:
     return VnstockMarketDataProvider()
 

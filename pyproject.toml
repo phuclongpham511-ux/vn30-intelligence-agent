@@ -3,7 +3,17 @@ name = "vn30-intelligence-agent"
 version = "0.1.0"
 description = "Day 0 foundation for personalized Vietnamese equity intelligence"
 requires-python = ">=3.12"
-dependencies = ["fastapi>=0.115,<1", "uvicorn[standard]>=0.34,<1", "sqlmodel>=0.0.24,<0.1", "pydantic-settings>=2.8,<3", "psycopg[binary]>=3.2,<4"]
+dependencies = [
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.34,<1",
+    "sqlmodel>=0.0.24,<0.1",
+    "pydantic-settings>=2.8,<3",
+    "psycopg[binary]>=3.2,<4",
+    "vnstock==4.0.2",
+    "pandas>=2.2,<4",
+    "numpy>=2,<3",
+    "truststore>=0.10.4",
+]
 
 [dependency-groups]
 dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "httpx>=0.28,<1"]
