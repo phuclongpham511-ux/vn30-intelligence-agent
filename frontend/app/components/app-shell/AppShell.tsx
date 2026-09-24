@@ -30,7 +30,7 @@ function Navigation({ close }: { close?: () => void }) {
     <div className="mt-auto p-5"><div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-2 text-xs font-medium"><Database size={14}/> Data foundation</div>
       <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Daily prices. Reported fundamentals. Inspectable evidence.</p>
-    </div><div className="mt-4 flex justify-between text-[10px] text-muted-foreground"><span>VN EQUITIES</span><span>SECTION 1.5</span></div></div>
+    </div><div className="mt-4 flex justify-between text-[10px] text-muted-foreground"><span>VN EQUITIES</span><span>RESEARCH</span></div></div>
   </div>;
 }
 
