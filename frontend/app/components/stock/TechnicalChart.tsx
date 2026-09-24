@@ -23,6 +23,13 @@ export default function TechnicalChart({ ticker, onRows }: { ticker: string; onR
   const [error, setError] = useState(false);
   const [indicators, setIndicators] = useState<Indicators>({MA20:true, MA50:true, Volume:true, RSI:true});
   const { resolvedTheme } = useTheme();
+  const [paletteVersion, setPaletteVersion] = useState(0);
+  useEffect(() => {
+    // next-themes can apply its DOM class after descendant effects have run.
+    const observer = new MutationObserver(() => setPaletteVersion(value => value + 1));
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,7 +99,7 @@ export default function TechnicalChart({ ticker, onRows }: { ticker: string; onR
     ma50.applyOptions({visible:indicators.MA50,color:color("--ma50")});
     ma20.setData(data.ma20); ma50.setData(data.ma50);
     refs.rsi?.applyOptions({color:color("--rsi")}); refs.rsi?.setData(data.rsi14);
-  }, [rows, resolvedTheme, indicators]);
+  }, [rows, resolvedTheme, indicators, paletteVersion]);
 
   useEffect(() => {
     currentRows.current = rows; setSelected(null); onRows(rows);

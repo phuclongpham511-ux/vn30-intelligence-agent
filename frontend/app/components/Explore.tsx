@@ -6,7 +6,7 @@ import type { Overview, TechnicalBar } from "@/lib/types";
 import StockHeader from "./stock/StockHeader";
 import TechnicalChart from "./stock/TechnicalChart";
 import MarketSnapshot from "./stock/MarketSnapshot";
-import FundamentalsCard from "./stock/FundamentalsCard";
+import FundamentalTrends from "./stock/FundamentalTrends";
 import RawDataTable from "./stock/RawDataTable";
 import MaterialitySlot from "./stock/MaterialitySlot";
 
@@ -33,7 +33,7 @@ export default function Explore({ ticker }: { ticker: string }) {
     <MaterialitySlot/>
     <TechnicalChart ticker={ticker} onRows={setTechnicalRows}/>
     <MarketSnapshot market={data.market}/>
-    <FundamentalsCard data={data.fundamentals}/>
+    <FundamentalTrends ticker={ticker}/>
     <NewsFeed items={data.news}/>
     <RawDataTable bars={technicalRows}/>
   </div>;

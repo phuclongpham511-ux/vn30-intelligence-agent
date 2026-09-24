@@ -13,12 +13,14 @@
   --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
 }
 :root {
+  --chart-secondary: #517990;
   --ma20: #a86c12; --ma50: #2376bb; --rsi: #506b82;
   --background: #f5f6fa; --foreground: #1c2030; --card: #ffffff; --muted: #edeef5;
   --muted-foreground: #646b7e; --border: #dce0e9; --primary: #6550d9; --primary-foreground: #ffffff;
   --positive: #087a51; --negative: #c43c51; --sidebar: #ffffff; --chart: #7763e8;
 }
 .dark {
+  --chart-secondary: #94b4c7;
   --ma20: #d6b16c; --ma50: #7bb5e3; --rsi: #a8bacb;
   --background: #0d1017; --foreground: #e9edf5; --card: #141821; --muted: #1c2130;
   --muted-foreground: #959fb3; --border: #262c3b; --primary: #ac9bff; --primary-foreground: #17112e;
