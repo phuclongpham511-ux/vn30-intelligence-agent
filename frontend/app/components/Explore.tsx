@@ -4,7 +4,7 @@ import NewsFeed from "./stock/NewsFeed";
 import { StockLoading, StockError } from "./stock/StockStates";
 import type { Overview } from "@/lib/types";
 import StockHeader from "./stock/StockHeader";
-import PriceChart from "./stock/PriceChart";
+import TechnicalChart from "./stock/TechnicalChart";
 import MarketSnapshot from "./stock/MarketSnapshot";
 import TechnicalMetrics from "./stock/TechnicalMetrics";
 import FundamentalsCard from "./stock/FundamentalsCard";
@@ -31,7 +31,8 @@ export default function Explore({ ticker }: { ticker: string }) {
   return <div className="page-stack">
     <StockHeader stock={data.stock} market={data.market}/>
     <MaterialitySlot/>
-    <div className="grid min-w-0 gap-4 xl:grid-cols-12"><div className="min-w-0 xl:col-span-8"><PriceChart bars={data.history} source={data.market.source}/></div><div className="min-w-0 xl:col-span-4"><MarketSnapshot market={data.market}/></div></div>
+    <TechnicalChart ticker={ticker}/>
+    <MarketSnapshot market={data.market}/>
     <TechnicalMetrics market={data.market}/>
     <FundamentalsCard data={data.fundamentals}/>
     <NewsFeed items={data.news}/>
