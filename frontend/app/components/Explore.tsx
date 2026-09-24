@@ -2,11 +2,10 @@
 import { useEffect, useState } from "react";
 import NewsFeed from "./stock/NewsFeed";
 import { StockLoading, StockError } from "./stock/StockStates";
-import type { Overview } from "@/lib/types";
+import type { Overview, TechnicalBar } from "@/lib/types";
 import StockHeader from "./stock/StockHeader";
 import TechnicalChart from "./stock/TechnicalChart";
 import MarketSnapshot from "./stock/MarketSnapshot";
-import TechnicalMetrics from "./stock/TechnicalMetrics";
 import FundamentalsCard from "./stock/FundamentalsCard";
 import RawDataTable from "./stock/RawDataTable";
 import MaterialitySlot from "./stock/MaterialitySlot";
@@ -14,6 +13,7 @@ import MaterialitySlot from "./stock/MaterialitySlot";
 
 export default function Explore({ ticker }: { ticker: string }) {
   const [data, setData] = useState<Overview | null>(null);
+  const [technicalRows, setTechnicalRows] = useState<TechnicalBar[]>([]);
   const [error, setError] = useState("");
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
@@ -31,11 +31,10 @@ export default function Explore({ ticker }: { ticker: string }) {
   return <div className="page-stack">
     <StockHeader stock={data.stock} market={data.market}/>
     <MaterialitySlot/>
-    <TechnicalChart ticker={ticker}/>
+    <TechnicalChart ticker={ticker} onRows={setTechnicalRows}/>
     <MarketSnapshot market={data.market}/>
-    <TechnicalMetrics market={data.market}/>
     <FundamentalsCard data={data.fundamentals}/>
     <NewsFeed items={data.news}/>
-    <RawDataTable bars={data.history}/>
+    <RawDataTable bars={technicalRows}/>
   </div>;
 }

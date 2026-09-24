@@ -12,6 +12,9 @@ export function rangeDates(range: Range, end = new Date()): { start: string; end
 export function technicalSeries(rows: TechnicalBar[], up: string, down: string) {
   const ordered = [...rows].sort((a, b) => a.date.localeCompare(b.date));
   return {
+    ma20: ordered.filter(row => row.ma20 != null).map(row => ({ time: row.date, value: row.ma20! })),
+    ma50: ordered.filter(row => row.ma50 != null).map(row => ({ time: row.date, value: row.ma50! })),
+    rsi14: ordered.filter(row => row.rsi14 != null).map(row => ({ time: row.date, value: row.rsi14! })),
     candles: ordered.map(({ date: time, open, high, low, close }) => ({ time, open, high, low, close })),
     volume: ordered.map(row => ({ time: row.date, value: row.volume, color: row.close >= row.open ? up : down })),
   };
