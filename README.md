@@ -3,7 +3,7 @@
 Help active retail investors know which changes deserve attention across Vietnamese equities.
 The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
 
-## Status: Section 1.5 — UI Refresh
+## Status: Section 1.6 — Financial Visualization Foundation
 
 Working vertical slice: dynamic ticker → vnstock → normalized schemas → deterministic
 analytics → FastAPI → Explore UI. Live market and annual financial data were verified for
@@ -43,8 +43,16 @@ environment variable defaults to http://127.0.0.1:8000. No browser CORS workarou
 ## Interface and language
 
 The responsive dashboard uses Tailwind CSS, shadcn/ui, Lucide, Recharts and persistent
-dark/light themes. Global search can validate and add new tickers. Stock detail includes
-daily prices, technical metrics, grouped fundamentals, raw data and labeled sample news.
+dark/light themes and a neutral blue research identity. Lightweight Charts 5.2.1 renders
+real candlesticks, MA20/MA50, volume and RSI in synchronized panes. Global search can validate and add new tickers. Stock detail includes
+3M/6M/1Y/2Y history, compact market context, annual revenue/profit/growth/profitability
+charts, raw technical and financial tables, and labeled sample news. Recharts renders
+financial trends; all indicators come from deterministic Python analytics.
+
+Technical and annual-history panels have independent loading/retry/empty states.
+Technical indicators initialize inside the selected window: warm-up stays null and
+changing the range can slightly change Wilder RSI initialization. The default 6M
+series matches the existing snapshot window. TradingView attribution is retained.
 
 The interface is permanently English-only. Only trusted display_name_en metadata is
 shown as a company name; otherwise the ticker is displayed. Raw company_name is retained
@@ -121,6 +129,8 @@ Fixture URLs are null; sample content is never represented as a real company ann
 | POST | /stocks/validate | Provider-backed validation |
 | GET | /stocks/{symbol} | Persisted stock or 404 |
 | GET | /stocks/{symbol}/history | Daily OHLCV; optional start/end |
+| GET | /stocks/{symbol}/technical-history | OHLCV plus aligned MA20/MA50/RSI14; optional start/end, same 730-day maximum |
+| GET | /stocks/{symbol}/fundamentals/history | Annual history, oldest first; limit=4 (1–20), only available periods |
 | GET | /stocks/{symbol}/market | Market snapshot |
 | GET | /stocks/{symbol}/fundamentals | Annual fundamental snapshot |
 | GET | /stocks/{symbol}/news | Labeled fixture feed; limit 1–20 |
@@ -163,15 +173,18 @@ docker run --rm -p 127.0.0.1:8000:8000 -v vn30-data:/data -e DATABASE_URL=sqlite
 ```powershell
 uv run pytest -q
 uv run python -m scripts.smoke_vnstock FPT TCB HPG VNM
+# Requires a running backend; validates/adds these symbols in the local DB:
+uv run python -m scripts.smoke_visualization FPT HPG TCB MWG
 cd frontend
 npm run build
 npm run typecheck
 npm test
 ```
 
-The default 43-test backend suite is offline; SDK calls are mocked. Smoke is explicitly opt-in,
+The default 57-test backend suite is offline; SDK calls are mocked. Smoke is explicitly opt-in,
 uses the real provider and exits nonzero on failure.
-Four frontend presentation tests cover English names, missing values, signed percentages and safe links.
+Nine frontend tests cover names, missing values, safe links, chart adapters, indicator nulls, annual ordering and real date-range mapping.
+See [Section 1.6 report](docs/SECTION1_6_REPORT.md) for final QA and the seven new screenshots.
 See [UI refresh report](docs/UI_REFRESH_REPORT.md) for screenshots and browser QA.
 See [Section 1 report](docs/SECTION1_REPORT.md) for observed results and limitations.
 
@@ -191,6 +204,7 @@ Full VN30 coverage and tick-level streaming remain outside the initial MVP.
 - [Day 0 plan](docs/DAY0_PLAN.md) and [historical Day 0 report](docs/DAY0_REPORT.md)
 - [Section 1 plan](docs/SECTION1_PLAN.md) and [Section 1 report](docs/SECTION1_REPORT.md)
 - [UI refresh report and screenshots](docs/UI_REFRESH_REPORT.md)
+- [Financial visualization report](docs/SECTION1_6_REPORT.md)
 - [Official references](docs/reference_repos.md)
 
 .env, local databases, dependencies, build artifacts, logs, editor state and private data/
