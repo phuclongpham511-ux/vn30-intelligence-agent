@@ -24,6 +24,12 @@ class MarketBar(DataModel):
         return self
 
 
+class TechnicalBar(MarketBar):
+    ma20: float | None = None
+    ma50: float | None = None
+    rsi14: float | None = Field(default=None, ge=0, le=100)
+
+
 class MarketSnapshot(DataModel):
     ticker: str
     as_of: date | None = None
@@ -69,6 +75,10 @@ class FundamentalSnapshot(DataModel):
     roe_change: float | None = None
     source: str
     currency: str = "VND"
+
+
+class FundamentalPeriod(FundamentalSnapshot):
+    period: str = Field(pattern=r"^\d{4}$")
 
 
 class NewsItem(DataModel):

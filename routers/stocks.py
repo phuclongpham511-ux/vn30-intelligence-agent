@@ -6,7 +6,7 @@ from src.db.session import get_session
 from src.models import Stock
 from src.providers.base import MarketDataProvider, FundamentalDataProvider, NewsProvider
 from src.schemas.stocks import SymbolRequest, SymbolValidation, StockOverview
-from src.schemas.data import MarketBar, MarketSnapshot, FundamentalSnapshot, NewsItem
+from src.schemas.data import MarketBar, MarketSnapshot, FundamentalSnapshot, NewsItem, TechnicalBar, FundamentalPeriod
 from src.services.stocks import find_stock, get_market_provider, list_stocks, validate_symbol
 from src.services import data
 
@@ -73,6 +73,24 @@ def stock_history(start: date | None = None, end: date | None = None,
 def stock_market(record: Stock = Depends(require_stock),
                  provider: MarketDataProvider = Depends(get_market_provider)):
     return data.market(record.symbol, provider)
+
+
+@router.get("/{symbol}/technical-history", response_model=list[TechnicalBar])
+def stock_technicals(start: date | None = None, end: date | None = None,
+                     record: Stock = Depends(require_stock),
+                     provider: MarketDataProvider = Depends(get_market_provider)):
+    end = end or date.today()
+    start = start or end - timedelta(days=180)
+    if start > end or (end - start).days > 730 or end > date.today():
+        raise HTTPException(status_code=422, detail="Use an ordered date range of at most 730 days, ending today or earlier")
+    return data.technicals(record.symbol, provider, start, end)
+
+
+@router.get("/{symbol}/fundamentals/history", response_model=list[FundamentalPeriod])
+def stock_fundamental_history(limit: int = Query(default=4, ge=1, le=20),
+                              record: Stock = Depends(require_stock),
+                              provider: FundamentalDataProvider = Depends(data.get_fundamental_provider)):
+    return data.annual_history(record.symbol, provider, limit)
 
 
 @router.get("/{symbol}/fundamentals", response_model=FundamentalSnapshot)
