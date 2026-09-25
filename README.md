@@ -3,13 +3,17 @@
 Help active retail investors know which changes deserve attention across Vietnamese equities.
 The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
 
-## Status: Section 2, Phase 1 — Materiality Engine V0 (backend only)
+## Status: Section 2, Phase 2 — Historical evaluation and first reviewed batch
 
 Working vertical slice: dynamic ticker → vnstock → normalized schemas → deterministic
 analytics → FastAPI → Explore UI. Live market and annual financial data were verified for
 FPT, TCB, HPG and a newly onboarded VNM. News is explicitly labeled synthetic sample data.
 Materiality Engine V0 is available as a deterministic backend package and offline developer preview.
 It is provisional, not connected to the UI; MaterialitySlot remains a placeholder. No AI is implemented.
+An offline historical evaluation framework now audits/caches data, replays V0 and creates
+review queues. The real pilot and first three user-reviewed cases are saved locally.
+Framework/pilot gates are satisfied; vendor-vintage/adjustment limitations remain,
+and three labels do not establish formal accuracy or production readiness.
 
 TCB, FPT and HPG remain initial seeds, not a hardcoded supported universe.
 
@@ -183,8 +187,8 @@ npm run typecheck
 npm test
 ```
 
-The default 90-test backend suite is offline; SDK calls are mocked.
-This includes 33 Materiality tests. The preview uses existing analytics with explicitly
+The default 111-test backend suite is offline; SDK calls are mocked.
+This includes 33 Materiality tests and 21 historical evaluation tests. The preview uses existing analytics with explicitly
 labeled synthetic fixtures, all excluded from materiality scoring. Smoke is explicitly opt-in,
 uses the real provider and exits nonzero on failure.
 Nine frontend tests cover names, missing values, safe links, chart adapters, indicator nulls, annual ordering and real date-range mapping.
@@ -194,8 +198,9 @@ See [Section 1 report](docs/SECTION1_REPORT.md) for observed results and limitat
 
 ## MVP roadmap and boundaries
 
-Next: Section 2, Phase 2 — point-in-time historical evaluation and calibration of
-Materiality V0. Monitoring priorities and watchlist attention budgets follow calibration.
+Next: expand the reviewed benchmark and address source-vintage/adjustment limitations
+before evidence-based Phase 3 calibration. V0 remains unchanged; Phase 3 has not started.
+Monitoring priorities and watchlist attention budgets follow calibration.
 
 Not implemented: production materiality integration, monitoring weighting, watchlist intelligence,
 AI/LLM/Agents SDK, portfolio/P&L, thesis, RAG/PDF, email, prediction, BUY/SELL/HOLD, trading,
@@ -210,6 +215,7 @@ Full VN30 coverage and tick-level streaming remain outside the initial MVP.
 - [UI refresh report and screenshots](docs/UI_REFRESH_REPORT.md)
 - [Financial visualization report](docs/SECTION1_6_REPORT.md)
 - [Materiality V0 integration report](docs/SECTION2_PHASE1_REPORT.md)
+- [Historical evaluation report and commands](docs/SECTION2_PHASE2_REPORT.md)
 - [Official references](docs/reference_repos.md)
 
 .env, local databases, dependencies, build artifacts, logs, editor state and private data/
