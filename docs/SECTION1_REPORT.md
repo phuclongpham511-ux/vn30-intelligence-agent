@@ -32,7 +32,7 @@ No ticker-specific branching exists in production services or analytics.
 - tests/conftest.py: offline dependency override preserving Day 0 scaffold tests.
 - tests/test_analytics.py, test_provider.py, test_data_api.py, test_persistence.py.
 - scripts/smoke_vnstock.py: explicit opt-in network smoke.
-- README.md, docs/SECTION1_PLAN.md, docs/SECTION1_REPORT.md, docs/reference_repos.md.
+- README.md, docs/SECTION1_REPORT.md, docs/reference_repos.md.
 
 ## 4. vnstock capabilities actually used
 

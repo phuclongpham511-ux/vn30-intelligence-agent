@@ -1,6 +1,6 @@
 # Technical Stock-Day Design Audit
 
-Date: 2026-10-02. Scope: two prospective research documents only. This file is the optional audit artifact and resumable phase record. No benchmark data, labels, model outputs or implementation are created.
+Original design date: 2026-10-02. Governance updates follow below. Earlier sections are historical delivery records; the latest appended governance update is authoritative for current readiness. No benchmark data, labels, model outputs or implementation are created.
 
 ## Inputs and fixed comparison
 
@@ -80,3 +80,129 @@ Terms are shared through the Benchmark Spec's normative glossary and restated co
 - Next step: owner decisions and document approval; generation/pilot require a subsequent explicit authorization. At completion of the design task, files remained local/uncommitted; no GitHub publication had been performed. The user's subsequent Git publication request authorizes publishing these documents and their two governing documents without changing research readiness or authorizing benchmark generation.
 
 Audit summary: Standards — 1 initial finding, 0 residual; Spec — 2 initial findings, 0 residual. The shared precision defect was corrected once in each affected document, not treated as two independent metric problems.
+
+## D1 governance update — 2026-10-03
+
+Authority: project owner's supplied instruction `24ef14c9-8221-4148-b104-1efd632cc169/Pasted text.txt` explicitly approves D1. Baseline for this documentation change is commit `54289b4`; no task commit is required for consistency review. The existing local-only documentation scope overrides to-spec's generic issue-publication template; code-review applies as two-axis documentation audit, not architecture redesign.
+
+Current status: **D1 APPROVED; D2–D6 BLOCKING; D7 later model-evaluation work. Benchmark generation remains BLOCKED.** No subsequent decision is resolved by this update.
+
+Approved semantics: absolute daily return and HIGH daily volume each compared to their own prior comparable empirical 95th percentile; at or above is EXISTS, below with valid evidence is DOES_NOT_EXIST, insufficient/invalid required evidence is UNRESOLVED. Use up to 252 valid prior trading-session observations, minimum 60, current excluded. Preserve signed price direction; market-relative evidence does not determine existence, and price cannot manufacture unusual volume. Severity, contextual relevance, safety, ranking and display remain separate.
+
+Read-only source inspection found one current own-history methodology: `src/evaluation/context.py` uses midrank `(less + 0.5*equal)/n`, corroborated by `tests/test_historical_evaluation.py` and `docs/SECTION2_PHASE2_REPORT.md`. It is not an inverse percentile threshold and its tied-value behavior cannot substitute for inclusive quantile comparison. Source/documentation searches did not find incompatible inverse-quantile implementations. D1 explicitly specifies nearest-rank inverse empirical CDF `q95=h_(ceil(95*n/100))`, one-based, no interpolation. This is documented mechanical definition, not a change to the legacy midrank helper. The D1 valid-observation window is also explicitly distinguished from legacy slice-before-null-filter context. No code was executed to generate scores or benchmarks.
+
+Changed documents: new `TECHNICAL_D1_FACTUAL_ABNORMALITY_DECISION.md`; updates to `TECHNICAL_STOCK_DAY_BENCHMARK_SPEC.md`, `TECHNICAL_ANNOTATION_HANDBOOK_V1.md`, and this audit. Evaluation Contract V2 remains unchanged; D1 fulfills its requirement for a separately approved factual predicate.
+
+Resumable status:
+
+- Source/governance inspection: COMPLETE.
+- Decision and linked-document edits: COMPLETE.
+- Standards / Spec consistency audit: COMPLETE; both independent axes report zero findings.
+- Final scope, D2–D7/rubric preservation and source-hash verification: COMPLETE. D2–D7 decision rows and Handbook intrinsic severity section match `54289b4` exactly; local links and whitespace checks pass. Only the three specified tracked documents plus the new D1 record changed in this task. No production/source changes.
+
+On resume, inspect only these four document changes against `54289b4`; finish audit and verification without opening datasets or proceeding to D2. Original delivered hashes above are historical, not hashes of the updated versions.
+
+### D1 Standards audit
+
+No actionable findings. The approved predicate and its deterministic inverse-quantile mechanics remain separate from legacy midrank, severity, contextual relevance, ranking and display. PIT/null/provenance rules and dynamic ticker scope are preserved. D2–D6 remain blockers and D7 remains later work.
+
+### D1 Spec audit
+
+No findings. All requested semantics and decision-record sections are present, including equality, absolute price return, high-volume scope, current exclusion, 252/60 history limits, market-relative independence and explicit UNRESOLVED handling. Mechanical nearest-rank definition is documented rather than falsely described as an existing quantile implementation. No datasets or protected cases were accessed by either audit.
+
+### D1 verification receipt
+
+- Evaluation Contract V2 unchanged SHA-256: `52dd579e720bf0e22b54a38180b1862e8f980cc91b66b700a9dcc705e89a80e0`.
+- New D1 decision SHA-256: `8f94757f54a8b77cb9fe36660e95fa30b9ff5ac37a68af275d1185bc6ab3587b`.
+- Updated Benchmark Spec SHA-256: `2c345abd6ca11263c9d9e5181a27c5c4113d71cce8dce4ff321053bf6ec102c6`.
+- Updated Handbook SHA-256: `a080f490476cc97415fd192586395d99e3fcc5ab87bcf5e18d9fc877a7f01abe`.
+- Inspected context/replay/test/report source text unchanged against `54289b4`; `git diff --check` passes.
+- No benchmark cases, annotations, scores or model evaluation generated; no tuning, production edits, V4/V5, frontend tests/build, protected-data access or Final Validation. No D2 work started.
+
+D1 audit summary: Standards 0 findings; Spec 0 findings. **D1 APPROVED; D2 next blocker; benchmark generation BLOCKED.**
+
+## D2 governance update — 2026-10-03
+
+Authority: project owner's supplied instruction `c200b700-dc4e-4e2e-a08d-647ebd026c8b/Pasted text.txt` explicitly approves D2. Current state: **D1 APPROVED; D2 APPROVED; D3–D6 BLOCKING; D7 LATER EVALUATION CALIBRATION. Benchmark generation remains BLOCKED.** D3 is next; no D3 work is authorized here.
+
+This update creates `TECHNICAL_D2_DATA_FRAME_PIT_DECISION.md` and updates Benchmark Spec, Handbook evidence visibility/readiness, and this audit only. The earlier uncommitted D1 work is preserved. Pre-D2 baselines: D1 SHA-256 `8f94757f54a8b77cb9fe36660e95fa30b9ff5ac37a68af275d1185bc6ab3587b`; Benchmark Spec `2c345abd6ca11263c9d9e5181a27c5c4113d71cce8dce4ff321053bf6ec102c6`; Handbook `a080f490476cc97415fd192586395d99e3fcc5ab87bcf5e18d9fc877a7f01abe`. `54289b4` is the tracked Git anchor, but its diff also contains the prior D1 changes; audit must distinguish them.
+
+Approved frame: stock-days strictly before 2025-01-01 with reliable as-of historical VN30 membership; no current-membership substitution. Closed Validation V1/V2 and completed V3 reviewed cases are not fresh annotation input; use metadata-only exclusions before loading. Holdout 2025–2026 stays sealed, uninspected and unenumerated. D6 retains sample size, actual dates, allocations and representative/enriched design; no signal/model/expected-label selection under D2.
+
+Approved cutoff: 23:59:59 Asia/Ho_Chi_Minh on the trading date. EOD_AVAILABILITY_ASSUMPTION explicitly means assurance=assumed, not audited publication timing. Preserve observation/assumed availability/source/snapshot/download/adjustment/quality metadata; only cutoff-visible inputs, no future filling or future repairs. D1 prior-only 252/60 history is unchanged. VN30 exact interval gaps stay null; essential transition/comparability gaps stay unresolved. Versioned verified comparable adjusted series must itself satisfy PIT. No intraday/alert-latency assessment is claimed.
+
+Repository inspection is source-only: `src/evaluation/models.py`, `src/evaluation/replay.py`, and `scripts/prepare_development_v3.py`. Existing EOD-assumption enum and timestamp precedent are compatible; legacy current universe, unknown-adjustment warnings and supplied-row adjacency do not establish D2 membership/comparability/continuity. An existing run cannot be certified merely by prior use. No direct source conflict makes the approved policy impossible; future builders must validate rather than weaken it. No raw datasets, case manifests, labels, snapshots or provider/network data were loaded.
+
+The spec's source-snapshot identity is clarified as cutoff-stable logical source/subset identity for prefix checks; full-container hashes remain in run provenance. This avoids making earlier IDs depend on appended future rows while preserving complete source provenance. D6's enriched-sampling ideas remain unapproved and must explicitly respect/reconcile the D2 selection boundary; no exception is silently granted now.
+
+Skill use: to-spec synthesis is limited to the user's requested local documentation, overriding generic issue-publication instructions. Code-review runs separate Standards and Spec consistency audits of this change, not architecture redesign. No implementation or production test suite is required.
+
+Resumable status:
+
+- Governing-document/source inspection: COMPLETE.
+- Decision and linked-document drafting: COMPLETE.
+- Independent Standards / Spec audit: COMPLETE; both axes report zero findings.
+- Final invariant/hash/scope checks: COMPLETE; D1/Contract/source hashes unchanged, Handbook protected sections unchanged, D3–D7 decision rows unchanged, all 17 D2 sections and local links verified, whitespace check passed.
+
+Resume by verifying the unchanged D1 and Contract hashes, reviewing these four documents and finishing the incomplete audit only. Do not build a benchmark or proceed to D3.
+
+### D2 Standards audit
+
+No actionable findings. Frame, historical membership, exact EOD cutoff, timing assurance, prior-only history, benchmark alignment and essential comparability/null rules agree across the documents. Cutoff-stable identity preserves prefix invariance with full-container provenance kept separately. Legacy limitations are recorded without certifying datasets or changing production. D1 is unchanged; later decisions and human rubrics are preserved.
+
+### D2 Spec audit
+
+No findings. All 17 required sections are present; cutoff-visible evidence, pre-load protection, current exclusion, 252/60 history, corporate-action handling and complete prefix checks match the approved instruction. D6 sampling, including enrichment, remains unresolved and not implicitly authorized. Neither audit accessed datasets/protected cases or ran evaluation.
+
+### D2 verification receipt
+
+- D1 unchanged SHA-256: `8f94757f54a8b77cb9fe36660e95fa30b9ff5ac37a68af275d1185bc6ab3587b`.
+- Evaluation Contract V2 unchanged SHA-256: `52dd579e720bf0e22b54a38180b1862e8f980cc91b66b700a9dcc705e89a80e0`.
+- D2 decision SHA-256: `bb1786c5bb6724c7b662a089286b1d730de51f46eaf21f1807368c0699fb6823`.
+- Updated Benchmark Spec SHA-256: `976612f41f473f90cf864195742b2ae4de353b3d2f081f9546f2395832944ba9`.
+- Updated Handbook SHA-256: `edb85f09b5f8a9cc0f5b0ecf10bf6db7fcf37c4b6745c7ea4e6c7653bf00ee66`.
+- Inspected models/replay/V3-preparation source bytes unchanged against start-of-task hashes. No production edits or executed provider/generator code.
+- Handbook sections 4–9 and 13 (severity, contextual relevance, retention, delivery, episodes, insights and reviewer design) unchanged against pre-D2 section hashes; D3–D7 register rows unchanged against the tracked baseline.
+- No sampling, evidence packets, annotations, scores, tuning, validation execution, protected-data/holdout access or enumeration, Final Validation, or frontend tests/build. No D3 work started.
+
+D2 audit summary: Standards 0 findings; Spec 0 findings. **D1/D2 APPROVED; D3 next blocker; benchmark generation remains BLOCKED.**
+
+## D3 documentation update
+
+D3 is approved by the project owner. Current state: **D1 APPROVED; D2 APPROVED; D3 APPROVED; D4 BLOCKING; D5 BLOCKING; D6 BLOCKING; D7 LATER. Benchmark generation remains BLOCKED.** Earlier status entries are historical; this entry supersedes D3-pending readiness only.
+
+Created `TECHNICAL_D3_MONITORING_CONTEXT_DECISION.md`; updated only D3-related task/exposure/today-only guidance in Benchmark Spec and Handbook, plus this audit. V1 uses one-user/one-stock technical EOD monitoring and `prior_exposure_mode = CONTROLLED_AS_IF_EMPTY`. No real prior delivery is asserted. PIT-safe market history and recurrence remain distinct from user exposure; no previous alert/acknowledgement is invented. Past events enter as context, not new events unless today's approved predicate fires. Portfolio/thesis/preferences and other domains remain out of scope.
+
+Lightweight consistency check: PASS. D3 meaning/mode and scope agree across edited docs; D1/D2 and D4–D7 decision rows unchanged. Direct conflicts found and corrected: previous requirements for a prior-exposure ledger and an already-delivered example conflicted with the approved controlled-empty V1 scenario. No residual direct conflict. Only the three authorized existing documents were read; no skills, agents, repo-wide searches, datasets/cases, holdout, scoring/evaluation or production work. Stop at D3.
+
+## D4 documentation update
+
+D4 is approved by the project owner. Current state: **D1 APPROVED; D2 APPROVED; D3 APPROVED; D4 APPROVED; D5 BLOCKING; D6 BLOCKING; D7 LATER. Benchmark generation remains BLOCKED.** Earlier readiness records are historical.
+
+Created `TECHNICAL_D4_EPISODE_POLICY_DECISION.md`; updated only D4 episode/split-related definitions and readiness in Benchmark Spec/Handbook, plus this audit. Episodes are same-family: anchor, continuation, confirmed closure and re-entry. Direction reversal starts a new price episode; volume is HIGH-volume only; MA/RSI continuation is not a repeated transition event. Unresolved continuity is neither bridged nor closed, and no fixed N-day rule applies. Cross-family insight grouping preserves separate episode IDs. Cross-boundary or uncertain episodes/groups are quarantined from Fresh Validation, without moving reserved cases to development.
+
+Lightweight documentation consistency check: PASS after correcting case-sensitive HIGH-volume wording in the decision record. Family-specific lifecycle, direction reversal, unresolved continuity, no repeated MA/RSI transition events, no fixed-gap shortcut, separate cross-family identities and Fresh Validation quarantine agree across edited documents. Direct conflicts corrected: previous cross-family episode definition and optional migration of boundary episodes to development. No residual direct conflict found. D1-D3 semantics remain intact; D5/D6 remain blockers. No datasets/cases, holdout, model/scoring/evaluation, production work, skills, agents or repo-wide search occurred. Stop at D4.
+
+## D5 documentation update
+
+**D1 APPROVED; D2 APPROVED; D3 APPROVED; D4 APPROVED; D5 APPROVED; D6 BLOCKING; D7 LATER. Benchmark generation remains BLOCKED.** Earlier delivery/readiness notes are historical and superseded for D5 V1.
+
+Created `TECHNICAL_D5_DELIVERY_POLICY_DECISION.md`; updated D5 attention/empty-state/overflow/delivery sections in Benchmark Spec and Handbook, plus this audit. Ordinary output is maximum 3, no filler; complete no-useful-change yields NO_MEANINGFUL_TECHNICAL_CHANGE, incomplete/unresolved evidence yields TECHNICAL_DATA_UNAVAILABLE_OR_INCOMPLETE, both with zero ordinary cards. Preserve full reference/overflow without Top-3 exposure credit. Ordinary Technical V1 required_delivery=NO; severity 3 creates no mandatory display or notification. Current EOD response only; no push/email/SMS/escalation/acknowledgement or mandatory overflow route. D1-D4 semantics unchanged.
+
+Narrow consistency check: PASS. D5 semantics match across edited docs; D1-D4 and D6/D7 decision rows preserved. Direct conflicts fixed: formerly unresolved delivery policy and mandatory notification/overflow fields, plus ambiguous empty-state names. Zero obligations do not produce a perfect delivery metric. No datasets/cases, source inspection, holdout, models/evaluation, skills/agents or repo-wide analysis. Stop at D5.
+
+## D-family Decision Review Protocol V1
+
+Created [Technical Decision Review Protocol V1](TECHNICAL_DECISION_REVIEW_PROTOCOL.md). D1–D6 are versioned hypotheses/contracts; changes require Decision Review using the common seven-dimension rubric. The summary score is diagnostic only; Integrity is a hard gate and Integrity=0 blocks KEEP. Poor model performance alone cannot trigger D revision. Fresh validation/holdout cannot be used for iterative D tuning; severe validation design defects invalidate the cycle, return to development review, and require a new fresh validation set. D7 model acceptance remains separate.
+
+**D1–D5 APPROVED; D6 BLOCKING; D7 LATER; benchmark generation BLOCKED.** Approved semantics remain unchanged. The prospective full D1–D6 freeze is not a claim that D6 is resolved now. The audit header's stale D2-only readiness pointer is corrected; historical records remain preserved. Only this audit and a minimal Benchmark Spec reference are updated; the Annotation Handbook is unchanged. One narrow documentation consistency check: PASS (16 checks); current D1–D7 readiness rows preserved. No data/cases, source code, model/evaluation, fresh validation or holdout work; no skills/sub-agents or broad audit. Stop before D6.
+
+## D6 — Study & Reviewer Design V1 approval
+
+**D1 APPROVED; D2 APPROVED; D3 APPROVED; D4 APPROVED; D5 APPROVED; D6 APPROVED; D7 LATER MODEL-EVALUATION ACCEPTANCE.** Earlier D6-pending notes are historical. D1–D6 design blockers are resolved, but **BENCHMARK GENERATION IS STILL NOT AUTHORIZED**: separate explicit Benchmark Generation Authorization and applicable construction integrity checks remain required.
+
+Created [D6 decision](TECHNICAL_D6_STUDY_REVIEWER_DECISION.md). Approved Development quota is 120 stock-days (80 Representative + 40 Enriched Diagnostic), with 60 reserved Fresh Validation stock-days. A reviews all; B independently reviews a reproducible 30% Development subset (36/120) and all Fresh Validation (60/60). Freeze selection/assignment rules before sampling; retain independent append-only raw labels and separate adjudication. Report typed agreement, unresolved rates, reasons and denominators without one arbitrary global agreement gate. Representative/enriched results remain separate; quota adequacy is not asserted as a universal optimum.
+
+Updated only D6 sampling/reviewer/readiness sections in Spec and Handbook, this audit, and minimal stale D6 readiness references in the Decision Review Protocol. Direct conflicts fixed: pending-D6/no-quota statements, unspecified reviewer allocation and readiness that incorrectly retained D6 as a design blocker. Evidence-only enrichment is a sampling component within the unchanged D2 eligible frame, not a frame exception. D1–D5 semantics and D4 isolation remain unchanged. Development supports Decision Review; severe validation defects require a failed-cycle record, Development review and a NEW Fresh Validation set. Existing 2025–2026 holdout remains sealed.
+
+One narrow documentation consistency check: PASS (16 checks). No data/cases, source code, model/scoring/evaluation, fresh validation or holdout access; no skills/sub-agents or repo-wide analysis. No benchmark generation or D7 work.

@@ -1,12 +1,12 @@
 # Technical Annotation Handbook V1
 
-Date: 2026-10-02. Status: **prospective handbook; readiness B — decisions required before pilot**. This handbook defines human judgments for a future complete stock-day benchmark. It creates no labels and does not reinterpret historical V1–V3 attention/verdicts.
+Date: 2026-10-02; D1/D2 governance updates: 2026-10-03. Status: **prospective handbook; readiness B — decisions required before pilot**. This handbook defines human judgments for a future complete stock-day benchmark. It creates no labels and does not reinterpret historical V1–V3 attention/verdicts.
 
 Primary authority: [Evaluation Contract V2](TECHNICAL_MATERIALITY_EVALUATION_CONTRACT_V2.md). Companion: [Stock-Day Benchmark Specification V1](TECHNICAL_STOCK_DAY_BENCHMARK_SPEC.md), especially its normative glossary, artifact fields and D1–D7 decision register. The [Architecture Review](TECHNICAL_MATERIALITY_ARCHITECTURE_REVIEW.md) explains why these judgments must be separated. If this handbook conflicts with Contract V2, stop the affected annotation and record a design defect; do not silently choose a new interpretation.
 
-The task is: **“Given a stock the user is monitoring, what changed today that deserves attention?”** Attention is not expected return, bullishness or investment advice. Positive and negative direction describe facts, not desirability. This is a technical, single-stock, end-of-day task; it does not cover cross-stock portfolio ranking or other domains.
+The task is: **“What changed today in this stock that deserves my attention?”** [D3 — APPROVED](TECHNICAL_D3_MONITORING_CONTEXT_DECISION.md) represents one user monitoring one stock at EOD, one ticker/date/cutoff, technical domain only. Portfolio position, unrealized gain/loss, investment thesis, risk tolerance, personalized preferences, fundamentals, news and cross-stock ranking are out of scope. Use `prior_exposure_mode = CONTROLLED_AS_IF_EMPTY`: assume no previous system technical insight was shown, as a controlled scenario rather than observed behavior. Do not fabricate delivery/acknowledgement history or infer that yesterday's event was seen. PIT-safe market history and recurrence are separate and may be visible. Only today's predicate-defined factual changes enter today's event set; yesterday's MA cross followed by unchanged ordering is contextual history, not a new cross. Attention is not expected return, bullishness or investment advice. Positive and negative direction describe facts, not desirability. This is a technical, single-stock, end-of-day task; it does not cover cross-stock portfolio ranking or other domains.
 
-Terminology is identical to the Benchmark Spec: an **opportunity** is an independent factual check; an **event** is a factual transition/abnormal condition; an **emitted candidate** is system output; a **reference event** is an independently adjudicated exists opportunity. A **stock-day** includes the full opportunity inventory at its cutoff, while the **ranking group** is the conditional emitted/retained/rankable population. An **episode** is a cutoff-supported continuing change/state, and an **insight unit** is one coherent change preserving source reference-event IDs. **Severity** is intrinsic attention; **contextual relevance** is usefulness now; **retention** is a disposition; **required delivery** is a separate policy-grounded obligation. **Unresolved** is not zero/no. **Top 1–3** means at most three ordinary display slots, excluding overflow.
+Terminology is identical to the Benchmark Spec: an **opportunity** is an independent factual check; an **event** is a factual transition/abnormal condition; an **emitted candidate** is system output; a **reference event** is an independently adjudicated exists opportunity. A **stock-day** includes the full opportunity inventory at its cutoff, while the **ranking group** is the conditional emitted/retained/rankable population. An **episode** is a cutoff-supported continuing change/state within the same event family and instrument, and an **insight unit** is one coherent change preserving source reference-event IDs. **Severity** is intrinsic attention; **contextual relevance** is usefulness now; **retention** is a disposition; **required delivery** is a separate policy-grounded obligation. **Unresolved** is not zero/no. **Top 1–3** means at most three ordinary display slots, excluding overflow.
 
 ## 1. Annotator view
 
@@ -20,10 +20,14 @@ Every reviewer receives the same complete, frozen evidence packet and administra
 | Market-relative context | Benchmark pair/return, signed excess and historical abnormality; preserve raw versus residual distinction |
 | Volume / MA / RSI | Raw shares, trailing mean/ratio, previous/current averages/RSI, transition boundaries and magnitude/depth evidence |
 | Sector/economic context | Only if in scope, cutoff-valid and sourced; otherwise explicit unavailable, never fabricated |
-| Recurrence / episode / prior exposure | Past-only histories and as-of state, prior delivered content/timestamps if the signed task uses it; evidence of history completeness |
+| Recurrence / episode / prior exposure | PIT-safe market/technical state and recurrence, plus explicit CONTROLLED_AS_IF_EMPTY scenario; no prior delivered content/timestamps or acknowledgement logs in V1 |
 | Quality/provenance | Source, adjustment/vintage, fixture/data-gap/staleness flags, timestamp assurance and limitations |
 
-Must not see: model/candidate identity, severity/Base/S/N/C scores, model thresholds, predicted attention, predicted order, final Materiality output, calibration results, detector-emitted status, future prices or episode outcomes, future news/fundamentals, later alerts/user responses, or validation/holdout split status. **Factual MA/RSI predicate boundaries are allowed**; the ban concerns model materiality/eligibility/display thresholds. Administrative aliases must not encode algorithm or split. Custodian-only candidate linkage must not leak through file names, notes or ordering.
+Must not see: model/candidate identity, severity/Base/S/N/C scores, model thresholds, predicted attention, predicted order, final Materiality output, calibration results, detector-emitted status, future prices or episode outcomes, future news/fundamentals, later alerts/user responses, or validation/holdout split status. **Approved factual predicate boundaries (MA/RSI and D1 q95) are allowed**; the ban concerns model materiality/eligibility/display thresholds. Administrative aliases must not encode algorithm or split. Custodian-only candidate linkage must not leak through file names, notes or ordering.
+
+Under [D2 — APPROVED](TECHNICAL_D2_DATA_FRAME_PIT_DECISION.md), annotators may see only evidence visible by **23:59:59 Asia/Ho_Chi_Minh on the trading date**. The new frame is pre-2025; membership and protected-case exclusions are custodian checks, not permission to reveal split status. Distinguish **audited publication time**, **EOD_AVAILABILITY_ASSUMPTION / assurance=assumed**, and **unavailable evidence**. A daily observation date or download timestamp does not prove market-close publication. Preserve source/snapshot, assumed available_at, adjustment semantics and quality flags in the view; do not describe assumed timing as verified.
+
+MA/RSI may include the valid cutoff-visible current bar, but D1 references still exclude today and require 60–252 valid comparable prior observations. Missing transition continuity or essential price/volume comparability produces UNRESOLVED. Mechanical corporate-action discontinuities are not genuine abnormal returns without a verified comparable PIT-valid series. Missing aligned VN30(t-1)/VN30(t) leaves market context null with a reason, not an automatic negative/unresolved D1 event. Do not fill evidence from prior/future values or outside research. D2 makes no intraday/alert-latency claim and does not alter any attention, episode or delivery judgment.
 
 Do not research the ticker externally while labeling; external hindsight can contaminate the packet. If a necessary fact is missing, file an evidence request and leave affected judgments unresolved. Current evidence cannot be corrected from memory. Suspected bias from recognizing a historical episode is recorded in reviewer provenance and considered in adjudication.
 
@@ -37,7 +41,7 @@ Follow this order for every complete stock-day. Preserve stage timestamps and re
 4. **Contextual relevance:** judge each existing event in the full stock-day/task/prior-exposure context. Record preliminary relevance independently of the number of available slots.
 5. **Duplicate / same-episode relations:** identify exact factual duplication, shared episode, related distinct and separate events, or unresolved relation. Finalize duplicate retention links, preserving the prior judgment.
 6. **Insight units:** construct the complete reference insight set, not just a top three. Independently label insight contextual relevance. Confirm/finalize event relevance after relationship adjudication; record any change from step 4 and its evidence. Do not copy insight relevance to all member events.
-7. **Required delivery:** apply the signed product policy per event/insight; record yes/no/unresolved, route and timing. Severity or a slot position is not the rule.
+7. **Required delivery:** record the approved D5 value NO for ordinary Technical V1 insights, with policy/version; do not infer an obligation from severity or rank.
 8. **Uncertainty:** record judgment-specific certainty, unavailable inputs and unresolved disagreement. Certainty may be noted earlier; this step verifies it across all stages.
 9. **Rationale:** finalize brief evidence-linked explanations distinguishing existence, magnitude, context, duplication and delivery. Confirm completeness and expected empty state.
 
@@ -51,8 +55,10 @@ Use `exists`, `does_not_exist`, or `unresolved`, plus an applicability/invalidit
 |---|---|
 | MA cross | Previous/current MA20−MA50 changes from <=0 to >0 or >=0 to <0, under the declared adjacency/source rules. A very small spread can be a valid crossing |
 | RSI entry | Previous RSI<=70 and current>70, or previous>=30 and current<30. Remaining in an outer regime is not a new entry; equality at the current boundary is not an entry |
-| Abnormal price move | Observe the signed return and quality/history/benchmark evidence, but abnormal-condition existence requires approved D1. A broad price observation candidate is not proof of an abnormal condition |
-| Unusual volume | Observe shares volume and historical reference/magnitude, but unusual-condition existence requires approved D1. Price movement cannot establish volume abnormality |
+| Abnormal price move | Apply approved D1: absolute daily stock return >= prior absolute-return empirical q95 is EXISTS; below is DOES_NOT_EXIST; insufficient/invalid required evidence is UNRESOLVED. Preserve signed up/down direction (genuine zero stays zero/neutral). Market-relative evidence does not determine existence |
+| Unusual volume | Apply approved D1: current daily volume >= prior comparable volume empirical q95 is EXISTS; below is DOES_NOT_EXIST; insufficient/invalid required evidence is UNRESOLVED. HIGH volume only; low-volume abnormality is out of scope. Price cannot establish volume abnormality |
+
+[D1 — APPROVED](TECHNICAL_D1_FACTUAL_ABNORMALITY_DECISION.md) uses up to the previous 252 valid comparable trading-session observations, minimum 60, excluding the current observation. Empirical q95 is the sorted one-based historical value at ceil(95*n/100), without interpolation; equality is EXISTS. Do not compare the legacy midrank context value to 0.95 or round evidence before comparison. The predicate and its frozen comparison evidence may be shown to annotators; it is not a candidate score.
 
 Do not invent a price/volume cutoff from past reviewer notes, model formulas or candidate names. Do not mark an objectively weak but valid transition nonexistent. If required evidence is absent, a plausible event remains unresolved; confidence language cannot turn it into a factual positive. Human disagreement between supported interpretations is preserved for adjudication, not averaged into a pseudo-event.
 
@@ -67,7 +73,7 @@ Assess **the event itself**, without asking whether it wins today's slot. Record
 | 2 — materially noteworthy | The event itself represents a meaningful change supported by its primary evidence and appropriate history/context; understanding it materially improves awareness of what changed |
 | 3 — highly important / critical attention | The event itself represents an exceptionally consequential or pronounced technical change under the common rubric, strongly supported by primary evidence. This label does not by itself impose an urgent delivery deadline |
 
-These are ordinal anchors, not new numerical detector/severity thresholds. If the rubric cannot distinguish adjacent levels reliably, record low certainty/disagreement; do not invent private thresholds. D6 must resolve pilot rubric/reviewer procedures before annotation.
+These are ordinal anchors, not new numerical detector/severity thresholds. If the rubric cannot distinguish adjacent levels reliably, record low certainty/disagreement; do not invent private thresholds. Apply the approved D6 independent review and judgment-specific diagnostics; actual annotation still requires separate generation/pilot authorization.
 
 Magnitude and own-history unusualness are distinct: a statistically unusual tiny move may remain modest, while a large raw move can deserve attention even when market-aligned. Market-relative evidence adds attribution/comparison, not universally superior truth. A signed residual is not proof of a company-specific cause. Supporting signals may strengthen understanding of the target event when relevant, but cannot replace its primary evidence or count correlated indicators as independent confirmations.
 
@@ -83,14 +89,14 @@ For events and, independently, insight units, answer: **“Given everything else
 
 | Level | Contextual rubric |
 |---|---|
-| 0 | No useful new information to show now under the task; for example fully redundant content already faithfully explained |
+| 0 | No useful new information to show now under the task; for example a redundant representation of the same current change |
 | 1 | Some incremental information, but limited current priority; suitable evidence to inspect without requiring prominence |
 | 2 | Materially useful information now; adds a meaningful change or explanation in this stock-day context |
 | 3 | Highest contextual importance under the common rubric; a particularly consequential current update, without inferring a notification deadline |
 
-Do not rank-normalize labels: a day of weak changes need not contain a 3, and many distinct items can all be 2 or 3. Do not cap the number of positive labels at three. A severe already-explained episode may have low incremental relevance; a moderate new event can be uniquely informative. A duplicate representation can have low standalone relevance while the coherent combined insight retains high relevance. Required delivery is still judged separately.
+Do not rank-normalize labels: a day of weak changes need not contain a 3, and many distinct items can all be 2 or 3. Do not cap the number of positive labels at three. An ongoing market episode may have limited incremental information today; a moderate new event can be uniquely informative. Under D3 V1 no event is considered already shown to the user, so assumed prior delivery must not reduce novelty or relevance. A duplicate representation can have low standalone relevance while the coherent combined insight retains high relevance. Required delivery is still judged separately.
 
-Unknown prior exposure is not “never shown.” If that uncertainty changes the judgment materially, relevance remains unresolved. D3 must prescribe the evidence/scenario; annotators cannot imagine individual users' preferences. Unavailable sector context is not evidence of zero sector-relative importance. Final event relevance and independent insight relevance serve different metrics and must both be stored.
+D3 V1 explicitly uses CONTROLLED_AS_IF_EMPTY, so prior exposure is a controlled scenario rather than a missing real-world ledger. Do not infer previous delivery or reduce novelty/relevance because a user probably saw a prior event. Factual recurrence remains visible as market history. Annotators cannot imagine portfolio, thesis, risk tolerance or personalized preferences. Unavailable sector context is not evidence of zero sector-relative importance. Final event relevance and independent insight relevance serve different metrics and must both be stored.
 
 ## 6. Retention / safety
 
@@ -107,17 +113,11 @@ Intrinsic attention>=2 is the research material-retention target; attention=3 is
 
 ## 7. Required delivery
 
-This field cannot support a safety claim until **D5** is signed. For each relevant event/insight record:
+[D5 - APPROVED](TECHNICAL_D5_DELIVERY_POLICY_DECISION.md) resolves ordinary Technical V1 insights to **required_delivery = NO** (machine `no`). Record this policy/version as the reason; it is not an unresolved judgment. Unknown factual evidence, severity or relevance stays unknown and is never turned into attention zero by this delivery value.
 
-- Required delivery: yes/no/unresolved, with policy version, reason and cited evidence.
-- Urgency class and deadline/time basis when defined by policy; otherwise null with policy-unresolved reason.
-- Whether ordinary Top-3 display is mandatory, or a named overflow/escalation route is acceptable.
-- Acceptable exception/deferment, visibility and acknowledgement requirements, plus what facts must be communicated faithfully.
-- Linked source events, insight IDs and uncertainty/adjudication record.
+Intrinsic severity, including severity 3, does not force display, bypass the maximum-three budget, create an overflow alert or trigger push/email. Ranking selects the ordinary current EOD response. No push/email/SMS, urgent escalation, acknowledgement tracking, notification deadline beyond the response or mandatory overflow route is introduced. Those require a future product-policy version.
 
-Do not invent deadlines, presume attention 3 always means immediate notification, or use “no” when policy is absent. A rationale can record concern without asserting an obligation unsupported by policy. Delivery yes at contextual relevance 0 is not automatically inconsistent: prior exposure might reduce relevance but an outstanding obligation can remain. Adjudicate under policy instead of editing severity/relevance to remove the conflict.
-
-The full-contract pilot is blocked until obligation and empty/overflow policies exist. A narrower pilot omitting delivery would need separately approved scope and could make no end-to-end safety claim. Overflow obligations must remain visible in the reference ledger even when more than three require communication.
+No hard delivery obligations exist in V1. Required-delivery metrics without a positive obligation denominator are undefined/not applicable, not perfect safety coverage. Annotators still preserve material/critical membership and ordinary display omissions; retention and coverage are distinct from mandatory delivery.
 
 ## 8. Duplicates / episodes
 
@@ -126,14 +126,19 @@ Use the same relationship enum as the Benchmark Spec:
 | Relation | Evidence to require |
 |---|---|
 | `same_factual_event` | Two representations refer to the same instrument/family/occurrence and underlying fact; retain source IDs and a valid survivor link |
-| `same_episode` | Different valid technical events express one cutoff-supported continuing change/state; coherent evidence links them, not just simultaneous timestamps |
+| `same_episode` | Same-family events/state belong to the same cutoff-supported continuing episode under D4; shared timestamps or cross-family correlation do not establish episode identity |
 | `related_distinct` | Shared context or correlation exists, but each carries a materially distinct change that must remain inspectable |
 | `separate` | Evidence supports distinct changes; no justified duplicate/episode merge |
 | `unresolved` | Available evidence or the approved episode protocol cannot settle the relationship |
 
-Same ticker/type within one calendar day is recurrence, not proof of duplication. A price move and RSI entry derived from the same OHLCV can be related without proving two independent causes or confirmations. Opposite direction or a new regime does not automatically close an episode unless the approved protocol says so.
+Recurrence alone does not prove factual duplication. Consecutive same-direction factual price events continue one episode; a valid non-abnormal day closes it, and opposite-direction abnormality closes it and starts a new episode. Consecutive factual HIGH-volume events continue one episode; a valid non-abnormal day closes it and later re-entry starts a new one. Missing continuity is UNRESOLVED.
 
-D4 must define anchor, continuation, closure, reversal/re-entry and allowed evidence; no numeric episode gap is supplied here. Use only information available at the cutoff. A later move cannot retrospectively tell a reviewer that an earlier event “began” a known future episode. Custodians may later link split components conservatively to prevent leakage, but that linkage is never shown as past knowledge.
+[D4 - APPROVED](TECHNICAL_D4_EPISODE_POLICY_DECISION.md) defines anchor/start, continuation, confirmed closure and new episode on re-entry. No fixed N-day gap rule. Missing/ambiguous/non-comparable continuity is UNRESOLVED, never silently bridged or closed. A later move cannot rewrite earlier cutoff knowledge. Cross-family events retain separate episode IDs; related events may later share an insight without sharing an episode.
+
+
+MA: a factual upward/downward cross anchors the bullish/bearish MA regime. Continuing that regime is the same episode, not a daily cross; a reverse factual cross closes the previous episode and starts the opposite one. RSI: upper entry continues while RSI>70 and closes on valid RSI<=70; lower entry continues while RSI<30 and closes on valid RSI>=30. Later factual re-entry starts a new episode; continuing state does not create another entry. Missing/ambiguous state continuity is UNRESOLVED.
+
+An episode spanning Development/Fresh Validation, or unresolved continuity near that boundary, requires quarantine of affected episode/groups from Fresh Validation. Do not move protected/reserved groups into development or apply a fixed-day embargo to simulate isolation. This is a later construction constraint, not permission to inspect or allocate groups now.
 
 Each relation records event IDs, as-of cutoff, evidence, rationale and adjudicator/version. Exact-duplicate survivor chains must resolve without cycles. Related-distinct must not be silently made transitive into a single insight. Preserve conflicting relations until adjudication; a tentative episode link does not authorize deleting an event.
 
@@ -151,11 +156,11 @@ Ambiguous merge/split cases require relation evidence and adjudication before pr
 
 Build the full weak ordering from final contextual relevance on all reference insights. Equal relevance forms an acceptable tie class; no strict preference is implied inside it. An administrative stable-ID order may render the packet, but must not become gold preference or break a label tie in a model's favor. Preserve a complete reference list and ties before deriving the first one/three useful positions.
 
-- Fewer than three useful insights: show only the available useful reference content; no filler negatives. Positive relevance can support a human useful-content reference, while `r>=2` is the separate contextual-material metric target. This does not set a model display threshold.
-- Zero useful insights: reference ordinary output is empty when the complete group's insight relevance is all zero. A day containing only relevance 1 differs from a no-useful-change day, even though contextual-material recall is undefined.
-- No evidence: use a distinct data-unavailable/unresolved expected state; never label it a confident no-useful-change day.
-- More than three material insights: retain the full gold set, ties and demand; report capacity pressure. Do not relabel the fourth to low relevance to make recall attainable.
-- Required-event overflow: preserve obligations and acceptable routes separately; overflow does not earn ordinary Top-3 exposure credit.
+- Fewer than three useful insights: return only 1 or 2 when that is the useful count; no filler. The maximum ordinary output is 3 ranked insights. This policy does not set a numeric model display threshold or alter contextual labels.
+- Zero useful insights with complete evidence: zero ordinary cards and expected state `NO_MEANINGFUL_TECHNICAL_CHANGE`. Do not confuse no-useful-change with no-material or no-event; keep existing relevance semantics.
+- Insufficient/unresolved evidence: zero ordinary cards and expected state `TECHNICAL_DATA_UNAVAILABLE_OR_INCOMPLETE`, distinct from complete no-change. Missing evidence is not evidence that nothing happened.
+- More than three useful/material insights: preserve the full reference set, rank the complete eligible set, display only Top 3 and retain later insights as diagnostic overflow. Do not lower labels to fit capacity; overflow earns no ordinary Top-3 exposure credit.
+- Required delivery: NO for ordinary Technical V1 insights. Severity 3 does not create a mandatory Top-3 slot, overflow alert or notification. Overflow is diagnostic, with no mandatory route.
 - Duplicate content: count a reference insight once. A second representation does not create a second relevant slot or independent event confirmation.
 
 For conditional event-ranking evaluation, custodians later project final event labels onto the complete emitted/retained/rankable population from the system ledger. Annotators must not see that membership or rejudge relevance to favor survivors. Conditional ideals use all members of that declared group, not merely returned items; end-to-end product ideals use the full independent reference insight set. Unresolved reference membership/relevance prevents a full-group ideal and must be reported.
@@ -172,7 +177,7 @@ Record attribution `market_aligned|stock_relative|mixed|unresolved` with evidenc
 
 ### B. `unusual_volume`
 
-Volume is primary. Inspect shares, comparable trading session, trailing mean and sample count, relative volume, historical distribution and adjustment/quality context. A ratio alone may be misleading if denominator/history is invalid. Missing relative volume is unknown magnitude, not average or zero volume. Price movement may support interpretation, but cannot manufacture an unusual-volume condition or substitute for volume magnitude. A quiet price response does not negate objectively unusual volume. D1 must settle elevated/low-volume factual scope before labeling existence.
+Volume is primary. Inspect shares, comparable trading session, trailing mean and sample count, relative volume, historical distribution and adjustment/quality context. A ratio alone may be misleading if denominator/history is invalid. Missing relative volume is unknown magnitude, not average or zero volume. Price movement may support interpretation, but cannot manufacture an unusual-volume condition or substitute for volume magnitude. A quiet price response does not negate objectively unusual volume. D1 is approved for HIGH volume only using the empirical q95 predicate. Low-volume abnormality is out of scope; no relative-volume-ratio gate is added. If raw comparable volume and its valid history suffice for q95, a missing optional ratio does not by itself make existence unresolved.
 
 ### C. `ma_cross`
 
@@ -202,11 +207,15 @@ Structural inventory completeness, evidence completeness and reference completen
 
 ## 13. Multi-annotator process
 
-Future pilot groups require independent human first passes before reviewer discussion. D6 must approve reviewer allocation (including multiple independent humans for agreement assessment), qualification, workload, uncertainty objectives and agreement acceptance criteria. No arbitrary agreement threshold or numeric case quota is chosen here.
+**[D6 — APPROVED](TECHNICAL_D6_STUDY_REVIEWER_DECISION.md):** Development/Pilot comprises 120 stock-days (80 Representative + 40 Enriched Diagnostic); Fresh Validation reserves 60 separately. Reviewer A reviews 120/120 Development, Reviewer B independently reviews a reproducible deterministic/random 30% subset (target 36/120); both independently review 60/60 Fresh Validation. Freeze sampling frame/version, inclusion/exclusion rules, component definitions, deterministic seed, algorithm and replacement policy before sampling. Freeze the B subset before labels; no manual selection of interesting days. Quotas are approved research allocations, not a universal statistical optimum.
+
+Representative selection is independent of detector output, model score and human label. Enrichment uses only frozen evidence-based conditions, never model scores, attention labels or expected verdicts; it does not redefine D2 eligibility. Report Representative and Enriched separately; enrichment is not a prevalence estimate. D4 episode isolation/quarantine remains authoritative, with no fixed-day substitute. Neither reviewer sees model/candidate scores, predicted ranking, detector-emitted status or other reviewer labels before independent submission.
 
 Reviewers use pseudonymous IDs, handbook/version/hash and identical frozen packet versions. Record role, timestamps, prior familiarity, training/policy acknowledgement and any assistance. Raw annotations are append-only; freeze them before showing another reviewer's answer. An adjudicator then sees evidence, independent judgments and rationales without model identity/scores; resolve conflicts with policy/rubric citations or retain unresolved. Adjudication may not force an integer simply to complete metrics.
 
-Report pre-adjudication agreement separately for factual existence, severity, contextual relevance, retention, required delivery and relations/mappings. Use distributions and ordinal disagreement gaps, agreement on tied preferences and mapping disputes; do not report post-adjudication consensus as independent agreement. The precise statistical agreement/uncertainty procedure is D6, frozen before the pilot; do not select it after observing labels.
+Report pre-adjudication factual existence exact agreement; severity/contextual relevance exact agreement, one-level disagreement and large disagreement >=2 levels; episode/duplicate/relationship exact relation agreement and unresolved/disputed relation rates. Also report unresolved rates, reasons, denominators and affected groups, preserving other retention/delivery/tied-preference diagnostics. Do not count singly reviewed groups or adjudicated consensus as independent paired agreement. Raw judgments remain append-only; separate adjudication preserves original labels, rationale, result, adjudicator identity/version and unresolved status. No arbitrary global threshold such as 80% agreement = PASS applies. These diagnostics feed the Decision Review Protocol, especially Reliability, Clarity and Operationalizability. Predeclare applicable uncertainty methods before analysis; missing judgments do not become zero.
+
+Development evidence may support separately authorized diagnostics, Decision Review, model development and debugging. Quota revision requires D6 V2, never a silent post-result change. Fresh Validation is protected from individual-case/label development tuning and iterative D redesign, and evaluated only after D-family, benchmark and required candidate freezes. A severe design defect invalidates that validation cycle: return to Development review, create justified Dn V2, then reserve a NEW Fresh Validation set. Do not repeatedly tune against the failed set. Existing 2025–2026 holdout remains sealed and unenumerated; D6 grants no access.
 
 AI assistance, if later authorized, requires tool/model/version, prompt/output hashes, fields suggested, evidence available, disclosure and a separate explicit human confirmation record. It does not count as another independent human reviewer. Unassisted and assisted conditions must be distinguished; no silent merging of AI suggestions into raw human labels. This task authorizes no AI labeling or external sharing.
 
@@ -221,10 +230,10 @@ These are requirements for a future package audit, not implemented validators:
 5. Duplicate links resolve to a valid surviving representation without cycles. Same-episode alone is not a deletion reason.
 6. Every owning insight preserves source event IDs and required communicated facts; no source event silently disappears or earns double gain.
 7. Material/critical insight flags follow member severity with unknown-status propagation; contextual insight relevance remains independently judged.
-8. Required-delivery yes has a policy, reason and evaluable route/timing requirements; unresolved policy cannot be encoded no. No obligation disappears from the reference ledger through budget/grouping.
+8. D5 V1 delivery value is NO under the approved policy; notification urgency/deadlines, mandatory overflow and acknowledgement are not applicable. Unknown factual labels remain unknown. Any future policy introducing yes requires a separate version; no ordinary V1 insight is silently given a hard obligation.
 9. A finalized complete ranking/reference group has no missing relevant membership, relevance or tie class. An affected incomplete group must not supply full-group ideal metrics.
 10. No-useful-change and no-event states agree with the complete underlying reference; data-unavailable is separate. More than three positive/material labels is valid.
-11. Prior-event recurrence and delivered-exposure histories are separate, past-only and consistent with cutoff. Never infer an alert from an event record.
+11. Prior-event recurrence is PIT-safe market history; prior exposure is CONTROLLED_AS_IF_EMPTY. No prior delivery/acknowledgement history is available in V1. Never infer an alert from an event record.
 12. Independent raw records and later adjudication have distinct IDs/lineage; changes are explained, versioned and do not erase disagreements.
 13. Rationale cites available evidence rather than future outcomes, candidate scores or expected model performance. Identical rubric terms mean the same thing across four families.
 14. Stage completion/revisions follow §2; finalized duplicate/context judgments preserve earlier provisional records. No retroactive severity edit merely to fit a Top-3 reference.
@@ -236,7 +245,7 @@ Any defect blocks the affected finalization until repaired or explicitly marked 
 **Synthetic and illustrative only. These are not sampled stock-days, benchmark labels, detector thresholds or scoring instructions.** No protected or V3 individual case is used.
 
 - **Tiny valid transition:** consecutive valid synthetic MA differences go from slightly negative to slightly positive. Existence and magnitude are separate questions. The reviewer must not mark the transition nonexistent merely because the spread is small, and must not let a large same-day residual rewrite the spread.
-- **Known severe episode already explained:** a hypothetical event has strong primary evidence, while an audited prior message already explained the continuing episode. Preserve its intrinsic judgment; independently assess whether today's new update adds useful content. Check any outstanding required-delivery obligation under policy instead of assuming prior exposure canceled it.
+- **Continuing market state:** yesterday's synthetic MA cross leaves MA20 above MA50 today. The state remains contextual market history; it does not create a new cross today unless the approved predicate fires again. Under CONTROLLED_AS_IF_EMPTY, do not invent a previous message or discount relevance for assumed prior delivery.
 - **Unknown volume denominator:** today's shares count is present but comparable trailing history is absent. Do not label volume average/zero, infer abnormality from price alone, or assert a confident no-useful-change day. Record which factual/severity judgments remain possible and which are unresolved.
 - **Capacity and duplication:** a hypothetical complete day contains four independently established distinct material changes plus two duplicate representations. Duplicates do not increase distinct demand; three slots cannot cover four distinct changes. Keep full reference membership and actual omissions visible, with separately adjudicated obligations. Do not merge unrelated changes merely to fit three.
 
@@ -248,7 +257,7 @@ Exact future order:
 
 **Benchmark evidence freeze → blinded independent annotation → raw-label freeze → adjudication → reconciled-label freeze → metric evaluation.**
 
-Before the first arrow, D1–D6 and generation/pilot authorization must be resolved and the package pass the Benchmark Spec's readiness checks. Freeze sources, packet hashes, opportunity/group membership, presentation order, task/exposure assumptions, handbook and assignment. No candidate score or ranking may be opened to annotators/adjudicators before the reconciled-label freeze; custodian access is separated and audited.
+Before the first arrow, D1-D6 are approved, but separate explicit Benchmark Generation Authorization is still required. Freeze sources, packets, group membership, order, task context, handbook and assignment, including D6 reproducible sampling and independent reviewer allocation. Candidate scores/ranks remain blinded until reconciled labels are frozen.
 
 Raw-label freeze includes original individual values, uncertainties, rationales, AI-assistance provenance if any, timestamps and hashes. Reconciled-label freeze includes every adjudication/remaining dispute, final event severity/context, retention, mappings, independently judged insight relevance/ties, delivery obligations and completeness eligibility. Preserve the raw archive independently.
 
@@ -258,15 +267,15 @@ Evidence defects discovered during annotation suspend affected groups. A correct
 
 ## 17. Annotation Readiness Decision
 
-**B. One or more product/research decisions must be resolved before pilot.** The handbook is structurally complete as a prospective field/rubric/workflow contract, but cannot yet produce reliable full-contract labels without these exact decisions:
+**D1–D6 design decisions APPROVED; generation/pilot NOT AUTHORIZED.** The handbook is a prospective field/rubric/workflow contract. Separate explicit Benchmark Generation Authorization, frozen execution specifications and construction integrity checks remain required; approval does not certify any generated data or labels.
 
-| Shared ID | Blocker before pilot |
+| Shared ID | Approved decision / execution prerequisite |
 |---|---|
-| D1 | Approve price/volume factual abnormal-condition predicates and negative/unknown rules; broad observations cannot stand in for existence truth |
-| D2 | Approve authorized fresh historical frame, cutoff/availability, continuity/adjustment and evidence policy; no allowed pilot packet exists yet |
-| D3 | Define the monitoring task, newly observable episode updates and audited versus controlled prior-exposure scenario |
-| D4 | Operationalize episode/duplicate/continuation/closure/re-entry rules and partition boundary isolation before reference grouping |
-| D5 | Define required delivery, deadlines, route/acknowledgement, ordinary display versus overflow and empty-state policy |
-| D6 | Approve pilot budget/selection/uncertainty, independent-human allocation, agreement/adjudication procedures and rubric acceptance |
+| D1 — APPROVED (not a remaining blocker) | [Approved factual predicates](TECHNICAL_D1_FACTUAL_ABNORMALITY_DECISION.md): own-history q95, absolute return / HIGH volume, inclusive equality, prior-only 252 valid observations maximum / 60 minimum; UNRESOLVED for insufficient/invalid evidence |
+| D2 — APPROVED (not a remaining policy blocker) | [Approved frame/PIT policy](TECHNICAL_D2_DATA_FRAME_PIT_DECISION.md): pre-2025 historical VN30 frame; 23:59:59 Asia/Ho_Chi_Minh; assumed EOD availability explicitly distinguished from audited timing. No pilot packet generated or certified |
+| D3 — APPROVED (not a remaining blocker) | [Monitoring Context V1](TECHNICAL_D3_MONITORING_CONTEXT_DECISION.md): one-stock technical EOD monitoring; CONTROLLED_AS_IF_EMPTY; market history distinct from user exposure; today's factual changes only |
+| D4 - APPROVED (not a remaining blocker) | [Episode Policy V1](TECHNICAL_D4_EPISODE_POLICY_DECISION.md): family-specific lifecycle; unresolved continuity preserved; Development/Fresh Validation boundary quarantine; no fixed-day shortcut |
+| D5 - APPROVED (not a remaining blocker) | [Delivery Policy V1](TECHNICAL_D5_DELIVERY_POLICY_DECISION.md): maximum 3/no filler; distinct no-change and incomplete-data empty states; diagnostic overflow; required_delivery=NO, current EOD response only |
+| D6 — APPROVED (not a remaining design blocker) | [Study & Reviewer Design V1](TECHNICAL_D6_STUDY_REVIEWER_DECISION.md): 120 Development (80 Representative + 40 Enriched), 60 Fresh Validation; A covers all, B covers 30% Development and 100% Validation independently; preserved raw labels, typed agreement diagnostics, reproducible frozen sampling and D4 isolation |
 
-D7 (layered model-evaluation gates) remains a later required freeze before model evaluation; it does not justify inventing annotation thresholds now. The next step is documented owner resolution of D1–D6 and approval of both document versions. Only a **separate explicit authorization** may then start benchmark generation, integrity audit and blinded pilot annotation in that order. This design stops without cases, labels, scores, implementation, V4/V5, tuning, protected-data access or Final Validation.
+D1-D6 design blockers are resolved. D7 remains LATER MODEL-EVALUATION ACCEPTANCE. BENCHMARK GENERATION IS STILL NOT AUTHORIZED pending separate explicit approval; do not start benchmark/model work or proceed to D7.

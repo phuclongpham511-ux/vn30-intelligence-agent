@@ -210,8 +210,8 @@ Full VN30 coverage and tick-level streaming remain outside the initial MVP.
 ## Documents
 
 - [Original product brief](docs/PRODUCT_BRIEF.md)
-- [Day 0 plan](docs/DAY0_PLAN.md) and [historical Day 0 report](docs/DAY0_REPORT.md)
-- [Section 1 plan](docs/SECTION1_PLAN.md) and [Section 1 report](docs/SECTION1_REPORT.md)
+- [Historical Day 0 report](docs/DAY0_REPORT.md)
+- [Section 1 report](docs/SECTION1_REPORT.md)
 - [UI refresh report and screenshots](docs/UI_REFRESH_REPORT.md)
 - [Financial visualization report](docs/SECTION1_6_REPORT.md)
 - [Materiality V0 integration report](docs/SECTION2_PHASE1_REPORT.md)
