@@ -284,6 +284,42 @@ def test_complete_phase1_smoke_receipt_and_safe_resume(tmp_path):
     assert first["smoke_groups"] == 3
     assert first["preflight"]["status"] == "BLOCKED_BY_DATA_OR_PROVENANCE"
     assert first["official_generation"] is False
+    assert first["governance_commit"] == "ceb944bab2e33e09a6d1586c31d1f8d8e271cde7"
+    assert first["active_d2_authority"] == "docs/TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V3.md"
+    assert all("docs/" + name in first["governance_hashes"] for name in (
+        "TECHNICAL_D2_DATA_FRAME_PIT_DECISION.md",
+        "TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V2.md",
+        "TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V3.md"))
+    assert "docs/TECHNICAL_BENCHMARK_POPULATION_DIRECTION_REVIEW_V4.md" in first["governance_hashes"]
+
+
+@pytest.mark.parametrize("name", [
+    "TECHNICAL_D1_FACTUAL_ABNORMALITY_DECISION.md",
+    "TECHNICAL_D2_DATA_FRAME_PIT_DECISION.md",
+    "TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V2.md",
+    "TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V3.md",
+    "TECHNICAL_STOCK_DAY_BENCHMARK_SPEC.md",
+    "TECHNICAL_BENCHMARK_POPULATION_DIRECTION_REVIEW_V4.md",
+    "TECHNICAL_D2_DECISION_REVIEW_V2_TO_V3.md",
+])
+def test_governance_lineage_rejects_unauthorized_mutation(tmp_path, name):
+    from scripts.build_technical_benchmark_smoke import ROOT, verify_governance
+    hashes = verify_governance()
+    for relative in hashes:
+        target = tmp_path / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((ROOT / relative).read_bytes())
+    assert verify_governance(tmp_path) == hashes
+    target = tmp_path / "docs" / name
+    target.write_bytes(target.read_bytes() + b"\nUNAUTHORIZED POLICY EDIT\n")
+    with pytest.raises(ValueError, match="Unauthorized governance mutation"):
+        verify_governance(tmp_path)
+
+
+def test_governance_lineage_missing_authority_fails(tmp_path):
+    from scripts.build_technical_benchmark_smoke import verify_governance
+    with pytest.raises(FileNotFoundError):
+        verify_governance(tmp_path)
 
 
 def test_safe_synthetic_loader_checks_hash_and_loads_no_unapproved_files(tmp_path):

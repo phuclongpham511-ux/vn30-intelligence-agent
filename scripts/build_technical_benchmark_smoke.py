@@ -21,6 +21,44 @@ GOVERNANCE = [
     "TECHNICAL_DECISION_REVIEW_PROTOCOL.md", "TECHNICAL_STOCK_DAY_BENCHMARK_SPEC.md",
     "TECHNICAL_ANNOTATION_HANDBOOK_V1.md", "TECHNICAL_STOCK_DAY_DESIGN_AUDIT.md",
 ]
+D2_V2_COMMIT = "91232b00a3c9e9b124f5570c449254bf22e2de04"
+ACTIVE_D2 = "docs/TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V3.md"
+# Owner-authorized Step A / A.1 document contents, pinned independently of HEAD.
+# A future authorized revision must update these pins explicitly; no auto-freeze.
+AUTHORIZED_STEP_A = {
+    "TECHNICAL_D6_STUDY_REVIEWER_DECISION.md": "7bf125d40ddf8cd145994d4e0ed43676db8b4953b542f0059591636ed147db0e",
+    "TECHNICAL_STOCK_DAY_BENCHMARK_SPEC.md": "4dfefea6c6503f33b13b5e6a49f938dcfdc5abe514897a5028a0ec885f96f7f7",
+    "TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V3.md": "e9a2905106a141b2b604e202c50836f669d35251853f727168abb8c931893b3c",
+    "TECHNICAL_D2_DECISION_REVIEW_V2_TO_V3.md": "cbb2bdb9790c971db6f165505fd759d487868e405471daa860788750b9afd228",
+    "TECHNICAL_BENCHMARK_POPULATION_DIRECTION_REVIEW_V4.md": "d03e5549a482a21b04047dcb3f332a43a862f17a59bc775a067dcef7913d92b5",
+}
+
+
+def verify_governance(document_root=ROOT):
+    """Fail closed against explicit authorities; HEAD ancestry is not approval.
+
+    Compare Git-normalized text so Windows CRLF checkout is not a policy edit.
+    Receipts still record raw working-file hashes for exact resume integrity.
+    """
+    for commit in (BASELINE, D2_V2_COMMIT):
+        subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"], cwd=ROOT, check=True)
+    versions = ["TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V2.md", "TECHNICAL_D2_DECISION_REVIEW_V1_TO_V2.md"]
+    paths = list(dict.fromkeys(GOVERNANCE + versions + list(AUTHORIZED_STEP_A)))
+    hashes = {}
+    for name in paths:
+        path = "docs/" + name
+        expected = AUTHORIZED_STEP_A.get(name)
+        if expected is None:
+            commit = D2_V2_COMMIT if name in versions or name in {
+                "TECHNICAL_ANNOTATION_HANDBOOK_V1.md", "TECHNICAL_STOCK_DAY_DESIGN_AUDIT.md"
+            } else BASELINE
+            content = subprocess.check_output(["git", "show", f"{commit}:{path}"], cwd=ROOT)
+            expected = sha256(content.replace(b"\r\n", b"\n")).hexdigest()
+        content = (Path(document_root) / path).read_bytes()
+        if sha256(content.replace(b"\r\n", b"\n")).hexdigest() != expected:
+            raise ValueError("Unauthorized governance mutation: " + path)
+        hashes[path] = sha256(content).hexdigest()
+    return hashes
 
 
 def synthetic_snapshot():
@@ -60,10 +98,7 @@ def _immutable(path, content):
 
 def run_phase1(output=OUTPUT):
     output = Path(output).resolve()
-    subprocess.run(["git", "merge-base", "--is-ancestor", BASELINE, "HEAD"], cwd=ROOT, check=True)
-    paths = ["docs/" + name for name in GOVERNANCE]
-    subprocess.run(["git", "diff", "--quiet", BASELINE, "--", *paths], cwd=ROOT, check=True)
-    governance_hashes = {p: sha256((ROOT / p).read_bytes()).hexdigest() for p in paths}
+    governance_hashes = verify_governance()
     code_paths = ["src/evaluation/benchmark/" + name + ".py" for name in (
         "__init__", "facts", "episodes", "inputs", "builder", "sampling", "package")]
     code_paths += ["scripts/build_technical_benchmark_smoke.py", "src/analytics/market.py", "src/evaluation/store.py"]
@@ -81,6 +116,7 @@ def run_phase1(output=OUTPUT):
     def checkpoint(phase):
         completed.append(phase)
         write_json(output / "status.json", {"governance_commit": BASELINE, "completed": completed,
+                   "active_d2_authority": ACTIVE_D2, "d2_v2_governance_commit": D2_V2_COMMIT,
                    "phase": phase, "official_generation": False, "data_access": "SYNTHETIC_ONLY",
                    "code_hashes": code_hashes, "governance_hashes": governance_hashes})
     checkpoint("BASELINE_VERIFIED")
@@ -138,6 +174,7 @@ def run_phase1(output=OUTPUT):
     for folder in ("smoke", "rebuild"):
         artifacts.extend(folder + "/" + name for name in [*first["files"], "run_manifest.json"])
     receipt = {"governance_commit": BASELINE, "governance_hashes": governance_hashes, "code_hashes": code_hashes,
+               "active_d2_authority": ACTIVE_D2, "d2_v2_governance_commit": D2_V2_COMMIT,
                "benchmark_status": "SMOKE_ONLY_NOT_BENCHMARK", "smoke_groups": len(groups),
                "prefix_invariance": "PASS", "deterministic_rebuild": "PASS", "official_generation": False,
                "preflight": result, "tests": "See separate pytest results; not inferred from smoke success",
