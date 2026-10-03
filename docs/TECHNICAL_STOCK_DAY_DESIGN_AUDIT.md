@@ -206,3 +206,15 @@ Created [D6 decision](TECHNICAL_D6_STUDY_REVIEWER_DECISION.md). Approved Develop
 Updated only D6 sampling/reviewer/readiness sections in Spec and Handbook, this audit, and minimal stale D6 readiness references in the Decision Review Protocol. Direct conflicts fixed: pending-D6/no-quota statements, unspecified reviewer allocation and readiness that incorrectly retained D6 as a design blocker. Evidence-only enrichment is a sampling component within the unchanged D2 eligible frame, not a frame exception. D1–D5 semantics and D4 isolation remain unchanged. Development supports Decision Review; severe validation defects require a failed-cycle record, Development review and a NEW Fresh Validation set. Existing 2025–2026 holdout remains sealed.
 
 One narrow documentation consistency check: PASS (16 checks). No data/cases, source code, model/scoring/evaluation, fresh validation or holdout access; no skills/sub-agents or repo-wide analysis. No benchmark generation or D7 work.
+
+## D2 V1 → V2 research-frame revision — 2026-10-03
+
+[Decision Review V1 → V2](TECHNICAL_D2_DECISION_REVIEW_V1_TO_V2.md): **REVISE**, impact **LOW**. D2 V1's absent lower bound caused the B2 source audit to treat membership certification scope as extending to VN30 inception in 2012. This is a directly attributable Operationalizability defect, not a model-performance-driven revision. Earlier D2 approval and audit entries remain historical; V1 bytes are preserved.
+
+**D2 V1 → REVISED; [D2 V2](TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V2.md) → APPROVED / ACTIVE** for future benchmark generation. Official Development/Pilot and future Fresh Validation stock-days satisfy `2020-01-01 <= session_date < 2025-01-01`. Pre-2020 warm-up is permitted only when PIT-valid and separately authorized for prior distributions, MA/RSI or episode/state initialization; it is not an eligible benchmark stock-day and does not expand sampling. Protected exclusions remain active and 2025–2026 holdout stays sealed.
+
+B2 now needs the basket in force at the start of 2020 and all regular/interim membership changes affecting 2020–2024, with effective dates and provenance. No membership dataset is constructed or certified. Existing checkpoint state: no official Development benchmark generated and no Fresh Validation selected; no official cases/labels require invalidation. Phase 1 framework and admission-gate logic remain valid; no code is inspected, changed or executed here.
+
+**D1 APPROVED; D2 V2 APPROVED; D3 APPROVED; D4 APPROVED; D5 APPROVED; D6 APPROVED; D7 LATER.** Real-data benchmark generation remains subject to B1–B6 certification and applicable execution authorization. This documentation revision does not grant additional execution authority.
+
+Only frame/version references and related warm-up wording are updated in Spec and Handbook. All other D2 rules and D1/D3/D4/D5/D6 semantics remain unchanged. No data/cases, model/evaluation, benchmark generation, Fresh Validation or holdout work occurs.
