@@ -100,7 +100,7 @@ def run_phase1(output=OUTPUT):
     output = Path(output).resolve()
     governance_hashes = verify_governance()
     code_paths = ["src/evaluation/benchmark/" + name + ".py" for name in (
-        "__init__", "facts", "episodes", "inputs", "builder", "sampling", "package")]
+        "__init__", "facts", "episodes", "inputs", "builder", "sampling", "package", "population")]
     code_paths += ["scripts/build_technical_benchmark_smoke.py", "src/analytics/market.py", "src/evaluation/store.py"]
     code_hashes = {p: sha256((ROOT / p).read_bytes()).hexdigest() for p in code_paths}
     receipt_path = output / "phase1_receipt.json"

@@ -5,6 +5,7 @@ from pathlib import Path
 from src.evaluation.store import canonical, digest
 from .builder import BASELINE, VERSION
 from .facts import FAMILIES
+from .population import CLAIM_SCOPE
 
 
 def write_package(directory, groups, *, source_inventory):
@@ -57,6 +58,8 @@ def write_package(directory, groups, *, source_inventory):
     files["integrity.json"] = (canonical(integrity) + "\n").encode()
     files["source_inventory.json"] = (canonical(source_inventory) + "\n").encode()
     manifest = {"schema_version": "1", "build_version": VERSION, "governance_commit": BASELINE,
+                "population_claim": {"approved_claim": CLAIM_SCOPE,
+                                     "claim_status": "NOT_ESTABLISHED_SMOKE_ONLY"},
                 "benchmark_status": "SMOKE_ONLY_NOT_BENCHMARK", "is_fixture": True,
                 "serialization": "UTF-8 canonical sorted JSON keys, compact separators, LF, no NaN",
                 "counts": counts, "checks": checks,

@@ -1,4 +1,6 @@
-"""D2 v1 metadata admission. Never opens certificate references or payloads.
+"""D2 metadata admission: legacy replay or V3 primary deployment cohort.
+
+Never opens certificate references or market payloads.
 
 PASS establishes consistency of declared custodian metadata only. Authenticity,
 file identity/reparse-point checks and payload hash verification belong to a future
@@ -12,6 +14,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, StringConstraints, ValidationError
 from src.evaluation.models import EvaluationModel
+from .population import COHORT_PATH, StockDayEligibility, evaluate_eligibility, load_cohort
 
 Text = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 SHA256 = Annotated[str, Field(pattern=r"^[0-9a-f]{64}$")]
@@ -181,8 +184,12 @@ def _ledger_reasons(manifest, ledger):
     return reasons
 
 
-def validate_real_data_admission(metadata):
-    """Validate supplied metadata in memory; null/unknown never implies certified."""
+def validate_real_data_admission(metadata, *, stock_day=None, cohort_path=COHORT_PATH):
+    """Legacy replay metadata, or D2 V3 primary eligibility when stock_day is supplied.
+
+    The primary path reads only the pinned cohort JSON, never certificate
+    references or market payloads. Both paths retain the disabled real loader.
+    """
     try:
         bundle = AdmissionMetadata.model_validate(metadata)
     except ValidationError as exc:
@@ -191,6 +198,20 @@ def validate_real_data_admission(metadata):
     manifest, request = bundle.manifest, bundle.request
     scope = manifest.scope
     reasons = []
+    population = None
+    if stock_day is not None:
+        try:
+            cohort = load_cohort(cohort_path)
+            population = evaluate_eligibility(cohort, stock_day)
+        except (OSError, ValueError):
+            return _decision(['COHORT_INVALID_OR_UNAVAILABLE'])
+        if population['decision'] != 'ELIGIBLE':
+            reasons.extend(population['reasons'])
+        else:
+            row = StockDayEligibility.model_validate(stock_day)
+            if (request.start != row.session or request.end != row.session
+                    or len(request.instruments) != 1 or request.instruments[0].ticker != row.ticker):
+                reasons.append('COHORT_STOCKDAY_REQUEST_MISMATCH')
     if manifest.source_classification != "SAFE_TO_INSPECT":
         reasons.append("B1_SOURCE_NOT_SAFE")
     if manifest.certification_status != "CERTIFIED":
@@ -226,6 +247,8 @@ def validate_real_data_admission(metadata):
                        ("comparability", "B3_COMPARABILITY_NOT_CERTIFIED"),
                        ("provenance", "B4_PROVENANCE_NOT_CERTIFIED"),
                        ("exchange_calendar", "B5_CALENDAR_NOT_CERTIFIED")):
+        if name == 'historical_universe' and stock_day is not None:
+            continue  # D2 V3 primary cohort; legacy replay certification is preserved.
         cert = getattr(manifest.certificates, name)
         if (cert is None or cert.status != "CERTIFIED" or not cert.issuer or not cert.version
                 or not cert.evidence_reference):
@@ -233,7 +256,10 @@ def validate_real_data_admission(metadata):
         elif cert.scope != manifest.scope or cert.normalized_sha256 != manifest.normalized_hash.sha256:
             reasons.append(code + ":SCOPE_OR_HASH_MISMATCH")
     reasons.extend(_ledger_reasons(manifest, bundle.ledger))
-    return _decision(reasons)
+    decision = _decision(reasons)
+    if population is not None:
+        decision['population_eligibility'] = population
+    return decision
 
 
 class AdmissionBlocked(PermissionError):
@@ -248,14 +274,14 @@ class RealDataLoaderDisabled(PermissionError):
         super().__init__("Metadata PASS; real-data loading remains disabled in Phase 1.5B")
 
 
-def request_real_payload(metadata, *, payload_loader):
+def request_real_payload(metadata, *, payload_loader, stock_day=None, cohort_path=COHORT_PATH):
     """Future injection seam. Validation always precedes the disabled loader boundary.
 
     The callback is deliberately NEVER invoked, even on PASS. There is no enable
     flag; a later authorized implementation must verify the physical file and
     certificates without treating this metadata verdict as official readiness.
     """
-    decision = validate_real_data_admission(metadata)
+    decision = validate_real_data_admission(metadata, stock_day=stock_day, cohort_path=cohort_path)
     if decision["decision"] != "PASS":
         raise AdmissionBlocked(decision)
     raise RealDataLoaderDisabled(decision)
