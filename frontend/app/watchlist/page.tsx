@@ -73,7 +73,7 @@ export default function WatchlistPage() {
     {universe.error && <p role="alert" className="text-sm">Available stocks could not be loaded. <button className="text-primary underline" onClick={universe.refresh}>Retry stocks</button></p>}
     {state.symbols.length >= 50 && <p className="text-xs text-muted-foreground">This browser Watchlist supports up to 50 stocks.</p>}
     {!ready ? <MascotState state="loading" role="status">Loading your Watchlist…</MascotState>
-      : !state.symbols.length ? !storageError && <section className="panel p-5"><MascotState state="noMatches"><div><h2 className="text-sm">No stocks followed yet</h2><p className="mt-1">Choose a stock above to monitor recent developments.</p></div></MascotState></section>
+      : !state.symbols.length ? !storageError && <section className="panel p-5"><MascotState state="emptyWatchlist"><div><h2 className="text-sm">No stocks followed yet</h2><p className="mt-1">Choose a stock above to monitor recent developments.</p></div></MascotState></section>
       : <>
         <SourceCoverage/>
         {loading ? <MascotState state="loading" role="status">Checking recent developments…</MascotState>

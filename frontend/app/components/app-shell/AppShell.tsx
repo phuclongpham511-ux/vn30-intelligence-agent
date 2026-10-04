@@ -4,7 +4,6 @@ import { ThemeProvider, useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Newspaper, Compass, Bookmark, PanelLeft, Moon, Sun, Search, Database, ArrowUpRight } from "lucide-react";
-import { MascotIllustration } from "../mascot/Mascot";
 import TickerSearch from "../stock/TickerSearch";
 import { StockUniverse } from "../stock/StockUniverse";
 import { Button } from "../ui/button";
@@ -14,7 +13,6 @@ function Navigation({ close }: { close?: () => void }) {
   const path = usePathname();
   return <div className="flex h-full flex-col">
     <Link href="/" onClick={close} className="flex items-center gap-2 px-4 pb-7 pt-5" aria-label="VN30 Intelligence home">
-      <MascotIllustration state="brand" size={48}/>
       <span className="text-base font-semibold tracking-tight">VN30<span className="ml-1 font-normal text-muted-foreground">Intelligence</span></span>
     </Link>
     <div className="eyebrow px-6 pb-3">Workspace</div>

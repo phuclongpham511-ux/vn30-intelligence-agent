@@ -15,9 +15,9 @@
 :root {
   --chart-secondary: #517990;
   --ma20: #a86c12; --ma50: #2376bb; --rsi: #506b82;
-  --background: #f4f6f8; --foreground: #192431; --card: #ffffff; --muted: #e9eef3;
-  --muted-foreground: #5d6a7b; --border: #d9e1e9; --primary: #2463b5; --primary-foreground: #ffffff;
-  --positive: #087a51; --negative: #bd3547; --sidebar: #f9fbfc; --chart: #397ab8;
+  --background: #edf1f5; --foreground: #17283d; --card: #ffffff; --muted: #e1e8f0;
+  --muted-foreground: #506176; --border: #c6d1de; --primary: #215b9c; --primary-foreground: #ffffff;
+  --positive: #087a51; --negative: #bd3547; --sidebar: #f5f7fa; --chart: #397ab8;
 }
 .dark {
   --chart-secondary: #94b4c7;
@@ -37,6 +37,10 @@ h1 { font-size: 30px; } h2 { font-size: 16px; } h3 { font-size: 14px; }
 .financial { font-variant-numeric: tabular-nums; }
 .eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted-foreground); }
 .panel { border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+.research-entry { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+.research-entry:hover { background: var(--muted); border-color: var(--primary); }
+:root:not(.dark) [aria-pressed="true"] { background: #e0ebf8; border-color: var(--primary); color: var(--primary); }
+:root:not(.dark) [aria-current="page"] { background: #dfeaf7; color: var(--primary); }
 .page-stack { display: flex; flex-direction: column; gap: 24px; }
 .muted { color: var(--muted-foreground); }
 .positive { color: var(--positive); } .negative { color: var(--negative); }

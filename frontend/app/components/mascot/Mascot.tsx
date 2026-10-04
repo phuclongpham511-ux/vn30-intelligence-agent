@@ -1,14 +1,18 @@
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { mascotAssets, mascotUiStates, type MascotUiState } from "@/lib/mascot";
+import { mascotAssets, mascotUiStates, showMascot, type MascotUiState } from "@/lib/mascot";
 
 export function MascotIllustration({ state, size = 64, className = "" }: {
   state: MascotUiState; size?: 48 | 64 | 128 | 160; className?: string;
 }) {
+  if (!showMascot) return null;
   // Nearby text communicates the state; the artwork adds no screen-reader noise.
-  return <Image src={mascotAssets[mascotUiStates[state]]} alt="" aria-hidden="true"
+  const pose = mascotUiStates[state];
+  return <span aria-hidden="true" className={`relative inline-block shrink-0 ${className}`} style={{ width: size, height: size }}>
+    <Image src={mascotAssets[pose]} alt="" aria-hidden="true"
     width={size} height={size} unoptimized draggable={false}
-    className={`shrink-0 object-contain ${className}`} style={{ imageRendering: "pixelated" }}/>
+    className="absolute inset-0 h-full w-full object-contain" style={{ imageRendering: "pixelated" }}/>
+  </span>;
 }
 
 export function MascotState({ state, children, role }: {
