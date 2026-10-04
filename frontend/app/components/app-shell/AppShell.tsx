@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { ChartNoAxesCombined, Compass, Bookmark, Layers, PanelLeft, Moon, Sun, Search, Database, ArrowUpRight } from "lucide-react";
+import { Newspaper, ChartNoAxesCombined, Compass, Bookmark, Layers, PanelLeft, Moon, Sun, Search, Database, ArrowUpRight } from "lucide-react";
 import TickerSearch from "../stock/TickerSearch";
 import { StockUniverse } from "../stock/StockUniverse";
 import { Button } from "../ui/button";
@@ -18,7 +18,7 @@ function Navigation({ close }: { close?: () => void }) {
     </Link>
     <div className="eyebrow px-6 pb-3">Workspace</div>
     <nav aria-label="Main navigation" className="space-y-1 px-3">
-      {[{href:"/",label:"Explore",icon:Compass},{href:"/watchlist",label:"Watchlist",icon:Bookmark}].map(({href,label,icon:Icon}) => {
+      {[{href:"/",label:"Explore",icon:Compass},{href:"/news",label:"News",icon:Newspaper},{href:"/watchlist",label:"Watchlist",icon:Bookmark}].map(({href,label,icon:Icon}) => {
         const active = href === "/" ? path === "/" || path.startsWith("/stocks") : path === href;
         return <Link key={href} onClick={close} href={href} aria-current={active ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${active ? "bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon size={17}/>{label}{active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary"/>}</Link>;
       })}
@@ -50,7 +50,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <div className="min-w-0 lg:ml-60">
       <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b bg-background/95 px-4 backdrop-blur-sm md:px-8">
         <Sheet open={open} onOpenChange={setOpen}><SheetTrigger asChild><Button variant="ghost" size="icon" className="lg:hidden" aria-label="Open navigation"><PanelLeft size={19}/></Button></SheetTrigger>
-          <SheetContent side="left" className="w-72 gap-0 p-0"><SheetTitle className="sr-only">Navigation</SheetTitle><SheetDescription className="sr-only">Explore and watchlist workspace</SheetDescription><Navigation close={() => setOpen(false)}/></SheetContent>
+          <SheetContent side="left" className="w-72 gap-0 p-0"><SheetTitle className="sr-only">Navigation</SheetTitle><SheetDescription className="sr-only">Explore, news and watchlist workspace</SheetDescription><Navigation close={() => setOpen(false)}/></SheetContent>
         </Sheet>
         <div className="min-w-0 flex-1"><TickerSearch/></div>
         <span className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex"><Database size={14}/> Daily data</span>

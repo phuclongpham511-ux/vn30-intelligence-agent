@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import health, stocks, watchlists
+from routers import health, stocks, watchlists, news
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from src.providers.base import ProviderError
@@ -8,6 +8,7 @@ app = FastAPI(title="VN30 Intelligence Agent", version="0.1.0")
 app.include_router(health.router)
 app.include_router(stocks.router)
 app.include_router(watchlists.router)
+app.include_router(news.router)
 
 
 @app.exception_handler(ProviderError)

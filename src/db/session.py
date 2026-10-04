@@ -19,6 +19,7 @@ def get_engine():
 
 def create_tables(engine=None):
     from src import models  # noqa: F401 - register tables
+    from src.news import models as news_models  # noqa: F401 - additive news tables
     target = engine if engine is not None else get_engine()
     SQLModel.metadata.create_all(target)
     if "display_name_en" not in {column["name"] for column in inspect(target).get_columns("stock")}:
