@@ -10,12 +10,13 @@ from src.providers.base import ProviderNotReadyError
 
 
 @pytest.fixture
-def session():
+def session(monkeypatch):
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     @event.listens_for(engine, "connect")
     def enable_fk(connection, _):
         connection.execute("PRAGMA foreign_keys=ON")
     create_tables(engine)
+    monkeypatch.setattr('src.db.session.get_engine', lambda: engine)
     with Session(engine) as session:
         yield session
     engine.dispose()

@@ -47,7 +47,19 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                 existing = session.exec(select(NewsArticle).where(or_(NewsArticle.url_hash == url_hash, (NewsArticle.source_id == source.source_id) & (NewsArticle.title_hash == title_hash)))).first()
                 if existing:
                     existing.last_seen_at = now
+                    # Refresh derived tags after taxonomy/universe changes, without
+                    # changing publisher evidence or renewing story activity.
+                    tags = tagger.tag(existing.title, existing.category)
+                    existing.topics, existing.tickers, existing.sectors = tags.topics, tags.tickers, tags.sectors
+                    existing.scope = tags.scope
                     session.add(existing)
+                    session.flush()
+                    story = session.get(NewsStory, existing.story_id)
+                    if story:
+                        members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story.id)).all()
+                        for field in ('topics', 'tickers', 'sectors'):
+                            setattr(story, field, sorted({v for a in members for v in getattr(a, field)}))
+                        session.add(story)
                     continue
                 published = utc(item.published_at) if item.published_at else None
                 # No historical backfill, and reject implausible future dates.
@@ -98,14 +110,14 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
     return result
 
 
-def articles(session, *, country=None, source=None, topic=None, ticker=None, sector=None, category=None, now=None, hours=72):
+def articles(session, *, country=None, source=None, topic=None, ticker=None, sector=None, category=None, financial_only=False, now=None, hours=72):
     now = utc(now or datetime.now(timezone.utc))
     query = select(NewsArticle).where(NewsArticle.first_seen_at >= now - timedelta(hours=hours))
     for field, value in [('country', country), ('source_id', source), ('category', category)]:
         if value:
             query = query.where(getattr(NewsArticle, field) == value)
     rows = session.exec(query).all()
-    return sorted([a for a in rows if all(not value or value.casefold() in {x.casefold() for x in getattr(a, field)} for field, value in [('topics', topic), ('tickers', ticker), ('sectors', sector)])],
+    return sorted([a for a in rows if (not financial_only or a.topics or a.tickers or a.sectors) and all(not value or value.casefold() in {x.casefold() for x in getattr(a, field)} for field, value in [('topics', topic), ('tickers', ticker), ('sectors', sector)])],
         key=lambda a: (utc(a.published_at or a.first_seen_at), a.id), reverse=True)
 
 

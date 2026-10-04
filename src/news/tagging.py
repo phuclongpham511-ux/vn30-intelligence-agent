@@ -5,21 +5,21 @@ from src.news.normalization import normalized
 
 TOPICS = {
     'Equities': ['chung khoan', 'vn index', 'vnindex', 'co phieu', 'stock market', 'stocks', 'equities', 'wall street', 's&p 500', 'nasdaq'],
-    'Rates': ['lai suat', 'fed', 'federal reserve', 'interest rate', 'central bank', 'ecb', 'monetary policy', 'governing council'],
+    'Rates': ['lai suat', 'fed', 'federal reserve', 'interest rate', 'interest rates', 'central bank', 'ecb', 'monetary policy', 'governing council'],
     'Currencies': ['ty gia', 'ngoai te', 'usd', 'dollar', 'forex', 'currency', 'yuan'],
     'China': ['trung quoc', 'china', 'chinese', 'beijing'],
     'Oil': ['dau tho', 'gia dau', 'oil', 'opec', 'crude', 'diesel'],
     'Gold': ['gia vang', 'vang mieng', 'gold', 'bullion'],
     'Trade': ['xuat khau', 'nhap khau', 'thue quan', 'tariff', 'trade', 'exports', 'imports'],
     'Economy': ['kinh te', 'lam phat', 'gdp', 'cpi', 'inflation', 'economy', 'economic', 'employment', 'recession'],
-    'Semiconductors': ['ban dan', 'semiconductor', 'chip', 'chips', 'nvidia', 'tsmc'],
+    'Semiconductors': ['ban dan', 'semiconductor', 'computer chip', 'computer chips', 'chipmaker', 'microchip', 'nvidia', 'tsmc'],
     'AI': ['tri tue nhan tao', 'artificial intelligence', 'ai', 'openai'],
     'Earnings': ['loi nhuan', 'doanh thu', 'ket qua kinh doanh', 'earnings', 'revenue', 'profit'],
     'Real Estate': ['bat dong san', 'dia oc', 'real estate', 'property market'],
-    'Banking': ['ngan hang', 'tin dung', 'banking', 'bank', 'banks', 'credit'],
+    'Banking': ['ngan hang', 'tin dung', 'banking', 'central bank', 'commercial bank', 'investment bank', 'banks', 'credit'],
 }
 SECTORS = {
-    'Financials': ['ngan hang', 'bao hiem', 'bank', 'banks', 'banking', 'insurance'],
+    'Financials': ['ngan hang', 'bao hiem', 'central bank', 'commercial bank', 'investment bank', 'banks', 'banking', 'insurance'],
     'Real Estate': ['bat dong san', 'dia oc', 'real estate', 'property'],
     'Technology': ['cong nghe', 'ban dan', 'technology', 'semiconductor', 'artificial intelligence'],
     'Energy': ['dau khi', 'dau tho', 'oil', 'gas', 'energy'],

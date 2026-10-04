@@ -3,8 +3,20 @@ from routers import health, stocks, watchlists, news
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from src.providers.base import ProviderError
+from contextlib import asynccontextmanager
+from src.config.settings import get_settings
+from src.db.session import create_tables
 
-app = FastAPI(title="VN30 Intelligence Agent", version="0.1.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Local first-run setup only; production schema deployment stays explicit.
+    if get_settings().app_env == "development":
+        create_tables()
+    yield
+
+
+app = FastAPI(title="VN30 Intelligence Agent", version="0.1.0", lifespan=lifespan)
 app.include_router(health.router)
 app.include_router(stocks.router)
 app.include_router(watchlists.router)

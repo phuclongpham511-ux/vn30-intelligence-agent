@@ -8,7 +8,6 @@ import TechnicalChart from "./stock/TechnicalChart";
 import MarketSnapshot from "./stock/MarketSnapshot";
 import FundamentalTrends from "./stock/FundamentalTrends";
 import RawDataTable from "./stock/RawDataTable";
-import MaterialitySlot from "./stock/MaterialitySlot";
 
 
 export default function Explore({ ticker }: { ticker: string }) {
@@ -30,11 +29,11 @@ export default function Explore({ ticker }: { ticker: string }) {
   if (!data) return <StockLoading ticker={ticker}/>;
   return <div className="page-stack">
     <StockHeader stock={data.stock} market={data.market}/>
-    <MaterialitySlot/>
-    <TechnicalChart ticker={ticker} onRows={setTechnicalRows}/>
+    <nav aria-label="Stock sections" className="flex flex-wrap gap-4 text-sm text-primary"><a href="#stock-price" className="hover:underline">Price & technicals</a><a href="#stock-fundamentals" className="hover:underline">Fundamentals</a><a href="#stock-news" className="hover:underline">News mentioning {ticker}</a></nav>
+    <div id="stock-price" className="scroll-mt-24"><TechnicalChart ticker={ticker} onRows={setTechnicalRows}/></div>
     <MarketSnapshot market={data.market}/>
-    <FundamentalTrends ticker={ticker}/>
-    <StockNews ticker={ticker}/>
+    <div id="stock-fundamentals" className="scroll-mt-24"><FundamentalTrends ticker={ticker}/></div>
+    <div id="stock-news" className="scroll-mt-24"><StockNews ticker={ticker}/></div>
     <RawDataTable bars={technicalRows}/>
   </div>;
 }

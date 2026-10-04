@@ -11,6 +11,18 @@ export type NewsSource = {
 };
 export type NewsFilters = { ticker: string; sector: string; country: string; source: string; topic: string };
 export const emptyNewsFilters: NewsFilters = { ticker: "", sector: "", country: "", source: "", topic: "" };
+export type NewsView = "briefing" | "latest" | "global";
+export function readNewsView(search: string): { view: NewsView; financialOnly: boolean } {
+  const params = new URLSearchParams(search);
+  const view = params.get("view");
+  return { view: view === "latest" || view === "global" ? view : "briefing", financialOnly: params.get("financial_only") !== "false" };
+}
+export function newsViewQuery(filters: NewsFilters, view: NewsView, financialOnly: boolean): string {
+  const params = new URLSearchParams(newsQuery(filters));
+  params.set("financial_only", String(financialOnly));
+  if (view !== "briefing") params.set("view", view);
+  return params.toString();
+}
 export function readNewsFilters(search: string): NewsFilters {
   const params = new URLSearchParams(search);
   return Object.fromEntries(Object.keys(emptyNewsFilters).map(key => [key, (params.get(key) || "").trim()])) as NewsFilters;

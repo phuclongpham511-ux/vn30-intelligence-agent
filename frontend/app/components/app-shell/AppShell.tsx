@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { ThemeProvider, useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { Newspaper, ChartNoAxesCombined, Compass, Bookmark, Layers, PanelLeft, Moon, Sun, Search, Database, ArrowUpRight } from "lucide-react";
+import { Newspaper, ChartNoAxesCombined, Compass, Bookmark, PanelLeft, Moon, Sun, Search, Database, ArrowUpRight } from "lucide-react";
 import TickerSearch from "../stock/TickerSearch";
 import { StockUniverse } from "../stock/StockUniverse";
 import { Button } from "../ui/button";
@@ -23,10 +23,6 @@ function Navigation({ close }: { close?: () => void }) {
         return <Link key={href} onClick={close} href={href} aria-current={active ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${active ? "bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon size={17}/>{label}{active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary"/>}</Link>;
       })}
     </nav>
-    <div className="mx-6 mt-8 border-t pt-6"><div className="eyebrow mb-4">On the horizon</div>
-      <div className="flex items-center gap-3 text-muted-foreground"><Layers size={16}/><span className="text-xs">Materiality intelligence</span></div>
-      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">A clearer view of what deserves your attention. Coming in Section 2.</p>
-    </div>
     <div className="mt-auto p-5"><div className="rounded-lg border bg-card p-3">
       <div className="flex items-center gap-2 text-xs font-medium"><Database size={14}/> Data foundation</div>
       <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Daily prices. Reported fundamentals. Inspectable evidence.</p>
@@ -57,7 +53,7 @@ function Shell({ children }: { children: React.ReactNode }) {
         <div className="ml-1 border-l pl-2"><ThemeToggle/></div>
       </header>
       <main id="main-content" className="mx-auto max-w-[1600px] p-4 md:p-8">{children}</main>
-      <footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>VN30 Intelligence · Vietnamese equities</span><span>Daily market data · Sample news</span></footer>
+      <footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>VN30 Intelligence · Vietnamese equities</span><span>Daily market data · Publisher news</span></footer>
     </div>
   </div>;
 }

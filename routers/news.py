@@ -17,8 +17,9 @@ DB = Annotated[Session, Depends(get_session)]
 def filters(country: str | None = None, source: str | None = None,
             topic: str | None = None, ticker: str | None = None, sector: str | None = None,
             category: Literal['VN', 'GLOBAL'] | None = None,
+            financial_only: bool = False,
             limit: int = Query(default=20, ge=1, le=100)):
-    return dict(country=country, source=source, topic=topic, ticker=ticker, sector=sector, category=category, limit=limit)
+    return dict(country=country, source=source, topic=topic, ticker=ticker, sector=sector, category=category, financial_only=financial_only, limit=limit)
 
 
 class StoryResponse(BaseModel):
