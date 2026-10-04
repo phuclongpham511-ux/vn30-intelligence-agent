@@ -1,0 +1,52 @@
+{
+  "B2": "ELIGIBILITY_LOGIC_IMPLEMENTED; no real candidate listing/history certified",
+  "B3": "UNRESOLVED; no cutoff-safe price/volume comparability evidence",
+  "B4": "UNRESOLVED; no certified replacement snapshot acquired",
+  "B5": "UNRESOLVED; no verified session backbone for candidate windows",
+  "B6": {
+    "artifact_sha256": {
+      "PROTECTED_CASE_EXCLUSION_LEDGER_V1.json": "6e27c02b28b158aa360ba899b25865ff7981e562f582ae9cae684ad862af8c90",
+      "PROTECTED_STOCK_DAY_EXCLUSIONS_V1.json": "e2baabba2256f18eb2b677f32ef8077eb82e74f7adbeaa531cdd764831783a53"
+    },
+    "counts": {
+      "development-v3": 160,
+      "validation-v1": 64,
+      "validation-v2": 64
+    },
+    "episode_scope": "UNRESOLVED; quarantine future candidate overlap rather than infer boundaries",
+    "status": "CERTIFIED_STOCK_DAY_EXCLUSIONS"
+  },
+  "benchmark_payload_loaded": false,
+  "cohort_count": 30,
+  "cohort_sha256": "b02ee0d77c48ed097dd068a6290f8bb0e26785f7f8b6125423948d696a36f499",
+  "decision": "REACQUIRE_CERTIFIED_DATA",
+  "decision_basis": "SOURCE_DECISION.md",
+  "governance_hashes": {
+    "docs/TECHNICAL_ANNOTATION_HANDBOOK_V1.md": "05ac9f61252f158af0996a52e64c10f819e2b913640c4b22dbfac9653e04e61b",
+    "docs/TECHNICAL_BENCHMARK_POPULATION_DIRECTION_REVIEW_V4.md": "d03e5549a482a21b04047dcb3f332a43a862f17a59bc775a067dcef7913d92b5",
+    "docs/TECHNICAL_D1_FACTUAL_ABNORMALITY_DECISION.md": "8f94757f54a8b77cb9fe36660e95fa30b9ff5ac37a68af275d1185bc6ab3587b",
+    "docs/TECHNICAL_D2_DATA_FRAME_PIT_DECISION.md": "bb1786c5bb6724c7b662a089286b1d730de51f46eaf21f1807368c0699fb6823",
+    "docs/TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V2.md": "70b13cb31fbafaaafba398907e2e53500e3da059270eb12cea144b5c9908602d",
+    "docs/TECHNICAL_D2_DATA_FRAME_PIT_DECISION_V3.md": "d0ddbb655a1191061534cce8bc5c0d67afd0605df80d927fe6cf6712483ecb90",
+    "docs/TECHNICAL_D2_DECISION_REVIEW_V1_TO_V2.md": "35c69578982e1d0c5948f9b8483e6f40f5a556e3514b5187cb547881d5d8cede",
+    "docs/TECHNICAL_D2_DECISION_REVIEW_V2_TO_V3.md": "cbb2bdb9790c971db6f165505fd759d487868e405471daa860788750b9afd228",
+    "docs/TECHNICAL_D3_MONITORING_CONTEXT_DECISION.md": "4e7e753c80cc877b0f16d5379690432914e9411cc8c02cc2b7cf2d97566b8442",
+    "docs/TECHNICAL_D4_EPISODE_POLICY_DECISION.md": "2f0038af9e534ccad750623076fed50765198642c52359b1e06ee73158ac4815",
+    "docs/TECHNICAL_D5_DELIVERY_POLICY_DECISION.md": "ee7c3ea474025387d61e4fa70f42298a079e843104673e4efbf95d3fa3560777",
+    "docs/TECHNICAL_D6_STUDY_REVIEWER_DECISION.md": "d7edf99647d13aeca71ddf2be67a311a3ff6a33523190c7685da394668036b92",
+    "docs/TECHNICAL_DECISION_REVIEW_PROTOCOL.md": "5a6c948fbc848450bbeeb19d673258cf679a44782a7691490a34307d394452f0",
+    "docs/TECHNICAL_STOCK_DAY_BENCHMARK_SPEC.md": "e909e16620abca2e9eae448c113a59fddf4fef106b1b2eaa2936e74097cff84b",
+    "docs/TECHNICAL_STOCK_DAY_DESIGN_AUDIT.md": "3f90ea4db9aab16080a67598e6ba11e2ea4a5a0f826666490b33f2717344dbb2"
+  },
+  "official_generation_enabled": false,
+  "real_data_PIT_prefix_check": "NOT_RUN_NO_ADMITTED_DATA",
+  "real_data_deterministic_rebuild": "NOT_RUN_NO_ADMITTED_DATA",
+  "remaining_evidence": [
+    "Accessible bounded source/export with documented original price/volume units and vintage semantics",
+    "Complete effective-dated corporate-action or equivalent comparability evidence for admitted windows",
+    "Dated session evidence, exceptions and coverage sufficient to resolve admitted windows",
+    "Historical listing identity and >=60 prior valid comparable sessions per representative candidate"
+  ],
+  "status": "BLOCKED_BY_DATA_OR_PROVENANCE",
+  "version": "technical-data-readiness-v1-20261004"
+}
