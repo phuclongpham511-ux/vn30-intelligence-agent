@@ -1,5 +1,6 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { MascotState } from "../components/mascot/Mascot";
 import { Button } from "../components/ui/button";
 import ArticleRow from "../components/news/ArticleRow";
 import SourceCoverage from "../components/news/SourceCoverage";
@@ -96,18 +97,18 @@ export default function NewsPage() {
     </form>
     </details>
     {newsQuery({ ...filters, topic: selectedTopic }) && <p className="text-xs text-muted-foreground">All sections show this filtered view. These filters do not change story ranking or factual tags.</p>}
-    {error && <div role="alert" className="rounded border p-4 text-sm">News is temporarily unavailable. {data && "Previously loaded headlines are shown below."} <button className="ml-2 text-primary underline" onClick={() => setAttempt(value => value + 1)}>Retry</button></div>}
-    {loading && !data && <p role="status" className="py-8 text-sm text-muted-foreground">Loading news…</p>}
+    {error && <MascotState state="dataUnavailable" role="alert">News is temporarily unavailable. {data && "Previously loaded headlines are shown below."} <button className="ml-2 text-primary underline" onClick={() => setAttempt(value => value + 1)}>Retry</button></MascotState>}
+    {loading && !data && <MascotState state="loading" role="status">Loading news…</MascotState>}
     {data && <>
       {view === "briefing" && <><section aria-labelledby="top-stories"><h2 id="top-stories">Top Stories</h2><p className="mt-1 text-xs text-muted-foreground">Ranked by independent sources, story activity and recency · recent 72-hour coverage.</p>
-        {!data.top.length && <p className="py-6 text-sm text-muted-foreground">No recent stories available.</p>}
+        {!data.top.length && <MascotState state="noMatches">No recent ingested stories match this view. Try clearing filters or checking source updates.</MascotState>}
         <div className="mt-3 grid gap-x-8 md:grid-cols-2">{data.top.map(({ story, articles }) => <article key={story.id} className="border-b py-4"><h3 className="font-medium leading-6">{story.representative_title}</h3><div className="mt-2 text-xs text-muted-foreground">{story.source_count} independent {story.source_count === 1 ? "source" : "sources"}</div><details className="mt-3 text-xs"><summary className="cursor-pointer text-primary">View reporting</summary>{articles.map(article => <ArticleRow key={article.id} article={article}/>)}</details></article>)}</div>
       </section>
       <section aria-labelledby="trending"><h2 id="trending">Trending Topics</h2><p className="mt-1 text-xs text-muted-foreground">Increasing coverage over the last six hours compared with the preceding six hours.</p><div className="mt-4 flex flex-wrap gap-2">{data.topics.map(topic => <button key={topic.topic} aria-pressed={selectedTopic === topic.topic} onClick={() => chooseTopic(selectedTopic === topic.topic ? "" : topic.topic)} className={`rounded border px-3 py-2 text-left text-sm focus-visible:outline ${selectedTopic === topic.topic ? "border-primary text-primary" : "hover:bg-muted"}`}><span className="font-medium">{topic.topic}</span><span className="mt-1 block text-xs text-muted-foreground">{topic.story_count} stories · {topic.source_count} sources</span></button>)}</div>{!data.topics.length && <p className="py-4 text-sm text-muted-foreground">No topics with increasing coverage yet.</p>}</section>
       </>}
       <div>
-        {view === "latest" && <section aria-labelledby="latest"><div className="flex items-center justify-between"><h2 id="latest">Latest News</h2>{selectedTopic && <button className="text-xs text-primary" onClick={() => chooseTopic("")}>Clear {selectedTopic} filter</button>}</div>{data.latest.map(article => <ArticleRow key={article.id} article={article}/>)}{!data.latest.length && <p className="py-6 text-sm text-muted-foreground">No recent ingested news matches this view. Clear filters or check source updates; missing headlines do not mean no event occurred.</p>}</section>}
-        {view === "global" && <section aria-labelledby="global"><h2 id="global">Global Markets</h2><p className="mt-1 text-xs text-muted-foreground">Rates, currencies, commodities, trade and global business.</p>{data.global.map(article => <ArticleRow key={article.id} article={article}/>)}{!data.global.length && <p className="py-6 text-sm text-muted-foreground">No recent global headlines match this view. Clear filters or check source updates.</p>}</section>}
+        {view === "latest" && <section aria-labelledby="latest"><div className="flex items-center justify-between"><h2 id="latest">Latest News</h2>{selectedTopic && <button className="text-xs text-primary" onClick={() => chooseTopic("")}>Clear {selectedTopic} filter</button>}</div>{data.latest.map(article => <ArticleRow key={article.id} article={article}/>)}{!data.latest.length && <MascotState state="noMatches">No recent ingested news matches this view. Clear filters or check source updates; missing headlines do not mean no event occurred.</MascotState>}</section>}
+        {view === "global" && <section aria-labelledby="global"><h2 id="global">Global Markets</h2><p className="mt-1 text-xs text-muted-foreground">Rates, currencies, commodities, trade and global business.</p>{data.global.map(article => <ArticleRow key={article.id} article={article}/>)}{!data.global.length && <MascotState state="noMatches">No recent global headlines match this view. Clear filters or check source updates.</MascotState>}</section>}
       </div>
     </>}
   </div>;

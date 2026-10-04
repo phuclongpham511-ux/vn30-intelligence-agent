@@ -1,10 +1,11 @@
+import { MascotIllustration } from "../components/mascot/Mascot";
 import Link from "next/link";
-import { Bookmark, ArrowRight, ScanLine } from "lucide-react";
+import { ArrowRight, ScanLine } from "lucide-react";
 import { Button } from "../components/ui/button";
 export default function WatchlistPage() {
   return <div className="page-stack"><div className="eyebrow">Workspace / Watchlist</div><div><h1>Watchlist</h1><p className="mt-2 text-sm text-muted-foreground">Your attention workspace</p></div>
-    <section className="panel flex min-h-[360px] flex-col items-center justify-center p-8 text-center"><span className="mb-5 rounded-xl border bg-muted p-4"><Bookmark size={26} className="text-muted-foreground"/></span><h2 className="text-xl">Nothing here yet.</h2>
-      <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">Watchlist management is not available yet. Use stock research and the market briefing to explore current evidence.</p>
+    <section className="panel flex min-h-[360px] flex-col items-center justify-center p-8 text-center"><MascotIllustration state="notAvailableYet" size={128} className="mb-3"/><h2 className="text-xl">Watchlist is not available yet.</h2>
+      <p className="mt-3 max-w-sm text-sm leading-6 text-muted-foreground">Use stock research and the market briefing to explore current evidence.</p>
       <Button variant="outline" asChild className="mt-6"><Link href="/">Explore available stocks<ArrowRight size={15}/></Link></Button>
       <Button variant="ghost" asChild className="mt-3"><Link href="/news">Open market briefing<ArrowRight size={15}/></Link></Button>
     </section>
