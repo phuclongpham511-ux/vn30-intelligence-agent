@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import NewsFeed from "./stock/NewsFeed";
+import StockNews from "./stock/StockNews";
 import { StockLoading, StockError } from "./stock/StockStates";
 import type { Overview, TechnicalBar } from "@/lib/types";
 import StockHeader from "./stock/StockHeader";
@@ -34,7 +34,7 @@ export default function Explore({ ticker }: { ticker: string }) {
     <TechnicalChart ticker={ticker} onRows={setTechnicalRows}/>
     <MarketSnapshot market={data.market}/>
     <FundamentalTrends ticker={ticker}/>
-    <NewsFeed items={data.news}/>
+    <StockNews ticker={ticker}/>
     <RawDataTable bars={technicalRows}/>
   </div>;
 }

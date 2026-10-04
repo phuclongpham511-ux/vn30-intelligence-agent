@@ -1,10 +1,12 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlmodel import Session, select
 from src.db.session import get_session
-from src.news.models import NewsArticle, NewsStory
+from src.news.models import NewsArticle, NewsStory, NewsSourceState
+from src.news.registry import load_sources
+from src.news.normalization import utc
 from src.news.service import articles, story_score, trending
 
 router = APIRouter(prefix='/news', tags=['news'])
@@ -34,6 +36,49 @@ class TrendingResponse(BaseModel):
     previous_mentions: int
     mention_velocity: float
     score: float
+
+
+class SourceResponse(BaseModel):
+    source_id: str
+    name: str
+    country: str
+    category: Literal['VN', 'GLOBAL']
+    enabled: bool
+    poll_interval_minutes: int
+    status: Literal['healthy', 'stale', 'error', 'not_attempted', 'disabled']
+    last_attempt_at: datetime | None
+    last_success_at: datetime | None
+    last_error: str | None
+    articles_received: int | None
+
+
+@router.get('/sources', response_model=list[SourceResponse])
+def sources(session: DB):
+    now = datetime.now(timezone.utc)
+    states = {state.source_id: state for state in session.exec(select(NewsSourceState)).all()}
+    output = []
+    for source in load_sources():
+        state = states.get(source.source_id)
+        if not source.enabled:
+            status = 'disabled'
+        elif state is None or state.last_attempt_at is None:
+            status = 'not_attempted'
+        elif state.last_error:
+            status = 'error'
+        elif state.last_success_at is None or utc(state.last_success_at) < now - timedelta(minutes=2 * source.poll_interval_minutes):
+            status = 'stale'
+        else:
+            status = 'healthy'
+        output.append(SourceResponse(
+            source_id=source.source_id, name=source.name, country=source.country,
+            category=source.category, enabled=source.enabled,
+            poll_interval_minutes=source.poll_interval_minutes, status=status,
+            last_attempt_at=state.last_attempt_at if state else None,
+            last_success_at=state.last_success_at if state else None,
+            last_error=state.last_error if state else None,
+            articles_received=state.articles_received if state and state.last_attempt_at else None,
+        ))
+    return output
 
 
 @router.get('/latest', response_model=list[NewsArticle])
