@@ -249,12 +249,27 @@ requirements, determine which blockers SSI resolves, and use another source only
 for requirements SSI cannot satisfy. Do not restart the entire Technical research
 process. Existing protected-case, validation and holdout safeguards remain in force.
 
-### Next active milestone — Watchlist Intelligence V1
+### Watchlist Intelligence V1 — browser-local monitoring slice implemented
+
+The existing Watchlist page now supports following/removing available stocks,
+recent ticker-matched Story developments, source evidence, distinct Story counts,
+explicit review state, and links to Stock Detail / filtered Latest News. Membership
+and reviewed Story IDs persist in this browser only; there is no cross-device sync
+or account identity. Account-owned Watchlist/WatchlistItem models and their CRUD
+scaffolds remain unchanged; no parallel database membership system was introduced.
+
+The read-only `/watchlists/monitoring` POST endpoint reuses News ingestion/tags and
+groups matching articles by Story ID over the last 72 hours of ingestion. An exact
+ticker tag is required; sector/global relevance is deferred. New means a Story ID
+not explicitly marked reviewed for that ticker, not a re-ingested article or a
+Materiality judgment. Failed requests and unavailable stocks do not become zero.
+This ships Personalized Relevance + Monitoring only; the broader direction below
+remains a roadmap, not an authorization to start another phase.
 
 News and stock-linked discovery reasonably answer **“What is happening?”** The
 remaining product gap is **“What changed for the stocks I follow?”**
 
-The next proposed milestone turns the existing Watchlist into a personalized
+The Watchlist Intelligence direction turns the existing Watchlist into a personalized
 monitoring workspace. Reuse it rather than rebuilding it from scratch:
 
 ```text
@@ -268,8 +283,9 @@ Initial intended scope: relevant latest stories per watched ticker,
 new-development counts, new-since-last-seen state, relevant sector/global stories,
 and useful no-change / empty / unavailable states. Use deterministic relevance
 first. This is **Personalized Relevance + Monitoring**, not full Materiality or
-Materiality scoring. This checkpoint records direction only; it does not authorize
-or implement the milestone.
+Materiality scoring. The browser-local slice above implements only ticker-tagged
+monitoring and explicit review; broader relevance and durable user identity remain
+outside this V1 slice.
 
 ### Later direction and current non-priorities
 

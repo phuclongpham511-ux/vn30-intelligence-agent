@@ -3,7 +3,7 @@
 Help active retail investors know which changes deserve attention across Vietnamese equities.
 The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
 
-## Status: News complete; next milestone Watchlist Intelligence V1
+## Status: News complete; Watchlist Intelligence V1 browser-local monitoring
 
 The canonical [project checkpoint in CONTEXT.md](CONTEXT.md#current-architecture-stage)
 records completed capabilities, blockers and the next direction (2026-10-05).
@@ -17,10 +17,11 @@ and provenance evidence; SSI FastConnect Market Data access has been requested a
 the project is waiting for SSI's response. Existing research/evaluation infrastructure
 remains available, but further calibration/deployment must wait for new evidence.
 
-The next proposed milestone is **Watchlist Intelligence V1**: reuse the existing
-Watchlist for deterministic Personalized Relevance + Monitoring, answering
-“What changed for what I follow?” This is not Materiality scoring and has not been
-implemented by this checkpoint. The AI Product Layer and Unified Materiality /
+**Watchlist Intelligence V1** now reuses the existing Watchlist page for browser-local
+membership, ticker-matched Story developments, source evidence and explicit review
+state, answering “What changed for what I follow?” This is deterministic Personalized
+Relevance + Monitoring, not Materiality scoring or cross-device personalization.
+The AI Product Layer and Unified Materiality /
 Personalized Attention Budget are later directions.
 
 TCB, FPT and HPG remain initial seeds, not a hardcoded supported universe.
@@ -207,11 +208,12 @@ See [Section 1 report](docs/SECTION1_REPORT.md) for observed results and limitat
 
 ## MVP roadmap and boundaries
 
-Next: Watchlist Intelligence V1, reusing the existing Watchlist for Personalized
-Relevance + Monitoring. Technical Materiality remains paused until new external
+Watchlist Intelligence V1 ships a browser-local Personalized Relevance + Monitoring
+slice; sector/global relevance and account-owned persistence remain deferred.
+Technical Materiality remains paused until new external
 data/provenance evidence becomes available. See the canonical checkpoint in CONTEXT.md.
 
-Not implemented: production materiality integration, monitoring weighting, watchlist intelligence,
+Not implemented: production materiality integration, monitoring weighting, cross-device watchlists,
 AI/LLM/Agents SDK, portfolio/P&L, thesis, RAG/PDF, email, prediction, BUY/SELL/HOLD, trading,
 multi-agent orchestration, queues, Redis, Kafka, Kubernetes or microservices.
 Full VN30 coverage and tick-level streaming remain outside the initial MVP.
