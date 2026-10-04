@@ -198,26 +198,98 @@ AI explanation must remain grounded in inspectable evidence.
 
 ## Current architecture stage
 
-Completed:
-- data and analytics foundation;
-- dynamic ticker onboarding;
-- financial visualization foundation;
-- Materiality Engine V0;
-- historical evaluation framework;
-- first human-reviewed historical batch.
+### Project checkpoint — 2026-10-05
 
-Current work:
-- expand the reviewed benchmark before formal calibration.
+This is the canonical current project status. It supersedes earlier phase-status
+summaries; historical research documents and implementation commits remain intact.
 
-Not yet production-integrated:
-- personalized materiality;
-- Attention Budget;
-- live materiality UI;
-- real news intelligence;
-- portfolio context;
-- thesis tracking;
-- RAG;
-- AI/LLM agent layer.
+Completed capabilities:
+
+- **Foundation / Data & Analytics:** FastAPI, data/database foundation, dynamic
+  ticker support, stock data, deterministic fundamental analytics and stock APIs.
+- **UI/UX + Financial Visualization:** Explore, Stock Detail, financial charts,
+  responsive layout and light/dark themes.
+- **News V1 — COMPLETE:** 10 Vietnamese and 5 global sources; ingestion and
+  configurable polling; deterministic normalization/deduplication and idempotent
+  repeated ingestion; Article → Story model; deterministic topic/ticker/sector
+  tagging; Top Stories, Trending Topics, Latest News and Global Markets; source
+  failure isolation and telemetry. No full article persistence or LLM dependency.
+- **Connected News Discovery — COMPLETE:** stock pages connected to ingested news;
+  ticker/sector/country/source/topic filtering; shareable filtered URLs and source
+  update status, reusing the existing News architecture.
+- **Market Briefing Usability & Readiness — COMPLETE:** separate Briefing, Latest
+  News and Global Markets views; improved navigation, mobile usability and
+  empty/error states; relevant ingestion and UI validation completed.
+- **Mascot UI V1 — COMPLETE:** centralized state system, restrained state semantics
+  and placement; mascot is secondary to financial information and is not the
+  primary brand/logo.
+
+Pre-existing local UI/mascot follow-up changes remain outside this documentation
+checkpoint commit. Pushing this checkpoint publishes existing implementation
+commits, not uncommitted working-tree changes.
+
+### Technical Materiality — PAUSED
+
+Technical Materiality is paused, not abandoned. Materiality Engine V0 and
+research/evaluation infrastructure already exist, including historical replay and
+reviewed evidence. Further calibration/deployment is blocked by external
+historical-data/provenance requirements. Do not continue without new source evidence.
+
+Unresolved requirements:
+
+- historical price provenance;
+- corporate-action / adjustment evidence;
+- trading-session continuity;
+- point-in-time integrity;
+- avoiding future-information leakage.
+
+SSI FastConnect has been contacted for Market Data access; the project is waiting
+for SSI's response. When access becomes available, probe only these unresolved
+requirements, determine which blockers SSI resolves, and use another source only
+for requirements SSI cannot satisfy. Do not restart the entire Technical research
+process. Existing protected-case, validation and holdout safeguards remain in force.
+
+### Next active milestone — Watchlist Intelligence V1
+
+News and stock-linked discovery reasonably answer **“What is happening?”** The
+remaining product gap is **“What changed for the stocks I follow?”**
+
+The next proposed milestone turns the existing Watchlist into a personalized
+monitoring workspace. Reuse it rather than rebuilding it from scratch:
+
+```text
+Existing Watchlist + News Stories + Ticker / Sector / Topic metadata
+                  + existing market/fundamental context
+→ personalized relevance / monitoring
+→ “What changed for what I follow?”
+```
+
+Initial intended scope: relevant latest stories per watched ticker,
+new-development counts, new-since-last-seen state, relevant sector/global stories,
+and useful no-change / empty / unavailable states. Use deterministic relevance
+first. This is **Personalized Relevance + Monitoring**, not full Materiality or
+Materiality scoring. This checkpoint records direction only; it does not authorize
+or implement the milestone.
+
+### Later direction and current non-priorities
+
+An **AI Product Layer** may later summarize watchlist changes, explain why a story
+relates to a stock and synthesize existing evidence. LLMs interpret and synthesize
+inspectable evidence; they do not invent calculations or facts.
+
+Longer term: News + Technical + Fundamentals + user context → Unified Materiality
+→ Personalized Attention Budget. Neither this integration nor the AI layer is the
+next implementation task. Personalized materiality, live materiality UI, portfolio
+context, thesis tracking and the AI/LLM agent layer remain future capabilities.
+
+Do not introduce now: vector DB, embeddings, bulk LLM news summarization, sentiment
+engine, social/forum ingestion, full portfolio intelligence, Watchlist rewrite,
+further Technical calibration without new source evidence, or microservices /
+Kafka / Redis / Celery / Kubernetes.
+
+Product progression: News **“What is happening?”** → next **“What changed for what
+I follow?”** → future Materiality **“What matters to me?”** The North Star remains:
+**“Do not give users more data. Help them know what deserves attention.”**
 
 ## Engineering principles
 

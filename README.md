@@ -3,17 +3,25 @@
 Help active retail investors know which changes deserve attention across Vietnamese equities.
 The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
 
-## Status: Section 2, Phase 2 — Historical evaluation and first reviewed batch
+## Status: News complete; next milestone Watchlist Intelligence V1
 
-Working vertical slice: dynamic ticker → vnstock → normalized schemas → deterministic
-analytics → FastAPI → Explore UI. Live market and annual financial data were verified for
-FPT, TCB, HPG and a newly onboarded VNM. News is explicitly labeled synthetic sample data.
-Materiality Engine V0 is available as a deterministic backend package and offline developer preview.
-It is provisional, not connected to the UI; MaterialitySlot remains a placeholder. No AI is implemented.
-An offline historical evaluation framework now audits/caches data, replays V0 and creates
-review queues. The real pilot and first three user-reviewed cases are saved locally.
-Framework/pilot gates are satisfied; vendor-vintage/adjustment limitations remain,
-and three labels do not establish formal accuracy or production readiness.
+The canonical [project checkpoint in CONTEXT.md](CONTEXT.md#current-architecture-stage)
+records completed capabilities, blockers and the next direction (2026-10-05).
+Foundation/data analytics, financial visualization, News V1, connected stock/news
+discovery, market briefing usability/readiness and Mascot UI V1 are complete.
+News uses 10 Vietnamese and 5 global sources without full article persistence or
+an LLM dependency.
+
+Technical Materiality is **PAUSED**, not abandoned, pending external historical-data
+and provenance evidence; SSI FastConnect Market Data access has been requested and
+the project is waiting for SSI's response. Existing research/evaluation infrastructure
+remains available, but further calibration/deployment must wait for new evidence.
+
+The next proposed milestone is **Watchlist Intelligence V1**: reuse the existing
+Watchlist for deterministic Personalized Relevance + Monitoring, answering
+“What changed for what I follow?” This is not Materiality scoring and has not been
+implemented by this checkpoint. The AI Product Layer and Unified Materiality /
+Personalized Attention Budget are later directions.
 
 TCB, FPT and HPG remain initial seeds, not a hardcoded supported universe.
 
@@ -51,7 +59,7 @@ The responsive dashboard uses Tailwind CSS, shadcn/ui, Lucide, Recharts and pers
 dark/light themes and a neutral blue research identity. Lightweight Charts 5.2.1 renders
 real candlesticks, MA20/MA50, volume and RSI in synchronized panes. Global search can validate and add new tickers. Stock detail includes
 3M/6M/1Y/2Y history, compact market context, annual revenue/profit/growth/profitability
-charts, raw technical and financial tables, and labeled sample news. Recharts renders
+charts, raw technical and financial tables, and connected ingested news. Recharts renders
 financial trends; all indicators come from deterministic Python analytics.
 
 Technical and annual-history panels have independent loading/retry/empty states.
@@ -83,7 +91,8 @@ Next.js, React, TypeScript; pytest and pytest-asyncio; backend Dockerfile.
   VCI Quote supplies daily OHLCV.
 - FundamentalDataProvider: VCI annual income statements, up to four periods in the
   verified community package. vnstock is pinned to 4.0.2 because mappings are version-specific.
-- NewsProvider: clearly labeled local fixtures, no crawler or invented live news.
+- News V1: metadata-only ingestion, deterministic Article → Story normalization,
+  tagging and deduplication, configurable polling, source telemetry and failure isolation.
 - Stock keeps the existing symbol/company_name fields (equivalent to ticker/name).
   updated_at and a case-insensitive unique index were added. The HTTP input accepts ticker or symbol.
 - Bounded process-local caches: 5-minute market history, 1-hour fundamentals and listings.
@@ -198,9 +207,9 @@ See [Section 1 report](docs/SECTION1_REPORT.md) for observed results and limitat
 
 ## MVP roadmap and boundaries
 
-Next: expand the reviewed benchmark and address source-vintage/adjustment limitations
-before evidence-based Phase 3 calibration. V0 remains unchanged; Phase 3 has not started.
-Monitoring priorities and watchlist attention budgets follow calibration.
+Next: Watchlist Intelligence V1, reusing the existing Watchlist for Personalized
+Relevance + Monitoring. Technical Materiality remains paused until new external
+data/provenance evidence becomes available. See the canonical checkpoint in CONTEXT.md.
 
 Not implemented: production materiality integration, monitoring weighting, watchlist intelligence,
 AI/LLM/Agents SDK, portfolio/P&L, thesis, RAG/PDF, email, prediction, BUY/SELL/HOLD, trading,
