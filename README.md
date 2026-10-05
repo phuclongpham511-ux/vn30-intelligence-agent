@@ -3,7 +3,37 @@
 Help active retail investors know which changes deserve attention across Vietnamese equities.
 The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
 
-## Status: News complete; Watchlist Intelligence V1 browser-local monitoring
+## Status: News refinement + Community Pulse V1; browser-local Watchlist monitoring
+
+News Top Stories shows one registry-selected representative per Story, with other
+reporting behind a disclosure. Independent publisher counts and ranking are unchanged.
+Filters select Stories and matching representatives; disclosures retain the other
+publishers' reporting for the selected Story.
+Optional thumbnails use explicit RSS/Atom media metadata only; absent or failed
+images render no placeholder. Sector tags remain available under Advanced filters
+with a partial-coverage label; the current company universe lacks sector metadata.
+
+Community Pulse is a separate News workspace view and separate database evidence
+layer. It samples one public F319 listing at `https://newf319.com/`, at most 50
+listing entries, every 30 minutes. Robots restrictions are checked before each
+acquisition; failed checks stop acquisition. Only public thread metadata is stored.
+Ticker relevance requires registered company identity or explicit ticker context,
+not bare uppercase tokens. Counts measure distinct observed threads, and activity
+ordering uses lifetime replies then public last-activity time; it is not a growth
+rate, sentiment or Materiality score. Six discussions appear by default.
+
+Run `uv run python -m scripts.ingest_community` once or use `--watch` in one scheduler
+process. The read-only `/community/pulse` endpoint never crawls during a page request.
+Run `create_tables()` during explicit production schema deployment for the additive
+Community tables and nullable News thumbnail fields. Local development does this
+at startup. News and Community ingestion failures remain independent.
+
+Source verification on 2026-10-05: F319 public listing parsed 20 threads, with stable
+URLs, dates and reply/view counts; `f319.com` itself did not resolve here. Chứng Sỹ
+returned a public shell without thread metadata and disallows `/api/` in robots;
+FireAnt returned a public shell without usable discussion metadata. Both are
+deferred; no authenticated or internal API was used. Community coverage is a
+bounded sample, and ticker matches depend on the registered company universe.
 
 The canonical [project checkpoint in CONTEXT.md](CONTEXT.md#current-architecture-stage)
 records completed capabilities, blockers and the next direction (2026-10-05).

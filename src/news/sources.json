@@ -11,7 +11,8 @@
     "category": "VN",
     "publisher_group": "fpt",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:34.305578+00:00"
+    "verified_at": "2026-10-04T14:07:34.305578+00:00",
+    "representative_priority": 10
   },
   {
     "source_id": "cafef",
@@ -25,7 +26,8 @@
     "category": "VN",
     "publisher_group": "vccorp",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:34.566207+00:00"
+    "verified_at": "2026-10-04T14:07:34.566207+00:00",
+    "representative_priority": 11
   },
   {
     "source_id": "vneconomy",
@@ -39,7 +41,8 @@
     "category": "VN",
     "publisher_group": "vneconomy",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:34.721504+00:00"
+    "verified_at": "2026-10-04T14:07:34.721504+00:00",
+    "representative_priority": 12
   },
   {
     "source_id": "vietstock",
@@ -53,7 +56,8 @@
     "category": "VN",
     "publisher_group": "vietstock",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:34.906579+00:00"
+    "verified_at": "2026-10-04T14:07:34.906579+00:00",
+    "representative_priority": 13
   },
   {
     "source_id": "vietnambiz",
@@ -67,7 +71,8 @@
     "category": "VN",
     "publisher_group": "vietnambiz",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:35.129511+00:00"
+    "verified_at": "2026-10-04T14:07:35.129511+00:00",
+    "representative_priority": 14
   },
   {
     "source_id": "vietnamnet",
@@ -81,7 +86,8 @@
     "category": "VN",
     "publisher_group": "vietnamnet",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:35.656311+00:00"
+    "verified_at": "2026-10-04T14:07:35.656311+00:00",
+    "representative_priority": 15
   },
   {
     "source_id": "tuoitre",
@@ -95,7 +101,8 @@
     "category": "VN",
     "publisher_group": "tuoitre",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:35.858546+00:00"
+    "verified_at": "2026-10-04T14:07:35.858546+00:00",
+    "representative_priority": 16
   },
   {
     "source_id": "thanhnien",
@@ -109,7 +116,8 @@
     "category": "VN",
     "publisher_group": "thanhnien",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:36.140236+00:00"
+    "verified_at": "2026-10-04T14:07:36.140236+00:00",
+    "representative_priority": 17
   },
   {
     "source_id": "dantri",
@@ -123,7 +131,8 @@
     "category": "VN",
     "publisher_group": "dantri",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:36.245805+00:00"
+    "verified_at": "2026-10-04T14:07:36.245805+00:00",
+    "representative_priority": 18
   },
   {
     "source_id": "vnbusiness",
@@ -137,7 +146,8 @@
     "category": "VN",
     "publisher_group": "vnbusiness",
     "timezone": "Asia/Ho_Chi_Minh",
-    "verified_at": "2026-10-04T14:07:36.536444+00:00"
+    "verified_at": "2026-10-04T14:07:36.536444+00:00",
+    "representative_priority": 19
   },
   {
     "source_id": "bbc",
@@ -151,7 +161,8 @@
     "category": "GLOBAL",
     "publisher_group": "bbc",
     "timezone": "UTC",
-    "verified_at": "2026-10-04T14:07:36.828985+00:00"
+    "verified_at": "2026-10-04T14:07:36.828985+00:00",
+    "representative_priority": 20
   },
   {
     "source_id": "guardian",
@@ -165,7 +176,8 @@
     "category": "GLOBAL",
     "publisher_group": "guardian",
     "timezone": "UTC",
-    "verified_at": "2026-10-04T14:07:37.878206+00:00"
+    "verified_at": "2026-10-04T14:07:37.878206+00:00",
+    "representative_priority": 21
   },
   {
     "source_id": "fed",
@@ -179,7 +191,8 @@
     "category": "GLOBAL",
     "publisher_group": "fed",
     "timezone": "UTC",
-    "verified_at": "2026-10-04T14:07:38.253313+00:00"
+    "verified_at": "2026-10-04T14:07:38.253313+00:00",
+    "representative_priority": 22
   },
   {
     "source_id": "ecb",
@@ -193,7 +206,8 @@
     "category": "GLOBAL",
     "publisher_group": "ecb",
     "timezone": "UTC",
-    "verified_at": "2026-10-04T14:07:40.163477+00:00"
+    "verified_at": "2026-10-04T14:07:40.163477+00:00",
+    "representative_priority": 23
   },
   {
     "source_id": "marketwatch",
@@ -207,6 +221,7 @@
     "category": "GLOBAL",
     "publisher_group": "marketwatch",
     "timezone": "UTC",
-    "verified_at": "2026-10-04T14:07:42.048027+00:00"
+    "verified_at": "2026-10-04T14:07:42.048027+00:00",
+    "representative_priority": 24
   }
 ]

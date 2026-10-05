@@ -52,6 +52,9 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                     tags = tagger.tag(existing.title, existing.category)
                     existing.topics, existing.tickers, existing.sectors = tags.topics, tags.tickers, tags.sectors
                     existing.scope = tags.scope
+                    if item.thumbnail_url:
+                        existing.thumbnail_url = canonical_url(item.thumbnail_url)
+                        existing.thumbnail_provenance = item.thumbnail_provenance
                     session.add(existing)
                     session.flush()
                     story = session.get(NewsStory, existing.story_id)
@@ -79,7 +82,9 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                     title_hash=title_hash, url_hash=url_hash, published_at=published,
                     first_seen_at=now, last_seen_at=now, country=source.country, language=source.language,
                     category=source.category, scope=tags.scope, topics=tags.topics, tickers=tags.tickers,
-                    sectors=tags.sectors, story_id=story.id)
+                    sectors=tags.sectors, story_id=story.id,
+                    thumbnail_url=canonical_url(item.thumbnail_url) if item.thumbnail_url else None,
+                    thumbnail_provenance=item.thumbnail_provenance)
                 session.add(article)
                 session.flush()
                 members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story.id)).all()

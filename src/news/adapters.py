@@ -15,6 +15,26 @@ class ArticleInput:
     title: str
     url: str
     published_at: datetime | None
+    thumbnail_url: str | None = None
+    thumbnail_provenance: str | None = None
+
+
+def feed_image(node):
+    media = '{http://search.yahoo.com/mrss/}'
+    candidates = [(n.get('url'), 'media:thumbnail') for n in node.iter(media + 'thumbnail')]
+    candidates += [(n.get('url'), 'media:content') for n in node.iter(media + 'content')
+                   if n.get('medium') == 'image' or n.get('type', '').startswith('image/')]
+    candidates += [(n.get('url'), 'enclosure') for n in node.findall('enclosure') if n.get('type', '').startswith('image/')]
+    atom = '{http://www.w3.org/2005/Atom}'
+    candidates += [(n.get('href'), 'atom:enclosure') for n in node.findall(atom + 'link')
+                   if n.get('rel') == 'enclosure' and n.get('type', '').startswith('image/')]
+    for url, provenance in candidates:
+        try:
+            if url:
+                return canonical_url(url), provenance
+        except ValueError:
+            pass
+    return None, None
 
 
 def fetch_feed(source: Source) -> bytes:
@@ -62,7 +82,8 @@ def parse_feed(data: bytes, source: Source) -> list[ArticleInput]:
             if source.source_id == 'vietnambiz' and date:
                 date = date.replace('GMT+7', '+0700')
             published = parse_time(date, source.timezone)
-        items.append(ArticleInput(title, url, published))
+        image, provenance = feed_image(node)
+        items.append(ArticleInput(title, url, published, image, provenance))
     return items
 
 

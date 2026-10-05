@@ -1607,6 +1607,7 @@ name = "vn30-intelligence-agent"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "beautifulsoup4" },
     { name = "fastapi" },
     { name = "numpy" },
     { name = "pandas" },
@@ -1627,6 +1628,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "beautifulsoup4", specifier = ">=4.12,<5" },
     { name = "fastapi", specifier = ">=0.115,<1" },
     { name = "numpy", specifier = ">=2,<3" },
     { name = "pandas", specifier = ">=2.2,<4" },

@@ -1,6 +1,7 @@
 export type NewsArticle = {
   id: string; title: string; url: string; source_name: string; published_at: string | null;
   first_seen_at: string; topics: string[]; tickers: string[]; sectors: string[];
+  thumbnail_url?: string | null; thumbnail_provenance?: string | null;
 };
 export type NewsSource = {
   source_id: string; name: string; country: string; category: "VN" | "GLOBAL";
@@ -11,11 +12,11 @@ export type NewsSource = {
 };
 export type NewsFilters = { ticker: string; sector: string; country: string; source: string; topic: string };
 export const emptyNewsFilters: NewsFilters = { ticker: "", sector: "", country: "", source: "", topic: "" };
-export type NewsView = "briefing" | "latest" | "global";
+export type NewsView = "briefing" | "latest" | "global" | "community";
 export function readNewsView(search: string): { view: NewsView; financialOnly: boolean } {
   const params = new URLSearchParams(search);
   const view = params.get("view");
-  return { view: view === "latest" || view === "global" ? view : "briefing", financialOnly: params.get("financial_only") !== "false" };
+  return { view: view === "latest" || view === "global" || view === "community" ? view : "briefing", financialOnly: params.get("financial_only") !== "false" };
 }
 export function newsViewQuery(filters: NewsFilters, view: NewsView, financialOnly: boolean): string {
   const params = new URLSearchParams(newsQuery(filters));

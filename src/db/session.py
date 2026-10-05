@@ -20,8 +20,14 @@ def get_engine():
 def create_tables(engine=None):
     from src import models  # noqa: F401 - register tables
     from src.news import models as news_models  # noqa: F401 - additive news tables
+    from src.community import models as community_models  # noqa: F401
     target = engine if engine is not None else get_engine()
     SQLModel.metadata.create_all(target)
+    news_columns = {column['name'] for column in inspect(target).get_columns('newsarticle')}
+    with target.begin() as connection:
+        for field in ('thumbnail_url', 'thumbnail_provenance'):
+            if field not in news_columns:
+                connection.execute(text(f'ALTER TABLE newsarticle ADD COLUMN {field} VARCHAR'))
     if "display_name_en" not in {column["name"] for column in inspect(target).get_columns("stock")}:
         with target.begin() as connection:
             connection.execute(text("ALTER TABLE stock ADD COLUMN display_name_en VARCHAR(255)"))

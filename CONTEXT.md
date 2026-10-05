@@ -287,6 +287,24 @@ Materiality scoring. The browser-local slice above implements only ticker-tagged
 monitoring and explicit review; broader relevance and durable user identity remain
 outside this V1 slice.
 
+### News refinement and Community Pulse V1 — 2026-10-05
+
+Top Stories now exposes one deterministic registry-selected representative with
+additional publisher evidence behind a disclosure; ranking/diversity is unchanged.
+Explicit feed media metadata may provide a thumbnail. Sector is demoted to Advanced
+headline-tag filtering because current company sector mapping is missing and actual
+coverage is sparse. No sector values were invented.
+
+Community Pulse is an explicitly authorized separate public-discussion evidence
+layer, not publisher News, Materiality or sentiment. V1 samples the public F319
+listing at newf319.com every 30 minutes, subject to robots/access checks, retaining
+thread URLs/titles, public author names, timestamps and optional lifetime reply/view
+counts. Distinct sampled-thread mentions and lifetime-reply ordering are descriptive;
+no activity growth rate is claimed. Missing counts remain null. The API reads stored
+metadata; collection failures do not affect publisher ingestion. Chứng Sỹ/FireAnt
+are deferred because their public HTML did not expose usable discussion metadata.
+This narrow slice supersedes the earlier blanket deferral of social/forum ingestion.
+
 ### Later direction and current non-priorities
 
 An **AI Product Layer** may later summarize watchlist changes, explain why a story
@@ -299,7 +317,7 @@ next implementation task. Personalized materiality, live materiality UI, portfol
 context, thesis tracking and the AI/LLM agent layer remain future capabilities.
 
 Do not introduce now: vector DB, embeddings, bulk LLM news summarization, sentiment
-engine, social/forum ingestion, full portfolio intelligence, Watchlist rewrite,
+engine, broader social crawling/profiling, full portfolio intelligence, Watchlist rewrite,
 further Technical calibration without new source evidence, or microservices /
 Kafka / Redis / Celery / Kubernetes.
 

@@ -18,6 +18,7 @@ class Source(BaseModel):
     # Naive publisher dates are interpreted in the publisher's timezone.
     timezone: str = 'UTC'
     verified_at: str | None = None
+    representative_priority: int = Field(default=100, ge=0)
 
 
 def load_sources(path: str | None = None) -> list[Source]:

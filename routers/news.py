@@ -25,8 +25,15 @@ def filters(country: str | None = None, source: str | None = None,
 class StoryResponse(BaseModel):
     story: NewsStory
     articles: list[NewsArticle]
+    representative_article: NewsArticle
     ranking_score: float
     ranking_reason: str = 'Independent publisher diversity, capped activity and recency'
+
+
+def representative(rows, priorities):
+    # Selection never changes diversity or ranking. Ties are stable across ingestion order.
+    return min(rows, key=lambda a: (priorities.get(a.source_id, 100),
+        -utc(a.published_at or a.first_seen_at).timestamp(), a.canonical_url, a.id))
 
 
 class TrendingResponse(BaseModel):
@@ -97,10 +104,16 @@ def top(session: DB, options: dict = Depends(filters)):
     for article in rows:
         grouped.setdefault(article.story_id, []).append(article)
     output = []
+    priorities = {s.source_id: s.representative_priority for s in load_sources()}
     for story_id, matching in grouped.items():
         story = session.get(NewsStory, story_id)
         if story:
-            output.append(StoryResponse(story=story, articles=matching[:5], ranking_score=story_score(story, now)))
+            chosen = representative(matching, priorities)
+            # Filters select discoveries/representatives; disclosure retains all
+            # evidence for the selected Story, including other publishers.
+            members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all()
+            evidence = [chosen, *sorted((a for a in members if a.id != chosen.id), key=lambda a: (a.source_id, a.canonical_url))]
+            output.append(StoryResponse(story=story, articles=evidence, representative_article=chosen, ranking_score=story_score(story, now)))
     return sorted(output, key=lambda x: (-x.ranking_score, x.story.id))[:limit]
 
 
@@ -117,4 +130,4 @@ def detail(story_id: str, session: DB):
     if not story:
         raise HTTPException(status_code=404, detail='News story not found')
     rows = session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id).order_by(NewsArticle.first_seen_at.desc())).all()
-    return StoryResponse(story=story, articles=rows, ranking_score=story_score(story, datetime.now(timezone.utc)))
+    return StoryResponse(story=story, articles=rows, representative_article=representative(rows, {s.source_id: s.representative_priority for s in load_sources()}), ranking_score=story_score(story, datetime.now(timezone.utc)))

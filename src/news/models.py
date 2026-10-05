@@ -48,3 +48,5 @@ class NewsArticle(SQLModel, table=True):
     tickers: list[str] = Field(default_factory=list, sa_type=JSON)
     sectors: list[str] = Field(default_factory=list, sa_type=JSON)
     story_id: str = Field(foreign_key='newsstory.id', index=True)
+    thumbnail_url: str | None = None
+    thumbnail_provenance: str | None = None
