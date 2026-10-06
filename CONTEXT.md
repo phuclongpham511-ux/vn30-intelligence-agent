@@ -20,6 +20,12 @@ News uses Company / Industry / Market Brief. A deterministic headline/read-layer
 
 Community shows a short evidence-grounded title, a bounded representative sentence and discussion/source/time metadata. Terms, complete bounded evidence, original URLs and source status remain inspectable in disclosures. Original source text may retain its source language; interface labels remain English. Same-day Vietnam filtering, native identities, review state and source isolation are unchanged; Community Momentum remains unimplemented.
 
+Explore is the market landing page: latest SSI VN-Index summary, multi-publisher Hot Topics, then ten-row equity discovery. VN30/VN100/HNX30 filters use SSI indexList + securitiesByBoard(index) memberships persisted separately and refreshed daily by the canonical worker; cached failures retain their source/as-of/status. The VN-Index summary is a separate five-minute read cache with explicit trading date, not the historical OHLC/Technical policy. Positive/negative mascots describe observed movement only.
+
+News navigation is Industry → Company → Market Brief → Community Pulse. Hot Topics is a promotion layer on Explore; it does not hide matching stories in News categories. Compact search shows typed matches or up to five browser-local recent ticker selections, never the full universe dropdown. Watchlist membership and review semantics are unchanged.
+
+Community Pulse explicitly selects Today or Last 24 hours; no automatic fallback relabels yesterday as today. The worker must run separately (`uv run python -m scripts.ingest_data --watch`) for continuing source freshness. HTTP refresh reads persisted evidence; it does not launch ingestion. Overnight empty Today and stale sources after stopping the worker are honest states, not deleted content.
+
 ### Material Event
 
 A factual change detected from normalized market, technical, fundamental, news, or corporate-event evidence.

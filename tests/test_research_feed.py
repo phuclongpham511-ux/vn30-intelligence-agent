@@ -57,4 +57,17 @@ def test_language_context_disambiguates_currency_roles_and_locations_from_symbol
     assert tagger.tag('CEO reports higher earnings', 'VN').tickers == ['CEO']
     assert tagger.tag('Hạ tầng TP.HCM tăng trưởng', 'VN').tickers == []
     assert tagger.tag('Rời VTV, đạo diễn chuyển công việc', 'VN').tickers == []
+    assert tagger.tag('Trở thành tỷ phú USD trong năm nay', 'VN').tickers == []
     assert tagger.tag('Cổ phiếu USD tăng giá', 'VN').tickers == ['USD']
+
+
+def test_named_organization_headlines_are_company_while_sector_framing_stays_industry():
+    from src.news.research import research_category
+    from types import SimpleNamespace
+    for title in ['ExampleBank được vinh danh tại giải thưởng ngân hàng','MB becomes the first bank in Vietnam to increase charter capital','Ngân hàng ExampleBank công bố kế hoạch mới','Chứng khoán ExampleBroker mở rộng hoạt động', 'Bank Y reports higher earnings','Company X plans expansion', 'Bảo hiểm ExampleInsurer tăng vốn']:
+        assert research_category(SimpleNamespace(title=title,tickers=[],sectors=['Financials']))=='COMPANY'
+    for title in ['Các ngân hàng nâng lãi suất tiền gửi','Securities industry grows with ABC leading brokerage','Real estate sector supply improves']:
+        assert research_category(SimpleNamespace(title=title,tickers=['ABC'],sectors=['Financials']))=='INDUSTRY'
+
+    assert research_category(SimpleNamespace(title='Interbank interest rates rise',tickers=[],sectors=['Financials']))=='MARKET_BRIEF'
+    assert research_category(SimpleNamespace(title='Nonbank lending grows',tickers=[],sectors=['Financials']))=='INDUSTRY'

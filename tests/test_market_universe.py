@@ -40,3 +40,19 @@ def test_failed_refresh_preserves_cache_and_lazy_research_validates_only_opened_
     assert calls == ['ZZZ']
     assert client.get('/stocks/ZZZ').status_code == 200 and calls == ['ZZZ']
     assert client.post('/stocks', json={'symbol':'NONSTOCK'}).status_code == 404
+
+
+def test_index_membership_cache_composes_with_discovery_and_survives_refresh_failure(session,client):
+    from src.services.universe import sync_universe,sync_index_groups
+    now=datetime.now(timezone.utc)
+    snapshot=SecurityUniverse(raw_count=2,exclusions={},securities=[SecurityMetadata(symbol='AAA',exchange='HOSE'),SecurityMetadata(symbol='BBB',exchange='HNX')])
+    sync_universe(session,provider=SimpleNamespace(get_security_universe=lambda:snapshot),now=now)
+    provider=SimpleNamespace(get_index_memberships=lambda:{'VN30':['AAA'],'VN100':['AAA'],'HNX30':['BBB']})
+    assert sync_index_groups(session,provider=provider,now=now)['status']=='ok'
+    groups=client.get('/stocks/universe').json()['index_groups']
+    assert groups['groups']['HNX30']==['BBB'] and groups['status']=='healthy'
+    assert sync_index_groups(session,provider=provider,now=now+timedelta(minutes=1))['status']=='skipped'
+    def fail():raise TimeoutError('private request')
+    assert sync_index_groups(session,provider=SimpleNamespace(get_index_memberships=fail),now=now+timedelta(days=1))['status']=='error'
+    cached=client.get('/stocks/universe').json()['index_groups']
+    assert cached['groups']['VN100']==['AAA'] and cached['status']=='error'

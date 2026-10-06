@@ -36,7 +36,7 @@ export function CommunityDiscussions({ ticker, data, loading, error, retry, seen
         <details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer">Source coverage · {data.sources.filter(source => source.enabled && source.status === "healthy").length}/{data.sources.filter(source => source.enabled).length} active sources healthy{data.coverage_partial ? " · partial coverage" : " · bounded sample"}</summary>
           <ul className="mt-2 space-y-2">{data.sources.map(source => <li key={source.source_id}>{source.name} · {collectionLabels[source.status]} · every {source.poll_interval_minutes} min<br/>Last attempt: {fetchTime(source.last_attempt_at)} · Last successful fetch: {fetchTime(source.last_success_at)} · Items: {source.items_received ?? "Unavailable"}<br/>{source.reason || communitySourceMessage(source.status)}</li>)}</ul>
         </details>
-        {!data.items.length && <p className="mt-4 text-sm text-muted-foreground">No same-day discussions matched {ticker === "Market" ? "this view" : ticker}. Coverage is incomplete; this does not mean no discussion occurred.</p>}
+        {!data.items.length && <p className="mt-4 text-sm text-muted-foreground">No {data.window.kind === "last24h" ? "last-24-hour" : "same-day"} discussions matched {ticker === "Market" ? "this view" : ticker}. {data.coverage_partial ? "Sources need a fresh worker check; coverage is incomplete." : "No matching published items were acquired for this window."} This does not mean no discussion occurred.</p>}
         <div className="mt-4 divide-y">{data.themes.map(theme => <article key={theme.id} className="py-4 first:pt-0">
           <h3 className="text-sm font-medium">{theme.label === 'Discussion phrasing' || theme.label === 'Recurring discussion phrase' ? (data.items.find(row => theme.evidence_ids.includes(row.id))?.title || theme.summary).slice(0, 100) : theme.label}</h3>
           <p className="mt-1 line-clamp-2 break-words text-sm leading-6">{theme.summary}</p>
@@ -47,8 +47,8 @@ export function CommunityDiscussions({ ticker, data, loading, error, retry, seen
             {renderEvidence(theme.evidence_ids)}
           </details>
         </article>)}</div>
-        {data.items.length > 0 && <details className="mt-3 text-xs"><summary className="cursor-pointer text-primary">All same-day evidence ({data.items.length} original {data.items.length === 1 ? "item" : "items"})</summary>{renderEvidence(data.items.map(row => row.id))}</details>}
-        {data.truncated && <p className="mt-2 text-xs text-muted-foreground">Analysis is limited to the latest 300 same-day items; sample coverage is incomplete.</p>}
+        {data.items.length > 0 && <details className="mt-3 text-xs"><summary className="cursor-pointer text-primary">All {data.window.label.toLowerCase()} evidence ({data.items.length} original {data.items.length === 1 ? "item" : "items"})</summary>{renderEvidence(data.items.map(row => row.id))}</details>}
+        {data.truncated && <p className="mt-2 text-xs text-muted-foreground">Analysis is limited to the latest 300 items in this window; sample coverage is incomplete.</p>}
         {data.items.length > 0 && <p className="mt-3 text-xs text-muted-foreground">Themes can overlap. Reposts count once; source breadth describes discussion, not corroboration.</p>}
       </>}
   </section>;

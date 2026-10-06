@@ -21,6 +21,7 @@ SOURCES = [Source(source_id=sid, name=sid, endpoint=f'https://{sid}.example/feed
 @pytest.fixture(autouse=True)
 def isolate_universe_acquisition(monkeypatch):
     monkeypatch.setattr(ingest_data, 'sync_universe', lambda session: {'status': 'skipped'})
+    monkeypatch.setattr(ingest_data, 'sync_index_groups', lambda session: {'status': 'skipped'})
 
 
 def test_successful_observations_are_chronological_nullable_and_atomic(session):
@@ -89,7 +90,7 @@ def test_unified_worker_persisted_restart_cadence_and_source_failure(tmp_path, m
     engine = create_engine(url); create_tables(engine)
     clock[0] += timedelta(minutes=1)
     result = ingest_data.run_cycle(engine)
-    assert result == {'universe': {'status': 'skipped'}, 'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}}
+    assert result == {'universe': {'status': 'skipped'}, 'groups': {'status': 'skipped'}, 'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}}
     assert calls == ['good', 'bad', 'community']
     with Session(engine) as session:
         assert utc(session.get(NewsSourceState, 'good').last_success_at) == NOW

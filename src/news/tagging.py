@@ -63,7 +63,7 @@ class Tagger:
             # notation still works for an issuer whose symbol overlaps an acronym.
             explicit = bool(re.search(r'(?:co phieu|ticker|stock|ma|hose|hnx|upcom)\s*$', folded_prefix) or
                 re.search(r'[#$]\s*$', prefix))
-            currency_amount = bool(re.search(r'(?:\d[\d.,]*|trieu|ty|ti|nghin|million|billion)\s*$', folded_prefix))
+            currency_amount = bool(re.search(r'(?:\d[\d.,]*|ty phu|trieu phu|billionaire|millionaire|trieu|ty|ti|nghin|million|billion)\s*$', folded_prefix))
             location = bool(re.search(r'(?:TP|T\.P)\.\s*$', prefix, re.I))
             broadcaster = bool(re.search(r'(?:roi|dai|kenh)\s*$', folded_prefix))
             following = re.match(r'\s+(?:(?:of|at|của)\s+)?([A-Z0-9]{1,20})\b', title[match.end():])

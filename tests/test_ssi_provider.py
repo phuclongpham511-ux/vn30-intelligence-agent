@@ -314,3 +314,20 @@ def test_raw_prices_remain_vnd_and_today_is_excluded():
         bars=provider.get_history(' xyz ',date(2024,9,19),date(2024,9,21))
         assert [(b.date,b.close,b.volume,b.source) for b in bars]==[
             (date(2024,9,20),19650,15048900,'SSI:FastConnect')]
+
+
+def test_index_groups_and_summary_preserve_raw_numbers_without_zero_fallback(make_provider):
+    def respond(request):
+        if request.url.path.endswith('/indexList'):
+            return httpx.Response(200,json=[{'index':'VN30','board':'HOSE'},{'index':'VN100','board':'HOSE'},{'index':'HNX30','board':'HNX'}])
+        if request.url.path.endswith('/securitiesByBoard'):
+            return httpx.Response(200,json=[{'symbol':'XYZ','board':'HNX' if request.url.params['index']=='HNX30' else 'HOSE','stockType':'Stock'}])
+        return httpx.Response(200,json=[{'tradingDate':'2024/09/20','indexValue':'1200.5','indexChange':'-10','indexChangePercentage':'-0.83'}])
+    provider=make_provider(respond)
+    assert provider.get_index_memberships()['VN30']==['XYZ']
+    summary=provider.get_index_snapshot()
+    assert summary['level']==1200.5 and summary['change']==-10 and summary['change_percent']==-0.83
+    missing=make_provider(lambda _:httpx.Response(200,json=[{'tradingDate':'2024/09/20','indexValue':'1200.5','indexChange':None,'indexChangePercentage':None}]))
+    assert missing.get_index_snapshot()['change'] is None
+    invalid=make_provider(lambda _:httpx.Response(200,json=[{'tradingDate':'2024/09/20','indexValue':None}]))
+    with pytest.raises(ProviderError): invalid.get_index_snapshot()

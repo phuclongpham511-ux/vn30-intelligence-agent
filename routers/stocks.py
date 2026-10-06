@@ -39,6 +39,15 @@ def universe(q: str = Query(default='', max_length=120),
     return browse_universe(session, q=q, exchange=exchange, offset=offset, limit=limit)
 
 
+@router.get('/index-snapshot')
+def index_snapshot(provider=Depends(get_market_provider)):
+    from src.providers.base import ProviderNotReadyError
+    method = getattr(provider, 'get_index_snapshot', None)
+    if method is None:
+        raise ProviderNotReadyError('VN-Index is unavailable from the configured provider.')
+    return method()
+
+
 @router.post("", response_model=Stock, status_code=201)
 def add_stock(body: SymbolRequest, session: Session = Depends(get_session),
               provider: MarketDataProvider = Depends(get_market_provider)):

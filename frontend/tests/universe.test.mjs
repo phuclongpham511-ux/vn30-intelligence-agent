@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { browseSecurities, loadUniverse } from '../lib/universe.ts';
+import { browseSecurities, loadUniverse,stockSuggestions,readRecentSearches,rememberSearch } from '../lib/universe.ts';
 
 test('full universe search/filter/pagination finds equities without a Stock id', () => {
   const rows = [{symbol:'AAA',exchange:'HOSE',display_name_en:'Alpha'},
@@ -18,4 +18,20 @@ test('cached metadata pages cover the full master and never request market histo
   assert.deepEqual(result.stocks.map(r=>r.symbol), ['AAA','BBB']);
   assert.equal(calls.length,2);
   assert.ok(calls.every(url=>url.startsWith('/api/stocks/universe?')));
+});
+
+test('compact discovery pages compose index membership, company search and exchange',()=>{
+ const rows=Array.from({length:32},(_,n)=>({symbol:`X${n}`,exchange:n%2?'HNX':'HOSE',display_name_en:'Alpha'}));
+ assert.equal(browseSecurities(rows).items.length,10);
+ assert.equal(browseSecurities(rows,'Alpha','HNX',0,10,['X1','X2']).total,1);
+ assert.equal(browseSecurities(rows,'','',1).items[0].symbol,'X10');
+ assert.deepEqual(browseSecurities(rows,'','',0,10,[]).items,[]);
+});
+test('empty search exposes only bounded real recent selections, never the full universe',()=>{
+ const rows=Array.from({length:100},(_,n)=>({symbol:`X${n}`,exchange:'HOSE'}));
+ assert.deepEqual(stockSuggestions(rows,'',[]),[]);
+ assert.deepEqual(stockSuggestions(rows,'',['X9','MISSING']).map(s=>s.symbol),['X9']);
+ assert.equal(stockSuggestions(rows,'X',[]).length,6);
+ assert.deepEqual(readRecentSearches('["X1","X1","bad value","X2"]'),['X1','X2']);
+ assert.deepEqual(rememberSearch(['X1','X2','X3','X4','X5'],'X2'),['X2','X1','X3','X4','X5']);
 });

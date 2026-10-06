@@ -54,6 +54,15 @@ class SecurityUniverseState(SQLModel, table=True):
     exclusions: dict = Field(default_factory=dict, sa_type=JSON)
 
 
+class IndexMembershipState(SQLModel, table=True):
+    id: str = Field(default='ssi', primary_key=True)
+    groups: dict = Field(default_factory=dict, sa_type=JSON)
+    source: str = 'SSI:FastConnect'
+    last_attempt_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
+    last_success_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
+    last_error: str | None = None
+
+
 class Watchlist(Timestamped, table=True):
     id: int | None = Field(default=None, primary_key=True)
     user_id: int = Field(foreign_key="users.id", index=True)

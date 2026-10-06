@@ -20,6 +20,10 @@ export const mascotAssets = {
 
 // These are interface states only. Empty content says nothing about the market.
 export const mascotUiStates = {
+  marketUp: "bullish",
+  marketDown: "bearish",
+  marketNeutral: "neutral",
+  marketUncertain: "uncertain",
   brand: "identity",
   discovery: "opportunity",
   emptyWatchlist: "idle",

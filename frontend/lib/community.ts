@@ -60,8 +60,9 @@ export type CommunityPulseData = {
     representative_id: string; evidence_ids: string[]; evidence_revisions: { id: string; revision_id: string }[] }[];
 };
 
-export async function loadCommunity(ticker: string, topic: string, signal?: AbortSignal): Promise<CommunityPulseData> {
+export async function loadCommunity(ticker: string, topic: string, signal?: AbortSignal, window: "today" | "last24h" = "today"): Promise<CommunityPulseData> {
   const query = new URLSearchParams();
+  query.set("window", window);
   if (ticker.trim()) query.set("ticker", ticker.trim().toUpperCase());
   // Publisher topic filters do not constrain Community discussion themes.
   void topic;

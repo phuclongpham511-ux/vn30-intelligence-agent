@@ -10,7 +10,7 @@ import { emptyNewsFilters, newsQuery, readNewsFilters, newsViewQuery, readNewsVi
 import type { NewsFilters, NewsSource, NewsView } from "@/lib/news";
 
 type Story = TopStoryData;
-type Data = { hot: Story[]; feed: Story[] };
+type Data = { feed: Story[] };
 
 export default function NewsPage() {
   const [data, setData] = useState<Data | null>(null);
@@ -20,7 +20,7 @@ export default function NewsPage() {
   const [draft, setDraft] = useState<NewsFilters>(emptyNewsFilters);
   const [sources, setSources] = useState<NewsSource[]>([]);
   const [ready, setReady] = useState(false);
-  const [view, setView] = useState<NewsView>("company");
+  const [view, setView] = useState<NewsView>("industry");
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const sync = () => {
@@ -52,13 +52,13 @@ export default function NewsPage() {
     try {
       const query = newsQuery(filters);
       const category = {company:'COMPANY', industry:'INDUSTRY', briefing:'MARKET_BRIEF'}[view];
-      const paths = [`hot?limit=6&${query}`, `feed?research_category=${category}&limit=30&${query}`];
+      const paths = [`feed?research_category=${category}&limit=30&${query}`];
       const results = await Promise.all(paths.map(async path => {
         const response = await fetch(`/api/news/${path}`, { signal, cache: "no-store" });
         if (!response.ok) throw new Error("News unavailable");
         return response.json();
       }));
-      if (!signal?.aborted) setData({ hot: results[0], feed: results[1] });
+      if (!signal?.aborted) setData({ feed: results[0] });
     } catch {
       if (!signal?.aborted) setError(true);
     } finally {
@@ -96,10 +96,6 @@ export default function NewsPage() {
     {view !== "community" && error && <MascotState state="dataUnavailable" role="alert">News is temporarily unavailable. {data && "Previously loaded headlines are shown below."} <button className="ml-2 text-primary underline" onClick={() => setAttempt(value => value + 1)}>Retry</button></MascotState>}
     {view !== "community" && loading && !data && <MascotState state="loading" role="status">Loading news…</MascotState>}
     {view !== "community" && data && <>
-      <section aria-labelledby="hot-topics"><h2 id="hot-topics">Hot Topics</h2><p className="mt-1 text-xs text-muted-foreground">Two or more independent publishers · ranked by source coverage, capped activity, then recency. Attention is not Materiality.</p>
-        {!data.hot.length && <MascotState state="noMatches">No multi-source stories match this view.</MascotState>}
-        <div className="mt-3 grid gap-x-8 md:grid-cols-2">{data.hot.map(item => <TopStory key={item.story.id} item={item}/>)}</div>
-      </section>
       <section aria-labelledby="research-feed"><h2 id="research-feed">{newsSectionLabels[view]}</h2>{view === 'briefing' && <p className="mt-1 text-xs text-muted-foreground">Broad market and policy reporting with at least two independent publishers.</p>}
         {!data.feed.length && <MascotState state="noMatches">No qualifying recent reporting matches this view. Coverage may be incomplete.</MascotState>}
         <div className="mt-3 grid gap-x-8 md:grid-cols-2">{data.feed.map(item => <TopStory key={item.story.id} item={item}/>)}</div>

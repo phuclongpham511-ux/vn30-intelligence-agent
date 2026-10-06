@@ -9,7 +9,7 @@ import time
 from zoneinfo import ZoneInfo
 
 from ssi_sdk import Auth, Config
-from ssi_sdk.constant import EP_DATA_OHLC, EP_DATA_SECURITIES_BY_BOARD
+from ssi_sdk.constant import EP_DATA_OHLC, EP_DATA_SECURITIES_BY_BOARD, EP_DATA_INDEX_LIST, EP_DATA_INDEX_SUMMARY
 
 from src.config.settings import get_settings
 from src.providers.base import ProviderError, ProviderNotReadyError
@@ -182,6 +182,57 @@ class SsiMarketDataProvider:
             return SecurityUniverse(securities=[securities[s] for s in sorted(securities)],
                 raw_count=raw_count, exclusions=exclusions, duplicate_count=duplicates)
         return self._guard('universe', 'security_master', fetch)
+
+    def get_index_memberships(self):
+        """Provider-reported membership only; no locally maintained constituent lists."""
+        def fetch():
+            indices = self._request(EP_DATA_INDEX_LIST, {})
+            if not isinstance(indices, list) or not indices or len(indices) > 200:
+                raise ValueError('Malformed index list')
+            available = {r['index']: r.get('board') for r in indices if isinstance(r, dict) and isinstance(r.get('index'), str)}
+            groups = {}
+            for code in ('VN30', 'VN100', 'HNX30'):
+                if code not in available:
+                    continue
+                rows = self._request(EP_DATA_SECURITIES_BY_BOARD, {'index': code})
+                if not isinstance(rows, list) or not rows or len(rows) > 10000:
+                    raise ValueError('Empty or malformed index membership')
+                symbols = set()
+                for row in rows:
+                    if not isinstance(row, dict) or row.get('stockType') != 'Stock' or row.get('board') != available[code]:
+                        raise ValueError('Unexpected index constituent')
+                    symbol = row.get('symbol')
+                    if not isinstance(symbol, str) or not self._symbol(symbol):
+                        raise ValueError('Invalid constituent identity')
+                    symbols.add(symbol.strip().upper())
+                groups[code] = sorted(symbols)
+            if not all(code in groups for code in ('VN30', 'VN100')):
+                raise ValueError('Required index groups unavailable')
+            return groups
+        return self._guard('indices', 'membership', fetch)
+
+    @lru_cache(maxsize=1)
+    def _index_snapshot(self, bucket):
+        def fetch():
+            rows = self._request(EP_DATA_INDEX_SUMMARY, {'index': 'VNINDEX'})
+            if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], dict):
+                raise ValueError('Missing or malformed VN-Index summary')
+            row = rows[0]
+            day = datetime.strptime(row['tradingDate'], '%Y/%m/%d').date()
+            if day > self._today():
+                raise ValueError('Future index date')
+            level = numeric(row, 'indexValue')
+            if level <= 0:
+                raise ValueError('Invalid index level')
+            return dict(index='VNINDEX', level=level,
+                change=numeric(row, 'indexChange') if row.get('indexChange') is not None else None,
+                change_percent=numeric(row, 'indexChangePercentage') if row.get('indexChangePercentage') is not None else None,
+                trading_date=day.isoformat(), source=self.source,
+                fetched_at=datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).isoformat())
+        return self._guard('VNINDEX', 'index_summary', fetch)
+
+    def get_index_snapshot(self):
+        return dict(self._index_snapshot(int(time.time() // 300)))
 
     @lru_cache(maxsize=128)
     def _history(self, symbol, start, end, today, bucket):

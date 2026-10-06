@@ -8,16 +8,17 @@ from src.db.session import create_tables, get_engine
 from src.news.registry import load_sources
 from src.news.service import ingest_cycle
 from src.community.daily import ingest_cycle as ingest_community
-from src.services.universe import sync_universe
+from src.services.universe import sync_universe, sync_index_groups
 
 
 def run_cycle(engine, *, registry=None, force_news=False):
     results = {}
     # Separate sessions/transactions: a failed domain cannot poison the other.
-    for domain in ('universe', 'news', 'community'):
+    for domain in ('universe', 'groups', 'news', 'community'):
         try:
             with Session(engine) as session:
                 results[domain] = (sync_universe(session) if domain == 'universe' else
+                    sync_index_groups(session) if domain == 'groups' else
                     ingest_cycle(session, load_sources(registry), force=force_news)
                     if domain == 'news' else ingest_community(engine))
         except Exception as exc:

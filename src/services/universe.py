@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta, timezone
 from sqlmodel import Session, select
 from sqlalchemy import func
-from src.models import Security, SecurityUniverseState
+from src.models import Security, SecurityUniverseState, IndexMembershipState
 from src.news.normalization import normalized, utc
 from src.providers.ssi import SsiMarketDataProvider
 
@@ -78,4 +78,42 @@ def browse_universe(session: Session, *, q='', exchange=None, offset=0, limit=10
         'stale' if not state.last_success_at or now - utc(state.last_success_at) > 2 * REFRESH_INTERVAL else 'healthy')
     return dict(items=session.exec(query.order_by(Security.symbol).offset(offset).limit(limit)).all(),
         total=total, total_universe=total_universe, offset=offset, limit=limit, status=status,
+        last_synced_at=utc(state.last_success_at) if state and state.last_success_at else None,
+        index_groups=index_groups(session, now=now))
+
+
+def sync_index_groups(session, *, provider=None, now=None, force=False):
+    now = now or datetime.now(timezone.utc)
+    state = session.get(IndexMembershipState, 'ssi') or IndexMembershipState()
+    interval = RETRY_INTERVAL if state.last_error else REFRESH_INTERVAL
+    if not force and state.last_attempt_at and now - utc(state.last_attempt_at) < interval:
+        return {'status': 'skipped'}
+    state.last_attempt_at = now
+    session.add(state); session.commit()
+    try:
+        if provider is None:
+            with SsiMarketDataProvider() as upstream:
+                groups = upstream.get_index_memberships()
+        else:
+            groups = provider.get_index_memberships()
+        known = {s.symbol for s in session.exec(select(Security).where(Security.is_active == True)).all()}
+        if not groups or any(not members or not set(members).issubset(known) for members in groups.values()):
+            raise ValueError('Index membership outside cached equity universe')
+        state.groups, state.last_success_at, state.last_error = groups, now, None
+        session.add(state); session.commit()
+        return {'status': 'ok', 'groups': {code: len(members) for code, members in groups.items()}}
+    except Exception as exc:
+        session.rollback()
+        state = session.get(IndexMembershipState, 'ssi')
+        state.last_error = type(exc).__name__
+        session.add(state); session.commit()
+        return {'status': 'error', 'error': state.last_error}
+
+
+def index_groups(session, *, now=None):
+    now = now or datetime.now(timezone.utc)
+    state = session.get(IndexMembershipState, 'ssi')
+    status = ('not_attempted' if not state else 'error' if state.last_error else
+        'stale' if not state.last_success_at or now - utc(state.last_success_at) > 2 * REFRESH_INTERVAL else 'healthy')
+    return dict(groups=state.groups if state else {}, status=status, source='SSI:FastConnect',
         last_synced_at=utc(state.last_success_at) if state and state.last_success_at else None)

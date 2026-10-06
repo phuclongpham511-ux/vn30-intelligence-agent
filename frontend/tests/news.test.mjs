@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { emptyNewsFilters, newsQuery, readNewsFilters, newsViewQuery, readNewsView } from "../lib/news.ts";
+import { emptyNewsFilters, newsQuery, readNewsFilters, newsViewQuery, readNewsView,newsSectionLabels } from "../lib/news.ts";
 
 test("news deep links preserve exact filter values without accepting unrelated URL fields", () => {
   const filters = readNewsFilters("?ticker=xyz&sector=Real%20Estate&source=one&country=VN&topic=Rates&user_id=123");
@@ -24,7 +24,13 @@ test("legacy deep links migrate to semantic categories and remove the technical 
   const query = newsViewQuery({ ...emptyNewsFilters, ticker: "xyz" }, "global", false);
   assert.deepEqual(readNewsView(query), { view: "briefing", financialOnly: false });
   assert.equal(readNewsFilters(query).ticker, "XYZ");
-  assert.deepEqual(readNewsView("?view=unknown"), { view: "company", financialOnly: false });
+  assert.deepEqual(readNewsView("?view=unknown"), { view: "industry", financialOnly: false });
   assert.equal(new URLSearchParams(query).has('financial_only'),false);
   assert.equal(readNewsView('?view=latest').view,'company');
+});
+
+test('News starts at Industry and preserves Company links while Hot Topics stays a promotion layer',()=>{
+ assert.deepEqual(Object.values(newsSectionLabels),['Industry','Company','Market Brief','Community Pulse']);
+ assert.equal(readNewsView('').view,'industry');
+ assert.equal(readNewsView('?'+newsViewQuery(emptyNewsFilters,'company')).view,'company');
 });

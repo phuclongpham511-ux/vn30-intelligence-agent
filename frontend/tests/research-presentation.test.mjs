@@ -25,22 +25,32 @@ test('news thumbnail preserves full aspect and missing/unsafe images leave no fr
 test('Explore renders a bounded universe with direct research links and no add prerequisite',()=>{
   const rows=Array.from({length:60},(_,n)=>({symbol:`X${n}`,exchange:n%2?'HNX':'HOSE',display_name_en:'Issuer'}));
   const Picker=component('../app/components/TickerPicker.tsx',{
+    './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
     './stock/StockUniverse':{useStocks:()=>({stocks:rows,loading:false,error:'',status:'healthy'})},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
     './mascot/Mascot':{MascotState:({children})=>children}});
   const html=renderToStaticMarkup(React.createElement(Picker));
   assert.match(html,/Explore stocks/);
   assert.doesNotMatch(html,/Available stocks|Validate and add/);
-  assert.equal((html.match(/href="\/stocks\//g)||[]).length,24);
+  assert.equal((html.match(/href="\/stocks\//g)||[]).length,10);
   assert.match(html,/of 60 results/);
 });
 
 test('Explore does not present an unknown universe count as zero',()=>{
   const Picker=component('../app/components/TickerPicker.tsx',{
+    './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
     './stock/StockUniverse':{useStocks:()=>({stocks:[],loading:true,error:'',status:'not_attempted'})},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
     './mascot/Mascot':{MascotState:({children})=>children}});
   const html=renderToStaticMarkup(React.createElement(Picker));
   assert.match(html,/Universe count unavailable/);
   assert.doesNotMatch(html,/0 Vietnam equities/);
+});
+
+test('shared stock search initially stays empty instead of rendering the market directory',()=>{
+  const Search=component('../app/components/stock/StockSearch.tsx',{'./useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})}});
+  const html=renderToStaticMarkup(React.createElement(Search,{stocks:Array.from({length:1522},(_,n)=>({symbol:`X${n}`,exchange:'HOSE'})),label:'Stock to follow',onSelect:()=>{}}));
+  assert.match(html,/role="combobox"/);
+  assert.match(html,/aria-expanded="false"/);
+  assert.doesNotMatch(html,/role="option"|<select/);
 });
