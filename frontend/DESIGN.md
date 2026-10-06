@@ -174,7 +174,7 @@ Requirements:
 
 ## Interaction
 
-- English-only UI.
+- English and Vietnamese product UI; source evidence stays in its original language.
 - Search and ticker onboarding remain dynamic.
 - Loading, empty, retry, and error states are first-class product states.
 - Keyboard focus must be visible.
@@ -242,5 +242,5 @@ Before accepting a frontend change, verify:
 4. Are missing data and evidence limitations honest?
 5. Are charts and numbers easier to compare?
 6. Is Materiality represented as attention-worthiness rather than recommendation?
-7. Does the change preserve English-only UI?
+7. Does the change support English and Vietnamese product chrome while preserving original source evidence?
 8. Did we avoid unnecessary new dependencies?

@@ -1,11 +1,14 @@
+"use client";
+import {useLocale} from "@/lib/i18n";
 import { MascotIllustration, MascotState } from "../mascot/Mascot";
 import Link from "next/link";
 import { RefreshCw, ArrowLeft } from "lucide-react";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 export function StockLoading({ ticker }: { ticker: string }) {
-  return <div className="page-stack" aria-busy="true" aria-label={`Loading ${ticker} overview`}>
-    <MascotState state="loading" role="status">Loading {ticker} market data, fundamentals and news.</MascotState>
+  const {t}=useLocale();
+  return <div className="page-stack" aria-busy="true" aria-label={t("Loading {ticker} overview",{ticker})}>
+    <MascotState state="loading" role="status">{t("Loading {ticker} market data, fundamentals and news.",{ticker})}</MascotState>
     <Skeleton className="h-4 w-28"/><div className="flex justify-between gap-4"><div className="flex gap-4"><Skeleton className="size-14 rounded-xl"/><div className="space-y-3"><Skeleton className="h-7 w-28"/><Skeleton className="h-4 w-40"/></div></div><Skeleton className="hidden h-16 w-40 sm:block"/></div>
     <Skeleton className="h-3 w-60"/><Skeleton className="h-[70px] w-full rounded-xl"/>
     <div className="grid gap-4 xl:grid-cols-12"><Skeleton className="h-[426px] rounded-xl xl:col-span-8"/><Skeleton className="h-[426px] rounded-xl xl:col-span-4"/></div>
@@ -14,10 +17,11 @@ export function StockLoading({ ticker }: { ticker: string }) {
   </div>;
 }
 export function StockError({ ticker, message, retry }: { ticker: string; message: string; retry: () => void }) {
+  const {t,ui}=useLocale();
   return <div className="flex min-h-[65vh] items-center justify-center"><div role="alert" className="panel w-full max-w-lg p-8 text-center sm:p-12">
     <MascotIllustration state="dataUnavailable" size={128} className="mx-auto mb-4"/>
-    <div className="eyebrow mb-3">Data unavailable</div><h1 className="text-2xl">Could not load {ticker}</h1><p className="mt-3 text-sm leading-6 text-muted-foreground">{message}</p>
-    <div className="mt-7 flex flex-wrap justify-center gap-3"><Button onClick={retry}><RefreshCw size={15}/>Retry</Button><Button variant="outline" asChild><Link href="/"><ArrowLeft size={15}/>Back to Explore</Link></Button></div>
-    <p className="mt-6 text-[11px] text-muted-foreground">No estimated or fallback numbers are shown.</p>
+    <div className="eyebrow mb-3">{t("Data unavailable")}</div><h1 className="text-2xl">{t("Could not load {ticker}",{ticker})}</h1><p className="mt-3 text-sm leading-6 text-muted-foreground">{ui(message)}</p>
+    <div className="mt-7 flex flex-wrap justify-center gap-3"><Button onClick={retry}><RefreshCw size={15}/>{t("Retry")}</Button><Button variant="outline" asChild><Link href="/"><ArrowLeft size={15}/>{t("Back to Explore")}</Link></Button></div>
+    <p className="mt-6 text-[11px] text-muted-foreground">{t("No estimated or fallback numbers are shown.")}</p>
   </div></div>;
 }

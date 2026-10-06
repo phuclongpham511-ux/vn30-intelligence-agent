@@ -1,8 +1,8 @@
-# VN30 Intelligence Agent — Domain Context
+# Woofi — Domain Context
 
 ## Product purpose
 
-VN30 Intelligence Agent helps active retail investors identify which changes deserve attention across Vietnamese equities.
+Woofi helps active retail investors identify which changes deserve attention across Vietnamese equities.
 
 North Star:
 
@@ -376,3 +376,11 @@ I follow?”** → future Materiality **“What matters to me?”** The North St
 - RAG is for unstructured evidence such as filings, research reports, and management commentary.
 - Technical analysis uses OHLCV and deterministic indicators rather than screenshot interpretation.
 - New technology is added only when a real problem requires it.
+
+## Product branding and localization
+
+The user-facing product is **Woofi**. Repository and internal technical names remain unchanged; VN30 remains a legitimate market index. The supplied Woofi wordmark is separate from the existing white-wolf state mascots.
+
+Product chrome supports English and Vietnamese through a typed frontend dictionary/context. A saved browser preference takes precedence; otherwise Vietnamese browser locales select Vietnamese and other locales select English. Headlines, excerpts, Community themes/evidence, company and publisher names, ticker symbols and quotes retain their source language. Localization changes presentation, never numerical ground truth or research semantics.
+
+News tabs display Industry → Company → Market → Community Pulse (Ngành → Doanh nghiệp → Thị trường → Cộng đồng). The visible Market label replaces Market Brief; internal `briefing` / `MARKET_BRIEF` identities remain unchanged. Category tabs identify the view without repeated category headings below them.

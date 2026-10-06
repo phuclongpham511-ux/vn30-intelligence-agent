@@ -30,7 +30,7 @@ test("semantic deep links exclude obsolete global/latest/financial state", () =>
 });
 
 test('News starts at Industry and preserves Company links while Hot Topics stays a promotion layer',()=>{
- assert.deepEqual(Object.values(newsSectionLabels),['Industry','Company','Market Brief','Community Pulse']);
+ assert.deepEqual(Object.values(newsSectionLabels),['Industry','Company','Market','Community Pulse']);
  assert.equal(readNewsView('').view,'industry');
  assert.equal(readNewsView('?'+newsViewQuery(emptyNewsFilters,'company')).view,'company');
 });

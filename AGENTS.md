@@ -22,7 +22,7 @@ Read `CONTEXT.md` before making product or backend changes. When touching the fr
 - Materiality is attention-worthiness, not bullishness, future-return prediction, or investment advice.
 - Raw evidence must remain inspectable behind insights.
 - Preferences may change ranking, not factual reality.
-- The UI is English-only.
+- The UI supports English and Vietnamese. Translate product chrome only; preserve original source evidence.
 
 ### Working style
 

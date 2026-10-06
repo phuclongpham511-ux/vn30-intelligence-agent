@@ -13,7 +13,7 @@ export type NewsSource = {
 export type NewsFilters = { ticker: string; sector: string; country: string; source: string; topic: string };
 export const emptyNewsFilters: NewsFilters = { ticker: "", sector: "", country: "", source: "", topic: "" };
 export type NewsView = "company" | "industry" | "briefing" | "community";
-export const newsSectionLabels = {industry: 'Industry', company: 'Company', briefing: 'Market Brief', community: 'Community Pulse'};
+export const newsSectionLabels = {industry: 'Industry', company: 'Company', briefing: 'Market', community: 'Community Pulse'};
 export function readNewsView(search: string): { view: NewsView } {
   const value = new URLSearchParams(search).get("view");
   const view = value === 'company' || value === 'briefing' || value === 'community' ? value : 'industry';
