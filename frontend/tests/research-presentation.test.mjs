@@ -70,12 +70,12 @@ test('Hot Topics selects only same-cluster images and excludes no-image stories'
  assert.match(render({...base,representative_article:preferred,articles:[preferred,sibling]}),/src="https:\/\/example.org\/preferred.jpg"/);
 });
 
-test('Explore hero links to index research, enlarges mascot, and keeps provider details out',()=>{
+test('Explore keeps the VN-Index summary and mascot without a chart navigation link',()=>{
  const Market=component('../app/components/ExploreMarket.tsx',{
   './mascot/Mascot':{MascotIllustration:({size})=>React.createElement('span',{'data-mascot-size':size}),MascotState:({children})=>children},
   './news/TopStory':()=>null});
  const html=renderToStaticMarkup(React.createElement(Market));
- assert.match(html,/<header/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
+ assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.doesNotMatch(html,/href="\/indices\/VNINDEX"|View research|Open VN-Index research/);assert.match(html,/data-mascot-size="128"/);
  assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary|panel flex/);
 });
 

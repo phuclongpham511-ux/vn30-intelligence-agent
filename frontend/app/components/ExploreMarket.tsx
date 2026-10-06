@@ -1,6 +1,5 @@
 "use client";
 import {useLocale} from "@/lib/i18n";
-import Link from 'next/link';
 import {useEffect,useState} from 'react';
 import {MascotIllustration,MascotState} from './mascot/Mascot';
 import TopStory,{type TopStoryData} from './news/TopStory';
@@ -19,15 +18,15 @@ export default function ExploreMarket(){
     <header className="flex flex-col gap-6 border-b pb-6 lg:flex-row lg:items-center lg:justify-between">
       <div className="min-w-0"><div className="eyebrow mb-3">{t("Workspace / Explore")}</div><h1>{t("Vietnam equities")}</h1><p className="mt-3 text-sm text-muted-foreground">{t("Market movement, publisher attention and stock research.")}</p></div>
       <div className="flex min-w-0 items-center gap-2 sm:gap-5">
-        <div className="min-w-0 flex-1"><Link href="/indices/VNINDEX" aria-label={t("Open VN-Index research")} className="block rounded p-1 hover:bg-muted/40 focus-visible:outline-2 focus-visible:outline-primary">
-          <h2 id="market-state" className="text-sm text-muted-foreground">{t("VN-Index")} <span className="ml-2 text-xs text-primary">{t("View research ↗")}</span></h2>
+        <div className="min-w-0 flex-1"><div className="p-1">
+          <h2 id="market-state" className="text-sm text-muted-foreground">{t("VN-Index")}</h2>
           {indexLoading&&!index?<p role="status" className="mt-3 text-sm">{t("Loading index…")}</p>:index?<>
             <p className={`mt-2 text-3xl font-semibold tabular-nums ${movement.color}`}>{index.level.toLocaleString(locale,{minimumFractionDigits:2,maximumFractionDigits:2})}</p>
             <p className={`mt-1 flex flex-wrap gap-x-3 text-xs font-medium tabular-nums ${movement.color}`}><span>{ui(movement.label)}</span><span>{ui(signed(index.change,'',locale))} {t("pts")}</span><span>{ui(signed(index.change_percent,'%',locale))}</span></p>
             <p className="mt-2 text-[11px] text-muted-foreground">{t("Trading date ·")} {localDate(index.trading_date)}</p>
             <dl className="mt-2 grid grid-cols-2 gap-x-4 text-[11px] tabular-nums"><div><dt className="text-muted-foreground">{t("Total volume")}</dt><dd>{ui(indexAggregate(index.total_volume,ui('shares'),locale))}</dd></div><div><dt className="text-muted-foreground">{t("Total value")}</dt><dd>{ui(indexAggregate(index.total_value,ui('VND'),locale))}</dd></div></dl>
           </>:<p className="mt-3 text-sm text-muted-foreground">{t("VN-Index data unavailable.")}</p>}
-        </Link>{indexError&&<p role="alert" className="mt-2 text-xs text-muted-foreground">{ui(index?'Refresh failed; showing the previous summary.':'Index data could not be loaded.')} <button className="text-primary underline" onClick={()=>setAttempt(v=>v+1)}>{t("Retry")}</button></p>}</div>
+        </div>{indexError&&<p role="alert" className="mt-2 text-xs text-muted-foreground">{ui(index?'Refresh failed; showing the previous summary.':'Index data could not be loaded.')} <button className="text-primary underline" onClick={()=>setAttempt(v=>v+1)}>{t("Retry")}</button></p>}</div>
         <div className="w-32 shrink-0"><MascotIllustration state={movement.mascot} size={128}/></div>
       </div>
     </header>
