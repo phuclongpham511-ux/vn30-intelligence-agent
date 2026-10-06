@@ -20,13 +20,13 @@ test("news filters encode reserved characters and clearing restores a market-wid
   assert.equal(newsQuery(emptyNewsFilters), "");
 });
 
-test("legacy deep links migrate to semantic categories and remove the technical financial toggle", () => {
-  const query = newsViewQuery({ ...emptyNewsFilters, ticker: "xyz" }, "global", false);
-  assert.deepEqual(readNewsView(query), { view: "briefing", financialOnly: false });
+test("semantic deep links exclude obsolete global/latest/financial state", () => {
+  const query = newsViewQuery({ ...emptyNewsFilters, ticker: "xyz" }, "briefing");
+  assert.deepEqual(readNewsView(query), { view: "briefing" });
   assert.equal(readNewsFilters(query).ticker, "XYZ");
-  assert.deepEqual(readNewsView("?view=unknown"), { view: "industry", financialOnly: false });
+  assert.deepEqual(readNewsView("?view=unknown"), { view: "industry" });
   assert.equal(new URLSearchParams(query).has('financial_only'),false);
-  assert.equal(readNewsView('?view=latest').view,'company');
+  assert.equal(readNewsView('?view=latest').view,'industry');
 });
 
 test('News starts at Industry and preserves Company links while Hot Topics stays a promotion layer',()=>{

@@ -331,3 +331,24 @@ def test_index_groups_and_summary_preserve_raw_numbers_without_zero_fallback(mak
     assert missing.get_index_snapshot()['change'] is None
     invalid=make_provider(lambda _:httpx.Response(200,json=[{'tradingDate':'2024/09/20','indexValue':None}]))
     with pytest.raises(ProviderError): invalid.get_index_snapshot()
+
+
+def test_index_summary_totals_are_nullable_real_numbers(make_provider):
+    provider=make_provider(lambda _:httpx.Response(200,json=[{'tradingDate':'2024/09/20','indexValue':'1200','totalTrade':'791551098','totalTradeValue':'18715110854170'}]))
+    row=provider.get_index_snapshot()
+    assert (row['total_volume'],row['total_value'],row['trading_date'])==(791551098,18715110854170,'2024-09-20')
+    missing=make_provider(lambda _:httpx.Response(200,json=[{'tradingDate':'2024/09/20','indexValue':'1200','totalTrade':None}])).get_index_snapshot()
+    assert missing['total_volume'] is None and missing['total_value'] is None
+
+
+def test_index_detail_uses_public_daily_history_without_onboarding(client):
+    from main import app
+    from src.services.stocks import get_market_provider
+    calls=[]
+    class Provider:
+        def get_history(self,symbol,start,end):
+            calls.append((symbol,start,end));return []
+    app.dependency_overrides[get_market_provider]=Provider
+    response=client.get('/stocks/index-history?start=2026-09-01&end=2026-10-01')
+    assert response.status_code==200 and response.json()==[]
+    assert calls==[('VNINDEX',date(2026,9,1),date(2026,10,1))]

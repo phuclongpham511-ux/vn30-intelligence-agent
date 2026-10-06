@@ -10,6 +10,12 @@ REFRESH_INTERVAL = timedelta(hours=24)
 RETRY_INTERVAL = timedelta(minutes=15)
 
 
+def listed_equities(session):
+    """Current ordinary SSI equities; legacy Stock fixtures cannot grant eligibility."""
+    return session.exec(select(Security).where(Security.is_active == True,
+        Security.instrument_type == 'Stock', Security.source == 'SSI:FastConnect')).all()
+
+
 def discovery_metadata(session):
     """Reuse provider identity for evidence tagging, retaining legacy fixture metadata."""
     from src.models import Stock

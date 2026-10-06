@@ -36,7 +36,7 @@ test("Community monitoring isolates ticker request failures without fabricating 
 import { readNewsView, newsViewQuery, emptyNewsFilters } from "../lib/news.ts";
 
 test("community is directly reachable through a separate News view", () => {
-  const query = newsViewQuery(emptyNewsFilters, "community", true);
+  const query = newsViewQuery(emptyNewsFilters, "community");
   assert.equal(readNewsView(query).view, "community");
 });
 

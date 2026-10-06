@@ -20,11 +20,18 @@ export async function loadUniverse(fetcher: typeof fetch = fetch, signal?: Abort
   return { stocks, status: metadata.status, lastSynced: metadata.last_synced_at || null, groups: metadata.index_groups || {groups:{},status:"not_attempted",source:"SSI:FastConnect"} };
 }
 
+export const recentSearchLimit = 8;
 export const recentSearchKey = 'vn30.recent-equity-searches.v1';
 export function readRecentSearches(raw: string | null): string[] {
-  try { const rows = JSON.parse(raw || '[]'); return Array.isArray(rows) ? [...new Set(rows.filter((s: unknown): s is string => typeof s === 'string' && /^[A-Z0-9]{1,20}$/.test(s)))].slice(0,5) : []; } catch { return []; }
+  try { const rows = JSON.parse(raw || '[]'); return Array.isArray(rows) ? [...new Set(rows.filter((s: unknown): s is string => typeof s === 'string' && /^[A-Z0-9]{1,20}$/.test(s)))].slice(0,recentSearchLimit) : []; } catch { return []; }
 }
-export function rememberSearch(rows: string[], symbol: string) { return [symbol, ...rows.filter(s=>s!==symbol)].slice(0,5); }
+export function rememberSearch(rows: string[], symbol: string) { return [symbol, ...rows.filter(s=>s!==symbol)].slice(0,recentSearchLimit); }
 export function stockSuggestions(stocks: Security[], query: string, recent: string[]) {
-  return query.trim() ? browseSecurities(stocks,query,'',0,6).items : recent.map(symbol=>stocks.find(s=>s.symbol===symbol)).filter((s): s is Security=>!!s).slice(0,5);
+  if (!query.trim()) return recent.map(symbol=>stocks.find(s=>s.symbol===symbol)).filter((s): s is Security=>!!s).slice(0,recentSearchLimit);
+  const text=fold(query);
+  if (!text) return [];
+  const rank=(stock:Security)=>fold(stock.symbol)===text?0:fold(stock.symbol).startsWith(text)?1:fold(stock.symbol).includes(text)?2:3;
+  return browseSecurities(stocks,query,'',0,stocks.length).items.sort((a,b)=>rank(a)-rank(b)||a.symbol.localeCompare(b.symbol)).slice(0,6);
 }
+
+export function removeRecentSearch(rows: string[], symbol: string) { return rows.filter(row => row !== symbol); }

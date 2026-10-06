@@ -14,12 +14,12 @@ export type NewsFilters = { ticker: string; sector: string; country: string; sou
 export const emptyNewsFilters: NewsFilters = { ticker: "", sector: "", country: "", source: "", topic: "" };
 export type NewsView = "company" | "industry" | "briefing" | "community";
 export const newsSectionLabels = {industry: 'Industry', company: 'Company', briefing: 'Market Brief', community: 'Community Pulse'};
-export function readNewsView(search: string): { view: NewsView; financialOnly: boolean } {
+export function readNewsView(search: string): { view: NewsView } {
   const value = new URLSearchParams(search).get("view");
-  const view = value === 'global' ? 'briefing' : value === 'latest' ? 'company' : value === 'company' || value === 'briefing' || value === 'community' ? value : 'industry';
-  return { view, financialOnly: false };
+  const view = value === 'company' || value === 'briefing' || value === 'community' ? value : 'industry';
+  return { view };
 }
-export function newsViewQuery(filters: NewsFilters, view: NewsView | 'latest' | 'global', _financialOnly = false): string {
+export function newsViewQuery(filters: NewsFilters, view: NewsView): string {
   const params = new URLSearchParams(newsQuery(filters));
   const canonical = readNewsView(`view=${view}`).view;
   if (canonical !== 'industry') params.set("view", canonical);

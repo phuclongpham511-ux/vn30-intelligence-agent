@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { NewsArticle } from "@/lib/news";
+import {newsViewQuery,emptyNewsFilters,type NewsArticle} from "@/lib/news";
 import ArticleRow from "../news/ArticleRow";
 import SourceCoverage from "../news/SourceCoverage";
 
@@ -23,7 +23,7 @@ export default function StockNews({ ticker }: { ticker: string }) {
   return <section className="panel overflow-hidden" aria-label={`${ticker} news`}>
     <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
       <div><h2>News mentioning {ticker}</h2><p className="mt-1 text-xs text-muted-foreground">Recent ingested headlines matched by ticker or company name.</p></div>
-      <Link href={`/news?ticker=${encodeURIComponent(ticker)}`} className="text-xs text-primary hover:underline">View all</Link>
+      <Link href={`/news?${newsViewQuery({...emptyNewsFilters,ticker},"company")}`} className="text-xs text-primary hover:underline">View all</Link>
     </div>
     <div className="px-5 py-4">
       <SourceCoverage/>

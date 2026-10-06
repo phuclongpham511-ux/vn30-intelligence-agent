@@ -96,7 +96,7 @@ export default function NewsPage() {
     {view !== "community" && error && <MascotState state="dataUnavailable" role="alert">News is temporarily unavailable. {data && "Previously loaded headlines are shown below."} <button className="ml-2 text-primary underline" onClick={() => setAttempt(value => value + 1)}>Retry</button></MascotState>}
     {view !== "community" && loading && !data && <MascotState state="loading" role="status">Loading news…</MascotState>}
     {view !== "community" && data && <>
-      <section aria-labelledby="research-feed"><h2 id="research-feed">{newsSectionLabels[view]}</h2>{view === 'briefing' && <p className="mt-1 text-xs text-muted-foreground">Broad market and policy reporting with at least two independent publishers.</p>}
+      <section aria-labelledby="research-feed"><h2 id="research-feed">{newsSectionLabels[view]}</h2>{view === 'briefing' && <p className="mt-1 text-xs text-muted-foreground">Broad Vietnam market, macro and policy reporting. Inspect publisher evidence behind each story.</p>}
         {!data.feed.length && <MascotState state="noMatches">No qualifying recent reporting matches this view. Coverage may be incomplete.</MascotState>}
         <div className="mt-3 grid gap-x-8 md:grid-cols-2">{data.feed.map(item => <TopStory key={item.story.id} item={item}/>)}</div>
       </section>

@@ -48,6 +48,13 @@ def index_snapshot(provider=Depends(get_market_provider)):
     return method()
 
 
+@router.get('/index-history')
+def index_history(start: date, end: date, provider=Depends(get_market_provider)):
+    # Reuse the verified daily endpoint, without stock onboarding or analytics.
+    return [dict(index='VNINDEX', unit='points', **bar.model_dump(mode='json', exclude={'ticker', 'currency'}))
+        for bar in provider.get_history('VNINDEX', start, end)]
+
+
 @router.post("", response_model=Stock, status_code=201)
 def add_stock(body: SymbolRequest, session: Session = Depends(get_session),
               provider: MarketDataProvider = Depends(get_market_provider)):

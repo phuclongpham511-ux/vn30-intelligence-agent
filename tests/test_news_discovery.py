@@ -72,8 +72,8 @@ def test_repeat_ingestion_refreshes_derived_tags_without_renewing_story_activity
     now = datetime.now(timezone.utc)
     class OldTagger:
         def tag(self, title, category):
-            return Tags(['Semiconductors'], [], [], 'GLOBAL')
-    feed = [source('global', category='GLOBAL', country='GB')]
+            return Tags(['Semiconductors'], [], [], 'MARKET')
+    feed = [source('local')]
     rows = [item('Amsterdam chip shop lands in court', 'https://global.example/chips', now)]
     ingest(session, rows, sources=feed, now=now, tagger=OldTagger())
     original = session.exec(select(NewsArticle)).one()

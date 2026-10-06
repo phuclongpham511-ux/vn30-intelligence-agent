@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { browseSecurities, loadUniverse,stockSuggestions,readRecentSearches,rememberSearch } from '../lib/universe.ts';
+import { browseSecurities, loadUniverse,stockSuggestions,readRecentSearches,rememberSearch,removeRecentSearch,recentSearchLimit } from '../lib/universe.ts';
 
 test('full universe search/filter/pagination finds equities without a Stock id', () => {
   const rows = [{symbol:'AAA',exchange:'HOSE',display_name_en:'Alpha'},
@@ -34,4 +34,22 @@ test('empty search exposes only bounded real recent selections, never the full u
  assert.equal(stockSuggestions(rows,'X',[]).length,6);
  assert.deepEqual(readRecentSearches('["X1","X1","bad value","X2"]'),['X1','X2']);
  assert.deepEqual(rememberSearch(['X1','X2','X3','X4','X5'],'X2'),['X2','X1','X3','X4','X5']);
+});
+
+test('history caps at eight, deduplicates, removes just one, and survives serialization',()=>{
+ let recent=[];
+ for(let n=0;n<15;n++) recent=rememberSearch(recent,`X${n}`);
+ assert.equal(recent.length,recentSearchLimit);
+ assert.equal(recent[0],'X14');
+ recent=removeRecentSearch(recent,'X13');
+ assert.equal(recent.length,7);assert.ok(!recent.includes('X13'));
+ assert.deepEqual(readRecentSearches(JSON.stringify(recent)),recent);
+ assert.deepEqual(readRecentSearches('[]'),[]);
+ assert.deepEqual(stockSuggestions([{symbol:'AAA',exchange:'HOSE'}],'???',[]),[]);
+});
+
+test('ticker exact/prefix matches precede broad company-name substrings',()=>{
+ const rows=[{symbol:'AAA',exchange:'HOSE',display_name_en:'Vietnam Example'},...['VIB','VIC','VID','VIE','VIG','VII','VIM'].map(symbol=>({symbol,exchange:'HOSE'}))];
+ assert.deepEqual(stockSuggestions(rows,'VI',[]).map(row=>row.symbol),['VIB','VIC','VID','VIE','VIG','VII']);
+ assert.equal(stockSuggestions(rows,'vib',[])[0].symbol,'VIB');
 });

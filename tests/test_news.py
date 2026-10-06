@@ -97,7 +97,7 @@ def test_registry_reload_and_unique_ids(tmp_path):
     file.write_text(json.dumps(entries * 2))
     with pytest.raises(ValueError): load_sources(str(file))
     assert len([s for s in load_sources() if s.category == 'VN']) >= 10
-    assert len([s for s in load_sources() if s.category == 'GLOBAL']) >= 5
+    assert not [s for s in load_sources() if s.category != 'VN' or s.country != 'VN']
 
 
 def test_idempotent_urls_titles_and_timestamps(session):
@@ -182,8 +182,8 @@ def test_recency_and_global_relevance(session):
     assert not session.exec(select(NewsArticle)).all()
     ingest(session, [item('Celebrity wedding', 'https://global.example/1'), item('Gold prices rise', 'https://global.example/2', None)], sources=[source('global', category='GLOBAL', country='US')])
     rows = session.exec(select(NewsArticle)).all()
-    assert len(rows) == 1 and rows[0].published_at is None
-    assert len(articles(session, category='GLOBAL', now=NOW)) == 1
+    assert rows == []
+    assert articles(session, category='GLOBAL', now=NOW) == []
 
 
 def test_ranking_diversity_over_repetition_and_decay():
@@ -196,7 +196,7 @@ def test_ranking_diversity_over_repetition_and_decay():
 def test_trending_increasing_coverage_and_idempotence(session):
     ingest(session, [item('Gold prices rise', 'https://one.example/old', NOW-timedelta(hours=8))], now=NOW-timedelta(hours=8))
     ingest(session, [item('Gold prices jump after dollar falls', 'https://one.example/a')])
-    ingest(session, [item('Gold demand rises in China', 'https://two.example/a')], sources=[source('two')])
+    ingest(session, [item('Gold demand rises in China with implications for Vietnam', 'https://two.example/a')], sources=[source('two')])
     rows = articles(session, now=NOW)
     topics = trending(rows, NOW)
     gold = next(x for x in topics if x['topic'] == 'Gold')
@@ -217,11 +217,11 @@ def test_api_contracts_filters_no_body_and_no_personalization(client, session):
     assert response.status_code == 200
     rows = response.json()
     assert len(rows) == 1 and rows[0]['tickers'] == ['XYZ']
-    assert len(client.get('/news/latest?category=GLOBAL').json()) == 1
+    assert client.get('/news/latest?category=GLOBAL').json() == []
     assert client.get('/news/latest?limit=0').status_code == 422
     assert client.get('/news/latest?limit=101').status_code == 422
     assert client.get('/news/latest?category=BAD').status_code == 422
-    assert client.get('/news/latest?topic=Gold').json()[0]['category'] == 'GLOBAL'
+    assert client.get('/news/latest?topic=Gold').json() == []
     top = client.get('/news/top?limit=1').json()
     assert len(top) == 1 and top[0]['ranking_score'] > 0
     detail = client.get('/news/stories/' + rows[0]['story_id'])

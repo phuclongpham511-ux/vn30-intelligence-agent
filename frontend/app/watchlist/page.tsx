@@ -136,7 +136,7 @@ export default function WatchlistPage() {
                 loading={communityLoading} error={communityError || (!communityLoading && community !== null && !discussions)}
                 retry={() => setAttempt(value => value + 1)} seen={state.communitySeen[symbol]} storageError={storageError}
                 review={() => { if (discussions) save(markCommunityReviewed(state, symbol, discussions.items)); }}/></div>
-              <div className="mt-3 flex flex-wrap gap-4 text-xs"><Link className="text-primary hover:underline" href={`/stocks/${encodeURIComponent(symbol)}`}>Open {symbol} stock detail</Link><Link className="text-primary hover:underline" href={`/news?${newsViewQuery({ ...emptyNewsFilters, ticker: symbol }, "latest", false)}`}>News mentioning {symbol}</Link></div>
+              <div className="mt-3 flex flex-wrap gap-4 text-xs"><Link className="text-primary hover:underline" href={`/stocks/${encodeURIComponent(symbol)}`}>Open {symbol} stock detail</Link><Link className="text-primary hover:underline" href={`/news?${newsViewQuery({ ...emptyNewsFilters, ticker: symbol }, "company")}`}>News mentioning {symbol}</Link></div>
             </div>
           </article>;
         })}</section>

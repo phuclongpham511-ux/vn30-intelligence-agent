@@ -7,7 +7,7 @@ from src.db.session import get_session
 from src.news.models import NewsArticle, NewsStory, NewsSourceState
 from src.news.registry import load_sources
 from src.news.normalization import utc
-from src.news.service import articles, story_score, trending
+from src.news.service import articles, story_score, trending, relevant_article, equity_tagger
 
 router = APIRouter(prefix='/news', tags=['news'])
 DB = Annotated[Session, Depends(get_session)]
@@ -26,6 +26,8 @@ class StoryResponse(BaseModel):
     story: NewsStory
     articles: list[NewsArticle]
     representative_article: NewsArticle
+    thumbnail_url: str | None = None
+    thumbnail_article_id: str | None = None
     ranking_score: float
     ranking_reason: str = 'Independent publisher diversity, capped activity and recency'
     research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] | None = None
@@ -35,6 +37,20 @@ def representative(rows, priorities):
     # Selection never changes diversity or ranking. Ties are stable across ingestion order.
     return min(rows, key=lambda a: (priorities.get(a.source_id, 100),
         -utc(a.published_at or a.first_seen_at).timestamp(), a.canonical_url, a.id))
+
+
+def cluster_thumbnail(chosen, members, priorities):
+    from urllib.parse import urlsplit
+    def valid(article):
+        try:
+            url = urlsplit(article.thumbnail_url or '')
+            return url.scheme in ('https', 'http') and bool(url.hostname) and not url.username and not url.password
+        except ValueError:
+            return False
+    if valid(chosen):
+        return chosen
+    candidates = [a for a in members if valid(a)]
+    return representative(candidates, priorities) if candidates else None
 
 
 class TrendingResponse(BaseModel):
@@ -105,6 +121,7 @@ def top(session: DB, options: dict = Depends(filters)):
     for article in rows:
         grouped.setdefault(article.story_id, []).append(article)
     output = []
+    tagger = equity_tagger(session)
     priorities = {s.source_id: s.representative_priority for s in load_sources()}
     for story_id, matching in grouped.items():
         story = session.get(NewsStory, story_id)
@@ -112,8 +129,9 @@ def top(session: DB, options: dict = Depends(filters)):
             chosen = representative(matching, priorities)
             # Filters select discoveries/representatives; disclosure retains all
             # evidence for the selected Story, including other publishers.
-            members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all()
+            members = [a for a in session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all() if relevant_article(a, tagger)]
             evidence = [chosen, *sorted((a for a in members if a.id != chosen.id), key=lambda a: (a.source_id, a.canonical_url))]
+            story = story.model_copy(update={'source_count': len({a.publisher_group for a in members}), 'article_count': len(members)})
             output.append(StoryResponse(story=story, articles=evidence, representative_article=chosen, ranking_score=story_score(story, now)))
     return sorted(output, key=lambda x: (-x.ranking_score, x.story.id))[:limit]
 
@@ -127,9 +145,8 @@ def topics(session: DB, options: dict = Depends(filters)):
 
 def research_rows(session, options, category=None, *, hot=False):
     from src.news.research import research_category, attention_order
-    from src.news.tagging import Tagger
-    from src.services.universe import discovery_metadata
-    tagger = Tagger(discovery_metadata(session))
+    tagger = equity_tagger(session)
+    eligible = {row.symbol: row for row in tagger.stocks}
     # Re-tag copies for older articles without destructive migration or lost provenance.
     selected = []
     options = dict(options)
@@ -139,7 +156,7 @@ def research_rows(session, options, category=None, *, hot=False):
         tags = tagger.tag(article.title, article.category)
         copy = article.model_copy(update={'tickers': tags.tickers,
             'sectors': sorted(set(article.sectors) | set(tags.sectors))})
-        kind = research_category(copy)
+        kind = research_category(copy, [eligible[symbol] for symbol in tags.tickers])
         if kind and (not category or kind == category) and (not ticker or ticker.upper() in copy.tickers):
             selected.append((copy, kind))
     grouped = {}
@@ -153,14 +170,19 @@ def research_rows(session, options, category=None, *, hot=False):
             continue
         chosen = representative([row[0] for row in matching], priorities)
         kind = next(kind for row, kind in matching if row.id == chosen.id)
-        members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all()
+        members = [a for a in session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all() if relevant_article(a, tagger)]
         source_count = len({a.publisher_group for a in members})
-        # Broad Market Brief and Hot Topics need two independent publisher groups.
-        if (hot or kind == 'MARKET_BRIEF') and source_count < 2:
+        # Archives retain single-source evidence; discovery requires independent coverage.
+        if hot and source_count < 2:
             continue
-        story = story.model_copy(update={'source_count': source_count})
+        image = cluster_thumbnail(chosen, members, priorities)
+        if hot and image is None:
+            continue
+        story = story.model_copy(update={'source_count': source_count, 'article_count': len(members),
+            'last_updated_at': max(a.first_seen_at for a in members)})
         output.append(StoryResponse(story=story, articles=[chosen, *[a for a in members if a.id != chosen.id]],
-            representative_article=chosen, research_category=kind, ranking_score=story_score(story, datetime.now(timezone.utc)),
+            representative_article=chosen, thumbnail_url=image.thumbnail_url if image else None,
+            thumbnail_article_id=image.id if image else None, research_category=kind, ranking_score=story_score(story, datetime.now(timezone.utc)),
             ranking_reason='Independent publishers first, capped article activity, then latest activity'))
     return sorted(output, key=attention_order)[:limit]
 

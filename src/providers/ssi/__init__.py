@@ -227,6 +227,8 @@ class SsiMarketDataProvider:
             return dict(index='VNINDEX', level=level,
                 change=numeric(row, 'indexChange') if row.get('indexChange') is not None else None,
                 change_percent=numeric(row, 'indexChangePercentage') if row.get('indexChangePercentage') is not None else None,
+                total_volume=numeric(row, 'totalTrade') if row.get('totalTrade') not in (None, '') else None,
+                total_value=numeric(row, 'totalTradeValue') if row.get('totalTradeValue') not in (None, '') else None,
                 trading_date=day.isoformat(), source=self.source,
                 fetched_at=datetime.now(ZoneInfo('Asia/Ho_Chi_Minh')).isoformat())
         return self._guard('VNINDEX', 'index_summary', fetch)

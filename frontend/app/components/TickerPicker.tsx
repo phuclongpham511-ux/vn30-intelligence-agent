@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
+import StockSearch from "./stock/StockSearch";
 import { useState } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { useStocks } from "./stock/StockUniverse";
@@ -9,18 +11,19 @@ import { Button } from "./ui/button";
 import { useRecentSearches } from "./stock/useRecentSearches";
 import { MascotState } from "./mascot/Mascot";
 export default function TickerPicker() {
+  const router=useRouter();
   const { stocks, loading, error, refresh, status, lastSynced, groups } = useStocks();
   const [query, setQuery] = useState('');
   const [exchange, setExchange] = useState('');
-  const {recent,remember}=useRecentSearches();
+  const {remember}=useRecentSearches();
   const [group,setGroup]=useState('');
   const [page, setPage] = useState(0);
   const result = browseSecurities(stocks, query, exchange, page, 10, group ? groups?.groups[group] || [] : undefined);
   return <section aria-labelledby="explore-title">
     <div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 id="explore-title">Explore stocks <span className="ml-2 text-xs font-normal text-muted-foreground">{stocks.length || (!loading && !error && status === 'healthy') ? `${stocks.length.toLocaleString('en-GB')} Vietnam equities` : 'Universe count unavailable'}</span></h2><span className="text-xs text-muted-foreground">SSI metadata{lastSynced ? ` · Synced ${new Date(lastSynced).toLocaleString('en-GB')}` : ''}</span></div>
-    <div className="mb-4 flex flex-wrap gap-3"><label className="min-w-0 w-full text-xs sm:w-auto sm:flex-1">Ticker or company<input aria-label="Explore ticker or company" className="mt-1 h-10 w-full rounded border bg-background px-3 text-sm" value={query} maxLength={120} onChange={e=>{setQuery(e.target.value);setPage(0);}} placeholder="Search all listed equities"/></label>
+    <div className="mb-4 flex flex-wrap gap-3"><div className="min-w-0 w-full text-xs sm:w-auto sm:flex-1"><span className="mb-1 block">Ticker or company</span><StockSearch stocks={stocks} label="Explore ticker or company" disabled={loading} onQueryChange={value=>{setQuery(value);setPage(0);}} onSelect={symbol=>router.push(`/stocks/${encodeURIComponent(symbol)}`)}/></div>
       <label className="text-xs">Exchange<select aria-label="Exchange" className="mt-1 block h-10 rounded border bg-background px-3 text-sm" value={exchange} onChange={e=>{setExchange(e.target.value);setPage(0);}}><option value="">All exchanges</option>{['HOSE','HNX','UPCOM'].map(e=><option key={e}>{e}</option>)}</select></label><label className="text-xs">Index group<select aria-label="Index group" className="mt-1 block h-10 rounded border bg-background px-3 text-sm" value={group} onChange={e=>{setGroup(e.target.value);setPage(0);}}><option value="">All equities</option>{['VN30','VN100','HNX30'].map(code=><option key={code} disabled={!groups?.groups[code]?.length}>{code}{!groups?.groups[code]?.length?' (unavailable)':''}</option>)}</select></label></div>
-    {!query && recent.length>0 && <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground"><span>Recent searches</span>{recent.filter(symbol=>stocks.some(s=>s.symbol===symbol)).map(symbol=><button key={symbol} className="rounded border px-2 py-1" onClick={()=>{setQuery(symbol);setPage(0);}}>{symbol}</button>)}</div>}
+
     {group && <p className="mb-3 text-xs text-muted-foreground">{group} membership · {groups?.source}{groups?.last_synced_at ? ` · Synced ${new Date(groups.last_synced_at).toLocaleString('en-GB')}`:''}{groups?.status!=='healthy'?' · cached / incomplete coverage':''}</p>}
     {loading ? <MascotState state="loading" role="status">Loading equity metadata…</MascotState> : error ? <p role="alert">{error} <button className="text-primary underline" onClick={refresh}>Retry</button></p> : <>
       {status !== 'healthy' && <p role="status" className="mb-3 text-xs text-muted-foreground">{stocks.length ? 'Showing cached metadata; the latest refresh is unavailable or stale.' : 'Equity metadata has not been acquired yet.'}</p>}

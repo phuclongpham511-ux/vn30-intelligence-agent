@@ -26,6 +26,8 @@ test('Explore renders a bounded universe with direct research links and no add p
   const rows=Array.from({length:60},(_,n)=>({symbol:`X${n}`,exchange:n%2?'HNX':'HOSE',display_name_en:'Issuer'}));
   const Picker=component('../app/components/TickerPicker.tsx',{
     './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
+    './stock/StockSearch':()=>React.createElement('input',{role:'combobox'}),
+    'next/navigation':{useRouter:()=>({push:()=>{}})},
     './stock/StockUniverse':{useStocks:()=>({stocks:rows,loading:false,error:'',status:'healthy'})},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
     './mascot/Mascot':{MascotState:({children})=>children}});
@@ -39,6 +41,8 @@ test('Explore renders a bounded universe with direct research links and no add p
 test('Explore does not present an unknown universe count as zero',()=>{
   const Picker=component('../app/components/TickerPicker.tsx',{
     './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
+    './stock/StockSearch':()=>React.createElement('input',{role:'combobox'}),
+    'next/navigation':{useRouter:()=>({push:()=>{}})},
     './stock/StockUniverse':{useStocks:()=>({stocks:[],loading:true,error:'',status:'not_attempted'})},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
     './mascot/Mascot':{MascotState:({children})=>children}});
@@ -53,4 +57,31 @@ test('shared stock search initially stays empty instead of rendering the market 
   assert.match(html,/role="combobox"/);
   assert.match(html,/aria-expanded="false"/);
   assert.doesNotMatch(html,/role="option"|<select/);
+});
+
+test('Hot Topics selects only same-cluster images and excludes no-image stories',()=>{
+ const render=item=>renderToStaticMarkup(React.createElement(TopStory,{item,requireImage:true}));
+ const base={story:{id:'s',source_count:2},representative_article:article,articles:[article]};
+ assert.equal(render(base),'');
+ const sibling={...article,id:'b',thumbnail_url:'https://example.org/sibling.jpg'};
+ assert.match(render({...base,articles:[article,sibling]}),/sibling.jpg/);
+ assert.doesNotMatch(render({...base,thumbnail_url:'https://other.example/unrelated.jpg'}),/<img/);
+ const preferred={...article,thumbnail_url:'https://example.org/preferred.jpg'};
+ assert.match(render({...base,representative_article:preferred,articles:[preferred,sibling]}),/src="https:\/\/example.org\/preferred.jpg"/);
+});
+
+test('Explore hero links to index research, enlarges mascot, and keeps provider details out',()=>{
+ const Market=component('../app/components/ExploreMarket.tsx',{
+  './mascot/Mascot':{MascotIllustration:({size})=>React.createElement('span',{'data-mascot-size':size}),MascotState:({children})=>children},
+  './news/TopStory':()=>null});
+ const html=renderToStaticMarkup(React.createElement(Market));
+ assert.match(html,/<header/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
+ assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary|panel flex/);
+});
+
+test('stock news archive link opens the semantic Company view',()=>{
+ const News=component('../app/components/stock/StockNews.tsx',{
+  '../news/ArticleRow':()=>null,'../news/SourceCoverage':()=>null});
+ const html=renderToStaticMarkup(React.createElement(News,{ticker:'XYZ'}));
+ assert.match(html,/href="\/news\?ticker=XYZ&amp;view=company"/);
 });

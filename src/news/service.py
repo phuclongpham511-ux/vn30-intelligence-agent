@@ -26,7 +26,7 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
     result = {}
     for source in sources:
         now = utc(supplied_now or datetime.now(timezone.utc))
-        if not source.enabled:
+        if not source.enabled or source.country != 'VN' or source.category != 'VN':
             continue
         state = session.get(NewsSourceState, source.source_id)
         if state and state.last_attempt_at and not force and utc(state.last_attempt_at) > now - timedelta(minutes=source.poll_interval_minutes):
@@ -118,13 +118,35 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
     return result
 
 
+def vietnam_article(article):
+    return article.country == 'VN' and article.category == 'VN'
+
+
+def equity_tagger(session):
+    from src.services.universe import listed_equities
+    return Tagger(listed_equities(session))
+
+
+def relevant_article(article, tagger):
+    from src.news.research import vietnam_relevance, primary_issuers
+    if not vietnam_article(article):
+        return False
+    if vietnam_relevance(article.title):
+        return True
+    tags = tagger.tag(article.title, article.category)
+    return vietnam_relevance(article.title,
+        primary_issuers(article.title, [row for row in tagger.stocks if row.symbol in tags.tickers]))
+
+
 def articles(session, *, country=None, source=None, topic=None, ticker=None, sector=None, category=None, financial_only=False, now=None, hours=72):
     now = utc(now or datetime.now(timezone.utc))
-    query = select(NewsArticle).where(NewsArticle.first_seen_at >= now - timedelta(hours=hours))
+    query = select(NewsArticle).where(NewsArticle.first_seen_at >= now - timedelta(hours=hours), NewsArticle.country == 'VN', NewsArticle.category == 'VN')
     for field, value in [('country', country), ('source_id', source), ('category', category)]:
         if value:
             query = query.where(getattr(NewsArticle, field) == value)
     rows = session.exec(query).all()
+    tagger = equity_tagger(session)
+    rows = [a for a in rows if relevant_article(a, tagger)]
     return sorted([a for a in rows if (not financial_only or a.topics or a.tickers or a.sectors) and all(not value or value.casefold() in {x.casefold() for x in getattr(a, field)} for field, value in [('topics', topic), ('tickers', ticker), ('sectors', sector)])],
         key=lambda a: (utc(a.published_at or a.first_seen_at), a.id), reverse=True)
 
