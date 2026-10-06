@@ -81,8 +81,8 @@ def sources(session: DB):
             source_id=source.source_id, name=source.name, country=source.country,
             category=source.category, enabled=source.enabled,
             poll_interval_minutes=source.poll_interval_minutes, status=status,
-            last_attempt_at=state.last_attempt_at if state else None,
-            last_success_at=state.last_success_at if state else None,
+            last_attempt_at=utc(state.last_attempt_at) if state and state.last_attempt_at else None,
+            last_success_at=utc(state.last_success_at) if state and state.last_success_at else None,
             last_error=state.last_error if state else None,
             articles_received=state.articles_received if state and state.last_attempt_at else None,
         ))

@@ -6,7 +6,7 @@ from urllib.request import Request, urlopen
 from urllib.robotparser import RobotFileParser
 from bs4 import BeautifulSoup
 from sqlmodel import select
-from src.community.models import CommunityThread, CommunitySourceState
+from src.community.models import CommunityThread, CommunitySourceState, CommunityThreadObservation
 from src.models import Stock
 from src.news.normalization import canonical_url, clean_title, utc
 from src.news.tagging import Tagger, contains
@@ -129,23 +129,28 @@ def community_tags(title, stocks):
 
 
 def ingest(session, *, fetch=acquire, now=None):
+    supplied_now = now
     now = utc(now or datetime.now(timezone.utc))
     state = session.get(CommunitySourceState, SOURCE_ID)
     if state and state.last_attempt_at and utc(state.last_attempt_at) > now - timedelta(minutes=POLL_MINUTES):
         return {'status': 'skipped'}
     try:
         incoming = fetch()
+        observed_at = utc(supplied_now or datetime.now(timezone.utc))
         stocks = session.exec(select(Stock)).all()
         for row in incoming:
             existing = session.get(CommunityThread, row['id'])
             tickers, topics = community_tags(row['title'], stocks)
-            thread = existing or CommunityThread(**row, first_seen_at=now, last_seen_at=now)
+            thread = existing or CommunityThread(**row, first_seen_at=observed_at, last_seen_at=observed_at)
             for field, value in row.items():
                 setattr(thread, field, value)
-            thread.last_seen_at, thread.tickers, thread.topics = now, tickers, topics
+            thread.last_seen_at, thread.tickers, thread.topics = observed_at, tickers, topics
             session.add(thread)
+            session.flush()  # parent exists before the observation foreign key
+            session.add(CommunityThreadObservation(thread_id=thread.id,
+                observed_at=observed_at, replies=thread.replies, views=thread.views))
         state = state or CommunitySourceState(source_id=SOURCE_ID)
-        state.last_attempt_at = state.last_success_at = now
+        state.last_attempt_at, state.last_success_at = now, observed_at
         state.last_error, state.threads_received = None, len(incoming)
         session.add(state)
         session.commit()
@@ -159,10 +164,21 @@ def ingest(session, *, fetch=acquire, now=None):
         return {'status': 'error', 'error': state.last_error}
 
 
-def pulse(session, *, ticker=None, topic=None, now=None):
+def source_status(session, *, now=None):
     now = utc(now or datetime.now(timezone.utc))
     state = session.get(CommunitySourceState, SOURCE_ID)
     status = 'not_attempted' if not state or not state.last_attempt_at else 'error' if state.last_error else 'stale' if not state.last_success_at or utc(state.last_success_at) < now - timedelta(minutes=2 * POLL_MINUTES) else 'healthy'
+    return dict(source_id=SOURCE_ID, name=SOURCE_NAME, url=ENDPOINT,
+        status=status, poll_interval_minutes=POLL_MINUTES,
+        last_attempt_at=utc(state.last_attempt_at) if state and state.last_attempt_at else None,
+        last_success_at=utc(state.last_success_at) if state and state.last_success_at else None,
+        last_error=state.last_error if state else None,
+        threads_received=state.threads_received if state and state.last_attempt_at else None)
+
+
+def pulse(session, *, ticker=None, topic=None, now=None):
+    now = utc(now or datetime.now(timezone.utc))
+    source = source_status(session, now=now)
     rows = session.exec(select(CommunityThread).where(CommunityThread.last_seen_at >= now - timedelta(hours=72))).all()
     rows = [r for r in rows if (not ticker or ticker.upper() in r.tickers) and (not topic or topic in r.topics)]
     from collections import Counter
@@ -172,8 +188,6 @@ def pulse(session, *, ticker=None, topic=None, now=None):
     rows.sort(key=lambda r: (-(r.replies if r.replies is not None else -1), -utc(r.activity_at or r.last_seen_at).timestamp(), r.id))
     def utc_row(row):
         return row.model_copy(update={f: utc(getattr(row, f)) if getattr(row, f) else None for f in ('published_at', 'activity_at', 'first_seen_at', 'last_seen_at')})
-    return dict(as_of=now, source=dict(id=SOURCE_ID, name=SOURCE_NAME, url=ENDPOINT, status=status,
-        last_success_at=utc(state.last_success_at) if state and state.last_success_at else None,
-        last_error=state.last_error if state else None),
+    return dict(as_of=now, source=dict(id=SOURCE_ID, **source),
         sampled_threads=len(rows), most_discussed=[dict(ticker=t, thread_count=n) for t,n in sorted(tickers.items(), key=lambda x:(-x[1],x[0]))],
         topics=[dict(topic=t, thread_count=n) for t,n in sorted(topics.items(), key=lambda x:(-x[1],x[0]))], threads=[utc_row(r) for r in rows[:20]])

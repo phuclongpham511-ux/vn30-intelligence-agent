@@ -305,6 +305,23 @@ metadata; collection failures do not affect publisher ingestion. Chứng Sỹ/Fi
 are deferred because their public HTML did not expose usable discussion metadata.
 This narrow slice supersedes the earlier blanket deferral of social/forum ingestion.
 
+### Data Update Reliability V1 — active milestone, implemented 2026-10-06
+
+One canonical `python -m scripts.ingest_data [--watch]` worker operates existing
+News and Community services outside FastAPI. Persisted per-source cadence survives
+restart; separate sessions isolate failures. Source status exposes actual last
+attempt/success and cadence-relative freshness. Successful Community acquisitions
+now append raw timestamped nullable replies/views observations without backfill or
+momentum claims. Automatic OS/process restart requires a future external supervisor.
+
+Agreed next steps (not implemented by this milestone):
+1. Connect Community discussion into Stock Detail / Watchlist research flows.
+2. Refine Watchlist daily monitoring and new-since-review behavior.
+3. Community Momentum only after sufficient repeated observations exist.
+
+Technical Materiality remains paused pending SSI / certified historical-data
+provenance evidence; this milestone does not reopen calibration or protected cases.
+
 ### Later direction and current non-priorities
 
 An **AI Product Layer** may later summarize watchlist changes, explain why a story

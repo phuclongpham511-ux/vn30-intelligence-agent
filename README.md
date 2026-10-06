@@ -22,11 +22,43 @@ not bare uppercase tokens. Counts measure distinct observed threads, and activit
 ordering uses lifetime replies then public last-activity time; it is not a growth
 rate, sentiment or Materiality score. Six discussions appear by default.
 
-Run `uv run python -m scripts.ingest_community` once or use `--watch` in one scheduler
-process. The read-only `/community/pulse` endpoint never crawls during a page request.
+The read-only `/community/pulse` and `/community/sources` endpoints never crawl
+during a page request. Browser Refresh only reads persisted data and source status.
 Run `create_tables()` during explicit production schema deployment for the additive
 Community tables and nullable News thumbnail fields. Local development does this
 at startup. News and Community ingestion failures remain independent.
+
+## Data Update Reliability V1 — canonical collection worker
+
+Run one worker alongside the FastAPI/web processes, against the same DATABASE_URL:
+
+```powershell
+uv run python -m scripts.ingest_data
+uv run python -m scripts.ingest_data --watch
+```
+
+One-off mode evaluates both domains and exits nonzero if either reports a failure.
+Watch mode reevaluates every 60 seconds; existing persisted News source intervals
+and Community's 30-minute interval determine due work. Each domain uses its own
+session; source/domain failures are reported by exception type only and do not
+terminate the watch loop. Ctrl+C/SIGTERM stops cleanly; in-flight bounded acquisition
+may finish first. Restart does not reset timestamps or force fetches. Skipped work
+does not change last-success state. Run only one collector: do not also run the
+legacy domain-specific `--watch` commands. These remain available for targeted
+diagnostics; News `--smoke` does not persist data. `--force-news` is an explicit
+one-off News override, forbidden with `--watch`; it does not bypass Community cadence.
+
+This worker does not start inside FastAPI. Automatic launch/process restart is
+the responsibility of a future external deployment supervisor, not implemented here.
+The worker is sequential and the 60-second wait follows completion of each cycle.
+
+Successful Community acquisitions append one CommunityThreadObservation per sampled
+thread (thread ID, actual observation time, nullable lifetime replies/views), alongside
+the latest thread state in one transaction. History starts with this feature; no
+backfill, retention job, velocity or momentum score exists. Failed/skipped cycles
+create no observations. Freshness APIs expose healthy (successful within twice the
+source interval), stale, latest-attempt error, never attempted and News disabled
+states. The UI displays last successful fetch, not a claim of complete market coverage.
 
 Source verification on 2026-10-05: F319 public listing parsed 20 threads, with stable
 URLs, dates and reply/view counts; `f319.com` itself did not resolve here. Chứng Sỹ

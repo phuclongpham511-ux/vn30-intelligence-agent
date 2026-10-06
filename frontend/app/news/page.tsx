@@ -81,7 +81,7 @@ export default function NewsPage() {
   }, [load, attempt]);
   return <div className="page-stack">
     <div className="flex items-start justify-between gap-4"><div><div className="eyebrow mb-3">News</div><h1>Market Today</h1><p className="mt-2 text-sm text-muted-foreground">Market-wide reporting from Vietnam and global markets.</p></div><Button variant="outline" disabled={loading && view !== "community"} onClick={() => setAttempt(value => value + 1)}>Refresh</Button></div>
-    {view !== "community" && <SourceCoverage/>}
+    <SourceCoverage attempt={attempt}/>
     <div className="flex flex-wrap items-center justify-between gap-3">
       <nav aria-label="News sections" className="flex flex-wrap gap-2">{([["briefing", "Market briefing"], ["latest", "Latest News"], ["global", "Global Markets"], ["community", "Community Pulse"]] as const).map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)} className={`rounded border px-3 py-2 text-sm ${view === key ? "border-primary text-primary" : "text-muted-foreground hover:bg-muted"}`}>{label}</button>)}</nav>
       {view !== "community" && <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={financialOnly} onChange={event => setFinancialOnly(event.target.checked)}/>Financially tagged only</label>}

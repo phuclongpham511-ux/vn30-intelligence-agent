@@ -18,11 +18,13 @@ def story_score(story: NewsStory, now: datetime) -> float:
 
 
 def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=False, matcher=None, tagger=None):
+    supplied_now = now
     now = utc(now or datetime.now(timezone.utc))
     matcher = matcher or LexicalStoryMatcher()
     tagger = tagger or Tagger(session.exec(select(Stock)).all())
     result = {}
     for source in sources:
+        now = utc(supplied_now or datetime.now(timezone.utc))
         if not source.enabled:
             continue
         state = session.get(NewsSourceState, source.source_id)
@@ -96,7 +98,7 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                 story.trend_score = story_score(story, now)
                 session.add(story)
                 added += 1
-            state.last_success_at = now
+            state.last_success_at = utc(supplied_now or datetime.now(timezone.utc))
             state.last_error = None
             state.articles_received = len(incoming)
             session.add(state)

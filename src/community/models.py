@@ -25,3 +25,11 @@ class CommunitySourceState(SQLModel, table=True):
     last_success_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
     last_error: str | None = None
     threads_received: int | None = None
+
+
+class CommunityThreadObservation(SQLModel, table=True):
+    """Raw successful listing observations; never backfilled or updated."""
+    thread_id: str = Field(foreign_key='communitythread.id', primary_key=True)
+    observed_at: datetime = Field(sa_type=DateTime(timezone=True), primary_key=True)
+    replies: int | None = None
+    views: int | None = None
