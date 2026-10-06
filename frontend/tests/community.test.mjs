@@ -1,14 +1,19 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { loadCommunity, loadCommunityUpdates, communityEvidence, communitySourceMessage } from "../lib/community.ts";
+import { loadCommunity, loadCommunityUpdates, communityEvidence, communitySourceMessage, communityTime } from "../lib/community.ts";
+
+test("Community timestamps use the Vietnam calendar date even at UTC midnight boundaries", () => {
+  assert.equal(communityTime("2026-10-06T17:05:00Z"), "07/10/2026, 00:05:00");
+  assert.equal(communityTime("bad"), "Unavailable");
+});
 
 test("stock discussion evidence preserves its original link and missing lifetime counts", () => {
-  const thread={url:'https://newf319.com/threads/example.22/',replies:null,views:null,activity_at:null,last_seen_at:'2026-10-06T10:00:00Z'};
+  const thread={url:'https://newf319.com/threads/example.22/',replies:null,views:null,published_at:'2026-10-06T10:00:00Z'};
   const evidence=communityEvidence(thread);
   assert.equal(evidence.url,thread.url);
   assert.equal(evidence.replies,'Replies unavailable');
   assert.equal(evidence.views,'Views unavailable');
-  assert.equal(evidence.timeLabel,'Observed');
+  assert.equal(evidence.timeLabel,'Published');
   assert.equal(communityEvidence({...thread,replies:0,views:12}).replies,'0 replies');
   assert.equal(communityEvidence({...thread,url:'javascript:alert(1)'}).url,null);
   assert.match(communitySourceMessage('healthy'),/sample/i);
@@ -42,7 +47,7 @@ test("community query is separate from publisher filtering and failures remain u
       const query = new URL(url, "http://localhost");
       assert.equal(query.pathname, "/api/community/pulse");
       assert.equal(query.searchParams.get("ticker"), "XYZ");
-      assert.equal(query.searchParams.get("topic"), "Earnings");
+      assert.equal(query.searchParams.get("topic"), null);
       assert.equal(query.searchParams.get("financial_only"), null);
       return { ok: true, json: async () => ({ threads: [], source: { status: "not_attempted" } }) };
     };

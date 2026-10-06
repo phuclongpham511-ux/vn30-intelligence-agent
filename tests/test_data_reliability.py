@@ -52,9 +52,9 @@ def test_community_source_status_api_and_reads_never_acquire(session, client, mo
     status = source_status(session, now=NOW + timedelta(minutes=61))
     assert status['status'] == 'error' and status['threads_received'] == 1
     response = client.get('/community/sources').json()[0]
-    assert response['poll_interval_minutes'] == 30
+    assert response['poll_interval_minutes'] == 15
     assert response['last_success_at'].endswith('Z')
-    assert client.get('/community/pulse').json()['sampled_threads'] >= 1
+    assert client.get('/community/pulse').json()['sampled_items'] == 0
 
 
 def test_unified_worker_persisted_restart_cadence_and_source_failure(tmp_path, monkeypatch):
@@ -65,24 +65,26 @@ def test_unified_worker_persisted_restart_cadence_and_source_failure(tmp_path, m
         calls.append(source.source_id)
         if source.source_id == 'bad': raise TimeoutError('secret')
         return [ArticleInput('Bank earnings increase', 'https://good.example/a', NOW)]
-    def community_fetch():
+    def community_fetch(*_):
         calls.append('community')
-        return ROWS
+        return [], ROWS
     monkeypatch.setattr(ingest_data, 'load_sources', lambda _: SOURCES)
     monkeypatch.setattr(ingest_data, 'ingest_cycle', lambda session, sources, **kw:
         ingest_cycle(session, sources, fetch=news_fetch, now=clock[0], **kw))
-    monkeypatch.setattr(ingest_data, 'ingest', lambda session:
-        ingest(session, fetch=community_fetch, now=clock[0]))
+    from src.community.daily import ingest_cycle as daily_cycle
+    from src.community.acquisition import SOURCES as community_sources
+    monkeypatch.setattr(ingest_data, 'ingest_community', lambda engine:
+        daily_cycle(engine, sources=community_sources[:1], fetch=community_fetch, now=clock[0]))
     engine = create_engine(url); create_tables(engine)
     result = ingest_data.run_cycle(engine)
     assert result['news']['bad']['status'] == 'error'
-    assert result['community']['status'] == 'ok' and ingest_data.failed(result)
+    assert result['community'][SOURCE_ID]['status'] == 'ok' and ingest_data.failed(result)
     assert calls == ['good', 'bad', 'community']
     engine.dispose()  # actual reconnect to persisted state, not an in-memory timer
     engine = create_engine(url); create_tables(engine)
     clock[0] += timedelta(minutes=1)
     result = ingest_data.run_cycle(engine)
-    assert result == {'news': {}, 'community': {'status': 'skipped'}}
+    assert result == {'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}}
     assert calls == ['good', 'bad', 'community']
     with Session(engine) as session:
         assert utc(session.get(NewsSourceState, 'good').last_success_at) == NOW
@@ -105,7 +107,7 @@ def test_unexpected_domain_exception_does_not_suppress_other_domain(session, mon
         return {} if domain == 'news' else {'status': 'ok'}
     monkeypatch.setattr(ingest_data, 'load_sources', lambda _: [])
     monkeypatch.setattr(ingest_data, 'ingest_cycle', lambda *a, **kw: invoke('news'))
-    monkeypatch.setattr(ingest_data, 'ingest', lambda *a: invoke('community'))
+    monkeypatch.setattr(ingest_data, 'ingest_community', lambda *a: invoke('community'))
     result = ingest_data.run_cycle(session.get_bind())
     assert calls == ['news', 'community']
     assert result[broken] == {'status': 'error', 'error': 'RuntimeError'}
@@ -114,7 +116,7 @@ def test_unexpected_domain_exception_does_not_suppress_other_domain(session, mon
 def test_watch_continues_after_failure_and_wait_is_interruptible(session, monkeypatch, capsys):
     calls = []
     monkeypatch.setattr(ingest_data, 'run_cycle', lambda *a, **kw: calls.append(kw) or
-        {'news': {'status': 'error', 'error': 'RuntimeError'}, 'community': {'status': 'skipped'}})
+        {'news': {'status': 'error', 'error': 'RuntimeError'}, 'community': {SOURCE_ID: {'status': 'skipped'}}})
     class Stop:
         def is_set(self): return len(calls) >= 2
         def wait(self, seconds): assert seconds == 60

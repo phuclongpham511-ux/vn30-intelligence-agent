@@ -17,9 +17,9 @@ new Function("require", "exports", compiled)(name => require(name.startsWith("@/
   ? `../lib/${name.slice(6)}.ts` : name), exports);
 const { CommunityDiscussions } = exports;
 const thread = { id: "thread-one", title: "Example Company public discussion", url: "https://newf319.com/threads/example.22/",
-  replies: null, views: null, activity_at: null, last_seen_at: "2026-10-06T10:00:00Z" };
-const pulse = { sampled_threads: 1, threads: [thread], source: { name: "F319", url: "https://newf319.com/",
-  status: "healthy", last_success_at: "2026-10-06T10:00:00Z" } };
+  replies: null, views: null, source_id: "f319_public", tickers: ["XYZ"], excerpt: "XYZ test support", published_at: "2026-10-06T10:00:00Z" };
+const pulse = { window: { label: "Today", start: "2026-10-05T17:00:00Z" }, unique_items: 1, items: [thread], themes: [{id: "levels", label: "Technical levels", summary: "XYZ test support", keywords: [], item_count: 1, source_count: 1, source_ids: ["f319_public"], latest_at: thread.published_at, evidence_ids: [thread.id]}], sources: [{ source_id: "f319_public", enabled: true, name: "F319", url: "https://newf319.com/",
+  status: "healthy", last_success_at: "2026-10-06T10:00:00Z" }] };
 const render = props => renderToStaticMarkup(React.createElement(CommunityDiscussions,
   { ticker: "XYZ", data: pulse, loading: false, error: false, retry() {}, ...props }));
 
@@ -30,21 +30,21 @@ test("Stock Detail renders matched public evidence, safe original links and unav
   assert.match(html, /Replies unavailable/);
   assert.match(html, /Views unavailable/);
   assert.doesNotMatch(html, /0 replies|0 views|Mark .*reviewed/);
-  const unsafe = render({ data: { ...pulse, threads: [{ ...thread, url: "javascript:alert(1)" }] } });
+  const unsafe = render({ data: { ...pulse, items: [{ ...thread, url: "javascript:alert(1)" }] } });
   assert.doesNotMatch(unsafe, /javascript:/);
 });
 
 test("Stock Detail distinguishes healthy empty, stale, acquisition error, never checked and read failure", () => {
-  assert.match(render({ data: { ...pulse, threads: [] } }), /No discussions matched XYZ/);
+  assert.match(render({ data: { ...pulse, items: [] } }), /No same-day discussions matched XYZ/);
   for (const [status, message] of [["stale", /may be stale/], ["error", /latest source acquisition failed/],
     ["not_attempted", /has not been checked yet/]]) {
-    assert.match(render({ data: { ...pulse, threads: [], source: { ...pulse.source, status } } }), message);
+    assert.match(render({ data: { ...pulse, items: [], sources: [{ ...pulse.sources[0], status }] } }), message);
   }
   assert.match(render({ error: true }), /Counts are unknown/);
   assert.match(render({ loading: true }), /Loading Community discussions/);
 });
 
-test("Community renderer never auto-reviews and uses only thread identities for new badges", () => {
+test("Community renderer never auto-reviews and uses only evidence identities for new badges", () => {
   let reviews = 0;
   const review = () => reviews++;
   const unreviewed = render({ review });
@@ -52,7 +52,7 @@ test("Community renderer never auto-reviews and uses only thread identities for 
   assert.match(unreviewed, /Not reviewed yet/);
   assert.equal(reviews, 0);
   assert.doesNotMatch(render({ review, seen: [thread.id], data: { ...pulse,
-    threads: [{ ...thread, replies: 1000, views: 9999 }] } }), /Mark 1 discussion reviewed|>New</);
+    items: [{ ...thread, replies: 1000, views: 9999 }] } }), /Mark 1 discussion reviewed|>New</);
   assert.match(render({ review, seen: [thread.id], data: { ...pulse,
-    threads: [{ ...thread, id: "new-thread" }] } }), /1 new since your Community review/);
+    items: [{ ...thread, id: "new-thread" }] } }), /1 new since your Community review/);
 });

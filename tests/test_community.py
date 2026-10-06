@@ -4,7 +4,7 @@ import pytest
 from sqlmodel import select
 from src.models import Stock
 from src.news.models import NewsArticle, NewsStory
-from src.community.models import CommunityThread, CommunitySourceState
+from src.community.models import CommunityThread, CommunitySourceState, CommunityEvidenceItem
 from src.community.service import acquire, parse_listing, community_tags, ingest, pulse, SOURCE_ID
 
 NOW = datetime(2026, 10, 4, 10, tzinfo=timezone.utc)
@@ -75,7 +75,7 @@ def test_empty_unattempted_and_stale_are_distinct(session):
 def test_stock_discussion_api_is_strict_bounded_and_persisted_only(session, client, monkeypatch):
     now = datetime.now(timezone.utc)
     for index in range(25):
-        session.add(CommunityThread(id=f'{SOURCE_ID}:{index}', source_id=SOURCE_ID,
+        session.add(CommunityEvidenceItem(id=f'{SOURCE_ID}:thread_comment:{index}', source_id=SOURCE_ID, source_item_id=str(index), item_type='thread_comment', excerpt=f'Example discussion {index}', revision_id='r1', published_at=now,
             title=f'Example Company discussion {index}', url=f'https://newf319.com/threads/example.{index}/',
             first_seen_at=now, last_seen_at=now, tickers=['XYZ'], replies=None, views=None))
     session.add(CommunityThread(id='unrelated', source_id=SOURCE_ID,title='Unrelated',url='https://newf319.com/',
@@ -86,10 +86,10 @@ def test_stock_discussion_api_is_strict_bounded_and_persisted_only(session, clie
     response=client.get('/community/pulse',params={'ticker':' xyz '})
     assert response.status_code==200
     data=response.json()
-    assert data['sampled_threads']==25 and len(data['threads'])==20
-    assert all(row['tickers']==['XYZ'] and row['replies'] is None and row['views'] is None for row in data['threads'])
-    assert all(row['url'].startswith('https://newf319.com/threads/') for row in data['threads'])
-    assert client.get('/community/pulse?ticker=UNKNOWN').json()['threads']==[]
+    assert data['sampled_items']==25 and len(data['items'])==25
+    assert all(row['tickers']==['XYZ'] and row['replies'] is None and row['views'] is None for row in data['items'])
+    assert all(row['url'].startswith('https://newf319.com/threads/') for row in data['items'])
+    assert client.get('/community/pulse?ticker=UNKNOWN').json()['items']==[]
 
 
 @pytest.mark.parametrize('status', ['healthy', 'stale', 'error', 'not_attempted'])
@@ -101,5 +101,5 @@ def test_stock_discussion_api_preserves_source_state_when_no_matches(session, cl
             last_error='TimeoutError' if status == 'error' else None))
         session.commit()
     data = client.get('/community/pulse?ticker=XYZ').json()
-    assert data['threads'] == []
-    assert data['source']['status'] == status
+    assert data['items'] == []
+    assert data['sources'][0]['status'] == status

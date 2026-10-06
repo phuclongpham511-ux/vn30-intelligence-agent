@@ -23,6 +23,9 @@ def create_tables(engine=None):
     from src.community import models as community_models  # noqa: F401
     target = engine if engine is not None else get_engine()
     SQLModel.metadata.create_all(target)
+    if 'items_received' not in {column['name'] for column in inspect(target).get_columns('communitysourcestate')}:
+        with target.begin() as connection:
+            connection.execute(text('ALTER TABLE communitysourcestate ADD COLUMN items_received INTEGER'))
     news_columns = {column['name'] for column in inspect(target).get_columns('newsarticle')}
     with target.begin() as connection:
         for field in ('thumbnail_url', 'thumbnail_provenance'):

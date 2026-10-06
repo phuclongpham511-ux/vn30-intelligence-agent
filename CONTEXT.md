@@ -299,15 +299,21 @@ Explicit feed media metadata may provide a thumbnail. Sector is demoted to Advan
 headline-tag filtering because current company sector mapping is missing and actual
 coverage is sparse. No sector values were invented.
 
-Community Pulse is an explicitly authorized separate public-discussion evidence
-layer, not publisher News, Materiality or sentiment. V1 samples the public F319
-listing at newf319.com every 30 minutes, subject to robots/access checks, retaining
-thread URLs/titles, public author names, timestamps and optional lifetime reply/view
-counts. Distinct sampled-thread mentions and lifetime-reply ordering are descriptive;
-no activity growth rate is claimed. Missing counts remain null. The API reads stored
-metadata; collection failures do not affect publisher ingestion. Chứng Sỹ/FireAnt
-are deferred because their public HTML did not expose usable discussion metadata.
-This narrow slice supersedes the earlier blanket deferral of social/forum ingestion.
+Community Daily Pulse groups same-day public investor discussion into top 1–3
+extractive themes. It remains separate from publisher News, sentiment, Materiality
+and investment advice. Active sources: F319 public latest-page comments, 24HMoney
+public community posts, and Chứng Sỹ public post pages/sitemap. Each polls every
+15 minutes with robots checks, bounded requests and isolated persisted status.
+FireAnt remains deferred: no stable unauthenticated item feed was verified.
+Today means the Vietnam calendar day using actual publication time, never observed
+time or an old thread's age; explicit `window=last24h` is labelled Last 24 hours.
+There is no automatic stale-data fallback. Stable native item identities and bounded
+immutable text/attribution revisions preserve evidence; legacy F319 thread tables
+and observations remain compatible. Conservative text dedup retains original links;
+themes rank by unique items, source breadth and recency, not truth or prediction.
+Stock Detail, Watchlist and Community Pulse expose themes and expandable evidence.
+Watchlist review is explicit and separate from News; item identity determines novelty.
+No Community Momentum or SSI historical retention is implemented.
 
 ### Data Update Reliability V1 — active milestone, implemented 2026-10-06
 
@@ -323,8 +329,7 @@ Both read bounded ticker-matched persisted discussions with explicit source fres
 Watchlist Community review uses separate thread identities from News Story IDs;
 only explicit review updates browser-local state, and count changes do not create
 new discussions. Community remains separate from News and Materiality, and is
-neither sentiment nor Momentum. The next Community stage is Community Momentum
-only after sufficient repeated observations exist.
+neither sentiment nor Momentum. Momentum remains deferred until daily coverage and repeated observations are sufficient.
 
 Technical Materiality remains paused pending SSI / certified historical-data
 provenance evidence; this milestone does not reopen calibration or protected cases.

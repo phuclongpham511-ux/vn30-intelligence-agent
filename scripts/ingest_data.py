@@ -7,7 +7,7 @@ from sqlmodel import Session
 from src.db.session import create_tables, get_engine
 from src.news.registry import load_sources
 from src.news.service import ingest_cycle
-from src.community.service import ingest
+from src.community.daily import ingest_cycle as ingest_community
 
 
 def run_cycle(engine, *, registry=None, force_news=False):
@@ -17,17 +17,16 @@ def run_cycle(engine, *, registry=None, force_news=False):
         try:
             with Session(engine) as session:
                 results[domain] = (ingest_cycle(session, load_sources(registry), force=force_news)
-                    if domain == 'news' else ingest(session))
+                    if domain == 'news' else ingest_community(engine))
         except Exception as exc:
             results[domain] = {'status': 'error', 'error': type(exc).__name__}
     return results
 
 
 def failed(results):
-    news = results['news']
-    return news.get('status') == 'error' or any(
-        isinstance(row, dict) and row.get('status') == 'error' for row in news.values()
-    ) or results['community'].get('status') == 'error'
+    return any(domain.get('status') == 'error' or any(
+        isinstance(row, dict) and row.get('status') == 'error' for row in domain.values()
+    ) for domain in results.values())
 
 
 def run(engine, *, watch=False, registry=None, force_news=False, stop=None):

@@ -1,29 +1,34 @@
 import { safeExternalUrl } from "./presentation.ts";
 
 export type CommunitySource = {
-  source_id: string; name: string; url: string;
-  status: "healthy" | "stale" | "error" | "not_attempted";
+  source_id: string; name: string; url: string; enabled: boolean; qualification: string; reason: string | null; items_received: number | null;
+  status: "healthy" | "stale" | "error" | "not_attempted" | "disabled";
   poll_interval_minutes: number; last_attempt_at: string | null;
   last_success_at: string | null; last_error: string | null; threads_received: number | null;
 };
-export type CommunityThread = CommunityPulseData["threads"][number];
+export type CommunityThread = CommunityItem;
 export type CommunityUpdate = { symbol: string; data: CommunityPulseData | null };
+
+export function communityTime(value: string | null): string {
+  if (!value || !Number.isFinite(Date.parse(value))) return "Unavailable";
+  return new Date(value).toLocaleString("en-GB", { timeZone: "Asia/Ho_Chi_Minh" });
+}
 
 export function communitySourceMessage(status: CommunitySource["status"]): string {
   return {
-    healthy: "A bounded public listing sample observed in the last 72 hours; coverage is incomplete.",
+    healthy: "A bounded same-day public discussion sample; coverage is incomplete.",
     stale: "The source has not been checked recently. Stored discussions may be stale.",
     error: "The latest source acquisition failed. Stored discussions may be shown; coverage is incomplete.",
+    disabled: "This source is deferred; no verified public discussion acquisition is available.",
     not_attempted: "This source has not been checked yet. Discussion coverage is unknown.",
   }[status];
 }
 
-export function communityEvidence(thread: Pick<CommunityThread, "url" | "replies" | "views" | "activity_at" | "last_seen_at">) {
+export function communityEvidence(thread: Pick<CommunityThread, "url" | "replies" | "views" | "published_at">) {
   return { url: safeExternalUrl(thread.url),
     replies: thread.replies == null ? "Replies unavailable" : `${thread.replies.toLocaleString("en-GB")} replies`,
     views: thread.views == null ? "Views unavailable" : `${thread.views.toLocaleString("en-GB")} views`,
-    timeLabel: thread.activity_at ? "Last public activity" : "Observed",
-    time: thread.activity_at || thread.last_seen_at };
+    timeLabel: "Published", time: thread.published_at };
 }
 
 export async function loadCommunityUpdates(symbols: string[], signal?: AbortSignal,
@@ -39,18 +44,27 @@ export async function loadCommunityUpdates(symbols: string[], signal?: AbortSign
   }
   return output;
 }
+export type CommunityItem = {
+  id: string; revision_id: string; source_id: string; source_item_id: string; item_type: string;
+  title: string | null; excerpt: string; url: string; author: string | null;
+  published_at: string; last_seen_at: string; tickers: string[];
+  replies: number | null; views: number | null; is_fixture: boolean;
+};
 export type CommunityPulseData = {
-  as_of: string; sampled_threads: number;
-  source: CommunitySource & { id: string };
-  most_discussed: { ticker: string; thread_count: number }[];
-  topics: { topic: string; thread_count: number }[];
-  threads: { id: string; title: string; url: string; author: string | null; published_at: string | null; activity_at: string | null; last_seen_at: string; tickers: string[]; topics: string[]; replies: number | null; views: number | null }[];
+  as_of: string; sampled_items: number; unique_items: number; truncated: boolean; coverage_partial: boolean;
+  window: { kind: "today" | "last24h"; label: string; timezone: string; start: string; end: string };
+  sources: CommunitySource[]; items: CommunityItem[];
+  active_tickers: { ticker: string; item_count: number }[];
+  themes: { id: string; label: string; keywords: string[]; summary: string; summary_kind: string;
+    item_count: number; source_count: number; source_ids: string[]; latest_at: string;
+    representative_id: string; evidence_ids: string[]; evidence_revisions: { id: string; revision_id: string }[] }[];
 };
 
 export async function loadCommunity(ticker: string, topic: string, signal?: AbortSignal): Promise<CommunityPulseData> {
   const query = new URLSearchParams();
   if (ticker.trim()) query.set("ticker", ticker.trim().toUpperCase());
-  if (topic.trim()) query.set("topic", topic.trim());
+  // Publisher topic filters do not constrain Community discussion themes.
+  void topic;
   const response = await fetch(`/api/community/pulse?${query}`, { cache: "no-store", signal });
   if (!response.ok) throw new Error("Community unavailable");
   return response.json();

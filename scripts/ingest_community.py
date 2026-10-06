@@ -2,9 +2,8 @@
 import argparse
 import json
 import time
-from sqlmodel import Session
 from src.db.session import create_tables, get_engine
-from src.community.service import ingest
+from src.community.daily import ingest_cycle
 
 
 def main():
@@ -14,11 +13,10 @@ def main():
     create_tables()
     try:
         while True:
-            with Session(get_engine()) as session:
-                result = ingest(session)
-                print(json.dumps(result), flush=True)
+            result = ingest_cycle(get_engine())
+            print(json.dumps(result), flush=True)
             if not args.watch:
-                return int(result['status'] == 'error')
+                return int(any(row['status'] == 'error' for row in result.values()))
             time.sleep(60)
     except KeyboardInterrupt:
         return 0
