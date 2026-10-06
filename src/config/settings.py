@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./vn30.db"
     openai_api_key: SecretStr = SecretStr("")
     app_env: str = "development"
+    market_data_provider: str = "ssi"
+    ssi_api_key: SecretStr = SecretStr("")
+    ssi_api_secret: SecretStr = SecretStr("")
 
 
 @lru_cache

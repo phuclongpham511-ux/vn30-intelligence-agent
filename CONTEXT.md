@@ -243,11 +243,15 @@ Unresolved requirements:
 - point-in-time integrity;
 - avoiding future-information leakage.
 
-SSI FastConnect has been contacted for Market Data access; the project is waiting
-for SSI's response. When access becomes available, probe only these unresolved
-requirements, determine which blockers SSI resolves, and use another source only
-for requirements SSI cannot satisfy. Do not restart the entire Technical research
-process. Existing protected-case, validation and holdout safeguards remain in force.
+SSI product Market Data qualification has PASSED. SSI Market Data Provider Integration
+V1 uses the official SDK 3.2.1 raw authenticated transport, dynamic security metadata,
+bounded pagination and existing deterministic analytics. SSI is the default market
+provider with no silent fallback; Fundamentals remain temporarily on vnstock/VCI.
+SSI historical OHLC is adjusted, prices VND ×1 and volume shares ×1. Only bars dated
+before today in Asia/Ho_Chi_Minh are eligible, including after market close.
+Technical Materiality remains BLOCKED by PIT vintage, historical revision policy,
+full adjustment methodology and benchmark continuity/provenance. Do not restart
+calibration. Existing protected-case, validation and holdout safeguards remain in force.
 
 ### Watchlist Intelligence V1 — browser-local monitoring slice implemented
 

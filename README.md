@@ -75,8 +75,9 @@ News uses 10 Vietnamese and 5 global sources without full article persistence or
 an LLM dependency.
 
 Technical Materiality is **PAUSED**, not abandoned, pending external historical-data
-and provenance evidence; SSI FastConnect Market Data access has been requested and
-the project is waiting for SSI's response. Existing research/evaluation infrastructure
+and provenance evidence. SSI product Market Data qualification has passed;
+product integration does not certify PIT vintage, historical revisions or the full
+adjustment methodology. Existing research/evaluation infrastructure
 remains available, but further calibration/deployment must wait for new evidence.
 
 **Watchlist Intelligence V1** now reuses the existing Watchlist page for browser-local
@@ -142,7 +143,7 @@ Exactly one root main.py and one FastAPI app.
 ```text
 Explore UI → Next.js API proxy → FastAPI routers → services
                                                 ↓
-                       existing provider interfaces → vnstock adapters
+                existing provider interfaces → SSI market / vnstock fundamentals
                                                 ↓
                       normalized schemas → pure analytics → API
 ```
@@ -150,23 +151,34 @@ Explore UI → Next.js API proxy → FastAPI routers → services
 Stack: Python, FastAPI, SQLModel/SQLAlchemy, Pydantic, psycopg, pandas, numpy, uv;
 Next.js, React, TypeScript; pytest and pytest-asyncio; backend Dockerfile.
 
-- MarketDataProvider: KBS listing validates the universe and supplies company names;
-  VCI Quote supplies daily OHLCV.
+- MarketDataProvider: SSI FastConnect securities metadata validates symbols and
+  supplies company names; daily historical OHLCV uses `ssi-sdk==3.2.1`.
+  `MARKET_DATA_PROVIDER=ssi` is the default. Set `SSI_API_KEY` and `SSI_API_SECRET`
+  locally; missing credentials fail safely with no silent fallback.
+  Explicit `MARKET_DATA_PROVIDER=vnstock` retains the temporary KBS/VCI adapter.
 - FundamentalDataProvider: VCI annual income statements, up to four periods in the
   verified community package. vnstock is pinned to 4.0.2 because mappings are version-specific.
+  Its original official wheel and transitive vnai wheel remain pinned in uv settings
+  because their PyPI version index entries are no longer available.
 - News V1: metadata-only ingestion, deterministic Article → Story normalization,
   tagging and deduplication, configurable polling, source telemetry and failure isolation.
 - Stock keeps the existing symbol/company_name fields (equivalent to ticker/name).
   updated_at and a case-insensitive unique index were added. The HTTP input accepts ticker or symbol.
 - Bounded process-local caches: 5-minute market history, 1-hour fundamentals and listings.
   Cache expiration retries upstream; there is no stale/fake fallback.
-- External SDK import is lazy. SDK telemetry and automatic agent-guide installation default off.
+- Legacy SDK import is lazy. SDK telemetry and automatic agent-guide installation default off.
   System TLS certificates are used without disabling certificate verification.
 
 ## Data contracts and formulas
 
-All price and financial amounts use **VND**, volume uses shares. VCI SDK OHLC prices are
-in thousands of VND and are multiplied by 1,000 exactly once in the adapter.
+All price and financial amounts use **VND**, volume uses shares. SSI prices are already
+VND (×1), volume is shares (×1), and historical prices are treated as adjusted.
+Required raw OHLC/volume fields are validated before SDK model zero coercion.
+Only bars dated strictly before today in `Asia/Ho_Chi_Minh` enter analytics:
+today is excluded even after close, becoming eligible on the next Vietnam calendar
+day. This intentional freshness delay creates no synthetic sessions or forward fill.
+VCI SDK OHLC prices (explicit legacy selection only) are in thousands of VND and
+are multiplied by 1,000 exactly once in the adapter.
 Statement amounts are already VND and are not scaled.
 
 MarketBar: ticker, date, open/high/low/close, volume, source, currency.
@@ -249,6 +261,7 @@ docker run --rm -p 127.0.0.1:8000:8000 -v vn30-data:/data -e DATABASE_URL=sqlite
 
 ```powershell
 uv run pytest -q
+uv run python -m scripts.smoke_ssi FPT HPG TCB VNM
 uv run python -m scripts.preview_materiality FPT
 uv run python -m scripts.smoke_vnstock FPT TCB HPG VNM
 # Requires a running backend; validates/adds these symbols in the local DB:

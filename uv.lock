@@ -10,6 +10,9 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 
+[manifest]
+overrides = [{ name = "vnai", url = "https://files.pythonhosted.org/packages/1f/34/7f419ef6661009006fbc149f4fca26159b7f56d9836b6cb9c170c3c0c465/vnai-2.6.1-py3-none-any.whl" }]
+
 [[package]]
 name = "annotated-doc"
 version = "0.0.5"
@@ -1478,6 +1481,20 @@ wheels = [
 ]
 
 [[package]]
+name = "ssi-sdk"
+version = "3.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "httpx" },
+    { name = "websocket-client" },
+    { name = "websockets" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e0/7e/6a5ed9b97fb1a5f4929bd63a853775d20b05d0b39e665e63b326037bd617/ssi_sdk-3.2.1.tar.gz", hash = "sha256:5d328cf42bcc03f6710bcf182fd0ce8cec5f9e556f6e1bbe1d69f8431add1f2f", size = 79932, upload-time = "2026-08-27T08:13:29.559Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/97/a8/03589b3f713542fc8693cacf45acb03a8d7bab586a854f6dfce4fc1c2a02/ssi_sdk-3.2.1-py3-none-any.whl", hash = "sha256:cbdda45bd26b57a9f3ebf5d7628f09fc0f5606aab4f187a37ecd930c56f208e0", size = 77794, upload-time = "2026-08-27T08:13:27.864Z" },
+]
+
+[[package]]
 name = "starlette"
 version = "1.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -1614,6 +1631,7 @@ dependencies = [
     { name = "psycopg", extra = ["binary"] },
     { name = "pydantic-settings" },
     { name = "sqlmodel" },
+    { name = "ssi-sdk" },
     { name = "truststore" },
     { name = "uvicorn", extra = ["standard"] },
     { name = "vnstock" },
@@ -1635,9 +1653,10 @@ requires-dist = [
     { name = "psycopg", extras = ["binary"], specifier = ">=3.2,<4" },
     { name = "pydantic-settings", specifier = ">=2.8,<3" },
     { name = "sqlmodel", specifier = ">=0.0.24,<0.1" },
+    { name = "ssi-sdk", specifier = "==3.2.1" },
     { name = "truststore", specifier = ">=0.10.4" },
     { name = "uvicorn", extras = ["standard"], specifier = ">=0.34,<1" },
-    { name = "vnstock", specifier = "==4.0.2" },
+    { name = "vnstock", url = "https://files.pythonhosted.org/packages/b5/81/8ac4ffc5104d70e5fdf04125ac3913df380ae0d534d756db55319c0e570f/vnstock-4.0.2-py3-none-any.whl" },
 ]
 
 [package.metadata.requires-dev]
@@ -1650,22 +1669,33 @@ dev = [
 [[package]]
 name = "vnai"
 version = "2.6.1"
-source = { registry = "https://pypi.org/simple" }
+source = { url = "https://files.pythonhosted.org/packages/1f/34/7f419ef6661009006fbc149f4fca26159b7f56d9836b6cb9c170c3c0c465/vnai-2.6.1-py3-none-any.whl" }
 dependencies = [
     { name = "cffi" },
     { name = "pandas" },
     { name = "psutil" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/69/7a/bd2379bdb53b1f4f8343309559d15073a767248f7b744bb626fd42fd7666/vnai-2.6.1.tar.gz", hash = "sha256:8adf105be47a24af55abcabe339971bbffb5585dd4a30f79a8ba5de8ff02107f", size = 48949, upload-time = "2026-09-23T03:32:58.332Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/34/7f419ef6661009006fbc149f4fca26159b7f56d9836b6cb9c170c3c0c465/vnai-2.6.1-py3-none-any.whl", hash = "sha256:ee67d1597855d56ac065ccda28879043224c296b9482c2f5a9d06b6a36b8d7f3", size = 58342, upload-time = "2026-09-23T03:32:56.91Z" },
+    { url = "https://files.pythonhosted.org/packages/1f/34/7f419ef6661009006fbc149f4fca26159b7f56d9836b6cb9c170c3c0c465/vnai-2.6.1-py3-none-any.whl", hash = "sha256:ee67d1597855d56ac065ccda28879043224c296b9482c2f5a9d06b6a36b8d7f3" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "build", marker = "extra == 'dev'", specifier = ">=1.0.0" },
+    { name = "cffi", specifier = ">=1.17.1" },
+    { name = "pandas", specifier = ">=1.5.0" },
+    { name = "psutil", specifier = ">=5.8.0" },
+    { name = "pyflakes", marker = "extra == 'dev'", specifier = ">=3.0.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=6.0.0" },
+    { name = "requests", specifier = ">=2.25.0" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "vnstock"
 version = "4.0.2"
-source = { registry = "https://pypi.org/simple" }
+source = { url = "https://files.pythonhosted.org/packages/b5/81/8ac4ffc5104d70e5fdf04125ac3913df380ae0d534d756db55319c0e570f/vnstock-4.0.2-py3-none-any.whl" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "importlib-metadata" },
@@ -1681,10 +1711,30 @@ dependencies = [
     { name = "vnai" },
     { name = "vnstock-ezchart" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e6/4a/3679bb40622eb46d56085a10d8ff41faec122261c84fbfeef4bff7b7a1dc/vnstock-4.0.2.tar.gz", hash = "sha256:a60052f1a8b2566e375c538456199c4d1d6e58fdd32e6e2ff790b51aece84041", size = 251523, upload-time = "2026-04-28T11:10:55.14Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b5/81/8ac4ffc5104d70e5fdf04125ac3913df380ae0d534d756db55319c0e570f/vnstock-4.0.2-py3-none-any.whl", hash = "sha256:4a32c169b934bc130dcb0267ffd01635d3e7e3f12cf485c82909e38a9cdf9489", size = 277380, upload-time = "2026-04-28T11:10:53.54Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/81/8ac4ffc5104d70e5fdf04125ac3913df380ae0d534d756db55319c0e570f/vnstock-4.0.2-py3-none-any.whl", hash = "sha256:4a32c169b934bc130dcb0267ffd01635d3e7e3f12cf485c82909e38a9cdf9489" },
 ]
+
+[package.metadata]
+requires-dist = [
+    { name = "beautifulsoup4" },
+    { name = "importlib-metadata", specifier = ">=1.0" },
+    { name = "openpyxl" },
+    { name = "packaging", specifier = ">=20.0" },
+    { name = "pandas" },
+    { name = "psutil" },
+    { name = "pydantic" },
+    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0" },
+    { name = "pytest-cov", marker = "extra == 'test'", specifier = ">=4.0" },
+    { name = "pytest-timeout", marker = "extra == 'test'" },
+    { name = "pytz" },
+    { name = "requests" },
+    { name = "seaborn" },
+    { name = "tenacity" },
+    { name = "vnai", specifier = ">=2.4.8" },
+    { name = "vnstock-ezchart", specifier = ">=0.0.3" },
+]
+provides-extras = ["test"]
 
 [[package]]
 name = "vnstock-ezchart"
@@ -1739,6 +1789,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/25/9d/b9deb52f1e4528ffe44338c5ebab95c32ed79203082da661de50288e130a/watchfiles-1.3.0-cp314-cp314t-win32.whl", hash = "sha256:81c989d7267bfb7b676cd32c83bec97914e396870983cbf493e29415037bff5e", size = 270863, upload-time = "2026-09-21T09:08:46.518Z" },
     { url = "https://files.pythonhosted.org/packages/59/59/8b1881afccbafda06248be4185e28034dd73c80c85e4da24f2cb0c1321eb/watchfiles-1.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:d754e049006e81a9be49dc78ba7802081cee426e968cbc63ee19e164fa2d0e39", size = 286879, upload-time = "2026-09-21T09:08:47.874Z" },
     { url = "https://files.pythonhosted.org/packages/46/dd/41c12ae9745d5d72f709333287679d71cbba68ad7678fed872207bba94f4/watchfiles-1.3.0-cp314-cp314t-win_arm64.whl", hash = "sha256:a5b631db08fd3032db57ec6a92d1777cd60f88803287e4e941a4858c53aab1e0", size = 276924, upload-time = "2026-09-21T09:08:48.976Z" },
+]
+
+[[package]]
+name = "websocket-client"
+version = "1.9.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d8/cb/a5abcc2891249f393827c650c6296660ce40374ac22d99ab9aea41f9d2a2/websocket_client-1.9.2.tar.gz", hash = "sha256:0fcb57545848be86992e128218fd96dd87a6769ffdb1a968dff79632b85604d0", size = 84110, upload-time = "2026-08-31T14:08:40.964Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/d2/cc4dc1271e464942db7ee278baae2daa99ee77cb2af744025c04da585a3e/websocket_client-1.9.2-py3-none-any.whl", hash = "sha256:e1a673830a9c7bfa47b1cd3d5e4178f4c9651d80a4eab02c9c23a1c3ec6250ce", size = 95786, upload-time = "2026-08-31T14:08:39.899Z" },
 ]
 
 [[package]]

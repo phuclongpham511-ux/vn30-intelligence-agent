@@ -10,6 +10,7 @@ dependencies = [
     "pydantic-settings>=2.8,<3",
     "psycopg[binary]>=3.2,<4",
     "vnstock==4.0.2",
+    "ssi-sdk==3.2.1",
     "pandas>=2.2,<4",
     "numpy>=2,<3",
     "truststore>=0.10.4",
@@ -22,3 +23,11 @@ dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "httpx>=0.28,<1"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["."]
+
+[tool.uv.sources]
+# PyPI removed the 4.0.2 index entry; preserve the existing official wheel/version.
+vnstock = { url = "https://files.pythonhosted.org/packages/b5/81/8ac4ffc5104d70e5fdf04125ac3913df380ae0d534d756db55319c0e570f/vnstock-4.0.2-py3-none-any.whl" }
+
+[tool.uv]
+# Keep the existing transitive vnai version after its index entry was removed too.
+override-dependencies = ["vnai @ https://files.pythonhosted.org/packages/1f/34/7f419ef6661009006fbc149f4fca26159b7f56d9836b6cb9c170c3c0c465/vnai-2.6.1-py3-none-any.whl"]

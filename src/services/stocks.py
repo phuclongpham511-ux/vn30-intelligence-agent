@@ -3,12 +3,19 @@ from sqlmodel import Session, select
 from src.models import Stock
 from src.providers.base import MarketDataProvider, ProviderNotReadyError
 from src.providers.vnstock import VnstockMarketDataProvider
+from src.providers.ssi import SsiMarketDataProvider
+from src.config.settings import get_settings
 from src.schemas.stocks import SymbolValidation
 
 
 @lru_cache
 def get_market_provider() -> MarketDataProvider:
-    return VnstockMarketDataProvider()
+    selected = get_settings().market_data_provider
+    if selected == "ssi":
+        return SsiMarketDataProvider()
+    if selected == "vnstock":
+        return VnstockMarketDataProvider()
+    raise ProviderNotReadyError("Unknown MARKET_DATA_PROVIDER. Use ssi or vnstock.")
 
 
 def list_stocks(session: Session):
