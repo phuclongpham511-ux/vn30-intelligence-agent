@@ -22,10 +22,7 @@ function Navigation({ close }: { close?: () => void }) {
         return <Link key={href} onClick={close} href={href} aria-current={active ? "page" : undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${active ? "bg-primary/10 font-medium text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}><Icon size={17}/>{label}{active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary"/>}</Link>;
       })}
     </nav>
-    <div className="mt-auto p-5"><div className="rounded-lg border bg-card p-3">
-      <div className="flex items-center gap-2 text-xs font-medium"><Database size={14}/> Data foundation</div>
-      <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">Daily prices. Reported fundamentals. Inspectable evidence.</p>
-    </div><div className="mt-4 flex justify-between text-[10px] text-muted-foreground"><span>VN EQUITIES</span><span>RESEARCH</span></div></div>
+
   </div>;
 }
 

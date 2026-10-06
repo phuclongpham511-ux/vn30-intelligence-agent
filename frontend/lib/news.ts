@@ -12,16 +12,17 @@ export type NewsSource = {
 };
 export type NewsFilters = { ticker: string; sector: string; country: string; source: string; topic: string };
 export const emptyNewsFilters: NewsFilters = { ticker: "", sector: "", country: "", source: "", topic: "" };
-export type NewsView = "briefing" | "latest" | "global" | "community";
+export type NewsView = "company" | "industry" | "briefing" | "community";
+export const newsSectionLabels = {company: 'Company', industry: 'Industry', briefing: 'Market Brief', community: 'Community Pulse'};
 export function readNewsView(search: string): { view: NewsView; financialOnly: boolean } {
-  const params = new URLSearchParams(search);
-  const view = params.get("view");
-  return { view: view === "latest" || view === "global" || view === "community" ? view : "briefing", financialOnly: params.get("financial_only") !== "false" };
+  const value = new URLSearchParams(search).get("view");
+  const view = value === 'global' ? 'briefing' : value === 'industry' || value === 'briefing' || value === 'community' ? value : 'company';
+  return { view, financialOnly: false };
 }
-export function newsViewQuery(filters: NewsFilters, view: NewsView, financialOnly: boolean): string {
+export function newsViewQuery(filters: NewsFilters, view: NewsView | 'latest' | 'global', _financialOnly = false): string {
   const params = new URLSearchParams(newsQuery(filters));
-  params.set("financial_only", String(financialOnly));
-  if (view !== "briefing") params.set("view", view);
+  const canonical = readNewsView(`view=${view}`).view;
+  if (canonical !== 'company') params.set("view", canonical);
   return params.toString();
 }
 export function readNewsFilters(search: string): NewsFilters {

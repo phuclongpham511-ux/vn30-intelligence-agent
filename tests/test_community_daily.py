@@ -7,6 +7,17 @@ from src.community.adapters import parse_chungsy_post
 NOW = datetime(2026, 10, 6, 12, tzinfo=timezone.utc)
 
 
+def test_sparse_theme_title_is_extracted_from_evidence_and_summary_is_short():
+    from src.community.themes import extract_themes
+    row = dict(id='native-one', title='Brokerage competition changes', excerpt='A bounded public discussion. ' + 'More supporting detail. '*25,
+        published_at=NOW, source_id='one', revision_id='revision-one')
+    theme = extract_themes([[row]])[0]
+    assert theme['label'] == 'Brokerage competition changes'
+    assert len(theme['summary']) <= 180
+    assert theme['item_count'] == theme['source_count'] == 1
+    assert theme['evidence_ids'] == ['native-one']
+
+
 def test_public_chungsy_post_preserves_native_identity_time_and_ticker_context():
     record = {'postId': 'post-22', 'textContent': '$XYZ tây bán ròng, test hỗ trợ MA50',
               'publishDate': '2026-10-06T10:00:00Z', 'user_FullName': 'Public investor',

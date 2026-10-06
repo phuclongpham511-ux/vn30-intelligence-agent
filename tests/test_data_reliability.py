@@ -18,6 +18,11 @@ SOURCES = [Source(source_id=sid, name=sid, endpoint=f'https://{sid}.example/feed
     country='VN', language='vi', category='VN', publisher_group=sid) for sid in ('good', 'bad')]
 
 
+@pytest.fixture(autouse=True)
+def isolate_universe_acquisition(monkeypatch):
+    monkeypatch.setattr(ingest_data, 'sync_universe', lambda session: {'status': 'skipped'})
+
+
 def test_successful_observations_are_chronological_nullable_and_atomic(session):
     assert ingest(session, fetch=lambda: ROWS, now=NOW)['status'] == 'ok'
     changed = [dict(ROWS[0], replies=None, views=None)]
@@ -84,7 +89,7 @@ def test_unified_worker_persisted_restart_cadence_and_source_failure(tmp_path, m
     engine = create_engine(url); create_tables(engine)
     clock[0] += timedelta(minutes=1)
     result = ingest_data.run_cycle(engine)
-    assert result == {'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}}
+    assert result == {'universe': {'status': 'skipped'}, 'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}}
     assert calls == ['good', 'bad', 'community']
     with Session(engine) as session:
         assert utc(session.get(NewsSourceState, 'good').last_success_at) == NOW
@@ -111,6 +116,18 @@ def test_unexpected_domain_exception_does_not_suppress_other_domain(session, mon
     result = ingest_data.run_cycle(session.get_bind())
     assert calls == ['news', 'community']
     assert result[broken] == {'status': 'error', 'error': 'RuntimeError'}
+
+
+def test_failed_security_master_does_not_suppress_news_or_community(session, monkeypatch):
+    calls = []
+    def fail(*_): raise TimeoutError('private contents')
+    monkeypatch.setattr(ingest_data, 'sync_universe', fail)
+    monkeypatch.setattr(ingest_data, 'load_sources', lambda _: [])
+    monkeypatch.setattr(ingest_data, 'ingest_cycle', lambda *a, **kw: calls.append('news') or {})
+    monkeypatch.setattr(ingest_data, 'ingest_community', lambda *a: calls.append('community') or {})
+    result = ingest_data.run_cycle(session.get_bind())
+    assert calls == ['news', 'community']
+    assert result['universe'] == {'status':'error','error':'TimeoutError'}
 
 
 def test_watch_continues_after_failure_and_wait_is_interruptible(session, monkeypatch, capsys):

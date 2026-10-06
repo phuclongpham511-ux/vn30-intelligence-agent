@@ -28,6 +28,7 @@ class StoryResponse(BaseModel):
     representative_article: NewsArticle
     ranking_score: float
     ranking_reason: str = 'Independent publisher diversity, capped activity and recency'
+    research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] | None = None
 
 
 def representative(rows, priorities):
@@ -122,6 +123,57 @@ def topics(session: DB, options: dict = Depends(filters)):
     limit = options.pop('limit')
     now = datetime.now(timezone.utc)
     return trending(articles(session, now=now, hours=12, **options), now)[:limit]
+
+
+def research_rows(session, options, category=None, *, hot=False):
+    from src.news.research import research_category, attention_order
+    from src.news.tagging import Tagger
+    from src.services.universe import discovery_metadata
+    tagger = Tagger(discovery_metadata(session))
+    # Re-tag copies for older articles without destructive migration or lost provenance.
+    selected = []
+    options = dict(options)
+    limit = options.pop('limit')
+    ticker = options.pop('ticker', None)
+    for article in articles(session, **options):
+        tags = tagger.tag(article.title, article.category)
+        copy = article.model_copy(update={'tickers': tags.tickers,
+            'sectors': sorted(set(article.sectors) | set(tags.sectors))})
+        kind = research_category(copy)
+        if kind and (not category or kind == category) and (not ticker or ticker.upper() in copy.tickers):
+            selected.append((copy, kind))
+    grouped = {}
+    for article, kind in selected:
+        grouped.setdefault(article.story_id, []).append((article, kind))
+    priorities = {s.source_id: s.representative_priority for s in load_sources()}
+    output = []
+    for story_id, matching in grouped.items():
+        story = session.get(NewsStory, story_id)
+        if not story:
+            continue
+        chosen = representative([row[0] for row in matching], priorities)
+        kind = next(kind for row, kind in matching if row.id == chosen.id)
+        members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all()
+        source_count = len({a.publisher_group for a in members})
+        # Broad Market Brief and Hot Topics need two independent publisher groups.
+        if (hot or kind == 'MARKET_BRIEF') and source_count < 2:
+            continue
+        story = story.model_copy(update={'source_count': source_count})
+        output.append(StoryResponse(story=story, articles=[chosen, *[a for a in members if a.id != chosen.id]],
+            representative_article=chosen, research_category=kind, ranking_score=story_score(story, datetime.now(timezone.utc)),
+            ranking_reason='Independent publishers first, capped article activity, then latest activity'))
+    return sorted(output, key=attention_order)[:limit]
+
+
+@router.get('/feed', response_model=list[StoryResponse])
+def feed(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] = 'COMPANY',
+         options: dict = Depends(filters)):
+    return research_rows(session, options, research_category)
+
+
+@router.get('/hot', response_model=list[StoryResponse])
+def hot(session: DB, options: dict = Depends(filters)):
+    return research_rows(session, options, hot=True)
 
 
 @router.get('/stories/{story_id}', response_model=StoryResponse)

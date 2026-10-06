@@ -14,6 +14,7 @@ from ssi_sdk.constant import EP_DATA_OHLC, EP_DATA_SECURITIES_BY_BOARD
 from src.config.settings import get_settings
 from src.providers.base import ProviderError, ProviderNotReadyError
 from src.schemas.data import MarketBar
+from src.schemas.stocks import SecurityMetadata, SecurityUniverse
 
 logger = logging.getLogger(__name__)
 PAGE_SIZE = 100
@@ -139,6 +140,48 @@ class SsiMarketDataProvider:
 
     def validate_symbol(self, symbol):
         return self.company_name(symbol) is not None
+
+    def get_security_universe(self):
+        """Three bounded master-data requests; unknown types are not inferred equities."""
+        def fetch():
+            securities, exclusions, raw_count, duplicates = {}, {}, 0, 0
+            for board in ('HOSE', 'HNX', 'UPCOM'):
+                payload = self._request(EP_DATA_SECURITIES_BY_BOARD, {'board': board})
+                if not isinstance(payload, list) or not payload or len(payload) > 10000:
+                    raise ValueError('Empty or malformed security master')
+                raw_count += len(payload)
+                board_equities = 0
+                for row in payload:
+                    if not isinstance(row, dict):
+                        raise ValueError('Malformed security metadata')
+                    kind = row.get('stockType') or 'unknown'
+                    if not isinstance(kind, str):
+                        raise ValueError('Malformed instrument type')
+                    if kind != 'Stock':
+                        exclusions[kind] = exclusions.get(kind, 0) + 1
+                        continue
+                    symbol = row.get('symbol')
+                    exchange = row.get('board')
+                    if not isinstance(symbol, str) or not re.fullmatch(r'[A-Z0-9]{1,20}', symbol.strip().upper()) or exchange != board:
+                        raise ValueError('Unexpected equity identity')
+                    def name(key):
+                        value = row.get(key)
+                        if value is not None and not isinstance(value, str):
+                            raise ValueError('Malformed issuer name')
+                        return value.strip() or None if value else None
+                    security = SecurityMetadata(symbol=symbol.strip().upper(), exchange=exchange,
+                        company_name=name('symbolNameVi'), display_name_en=name('symbolNameEn'))
+                    board_equities += 1
+                    if security.symbol in securities:
+                        if securities[security.symbol] != security:
+                            raise ValueError('Conflicting duplicate security')
+                        duplicates += 1
+                    securities[security.symbol] = security
+                if not board_equities:
+                    raise ValueError('No equities in security master')
+            return SecurityUniverse(securities=[securities[s] for s in sorted(securities)],
+                raw_count=raw_count, exclusions=exclusions, duplicate_count=duplicates)
+        return self._guard('universe', 'security_master', fetch)
 
     @lru_cache(maxsize=128)
     def _history(self, symbol, start, end, today, bucket):

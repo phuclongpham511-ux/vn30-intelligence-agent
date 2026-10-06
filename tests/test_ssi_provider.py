@@ -79,6 +79,37 @@ def test_security_normalization_invalid_and_hourly_cache(make_provider):
     assert calls==['XYZ','NOSUCH']
 
 
+def test_equity_universe_uses_type_not_ticker_shape_and_never_fetches_prices(make_provider):
+    calls = []
+    def respond(request):
+        calls.append(dict(request.url.params))
+        board = request.url.params['board']
+        stock = dict(symbol=' xy1 ' if board == 'HOSE' else board, board=board,
+            stockType='Stock', symbolNameEn='Example issuer', symbolNameVi='Issuer')
+        return httpx.Response(200, json=[stock, stock,
+            dict(symbol='ABC', board=board, stockType='ETF Product'),
+            dict(symbol='UNKNOWN', board=board)])
+    snapshot = make_provider(respond).get_security_universe()
+    assert snapshot.raw_count == 12
+    assert [row.symbol for row in snapshot.securities] == ['HNX', 'UPCOM', 'XY1']
+    assert snapshot.exclusions == {'ETF Product': 3, 'unknown': 3}
+    assert snapshot.duplicate_count == 3
+    assert snapshot.securities[-1].exchange == 'HOSE'
+    assert snapshot.securities[-1].display_name_en == 'Example issuer'
+    assert calls == [{'board':'HOSE'}, {'board':'HNX'}, {'board':'UPCOM'}]
+
+
+@pytest.mark.parametrize('payload', [[], {}, [None], [{'symbol':'ABC','board':'HOSE','stockType':'Stock'}, {'symbol':'ABC','board':'HOSE','stockType':'Stock','symbolNameEn':'Conflicting'}]])
+def test_security_master_fails_closed_on_empty_malformed_or_conflicting_data(make_provider, payload):
+    with pytest.raises(ProviderError):
+        make_provider(lambda request: httpx.Response(200, json=payload)).get_security_universe()
+
+
+def test_security_master_upstream_failure_is_sanitized(make_provider):
+    with pytest.raises(ProviderError, match='temporarily unavailable'):
+        make_provider(lambda request: httpx.Response(500, text='private-secret')).get_security_universe()
+
+
 @pytest.mark.parametrize('status',[401,429,500])
 def test_upstream_failures_sanitized(make_provider, caplog, status):
     provider=make_provider(lambda request:httpx.Response(status,json={'message':'private-secret private-token'}))

@@ -8,15 +8,17 @@ from src.db.session import create_tables, get_engine
 from src.news.registry import load_sources
 from src.news.service import ingest_cycle
 from src.community.daily import ingest_cycle as ingest_community
+from src.services.universe import sync_universe
 
 
 def run_cycle(engine, *, registry=None, force_news=False):
     results = {}
     # Separate sessions/transactions: a failed domain cannot poison the other.
-    for domain in ('news', 'community'):
+    for domain in ('universe', 'news', 'community'):
         try:
             with Session(engine) as session:
-                results[domain] = (ingest_cycle(session, load_sources(registry), force=force_news)
+                results[domain] = (sync_universe(session) if domain == 'universe' else
+                    ingest_cycle(session, load_sources(registry), force=force_news)
                     if domain == 'news' else ingest_community(engine))
         except Exception as exc:
             results[domain] = {'status': 'error', 'error': type(exc).__name__}
@@ -41,7 +43,7 @@ def run(engine, *, watch=False, registry=None, force_news=False, stop=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='News + Community metadata worker')
+    parser = argparse.ArgumentParser(description='SSI universe + News + Community metadata worker')
     parser.add_argument('--watch', action='store_true')
     parser.add_argument('--registry', help='Alternate News source registry JSON path')
     parser.add_argument('--force-news', action='store_true', help='One-off News cadence override; Community cadence remains intact')

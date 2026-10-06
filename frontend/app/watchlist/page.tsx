@@ -90,12 +90,12 @@ export default function WatchlistPage() {
     <p className="text-xs text-muted-foreground">Saved in this browser only · No cross-device sync. News stories and Community discussions have separate review states. News counts describe recent Stories; Community counts describe same-day discussions.</p>
     {storageError && <p role="alert" className="rounded border p-3 text-sm">Browser storage is unavailable or saved data cannot be read. Your saved Watchlist has not been overwritten. Reload to retry.</p>}
     <form aria-label="Follow a stock" className="flex flex-wrap items-end gap-3" onSubmit={event => { event.preventDefault(); if (available.some(stock => stock.symbol === selected) && save(followStock(state, selected))) setSelected(""); }}>
-      <label className="text-xs">Stock to follow<select aria-label="Stock to follow" value={selected} onChange={event => setSelected(event.target.value)} disabled={!ready || universe.loading || !!universe.error || storageError || state.symbols.length >= 50} required className="mt-1 block h-10 max-w-full rounded border bg-background px-3 text-sm sm:min-w-64">
-        <option value="">Choose an available stock</option>{available.map(stock => <option key={stock.symbol} value={stock.symbol}>{stock.symbol}{englishCompanyName(stock) ? ` · ${englishCompanyName(stock)}` : ""}</option>)}
+      <label className="min-w-0 w-full text-xs sm:w-auto">Stock to follow<select aria-label="Stock to follow" value={selected} onChange={event => setSelected(event.target.value)} disabled={!ready || universe.loading || !!universe.error || storageError || state.symbols.length >= 50} required className="mt-1 block h-10 w-full max-w-full rounded border bg-background px-3 text-sm sm:w-80">
+        <option value="">Choose a listed equity</option>{available.map(stock => <option key={stock.symbol} value={stock.symbol}>{stock.symbol}{englishCompanyName(stock) ? ` · ${englishCompanyName(stock)}` : ""}</option>)}
       </select></label><Button disabled={!selected || storageError || !ready || state.symbols.length >= 50}>Follow stock</Button>
       <Link href="/" className="py-2 text-xs text-primary hover:underline">Find more stocks in Explore</Link>
     </form>
-    {universe.error && <p role="alert" className="text-sm">Available stocks could not be loaded. <button className="text-primary underline" onClick={universe.refresh}>Retry stocks</button></p>}
+    {universe.error && <p role="alert" className="text-sm">Equity metadata could not be loaded. <button className="text-primary underline" onClick={universe.refresh}>Retry stocks</button></p>}
     {state.symbols.length >= 50 && <p className="text-xs text-muted-foreground">This browser Watchlist supports up to 50 stocks.</p>}
     {!ready ? <MascotState state="loading" role="status">Loading your Watchlist…</MascotState>
       : !state.symbols.length ? !storageError && <section className="panel p-5"><MascotState state="emptyWatchlist"><div><h2 className="text-sm">No stocks followed yet</h2><p className="mt-1">Choose a stock above to monitor recent developments.</p></div></MascotState></section>

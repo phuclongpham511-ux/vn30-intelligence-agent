@@ -23,6 +23,16 @@ const pulse = { window: { label: "Today", start: "2026-10-05T17:00:00Z" }, uniqu
 const render = props => renderToStaticMarkup(React.createElement(CommunityDiscussions,
   { ticker: "XYZ", data: pulse, loading: false, error: false, retry() {}, ...props }));
 
+test('theme hierarchy hides secondary excerpts and legacy generic titles retain grounded evidence', () => {
+  const html = render({data:{...pulse,themes:[{...pulse.themes[0],label:'Discussion phrasing'}]}});
+  assert.doesNotMatch(html,/Discussion phrasing/);
+  assert.match(html,/Example Company public discussion/);
+  assert.match(html,/line-clamp-2/);
+  assert.match(html,/1 discussion · 1 source/);
+  assert.match(html,/<details[^>]*><summary[^>]*>View discussions/);
+  assert.match(html,/Investor discussion · unverified/);
+});
+
 test("Stock Detail renders matched public evidence, safe original links and unavailable counts", () => {
   const html = render();
   assert.match(html, /Example Company public discussion/);

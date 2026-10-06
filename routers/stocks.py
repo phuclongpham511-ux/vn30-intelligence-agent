@@ -1,22 +1,28 @@
 from datetime import date, timedelta
+from typing import Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 from src.db.session import get_session
-from src.models import Stock
+from src.models import Stock, Security
 from src.providers.base import MarketDataProvider, FundamentalDataProvider, NewsProvider
 from src.schemas.stocks import SymbolRequest, SymbolValidation, StockOverview
 from src.schemas.data import MarketBar, MarketSnapshot, FundamentalSnapshot, NewsItem, TechnicalBar, FundamentalPeriod
 from src.services.stocks import find_stock, get_market_provider, list_stocks, validate_symbol
 from src.services import data
+from src.services.universe import browse_universe
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
 
-def require_stock(symbol: str, session: Session = Depends(get_session)) -> Stock:
+def require_stock(symbol: str, session: Session = Depends(get_session),
+                  provider: MarketDataProvider = Depends(get_market_provider)) -> Stock:
     stock = find_stock(session, symbol)
     if stock is None:
-        raise HTTPException(status_code=404, detail="Stock not found")
+        security = session.get(Security, symbol.strip().upper())
+        if security is None or not security.is_active:
+            raise HTTPException(status_code=404, detail="Stock not found")
+        stock = add_stock(SymbolRequest(symbol=security.symbol), session, provider)
     return stock
 
 
@@ -25,16 +31,30 @@ def stocks(session: Session = Depends(get_session)):
     return list_stocks(session)
 
 
+@router.get('/universe')
+def universe(q: str = Query(default='', max_length=120),
+             exchange: Literal['HOSE', 'HNX', 'UPCOM'] | None = None,
+             offset: int = Query(default=0, ge=0), limit: int = Query(default=100, ge=1, le=500),
+             session: Session = Depends(get_session)):
+    return browse_universe(session, q=q, exchange=exchange, offset=offset, limit=limit)
+
+
 @router.post("", response_model=Stock, status_code=201)
 def add_stock(body: SymbolRequest, session: Session = Depends(get_session),
               provider: MarketDataProvider = Depends(get_market_provider)):
     existing = find_stock(session, body.symbol)
     if existing:
         return existing
+    security = session.get(Security, body.symbol)
+    # Once a master is present, provider validation cannot admit non-equities.
+    from src.models import SecurityUniverseState
+    if session.get(SecurityUniverseState, 'ssi') and (not security or not security.is_active):
+        raise HTTPException(status_code=404, detail='Ticker is not in the listed equity universe')
     if not provider.validate_symbol(body.symbol):
         raise HTTPException(status_code=404, detail="Ticker was not found in the provider universe")
     name_lookup = getattr(provider, "company_name", None)
-    record = Stock(symbol=body.symbol, company_name=name_lookup(body.symbol) if name_lookup else None)
+    record = Stock(symbol=body.symbol, company_name=security.company_name if security else name_lookup(body.symbol) if name_lookup else None,
+        display_name_en=security.display_name_en if security else None, exchange=security.exchange if security else None)
     session.add(record)
     try:
         session.commit()

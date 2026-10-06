@@ -1,4 +1,5 @@
 export type Stock = { id: number; symbol: string; company_name: string | null; display_name_en?: string | null; exchange: string | null; sector?: string | null };
+export type Security = { symbol: string; exchange: string; company_name?: string | null; display_name_en?: string | null; source?: string; instrument_type?: string; last_synced_at?: string };
 export type Bar = { date: string; open: number; high: number; low: number; close: number; volume: number; source: string };
 export type Market = { ticker: string; as_of: string | null; close: number | null; source: string } & Record<string, string | number | null>;
 export type Fundamental = { period: string | null; source: string } & Record<string, string | number | null>;

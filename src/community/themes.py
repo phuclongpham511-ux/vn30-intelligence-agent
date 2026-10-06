@@ -10,6 +10,7 @@ TOPICS = (
     ('earnings_capacity', 'Earnings and operating capacity', ('loi nhuan', 'cong suat', 'san luong', 'doanh thu', 'ket qua kinh doanh')),
     ('distributions', 'Dividends and distributions', ('co tuc', 'chia thuong', 'chia co phieu', 'tra co tuc')),
     ('price_action', 'Price action discussion', ('keo tru', 'dap', 'tim', 'break', 'fomo', 'tang tran', 'giam san')),
+    ('brokerage_share', 'Brokerage market-share competition', ('thi phan moi gioi', 'brokerage market share')),
 )
 STOP = set('va la cua cho voi nhung nay thi mot cac co phieu ma ngay hom nay nha dau tu cong ty tap doan ve trong duoc khong den tu tren tai se da dang nguoi khi cung rat nhu hon sau lai roi nao minh anh em chung ta toi ban mua stock ticker'.split())
 
@@ -56,6 +57,21 @@ def representative_excerpt(row, keywords):
     return row['excerpt'][:300]
 
 
+def evidence_title(row):
+    """Quote an actual source clause; never translate or invent a sparse theme."""
+    body = row.get('title') or row['excerpt']
+    body = re.sub(r'https?://\S+|www\.\S+', '', body)
+    clause = re.split(r'[\n.!?]', ' '.join(body.split()), maxsplit=1)[0].strip()
+    return clause[:100] + ('…' if len(clause) > 100 else '')
+
+
+def concise_excerpt(row, keywords):
+    body = representative_excerpt(row, keywords)
+    sentences = re.split(r'(?<=[.!?])\s+', body)
+    sentence = next((part for part in sentences if any(re.search(r'(?<!\w)' + re.escape(term) + r'(?!\w)', normalized(part)) for term in keywords)), sentences[0])
+    return sentence[:179] + '…' if len(sentence) > 180 else sentence
+
+
 def extract_themes(groups, excluded=()):
     excluded_words = set(' '.join(normalized(value) for value in excluded).split())
     candidates = {}
@@ -84,19 +100,19 @@ def extract_themes(groups, excluded=()):
             continue
         indices = {index for index in unmatched if phrase in item_phrases[index]}
         if indices:
-            candidates['phrase:' + phrase] = dict(label='Recurring discussion phrase', indices=indices, keywords={phrase})
+            candidates['phrase:' + phrase] = dict(label=None, indices=indices, keywords={phrase})
             unmatched = [i for i in unmatched if i not in indices]
     # Honest sparse coverage: quote a real discussion instead of inventing a topic.
     for index in unmatched:
-        candidates['item:' + groups[index][0]['id']] = dict(label='Discussion phrasing', indices={index}, keywords=set())
+        candidates['item:' + groups[index][0]['id']] = dict(label=evidence_title(groups[index][0]), indices={index}, keywords=set())
     output = []
     for identity, candidate in candidates.items():
         evidence = [row for index in sorted(candidate['indices']) for row in groups[index]]
         evidence.sort(key=lambda row:(-row['published_at'].timestamp(),row['id']))
         sources = sorted(set(row['source_id'] for row in evidence))
         representative = evidence[0]
-        output.append(dict(id=identity, label=candidate['label'], keywords=sorted(candidate['keywords'])[:5],
-            summary=representative_excerpt(representative, candidate['keywords']), summary_kind='representative_excerpt',
+        output.append(dict(id=identity, label=candidate['label'] or evidence_title(representative), keywords=sorted(candidate['keywords'])[:5],
+            summary=concise_excerpt(representative, candidate['keywords']), summary_kind='representative_excerpt',
             representative_id=representative['id'], item_count=len(candidate['indices']), source_ids=sources,
             source_count=len(sources), latest_at=evidence[0]['published_at'], evidence_ids=[row['id'] for row in evidence],
             evidence_revisions=[dict(id=row['id'], revision_id=row['revision_id']) for row in evidence]))

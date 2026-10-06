@@ -12,6 +12,14 @@ The product is a research and monitoring system, not an automated trading or rec
 
 ## Core domain language
 
+### Market discovery and research feeds
+
+Stock discovery uses SSI FastConnect ordinary-equity metadata across HOSE, HNX and UPCOM. Persisted/watchlisted stocks are personalization, not the supported universe. A separate metadata snapshot refreshes daily in the canonical ingestion worker (failed attempts retry after 15 minutes); HTTP discovery reads the cache. Unknown instrument types are excluded. Stock records and market history remain lazy.
+
+News uses Company / Industry / Market Brief. A deterministic headline/read-layer mapping preserves older Article/Story records and provenance. Company and Industry can contain single-source reporting. Market Brief and Hot Topics require at least two independent publisher groups; Hot Topics ranks publisher breadth first, capped article activity second, then latest activity. This is publisher attention, not Materiality or corroborated truth. Headline classification and company-name coverage remain partial.
+
+Community shows a short evidence-grounded title, a bounded representative sentence and discussion/source/time metadata. Terms, complete bounded evidence, original URLs and source status remain inspectable in disclosures. Original source text may retain its source language; interface labels remain English. Same-day Vietnam filtering, native identities, review state and source isolation are unchanged; Community Momentum remains unimplemented.
+
 ### Material Event
 
 A factual change detected from normalized market, technical, fundamental, news, or corporate-event evidence.

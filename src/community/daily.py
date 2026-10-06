@@ -11,6 +11,7 @@ from src.community.models import CommunityEvidenceItem, CommunityEvidenceRevisio
 from src.community.acquisition import SOURCES, acquire
 from src.community.service import community_tags
 from src.models import Stock
+from src.services.universe import discovery_metadata
 
 
 def time_window(now, kind='today'):
@@ -36,7 +37,7 @@ def ingest_source(session, source, *, fetch=acquire, now=None):
     if state and state.last_attempt_at and utc(state.last_attempt_at) > now - timedelta(minutes=source.interval):
         return {'status': 'skipped'}
     try:
-        stocks = session.exec(select(Stock)).all()
+        stocks = discovery_metadata(session)
         incoming, threads = fetch(source, stocks)
         observed_at = utc(supplied_now or datetime.now(timezone.utc))
         known = {s.symbol for s in stocks}
@@ -136,7 +137,7 @@ def pulse(session, *, ticker=None, topic=None, now=None, window='today'):
             row[key] = utc(row[key])
     groups = deduplicate(items)
     excluded = [ticker] if ticker else []
-    for stock in session.exec(select(Stock)).all():
+    for stock in discovery_metadata(session):
         excluded.extend([stock.symbol, stock.company_name or ''])
     themes = extract_themes(groups, excluded)
     if topic:

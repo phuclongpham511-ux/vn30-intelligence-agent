@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field, field_validator
 from sqlmodel import Session, select
 from src.db.session import get_session
-from src.models import Stock
+from src.models import Stock, Security
 from src.news.models import NewsArticle
 from src.news.normalization import utc
 from src.news.service import articles
@@ -51,6 +51,8 @@ def monitoring(body: MonitoringRequest, session: Annotated[Session, Depends(get_
     available = {stock.symbol for stock in session.exec(
         select(Stock).where(Stock.symbol.in_(body.symbols), Stock.is_active == True)
     ).all()}
+    available.update(stock.symbol for stock in session.exec(select(Security).where(
+        Security.symbol.in_(body.symbols), Security.is_active == True)).all())
     recent = articles(session, now=now) if available else []
     output = []
     for symbol in body.symbols:

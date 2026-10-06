@@ -1,20 +1,27 @@
 "use client";
 import Link from "next/link";
-import { ArrowUpRight, Database, ArrowRight, RefreshCw } from "lucide-react";
+import { useState } from "react";
+import { ArrowUpRight } from "lucide-react";
 import { useStocks } from "./stock/StockUniverse";
 import { englishCompanyName } from "@/lib/presentation";
+import { browseSecurities } from "@/lib/universe";
 import { Button } from "./ui/button";
-import { Skeleton } from "./ui/skeleton";
+import { MascotState } from "./mascot/Mascot";
 export default function TickerPicker() {
-  const { stocks, loading, error, refresh } = useStocks();
-  return <section aria-labelledby="available-title">
-    <div className="mb-4 flex items-center justify-between"><div className="flex items-center gap-3"><h2 id="available-title">Available stocks</h2><span className="rounded-md border px-2 py-0.5 text-[11px] text-muted-foreground">{loading ? "…" : stocks.length}</span></div><span className="hidden text-xs text-muted-foreground sm:block">Your market starting points</span></div>
-    {loading ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{[0,1,2].map(i => <Skeleton key={i} className="h-40 rounded-xl"/>)}</div>
-      : error ? <div role="alert" className="panel p-6"><p>{error}</p><Button variant="outline" onClick={refresh} className="mt-4"><RefreshCw/>Retry</Button></div>
-      : stocks.length ? <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">{stocks.map(stock => <Link key={stock.id} href={"/stocks/" + stock.symbol} className="group panel p-5 transition-colors hover:border-primary/60 hover:bg-muted/30">
-        <div className="flex items-start justify-between"><span className="flex h-11 min-w-11 items-center justify-center rounded-lg border bg-muted/40 px-2 text-sm font-semibold tracking-wide">{stock.symbol}</span><ArrowUpRight size={17} className="text-muted-foreground transition-colors group-hover:text-primary"/></div>
-        <h3 className="mt-4 text-base">{stock.symbol}</h3>{englishCompanyName(stock) && <p className="mt-1 truncate text-xs text-muted-foreground">{englishCompanyName(stock)}</p>}
-        <div className="mt-5 flex items-center justify-between border-t pt-3 text-[11px] text-muted-foreground"><span>{stock.exchange || "Vietnam equity"}</span><span className="flex items-center gap-1.5">Open overview<ArrowRight size={12}/></span></div>
-      </Link>)}</div> : <div className="panel p-8 text-center"><Database className="mx-auto mb-3 text-muted-foreground"/><h3>No stocks added yet</h3><p className="mt-2 text-sm text-muted-foreground">Use the search above to validate and add a ticker.</p></div>}
+  const { stocks, loading, error, refresh, status, lastSynced } = useStocks();
+  const [query, setQuery] = useState('');
+  const [exchange, setExchange] = useState('');
+  const [page, setPage] = useState(0);
+  const result = browseSecurities(stocks, query, exchange, page);
+  return <section aria-labelledby="explore-title">
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2"><h2 id="explore-title">Explore stocks <span className="ml-2 text-xs font-normal text-muted-foreground">{stocks.length || (!loading && !error && status === 'healthy') ? `${stocks.length.toLocaleString('en-GB')} Vietnam equities` : 'Universe count unavailable'}</span></h2><span className="text-xs text-muted-foreground">SSI metadata{lastSynced ? ` · Synced ${new Date(lastSynced).toLocaleString('en-GB')}` : ''}</span></div>
+    <div className="mb-4 flex flex-wrap gap-3"><label className="min-w-0 flex-1 text-xs">Ticker or company<input aria-label="Explore ticker or company" className="mt-1 h-10 w-full rounded border bg-background px-3 text-sm" value={query} maxLength={120} onChange={e=>{setQuery(e.target.value);setPage(0);}} placeholder="Search all listed equities"/></label>
+      <label className="text-xs">Exchange<select aria-label="Exchange" className="mt-1 block h-10 rounded border bg-background px-3 text-sm" value={exchange} onChange={e=>{setExchange(e.target.value);setPage(0);}}><option value="">All exchanges</option>{['HOSE','HNX','UPCOM'].map(e=><option key={e}>{e}</option>)}</select></label></div>
+    {loading ? <MascotState state="loading" role="status">Loading equity metadata…</MascotState> : error ? <p role="alert">{error} <button className="text-primary underline" onClick={refresh}>Retry</button></p> : <>
+      {status !== 'healthy' && <p role="status" className="mb-3 text-xs text-muted-foreground">{stocks.length ? 'Showing cached metadata; the latest refresh is unavailable or stale.' : 'Equity metadata has not been acquired yet.'}</p>}
+      {!result.total ? <MascotState state="dataUnavailable">No matching equities in the cached universe.</MascotState> : <div className="panel divide-y">{result.items.map(stock=><Link key={stock.symbol} href={`/stocks/${stock.symbol}`} className="flex items-center gap-3 px-4 py-3 hover:bg-muted">
+        <span className="w-16 shrink-0 text-sm font-semibold">{stock.symbol}</span><span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{englishCompanyName(stock) || `${stock.symbol} · ${stock.exchange}`}</span><span className="text-xs text-muted-foreground">{stock.exchange}</span><ArrowUpRight size={14}/></Link>)}</div>}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground"><span>{result.total ? page * 24 + 1 : 0}–{Math.min((page+1)*24,result.total)} of {result.total.toLocaleString('en-GB')} results</span><div className="flex gap-2"><Button variant="outline" disabled={!page} onClick={()=>setPage(page-1)}>Previous</Button><Button variant="outline" disabled={(page+1)*24>=result.total} onClick={()=>setPage(page+1)}>Next</Button></div></div>
+    </>}
   </section>;
 }

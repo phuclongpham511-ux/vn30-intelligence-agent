@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from enum import Enum
-from sqlalchemy import Column, DateTime, Enum as SAEnum, UniqueConstraint, CheckConstraint
+from sqlalchemy import Column, DateTime, Enum as SAEnum, UniqueConstraint, CheckConstraint, JSON
 from sqlmodel import Field, SQLModel
 
 
@@ -29,6 +29,29 @@ class Stock(Timestamped, table=True):
     industry: str | None = Field(default=None, max_length=100)
     is_active: bool = True
     updated_at: datetime = Field(default_factory=utc_now, sa_column=Column(DateTime(timezone=True), nullable=False, onupdate=utc_now))
+
+
+class Security(SQLModel, table=True):
+    """Discovery metadata; not a watched stock or a market-data record."""
+    symbol: str = Field(primary_key=True, max_length=20)
+    exchange: str = Field(index=True, max_length=30)
+    instrument_type: str = Field(default='Stock', max_length=50)
+    company_name: str | None = None
+    display_name_en: str | None = None
+    source: str = 'SSI:FastConnect'
+    is_active: bool = True
+    last_synced_at: datetime = Field(sa_type=DateTime(timezone=True))
+    search_text: str = ''
+
+
+class SecurityUniverseState(SQLModel, table=True):
+    id: str = Field(default='ssi', primary_key=True)
+    last_attempt_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
+    last_success_at: datetime | None = Field(default=None, sa_type=DateTime(timezone=True))
+    last_error: str | None = None
+    raw_count: int | None = None
+    duplicate_count: int | None = None
+    exclusions: dict = Field(default_factory=dict, sa_type=JSON)
 
 
 class Watchlist(Timestamped, table=True):

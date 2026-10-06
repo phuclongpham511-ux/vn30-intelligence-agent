@@ -27,7 +27,7 @@ export function CommunityDiscussions({ ticker, data, loading, error, retry, seen
         aria-label={`Mark ${ticker} Community reviewed`} disabled={storageError}
         className="text-xs text-primary underline disabled:opacity-50" onClick={review}>Mark {fresh.length} {fresh.length === 1 ? "discussion" : "discussions"} reviewed</button>}
     </div>
-    <p className="mt-1 text-xs text-muted-foreground">What investors are discussing · opinions and unverified claims · Vietnam time.</p>
+    <p className="mt-1 text-xs text-muted-foreground">Investor discussion · unverified · Vietnam time</p>
     {loading ? <p role="status" className="mt-3 text-sm text-muted-foreground">Loading Community discussions…</p>
       : error ? <p role="alert" className="mt-3 text-sm">Community discussions are temporarily unavailable. Counts are unknown. <button className="text-primary underline" onClick={retry}>Retry Community</button></p>
       : data && <>
@@ -38,12 +38,12 @@ export function CommunityDiscussions({ ticker, data, loading, error, retry, seen
         </details>
         {!data.items.length && <p className="mt-4 text-sm text-muted-foreground">No same-day discussions matched {ticker === "Market" ? "this view" : ticker}. Coverage is incomplete; this does not mean no discussion occurred.</p>}
         <div className="mt-4 divide-y">{data.themes.map(theme => <article key={theme.id} className="py-4 first:pt-0">
-          <h3 className="text-sm font-medium">{theme.label}</h3>
-          {theme.keywords.length > 0 && <p className="mt-1 text-xs text-muted-foreground">Discussion terms: {theme.keywords.join(" · ")}</p>}
-          <p className="mt-2 text-xs text-muted-foreground">Representative discussion excerpt</p>
-          <blockquote className="mt-1 break-words border-l-2 pl-3 text-sm leading-6">{theme.summary}</blockquote>
-          <p className="mt-2 text-xs text-muted-foreground">{theme.item_count} unique {theme.item_count === 1 ? "discussion" : "discussions"} · {theme.source_count} {theme.source_count === 1 ? "source" : "sources"}: {theme.source_ids.map(sourceName).join(", ")} · Latest <time dateTime={theme.latest_at}>{fetchTime(theme.latest_at)}</time></p>
+          <h3 className="text-sm font-medium">{theme.label === 'Discussion phrasing' || theme.label === 'Recurring discussion phrase' ? (data.items.find(row => theme.evidence_ids.includes(row.id))?.title || theme.summary).slice(0, 100) : theme.label}</h3>
+          <p className="mt-1 line-clamp-2 break-words text-sm leading-6">{theme.summary}</p>
+          <p className="mt-2 text-xs text-muted-foreground">{theme.item_count} {theme.item_count === 1 ? "discussion" : "discussions"} · {theme.source_count} {theme.source_count === 1 ? "source" : "sources"} · Latest <time dateTime={theme.latest_at}>{fetchTime(theme.latest_at)}</time></p>
           <details className="mt-3 text-xs"><summary className="cursor-pointer text-primary">View discussions ({theme.evidence_ids.length} original {theme.evidence_ids.length === 1 ? "item" : "items"})</summary>
+            {theme.keywords.length > 0 && <p className="mt-3 text-muted-foreground">Discussion terms: {theme.keywords.join(" · ")}</p>}
+            <p className="mt-2 text-muted-foreground">Sources: {theme.source_ids.map(sourceName).join(', ')}</p>
             {renderEvidence(theme.evidence_ids)}
           </details>
         </article>)}</div>

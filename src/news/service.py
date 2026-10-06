@@ -21,7 +21,8 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
     supplied_now = now
     now = utc(now or datetime.now(timezone.utc))
     matcher = matcher or LexicalStoryMatcher()
-    tagger = tagger or Tagger(session.exec(select(Stock)).all())
+    from src.services.universe import discovery_metadata
+    tagger = tagger or Tagger(discovery_metadata(session))
     result = {}
     for source in sources:
         now = utc(supplied_now or datetime.now(timezone.utc))

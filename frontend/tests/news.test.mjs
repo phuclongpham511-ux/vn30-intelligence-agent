@@ -20,9 +20,11 @@ test("news filters encode reserved characters and clearing restores a market-wid
   assert.equal(newsQuery(emptyNewsFilters), "");
 });
 
-test("briefing deep links restore the financial view without changing filter meaning", () => {
+test("legacy deep links migrate to semantic categories and remove the technical financial toggle", () => {
   const query = newsViewQuery({ ...emptyNewsFilters, ticker: "xyz" }, "global", false);
-  assert.deepEqual(readNewsView(query), { view: "global", financialOnly: false });
+  assert.deepEqual(readNewsView(query), { view: "briefing", financialOnly: false });
   assert.equal(readNewsFilters(query).ticker, "XYZ");
-  assert.deepEqual(readNewsView("?view=unknown"), { view: "briefing", financialOnly: true });
+  assert.deepEqual(readNewsView("?view=unknown"), { view: "company", financialOnly: false });
+  assert.equal(new URLSearchParams(query).has('financial_only'),false);
+  assert.equal(readNewsView('?view=latest').view,'company');
 });
