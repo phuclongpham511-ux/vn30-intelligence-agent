@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import StockNews from "./stock/StockNews";
+import StockCommunity from "./stock/StockCommunity";
 import { StockLoading, StockError } from "./stock/StockStates";
 import type { Overview, TechnicalBar } from "@/lib/types";
 import StockHeader from "./stock/StockHeader";
@@ -29,11 +30,12 @@ export default function Explore({ ticker }: { ticker: string }) {
   if (!data) return <StockLoading ticker={ticker}/>;
   return <div className="page-stack">
     <StockHeader stock={data.stock} market={data.market}/>
-    <nav aria-label="Stock sections" className="flex flex-wrap gap-4 text-sm text-primary"><a href="#stock-price" className="hover:underline">Price & technicals</a><a href="#stock-fundamentals" className="hover:underline">Fundamentals</a><a href="#stock-news" className="hover:underline">News mentioning {ticker}</a></nav>
+    <nav aria-label="Stock sections" className="flex flex-wrap gap-4 text-sm text-primary"><a href="#stock-price" className="hover:underline">Price & technicals</a><a href="#stock-fundamentals" className="hover:underline">Fundamentals</a><a href="#stock-news" className="hover:underline">News mentioning {ticker}</a><a href="#stock-community" className="hover:underline">Community discussions</a></nav>
     <div id="stock-price" className="scroll-mt-24"><TechnicalChart ticker={ticker} onRows={setTechnicalRows}/></div>
     <MarketSnapshot market={data.market}/>
     <div id="stock-fundamentals" className="scroll-mt-24"><FundamentalTrends ticker={ticker}/></div>
     <div id="stock-news" className="scroll-mt-24"><StockNews ticker={ticker}/></div>
+    <div id="stock-community" className="scroll-mt-24"><StockCommunity ticker={ticker}/></div>
     <RawDataTable bars={technicalRows}/>
   </div>;
 }

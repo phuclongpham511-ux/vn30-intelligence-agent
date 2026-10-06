@@ -1,25 +1,30 @@
 import type { NewsArticle } from "./news.ts";
 
 export const watchlistStorageKey = "vn30.watchlist.v1";
-export type WatchlistState = { symbols: string[]; seen: Record<string, string[]> };
+export type WatchlistState = { symbols: string[]; seen: Record<string, string[]>; communitySeen: Record<string, string[]> };
 export type Development = {
   story_id: string; title: string; first_seen_at: string; published_at: string | null;
   source_count: number; articles: NewsArticle[];
 };
 export type MonitoredStock = { symbol: string; status: "ready" | "unavailable"; developments: Development[] | null };
 export type WatchlistUpdates = { as_of: string; window_start: string; stocks: MonitoredStock[] };
-export const emptyWatchlist = (): WatchlistState => ({ symbols: [], seen: {} });
+export const emptyWatchlist = (): WatchlistState => ({ symbols: [], seen: {}, communitySeen: {} });
+
+function validReviewState(value: unknown): value is Record<string, string[]> {
+  return !!value && typeof value === "object" && !Array.isArray(value) &&
+    Object.values(value).every(ids => Array.isArray(ids) && ids.every(id => typeof id === "string"));
+}
 
 export function readWatchlist(raw: string | null): WatchlistState {
   if (raw === null) return emptyWatchlist();
   const value = JSON.parse(raw);
   if (!value || !Array.isArray(value.symbols) || value.symbols.length > 50 ||
     !value.symbols.every((symbol: unknown) => typeof symbol === "string" && /^[A-Z0-9]{1,20}$/.test(symbol)) ||
-    !value.seen || typeof value.seen !== "object" || Array.isArray(value.seen) ||
-    !Object.values(value.seen).every(ids => Array.isArray(ids) && ids.every(id => typeof id === "string"))) {
+    !validReviewState(value.seen) ||
+    (value.communitySeen !== undefined && !validReviewState(value.communitySeen))) {
     throw new Error("Saved Watchlist is unavailable");
   }
-  return { symbols: [...new Set<string>(value.symbols)], seen: value.seen };
+  return { symbols: [...new Set<string>(value.symbols)], seen: value.seen, communitySeen: value.communitySeen ?? {} };
 }
 
 export function followStock(state: WatchlistState, symbol: string): WatchlistState {
@@ -28,7 +33,16 @@ export function followStock(state: WatchlistState, symbol: string): WatchlistSta
 }
 export function unfollowStock(state: WatchlistState, symbol: string): WatchlistState {
   const seen = { ...state.seen }; delete seen[symbol];
-  return { symbols: state.symbols.filter(value => value !== symbol), seen };
+  const communitySeen = { ...state.communitySeen }; delete communitySeen[symbol];
+  return { symbols: state.symbols.filter(value => value !== symbol), seen, communitySeen };
+}
+export function unreviewedThreads(threads: { id: string }[], seen: string[] = []): string[] {
+  const reviewed = new Set(seen);
+  return [...new Set(threads.map(row => row.id))].filter(id => !reviewed.has(id));
+}
+export function markCommunityReviewed(state: WatchlistState, symbol: string, threads: { id: string }[]): WatchlistState {
+  return { ...state, communitySeen: { ...state.communitySeen,
+    [symbol]: [...new Set([...(state.communitySeen[symbol] || []), ...threads.map(row => row.id)])] } };
 }
 export function unreviewedStories(developments: Development[], seen: string[] = []): string[] {
   const reviewed = new Set(seen);

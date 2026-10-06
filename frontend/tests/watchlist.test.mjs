@@ -1,6 +1,22 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { emptyWatchlist, readWatchlist, followStock, unfollowStock, markReviewed, unreviewedStories, loadWatchlistUpdates } from "../lib/watchlist.ts";
+import { emptyWatchlist, readWatchlist, followStock, unfollowStock, markReviewed, unreviewedStories, loadWatchlistUpdates, markCommunityReviewed, unreviewedThreads } from "../lib/watchlist.ts";
+
+test("Community identities persist separately from News, with explicit review and no reply-count novelty", () => {
+  const original = followStock(readWatchlist(JSON.stringify({ symbols: [], seen: {} })), "XYZ");
+  const threads = [{ id: "same", replies: null, views: null }];
+  assert.deepEqual(unreviewedThreads(threads, original.communitySeen.XYZ), ["same"]);
+  assert.equal(original.communitySeen.XYZ, undefined);
+  const newsReviewed = markReviewed(original, "XYZ", [{ story_id: "same" }]);
+  assert.deepEqual(unreviewedThreads(threads, newsReviewed.communitySeen.XYZ), ["same"]);
+  const reviewed = readWatchlist(JSON.stringify(markCommunityReviewed(newsReviewed, "XYZ", threads)));
+  assert.deepEqual(reviewed.seen.XYZ, ["same"]);
+  assert.deepEqual(unreviewedThreads([{ id: "same", replies: 999, views: 10000 }], reviewed.communitySeen.XYZ), []);
+  assert.deepEqual(unreviewedThreads([...threads, { id: "new" }], reviewed.communitySeen.XYZ), ["new"]);
+  const later = markCommunityReviewed(reviewed, "XYZ", [{ id: "new" }]);
+  assert.deepEqual(unreviewedThreads(threads, later.communitySeen.XYZ), []);
+  assert.deepEqual(unfollowStock(later, "XYZ"), emptyWatchlist());
+});
 
 test("browser membership survives serialization, deduplicates and removes review state", () => {
   let state = followStock(followStock(emptyWatchlist(), "XYZ"), "XYZ");

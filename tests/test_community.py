@@ -4,7 +4,7 @@ import pytest
 from sqlmodel import select
 from src.models import Stock
 from src.news.models import NewsArticle, NewsStory
-from src.community.models import CommunityThread
+from src.community.models import CommunityThread, CommunitySourceState
 from src.community.service import acquire, parse_listing, community_tags, ingest, pulse, SOURCE_ID
 
 NOW = datetime(2026, 10, 4, 10, tzinfo=timezone.utc)
@@ -70,3 +70,36 @@ def test_empty_unattempted_and_stale_are_distinct(session):
     ingest(session, fetch=lambda: [], now=NOW)
     assert pulse(session, now=NOW)['source']['status'] == 'healthy'
     assert pulse(session, now=NOW + timedelta(hours=2))['source']['status'] == 'stale'
+
+
+def test_stock_discussion_api_is_strict_bounded_and_persisted_only(session, client, monkeypatch):
+    now = datetime.now(timezone.utc)
+    for index in range(25):
+        session.add(CommunityThread(id=f'{SOURCE_ID}:{index}', source_id=SOURCE_ID,
+            title=f'Example Company discussion {index}', url=f'https://newf319.com/threads/example.{index}/',
+            first_seen_at=now, last_seen_at=now, tickers=['XYZ'], replies=None, views=None))
+    session.add(CommunityThread(id='unrelated', source_id=SOURCE_ID,title='Unrelated',url='https://newf319.com/',
+        first_seen_at=now,last_seen_at=now,tickers=['ABC']))
+    session.commit()
+    def disallow_fetch(*args): raise AssertionError('Read endpoint must not acquire upstream')
+    monkeypatch.setattr('src.community.service.read_public', disallow_fetch)
+    response=client.get('/community/pulse',params={'ticker':' xyz '})
+    assert response.status_code==200
+    data=response.json()
+    assert data['sampled_threads']==25 and len(data['threads'])==20
+    assert all(row['tickers']==['XYZ'] and row['replies'] is None and row['views'] is None for row in data['threads'])
+    assert all(row['url'].startswith('https://newf319.com/threads/') for row in data['threads'])
+    assert client.get('/community/pulse?ticker=UNKNOWN').json()['threads']==[]
+
+
+@pytest.mark.parametrize('status', ['healthy', 'stale', 'error', 'not_attempted'])
+def test_stock_discussion_api_preserves_source_state_when_no_matches(session, client, status):
+    now = datetime.now(timezone.utc)
+    if status != 'not_attempted':
+        session.add(CommunitySourceState(source_id=SOURCE_ID, last_attempt_at=now,
+            last_success_at=now - timedelta(hours=2) if status == 'stale' else now,
+            last_error='TimeoutError' if status == 'error' else None))
+        session.commit()
+    data = client.get('/community/pulse?ticker=XYZ').json()
+    assert data['threads'] == []
+    assert data['source']['status'] == status

@@ -8,8 +8,11 @@ import ArticleRow from "../components/news/ArticleRow";
 import { useStocks } from "../components/stock/StockUniverse";
 import { englishCompanyName } from "@/lib/presentation";
 import { emptyNewsFilters, newsViewQuery } from "@/lib/news";
-import { emptyWatchlist, readWatchlist, followStock, unfollowStock, markReviewed, unreviewedStories, loadWatchlistUpdates, watchlistStorageKey } from "@/lib/watchlist";
+import { emptyWatchlist, readWatchlist, followStock, unfollowStock, markReviewed, unreviewedStories, loadWatchlistUpdates, watchlistStorageKey, markCommunityReviewed, unreviewedThreads } from "@/lib/watchlist";
 import type { WatchlistState, WatchlistUpdates } from "@/lib/watchlist";
+import { loadCommunityUpdates } from "@/lib/community";
+import type { CommunityUpdate } from "@/lib/community";
+import { CommunityDiscussions } from "../components/stock/StockCommunity";
 
 export default function WatchlistPage() {
   const universe = useStocks();
@@ -21,6 +24,9 @@ export default function WatchlistPage() {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [attempt, setAttempt] = useState(0);
+  const [community, setCommunity] = useState<CommunityUpdate[] | null>(null);
+  const [communityLoading, setCommunityLoading] = useState(false);
+  const [communityError, setCommunityError] = useState(false);
   const symbolsKey = state.symbols.join(",");
 
   useEffect(() => {
@@ -49,6 +55,21 @@ export default function WatchlistPage() {
     const timer = setInterval(() => void load(), 15 * 60 * 1000);
     return () => { controller.abort(); clearInterval(timer); };
   }, [ready, symbolsKey, attempt]);
+  useEffect(() => {
+    if (!ready || !symbolsKey) { setCommunity(null); setCommunityLoading(false); return; }
+    const controller = new AbortController();
+    const load = async () => {
+      setCommunityLoading(true); setCommunityError(false); setCommunity(null);
+      try {
+        const result = await loadCommunityUpdates(symbolsKey.split(","), controller.signal);
+        if (!controller.signal.aborted) setCommunity(result);
+      } catch { if (!controller.signal.aborted) setCommunityError(true); }
+      finally { if (!controller.signal.aborted) setCommunityLoading(false); }
+    };
+    void load();
+    const timer = setInterval(() => void load(), 15 * 60 * 1000);
+    return () => { controller.abort(); clearInterval(timer); };
+  }, [ready, symbolsKey, attempt]);
   const save = (next: WatchlistState) => {
     try { localStorage.setItem(watchlistStorageKey, JSON.stringify(next)); setState(next); setStorageError(false); return true; }
     catch { setStorageError(true); return false; }
@@ -58,11 +79,15 @@ export default function WatchlistPage() {
   const recentCount = new Set(all.map(row => row.story_id)).size;
   const newCount = new Set(data?.stocks.flatMap(row => unreviewedStories(row.developments || [], state.seen[row.symbol])) || []).size;
   const unavailableCount = data?.stocks.filter(row => row.status === "unavailable").length || 0;
+  const communityCount = new Set(community?.flatMap(row => row.data?.threads.map(thread => thread.id) || []) || []).size;
+  const newCommunityCount = new Set(community?.flatMap(row => unreviewedThreads(row.data?.threads || [], state.communitySeen[row.symbol])) || []).size;
+  const communityIncomplete = community?.some(row => !row.data || row.data.source.status !== "healthy");
+  const communityAvailable = community?.some(row => row.data !== null);
   return <div className="page-stack">
     <div className="flex items-start justify-between gap-3"><div><div className="eyebrow mb-3">Workspace / Watchlist</div><h1>Watchlist</h1><p className="mt-2 text-sm text-muted-foreground">What changed for the stocks you follow?</p></div>
-      <Button variant="outline" disabled={!ready || !state.symbols.length || loading} onClick={() => setAttempt(value => value + 1)}>Refresh updates</Button>
+      <Button variant="outline" disabled={!ready || !state.symbols.length || loading || communityLoading} onClick={() => setAttempt(value => value + 1)}>Refresh updates</Button>
     </div>
-    <p className="text-xs text-muted-foreground">Saved in this browser only · No cross-device sync. Developments are ticker-matched news stories, not investment importance.</p>
+    <p className="text-xs text-muted-foreground">Saved in this browser only · No cross-device sync. News stories and Community discussions have separate review states. Counts describe observed evidence.</p>
     {storageError && <p role="alert" className="rounded border p-3 text-sm">Browser storage is unavailable or saved data cannot be read. Your saved Watchlist has not been overwritten. Reload to retry.</p>}
     <form aria-label="Follow a stock" className="flex flex-wrap items-end gap-3" onSubmit={event => { event.preventDefault(); if (available.some(stock => stock.symbol === selected) && save(followStock(state, selected))) setSelected(""); }}>
       <label className="text-xs">Stock to follow<select aria-label="Stock to follow" value={selected} onChange={event => setSelected(event.target.value)} disabled={!ready || universe.loading || !!universe.error || storageError || state.symbols.length >= 50} required className="mt-1 block h-10 max-w-full rounded border bg-background px-3 text-sm sm:min-w-64">
@@ -78,12 +103,16 @@ export default function WatchlistPage() {
         <SourceCoverage/>
         {loading ? <MascotState state="loading" role="status">Checking recent developments…</MascotState>
           : error ? <MascotState state="dataUnavailable" role="alert">Watchlist updates are temporarily unavailable. Counts are unknown. <button className="text-primary underline" onClick={() => setAttempt(value => value + 1)}>Retry updates</button></MascotState>
-          : data && <div className="flex flex-wrap gap-x-5 gap-y-2 border-y py-3 text-sm" role="status"><span>{recentCount} observed recent developments</span><span>{newCount} unreviewed</span>{unavailableCount > 0 && <span>{unavailableCount} stocks unavailable · totals incomplete</span>}<span className="text-xs text-muted-foreground">Ingested in the last 72 hours · Checked {new Date(data.as_of).toLocaleString("en-GB")}</span></div>}
+          : data && <div className="flex flex-wrap gap-x-5 gap-y-2 border-y py-3 text-sm" role="status"><span>News: {recentCount} observed recent developments</span><span>{newCount} unreviewed News developments</span>{unavailableCount > 0 && <span>{unavailableCount} stocks unavailable · totals incomplete</span>}<span className="text-xs text-muted-foreground">Ingested in the last 72 hours · Checked {new Date(data.as_of).toLocaleString("en-GB")}</span></div>}
+        <div role="status" className="text-sm">{communityLoading ? "Checking Community discussions…"
+          : communityError || (community !== null && !communityAvailable) ? "Community counts are unknown. Retry updates to check again."
+          : community && <><span>Community: {communityCount} observed {communityCount === 1 ? "discussion" : "discussions"} · {newCommunityCount} unreviewed</span>{communityIncomplete && <span className="text-muted-foreground"> · source coverage incomplete or unavailable</span>}</>}</div>
         <section className="panel divide-y" aria-label="Watched stocks">{state.symbols.map(symbol => {
           const row = data?.stocks.find(stock => stock.symbol === symbol);
           const developments = row?.developments;
           const fresh = developments ? unreviewedStories(developments, state.seen[symbol]) : [];
           const reviewedBefore = Object.hasOwn(state.seen, symbol);
+          const discussions = community?.find(stock => stock.symbol === symbol)?.data || null;
           return <article key={symbol} className="grid gap-4 p-5 md:grid-cols-[170px_minmax(0,1fr)]" aria-label={`${symbol} monitoring`}>
             <div><Link href={`/stocks/${encodeURIComponent(symbol)}`} className="text-lg font-semibold text-primary hover:underline">{symbol}</Link><p className="mt-1 text-xs text-muted-foreground">{englishCompanyName(universe.stocks.find(stock => stock.symbol === symbol) || { company_name: null })}</p>
               <button className="mt-3 text-xs text-muted-foreground underline" aria-label={`Remove ${symbol} from Watchlist`} disabled={storageError} onClick={() => save(unfollowStock(state, symbol))}>Remove</button>
@@ -93,7 +122,7 @@ export default function WatchlistPage() {
                 : error ? <p className="text-sm text-muted-foreground">Development count unavailable.</p>
                 : row?.status === "unavailable" ? <p className="text-sm">Stock data is unavailable. This is not a no-change result.</p>
                 : developments && <>
-                  <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm">{developments.length} recent {developments.length === 1 ? "development" : "developments"} · {reviewedBefore ? `${fresh.length} new since your review` : "Not reviewed yet"}</h2>
+                  <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm">News · {developments.length} recent {developments.length === 1 ? "development" : "developments"} · {reviewedBefore ? `${fresh.length} new since your review` : "Not reviewed yet"}</h2>
                     {fresh.length > 0 && <button className="text-xs text-primary underline disabled:opacity-50" disabled={storageError} aria-label={`Mark ${symbol} reviewed`} onClick={() => save(markReviewed(state, symbol, developments))}>Mark reviewed</button>}
                   </div>
                   {!developments.length ? <p className="mt-3 text-sm text-muted-foreground">No recent ticker-matched stories ingested. This does not prove that nothing changed; coverage or tags may be incomplete.</p>
@@ -103,6 +132,10 @@ export default function WatchlistPage() {
                     </li>)}</ul>}
                   {developments.length > 3 && <p className="text-xs text-muted-foreground">Showing 3 of {developments.length} developments. Open News for more reporting.</p>}
                 </>}
+              <div className="mt-5 border-t pt-4"><CommunityDiscussions ticker={symbol} data={discussions}
+                loading={communityLoading} error={communityError || (!communityLoading && community !== null && !discussions)}
+                retry={() => setAttempt(value => value + 1)} seen={state.communitySeen[symbol]} storageError={storageError}
+                review={() => { if (discussions) save(markCommunityReviewed(state, symbol, discussions.threads)); }}/></div>
               <div className="mt-3 flex flex-wrap gap-4 text-xs"><Link className="text-primary hover:underline" href={`/stocks/${encodeURIComponent(symbol)}`}>Open {symbol} stock detail</Link><Link className="text-primary hover:underline" href={`/news?${newsViewQuery({ ...emptyNewsFilters, ticker: symbol }, "latest", false)}`}>News mentioning {symbol}</Link></div>
             </div>
           </article>;

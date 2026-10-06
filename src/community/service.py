@@ -178,6 +178,7 @@ def source_status(session, *, now=None):
 
 def pulse(session, *, ticker=None, topic=None, now=None):
     now = utc(now or datetime.now(timezone.utc))
+    ticker = ticker.strip().upper() if ticker else None
     source = source_status(session, now=now)
     rows = session.exec(select(CommunityThread).where(CommunityThread.last_seen_at >= now - timedelta(hours=72))).all()
     rows = [r for r in rows if (not ticker or ticker.upper() in r.tickers) and (not topic or topic in r.topics)]

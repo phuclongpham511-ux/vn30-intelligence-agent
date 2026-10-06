@@ -318,10 +318,13 @@ attempt/success and cadence-relative freshness. Successful Community acquisition
 now append raw timestamped nullable replies/views observations without backfill or
 momentum claims. Automatic OS/process restart requires a future external supervisor.
 
-Agreed next steps (not implemented by this milestone):
-1. Connect Community discussion into Stock Detail / Watchlist research flows.
-2. Refine Watchlist daily monitoring and new-since-review behavior.
-3. Community Momentum only after sufficient repeated observations exist.
+Community is now integrated into Stock Detail and browser-local Watchlist monitoring.
+Both read bounded ticker-matched persisted discussions with explicit source freshness.
+Watchlist Community review uses separate thread identities from News Story IDs;
+only explicit review updates browser-local state, and count changes do not create
+new discussions. Community remains separate from News and Materiality, and is
+neither sentiment nor Momentum. The next Community stage is Community Momentum
+only after sufficient repeated observations exist.
 
 Technical Materiality remains paused pending SSI / certified historical-data
 provenance evidence; this milestone does not reopen calibration or protected cases.
