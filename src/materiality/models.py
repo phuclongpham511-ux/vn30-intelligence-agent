@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from enum import StrEnum
 from math import isfinite
+from src.corporate_actions.models import CorporateActionContext
 
 
 def bounded(value: float) -> float:
@@ -111,3 +112,4 @@ class MaterialityResult:
     excluded: bool = False
     exclusion_reason: str | None = None
     reason_codes: tuple[str, ...] = ()
+    corporate_action_context: CorporateActionContext = CorporateActionContext()

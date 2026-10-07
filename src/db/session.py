@@ -21,6 +21,7 @@ def create_tables(engine=None):
     from src import models  # noqa: F401 - register tables
     from src.news import models as news_models  # noqa: F401 - additive news tables
     from src.community import models as community_models  # noqa: F401
+    from src.corporate_actions import storage as corporate_action_models  # noqa: F401
     target = engine if engine is not None else get_engine()
     SQLModel.metadata.create_all(target)
     if 'items_received' not in {column['name'] for column in inspect(target).get_columns('communitysourcestate')}:

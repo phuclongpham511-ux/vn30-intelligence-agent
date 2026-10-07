@@ -4,6 +4,7 @@ from src.schemas.data import TechnicalBar, FundamentalPeriod
 from .detectors import ScoringContext, detect_fundamental_events, detect_market_events
 from .models import MaterialEventCandidate, MaterialityCategory, MaterialityComponents, MaterialityResult, SIGNIFICANCE_CHANNELS
 from .scoring import base_materiality, confidence, novelty, significance
+from src.corporate_actions.context import enrich_result
 
 
 def evaluate_candidate(candidate: MaterialEventCandidate) -> MaterialityResult:
@@ -31,9 +32,13 @@ def evaluate_candidate(candidate: MaterialEventCandidate) -> MaterialityResult:
 def detect_and_score_market_events(prior: TechnicalBar | None, current: TechnicalBar,
                                    contexts: dict[str, ScoringContext] | None = None, *,
                                    is_fixture: bool = False, recent_bars: list[TechnicalBar] | None = None,
-                                   relative_volume: float | None = None) -> tuple[MaterialityResult, ...]:
-    return tuple(map(evaluate_candidate, detect_market_events(prior, current, contexts,
+                                   relative_volume: float | None = None,
+                                   corporate_actions=None, generated_at=None) -> tuple[MaterialityResult, ...]:
+    if corporate_actions is not None and generated_at is None:
+        raise ValueError('Corporate-action context requires an explicit generation timestamp')
+    results = tuple(map(evaluate_candidate, detect_market_events(prior, current, contexts,
         is_fixture=is_fixture, recent_bars=recent_bars, relative_volume=relative_volume)))
+    return tuple(enrich_result(r, corporate_actions, generated_at=generated_at) for r in results) if corporate_actions is not None else results
 
 
 def detect_and_score_fundamental_events(prior: FundamentalPeriod | None, current: FundamentalPeriod,

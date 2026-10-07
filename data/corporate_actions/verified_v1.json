@@ -1,0 +1,63 @@
+{
+  "dataset_version": "curated-corporate-actions-v1",
+  "source_kind": "curated_verified",
+  "limitations": [
+    "Six manually verified notice components across five issuers; not market-wide coverage or an automatic source.",
+    "Secondary references are identified explicitly. No historical Woofi receipt times are asserted.",
+    "HFC additional registration has no verified price-effective/ex-date: it must not match Technical events.",
+    "Real notice metadata only: no protected historical price samples or calibration labels."
+  ],
+  "notices": [
+    {
+      "symbol": "VNM", "action_type": "cash_dividend", "effective_date": "2020-09-29",
+      "record_date": "2020-09-30", "payment_date": "2020-10-15", "announced_on": "2020-08-03",
+      "source": "Vinamilk issuer notice (Vietstock mirror)", "source_id": "VNM-issuer-notice-2020-08-03",
+      "source_url": "https://static2.vietstock.vn/vietstock/2020/8/6/20200806_20200806%20-%20VNM%20-%20CBTT%20ngay%20DKCC%20chot%20danh%20sach%20tra%20co%20tuc.pdf",
+      "supporting_urls": ["https://fica.dantri.com.vn/chung-khoan/co-dong-vinamilk-huong-loc-co-tuc-gia-co-phieu-bat-tang-manh-20200929010525937.htm"],
+      "component_id": "VNM-2020-cash", "terms": {"cash_vnd_per_share": 2000}, "verified": true,
+      "verification_note": "Issuer document supplies record/payment/terms; contemporaneous Dan Tri report explicitly confirms ex-date."
+    },
+    {
+      "symbol": "VNM", "action_type": "bonus_shares", "effective_date": "2020-09-29",
+      "record_date": "2020-09-30", "announced_on": "2020-08-03",
+      "source": "Vinamilk issuer notice (Vietstock mirror)", "source_id": "VNM-issuer-notice-2020-08-03",
+      "source_url": "https://static2.vietstock.vn/vietstock/2020/8/6/20200806_20200806%20-%20VNM%20-%20CBTT%20ngay%20DKCC%20chot%20danh%20sach%20tra%20co%20tuc.pdf",
+      "supporting_urls": ["https://fica.dantri.com.vn/chung-khoan/co-dong-vinamilk-huong-loc-co-tuc-gia-co-phieu-bat-tang-manh-20200929010525937.htm"],
+      "component_id": "VNM-2020-bonus", "terms": {"new_shares_per_old": 0.2}, "verified": true,
+      "verification_note": "Capital-from-equity bonus, 5 old shares to 1 new; preserve separately from cash dividend."
+    },
+    {
+      "symbol": "HDB", "action_type": "stock_dividend", "effective_date": "2022-09-27",
+      "record_date": "2022-09-28", "announced_at": "2022-09-20T11:04:00+07:00",
+      "source": "Vietstock report via 24HMoney", "source_id": "a1629620",
+      "source_url": "https://24hmoney.vn/news/hdbank-chot-quyen-chia-co-tuc-2021-ty-le-25-c4a1629620.html",
+      "component_id": "HDB-2021-stock-dividend", "terms": {"new_shares_per_old": 0.25}, "verified": true,
+      "verification_note": "Secondary report explicitly supplies ex-date, record date and 25% dividend from undistributed profits."
+    },
+    {
+      "symbol": "GAS", "action_type": "bonus_shares", "effective_date": "2023-09-22",
+      "record_date": "2023-09-25", "announced_on": "2023-09-12",
+      "source": "SHS Market Lens", "source_id": "Market-Lens-2023-09-12-p5",
+      "source_url": "https://archive.shs.com.vn/Sites/QuoteVN/SiteRoot/reportattach/20230912_172533_Market%20Lens%20Final%20New%2012-09-2023.pdf",
+      "supporting_urls": ["https://www.vsd.vn/vi/ad/161638"],
+      "component_id": "GAS-2023-equity-bonus", "terms": {"new_shares_per_old": 0.2}, "verified": true,
+      "verification_note": "Broker report explicitly supplies ex-date and 20% capital-from-equity bonus; VSD reference retained, retrieval intermittent."
+    },
+    {
+      "symbol": "SSI", "action_type": "rights_offering", "effective_date": "2022-06-22",
+      "record_date": "2022-06-23", "announced_on": "2022-06-22",
+      "source": "KIS event calendar with ACBS rights notice", "source_id": "MIRSSI221",
+      "source_url": "https://kisvn.vn/wp-content/uploads/2022/06/Bai-Daily-ngay_Vi_20220622.pdf",
+      "supporting_urls": ["https://acbs.com.vn/tin-tuc/chi-tiet/thong-bao-thuc-hien-quyen-mua-phat-hanh-them-ssi-1015000270-nc7204e5a", "https://vsd.vn/vi/ad/151355"],
+      "component_id": "SSI-2022-rights", "terms": {"new_shares_per_old": 0.5, "subscription_price_vnd": 15000}, "verified": true,
+      "verification_note": "KIS calendar p3 explicitly confirms ex-date; ACBS notice confirms record date, 2:1 rights and subscription price. Publication date is KIS source date, not claimed first issuer announcement."
+    },
+    {
+      "symbol": "HFC", "action_type": "additional_issuance", "effective_date": null,
+      "announced_on": "2023-09-22",
+      "source": "VSDC", "source_id": "161939", "source_url": "https://vsdc.vn/vi/ad/161939",
+      "component_id": "HFC-2023-additional-registration", "verified": true,
+      "verification_note": "VSDC verifies additional registration of 2,000,000 shares on 2023-09-22 and custody from 2023-09-26. Neither date is certified as a price-effective/ex-date. Terms ratio remains unknown."
+    }
+  ]
+}

@@ -8,9 +8,10 @@ from .context import build_context
 from .event_memory import EventMemory
 from .models import ReplayCase
 from .store import digest, validate_observations
+from src.corporate_actions.context import context_for_candidate
 
 
-def replay(observations, manifest, config):
+def replay(observations, manifest, config, *, corporate_actions=None):
     observations = validate_observations(observations)
     benchmark = {o.payload.date: o for o in observations if o.data_type == "benchmark"
                  and o.ticker == manifest.benchmark and o.available_at is not None and not o.is_fixture}
@@ -62,6 +63,7 @@ def replay(observations, manifest, config):
         for candidate in candidates:
             candidate = replace(candidate, reason_codes=candidate.reason_codes + tuple(flags))
             result = evaluate_candidate(candidate)
+            action_context = context_for_candidate(candidate, corporate_actions, generated_at=now)
             normalized = {name: getattr(candidate, name) for name in ("own_history_abnormality",
                 "market_relative_abnormality", "sector_relative_abnormality", "economic_magnitude")}
             provenance = {"dataset_version": manifest.dataset_version,
@@ -80,7 +82,8 @@ def replay(observations, manifest, config):
                 confidence=result.components.confidence, base_score=result.base_score,
                 raw_context_features=raw, normalized_context_features=normalized,
                 reason_codes=list(result.reason_codes), excluded=result.excluded, exclusion_reason=result.exclusion_reason,
-                source_provenance=provenance, context_version=config.context_version, split=config.split(current.date)))
+                source_provenance=provenance, context_version=config.context_version, split=config.split(current.date),
+                corporate_action_context=action_context))
             memory.record(observation.ticker, candidate.event_type, now)
         history.append(observation)
         past.append(raw)

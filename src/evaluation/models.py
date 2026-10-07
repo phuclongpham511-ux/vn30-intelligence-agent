@@ -4,6 +4,7 @@ from typing import Literal
 from pydantic import ConfigDict, Field, model_validator, field_validator
 from src.schemas.data import DataModel, MarketBar, TechnicalBar, FundamentalPeriod, NewsItem
 from src.materiality.models import MaterialEventCandidate, EventType
+from src.corporate_actions.models import CorporateActionContext
 
 
 class EvaluationModel(DataModel):
@@ -130,6 +131,7 @@ class ReplayCase(EvaluationModel):
     score_version: str = "v0"
     context_version: str
     split: Literal["calibration", "validation", "holdout", "stress", "unassigned"]
+    corporate_action_context: CorporateActionContext = Field(default_factory=CorporateActionContext)
 
 
 class HumanReview(EvaluationModel):

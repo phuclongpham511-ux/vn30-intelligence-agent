@@ -377,6 +377,23 @@ neither sentiment nor Momentum. Momentum remains deferred until daily coverage a
 Technical Materiality remains paused pending SSI / certified historical-data
 provenance evidence; this milestone does not reopen calibration or protected cases.
 
+### Corporate-action-aware Technical context V1 — 2026-10-08
+
+SSI adjusted history remains authoritative for return, MA, RSI, Bollinger Bands
+and volatility. Verified corporate actions add inspectable context after scoring;
+they never suppress events, assert causation, change Significance/Novelty/Base,
+thresholds or volume rules. V1 matches only the exact effective/ex-date session,
+distinct from announcement, record and payment dates. Unresolved ex-dates do not
+match. Actual receipt (`observed_at`) gates both current enrichment and replay;
+source publication alone cannot backfill knowledge. Corrections append source
+versions; late notices append timestamped context updates without rewriting the
+original scored event. Incomplete source coverage means UNKNOWN when no match
+is observed, never a certified absence. Initial source is a curated verified
+dataset plus an explicit import/service seam, not an automatic corporate-action
+feed or a live Technical UI. Practical knowledge-time handling is an operational
+constraint; exact vendor PIT is not a general Product blocker. Official Materiality
+calibration and historical vendor-vintage certification remain outside this V1.
+
 ### Later direction and current non-priorities
 
 An **AI Product Layer** may later summarize watchlist changes, explain why a story

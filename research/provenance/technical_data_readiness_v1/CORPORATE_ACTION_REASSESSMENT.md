@@ -245,3 +245,15 @@ raw snapshot archive, secret inclusion or push.
 
 **Next:** complete a protected-safe, verified rights/additional-issuance sample and
 resolve the rejected VNM window before selecting an action-aware exclusion policy.
+
+## Operational decision — 2026-10-08
+
+The owner approved corporate-action-aware **context**, not exclusion or a further
+PIT research gate. V1 keeps SSI adjusted indicators and all detector/scoring rules
+unchanged. Verified exact ex-date matches use actual Woofi receipt time; revisions
+and late context append separate evidence without rewriting original events.
+Missing evidence remains UNKNOWN. The prior studies above remain historical
+evidence, not a claim of current product suppression policy or a general Product
+blocker. Official calibration and vendor-vintage certification are not performed.
+Implementation, source limits and verification are recorded in
+[`docs/CORPORATE_ACTION_CONTEXT_V1.md`](../../../docs/CORPORATE_ACTION_CONTEXT_V1.md).

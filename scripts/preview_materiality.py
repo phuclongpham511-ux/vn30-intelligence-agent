@@ -1,7 +1,7 @@
 """Offline engineering preview: python -m scripts.preview_materiality [TICKER]."""
 import argparse
 import json
-from dataclasses import asdict
+from pydantic import TypeAdapter
 from datetime import date, timedelta
 
 from src.analytics.market import technical_history
@@ -9,6 +9,7 @@ from src.analytics.fundamentals import fundamental_history
 from src.schemas.data import MarketBar, FundamentalRecord
 from src.schemas.stocks import SymbolRequest
 from src.materiality import ScoringContext, detect_and_score_market_events, detect_and_score_fundamental_events
+from src.materiality.models import MaterialityResult
 
 
 def preview(ticker: str) -> dict:
@@ -34,7 +35,7 @@ def preview(ticker: str) -> dict:
     results = (detect_and_score_market_events(technicals[-2], technicals[-1], market_contexts, is_fixture=True) +
                detect_and_score_fundamental_events(annual[-2], annual[-1], fundamental_contexts, is_fixture=True))
     return {"notice": "Engineering preview only; synthetic fixtures are excluded. V0 is not calibrated or production-ready.",
-            "results": [asdict(result) for result in results]}
+            "results": [TypeAdapter(MaterialityResult).dump_python(result, mode='json') for result in results]}
 
 
 def main() -> None:
