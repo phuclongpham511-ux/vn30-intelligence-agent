@@ -249,23 +249,33 @@ research/evaluation infrastructure already exist, including historical replay an
 reviewed evidence. Further calibration/deployment is blocked by external
 historical-data/provenance requirements. Do not continue without new source evidence.
 
-Unresolved requirements:
-
-- historical price provenance;
-- corporate-action / adjustment evidence;
-- trading-session continuity;
-- point-in-time integrity;
-- avoiding future-information leakage.
-
 SSI product Market Data qualification has PASSED. SSI Market Data Provider Integration
 V1 uses the official SDK 3.2.1 raw authenticated transport, dynamic security metadata,
 bounded pagination and existing deterministic analytics. SSI is the default market
 provider with no silent fallback; Fundamentals remain temporarily on vnstock/VCI.
-SSI historical OHLC is adjusted, prices VND ×1 and volume shares ×1. Only bars dated
-before today in Asia/Ho_Chi_Minh are eligible, including after market close.
-Technical Materiality remains BLOCKED by PIT vintage, historical revision policy,
-full adjustment methodology and benchmark continuity/provenance. Do not restart
-calibration. Existing protected-case, validation and holdout safeguards remain in force.
+SSI officially confirms Historical Daily OHLC is adjusted for cash dividends,
+stock dividends/bonus shares, additional issuance and rights offerings. Product
+normalization remains prices VND ×1 and volume shares ×1; only bars dated before
+today in Asia/Ho_Chi_Minh are eligible for daily analytics, even after market close.
+Historical charts/current indicators use the currently available adjusted series.
+
+Provider confirmation recorded 2026-10-07: Historical API returns the currently
+stored version at query time. SSI provides no detailed adjustment formulas/factors,
+record-level revision timestamps/version IDs/correction notifications, or historical
+vintage retrieval. Raw/unadjusted history is unavailable; future development intent
+has no implementation date. The private adjustment method is a known limitation,
+not an open reverse-engineering task. SSI remains APPROVED for product market data,
+but current SSI history alone is NOT ADMISSIBLE for the official PIT-sensitive
+Technical benchmark. The blocker is dataset provenance, not the implemented
+Technical Engine V0. Technical Materiality V1 calibration remains PAUSED/BLOCKED.
+
+Preferred research path: a certified historical source, or deterministic versioned
+raw-price + effective-dated, cutoff-visible corporate-action reconstruction, with
+session continuity and provenance verified. Future SSI raw data must be re-qualified.
+Long-term SSI snapshot retention requires explicit storage-right confirmation
+(currently UNRESOLVED); a future archive cannot recover 2020–2024 vintages. The frozen
+benchmark frame/cohort, protected cases and sealed 2025–2026 holdout remain unchanged.
+See [source decision](research/provenance/technical_data_readiness_v1/SOURCE_DECISION.md).
 
 ### Watchlist Intelligence V1 — browser-local monitoring slice implemented
 
