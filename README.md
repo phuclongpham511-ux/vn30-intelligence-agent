@@ -87,21 +87,21 @@ Relevance + Monitoring, not Materiality scoring or cross-device personalization.
 The AI Product Layer and Unified Materiality /
 Personalized Attention Budget are later directions.
 
-TCB, FPT and HPG remain initial seeds, not a hardcoded supported universe.
-
 ## Run locally
 
 Requirements: Python 3.12+, uv, Node.js 24+ and npm (Node 24.16 tested; frontend tests use native TypeScript support). From repository root:
 
 ```powershell
 uv --system-certs sync --frozen
-Copy-Item .env.example .env
-uv run python -m scripts.seed_stocks
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 uv run uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-Do not overwrite an existing .env when upgrading. The seed command creates the schema,
-applies the additive Day 0 Stock migration and seeds idempotently. No OpenAI key is required.
+The `.env` copy runs only on first setup. It preserves existing SSI credentials when you
+restart the backend or repeat these commands. Edit `.env` to add credentials after first
+setup; never copy `.env.example` over an existing `.env`. The backend loads `.env` from the
+repository root and creates or updates the local schema during development startup. No
+OpenAI key is required.
 
 In a second terminal:
 
@@ -134,7 +134,7 @@ series matches the existing snapshot window. TradingView attribution is retained
 The interface is permanently English-only. Only trusted display_name_en metadata is
 shown as a company name; otherwise the ticker is displayed. Raw company_name is retained
 in the backend but is never a UI fallback. New tickers do not require frontend branches.
-The seed command applies the additive display-name migration idempotently.
+Development startup applies the additive display-name migration idempotently.
 
 ## Architecture
 
@@ -243,8 +243,8 @@ No authentication; bind locally for development.
 ## Persistence and containers
 
 SQLite is the default real on-disk persistence path. For an existing PostgreSQL server,
-set DATABASE_URL to postgresql+psycopg://USER:PASSWORD@localhost:5432/vn30, then run the seed
-command. Plain postgresql:// URLs are normalized to psycopg. Core entities are persisted;
+set DATABASE_URL to postgresql+psycopg://USER:PASSWORD@localhost:5432/vn30. Plain
+postgresql:// URLs are normalized to psycopg. Core entities are persisted;
 market/fundamental datasets are fetched on demand and not stored in the database.
 
 SQLite migration/save/reopen was verified. PostgreSQL DDL compiles in tests, but no local
@@ -253,7 +253,6 @@ container verification remains a release gate.
 
 ```powershell
 docker build -t vn30-intelligence-agent .
-docker run --rm -v vn30-data:/data -e DATABASE_URL=sqlite:////data/vn30.db vn30-intelligence-agent uv run --no-sync python -m scripts.seed_stocks
 docker run --rm -p 127.0.0.1:8000:8000 -v vn30-data:/data -e DATABASE_URL=sqlite:////data/vn30.db vn30-intelligence-agent
 ```
 

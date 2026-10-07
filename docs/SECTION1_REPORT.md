@@ -135,7 +135,6 @@ Dockerfile continues packaging the backend with the locked dependencies.
 
 ```powershell
 uv --system-certs sync --frozen
-uv run python -m scripts.seed_stocks
 uv run uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 uv run pytest -q
 uv run python -m scripts.smoke_vnstock FPT TCB HPG VNM

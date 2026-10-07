@@ -11,7 +11,7 @@ Implementation date: 2026-09-23.
 - src/providers/: market/fundamental interfaces and isolated vnstock stubs.
 - src/schemas/ and src/services/: symbol validation contract and database-driven stock queries.
 - src/analytics/, materiality/, monitoring/, agent/: package markers only.
-- scripts/seed_stocks.py: idempotent initial stock seeding.
+- Initial development used three curated stock seed records; the seed script and records were later removed.
 - frontend/: Next.js App Router pages, styles, TypeScript config and npm lockfile.
 - tests/: health, models, API, provider substitution and evaluation scaffold checks.
 - evaluation/materiality_cases.json: two personalization examples, no ranking engine.
@@ -35,7 +35,6 @@ and `npm ci`. Certificate verification was not disabled.
 Backend, from repository root:
 
 ```powershell
-uv run python -m scripts.seed_stocks
 uv run uvicorn main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
