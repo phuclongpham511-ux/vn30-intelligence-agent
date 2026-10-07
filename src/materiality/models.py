@@ -31,6 +31,8 @@ class EventType(StrEnum):
     UNUSUAL_VOLUME = "unusual_volume"
     MA_CROSS = "ma_cross"
     RSI_REGIME_ENTRY = "rsi_regime_entry"
+    BOLLINGER_LOWER_REVERSAL_VOLUME = "bollinger_lower_reversal_volume"
+    BOLLINGER_UPPER_REVERSAL_VOLUME = "bollinger_upper_reversal_volume"
     REVENUE_GROWTH_CHANGE = "revenue_growth_change"
     NET_PROFIT_GROWTH_CHANGE = "net_profit_growth_change"
     MARGIN_CHANGE = "margin_change"

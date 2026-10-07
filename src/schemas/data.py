@@ -28,6 +28,9 @@ class TechnicalBar(MarketBar):
     ma20: float | None = None
     ma50: float | None = None
     rsi14: float | None = Field(default=None, ge=0, le=100)
+    bb50_upper: float | None = None
+    bb50_lower: float | None = None
+    bb50_std: float | None = Field(default=None, ge=0)
 
 
 class MarketSnapshot(DataModel):

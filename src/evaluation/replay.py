@@ -50,7 +50,8 @@ def replay(observations, manifest, config):
             contexts[event] = replace(context, days_since_similar_event=memory.days_since(observation.ticker, event, now))
         # A fixture anywhere in the expanding indicator prefix contaminates its outputs.
         fixture = observation.is_fixture or any(o.is_fixture for o in history)
-        candidates = detect_market_events(previous, technicals[-1], contexts, is_fixture=fixture)
+        candidates = detect_market_events(previous, technicals[-1], contexts, is_fixture=fixture,
+            recent_bars=technicals[-3:], relative_volume=raw['relative_volume'])
         flags = []
         if manifest.adjustment_basis == "unknown":
             flags.append("adjustment_semantics_unknown")

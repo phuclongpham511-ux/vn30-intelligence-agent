@@ -3,7 +3,7 @@
 Callers supply consecutive trading observations and externally normalized strengths.
 No historical calibration, provider access, or UI decisions occur here.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from math import isfinite
 
 from src.analytics.market import market_snapshot
@@ -49,7 +49,8 @@ def _candidate(current, kind, category, direction, evidence, context, is_fixture
 
 def detect_market_events(prior: TechnicalBar | None, current: TechnicalBar,
                          contexts: dict[str, ScoringContext] | None = None, *,
-                         is_fixture: bool = False) -> tuple[MaterialEventCandidate, ...]:
+                         is_fixture: bool = False, recent_bars: list[TechnicalBar] | None = None,
+                         relative_volume: float | None = None) -> tuple[MaterialEventCandidate, ...]:
     """Consume adjacent rows from technical_history, preserving VND/share units.
 
     is_fixture applies to the entire input pair and supplied scoring context.
@@ -91,7 +92,68 @@ def detect_market_events(prior: TechnicalBar | None, current: TechnicalBar,
     context = contexts.get(EventType.UNUSUAL_VOLUME.value)
     if context and context.own_history_abnormality is not None and _valid(current.volume):
         emit(EventType.UNUSUAL_VOLUME, EventDirection.NEUTRAL, [_evidence(current, "volume", "shares")])
+    recent = recent_bars if recent_bars is not None else ([prior, current] if prior else [current])
+    if not recent or recent[-1] != current or (prior and (len(recent) < 2 or recent[-2] != prior)):
+        raise ValueError("Recent bars must end with the current/prior pair")
+    for left, right in zip(recent, recent[1:]):
+        _validate_pair(left, right)
+        if left.date >= right.date:
+            raise ValueError("Recent bars must be strictly chronological")
+    events.extend(_bollinger_events(prior, current, recent, contexts, relative_volume, is_fixture))
     return tuple(events)
+
+
+def _bollinger_events(prior, current, recent, contexts, relative_volume, is_fixture):
+    """Inclusive touch, strict recovery on confirmation; delay 0..2 observations.
+
+    Existing trailing volume midrank >= .95 is a provisional confirmation gate,
+    not a calibrated Materiality cutoff. It uses confirmation-day volume only.
+    Reconfirmation can occur inside the short window; event memory lowers novelty.
+    """
+    volume = contexts.get(EventType.UNUSUAL_VOLUME.value)
+    rank = volume.own_history_abnormality if volume else None
+    if (not prior or not _valid(rank, current.volume, current.bb50_std) or
+            rank < .95 or current.volume <= 0 or current.bb50_std <= 0):
+        return []
+    output = []
+    for kind, band, extreme, direction in (
+        (EventType.BOLLINGER_LOWER_REVERSAL_VOLUME, 'bb50_lower', 'low', EventDirection.POSITIVE),
+        (EventType.BOLLINGER_UPPER_REVERSAL_VOLUME, 'bb50_upper', 'high', EventDirection.NEGATIVE)):
+        boundary = getattr(current, band)
+        if not _valid(boundary):
+            continue
+        upward = direction == EventDirection.POSITIVE
+        if not ((current.close > boundary and current.close > prior.close) if upward else
+                (current.close < boundary and current.close < prior.close)):
+            continue
+        touch = next((row for row in reversed(recent[-3:])
+            if _valid(getattr(row, band), row.bb50_std) and row.bb50_std > 0 and
+            (row.low <= row.bb50_lower if upward else row.high >= row.bb50_upper)), None)
+        if touch is None:
+            continue
+        evidence = [_evidence(current, name, current.currency) for name in
+            ('close', 'low', 'high', 'ma50', 'bb50_lower', 'bb50_upper', 'bb50_std')]
+        evidence.extend((EvidenceItem('touch_'+extreme, getattr(touch, extreme), touch.source,
+                unit=touch.currency, as_of=touch.date),
+            EvidenceItem('touch_band', getattr(touch, band), touch.source, unit=touch.currency, as_of=touch.date),
+            EvidenceItem('touch_session', touch.date.isoformat(), touch.source, as_of=touch.date),
+            EvidenceItem('confirmation_session', current.date.isoformat(), current.source, as_of=current.date),
+            EvidenceItem('touch_distance_fraction', getattr(touch, extreme)/getattr(touch, band)-1
+                if getattr(touch, band) != 0 else None, touch.source, unit='fraction', as_of=touch.date),
+            EvidenceItem('previous_close', prior.close, prior.source, unit=prior.currency, as_of=prior.date),
+            EvidenceItem('confirmation_return', current.close/prior.close-1, current.source,
+                unit='fraction', as_of=current.date),
+            _evidence(current, 'volume', 'shares'),
+            EvidenceItem('volume_percentile', rank, current.source, unit='fraction', as_of=current.date),
+            EvidenceItem('relative_volume', relative_volume, current.source, unit='ratio', as_of=current.date)))
+        # No extra volume/BB score channel: reuse the price context, volume gates eligibility.
+        context = contexts.get(kind.value)
+        if context is None:
+            context = replace(contexts.get(EventType.ABNORMAL_PRICE_MOVE.value, ScoringContext()),
+                days_since_similar_event=None)  # Price-event recurrence is not BB recurrence.
+        output.append(_candidate(current, kind, MaterialityCategory.TECHNICAL, direction,
+            evidence, context, is_fixture))
+    return output
 
 
 def detect_fundamental_events(prior: FundamentalPeriod | None, current: FundamentalPeriod,

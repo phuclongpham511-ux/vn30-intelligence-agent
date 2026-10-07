@@ -37,7 +37,14 @@ def rolling_indicators(closes: list[float]) -> tuple[list, list, list]:
 def technical_history(ticker: str, bars: list[MarketBar], source: str) -> list[TechnicalBar]:
     ordered = ordered_bars(ticker, bars, source)
     ma20, ma50, rsi = rolling_indicators([bar.close for bar in ordered])
-    return [TechnicalBar(**bar.model_dump(), ma20=ma20[i], ma50=ma50[i], rsi14=rsi[i])
+    # BB(50,2) uses sample std (ddof=1), consistent with existing volatility.
+    # The same 50 closes supply SMA50/middle and std; no warm-up zero filling.
+    std = pd.Series([bar.close for bar in ordered], dtype=float).rolling(50).std(ddof=1)
+    deviations = [None if pd.isna(value) else float(value) for value in std]
+    return [TechnicalBar(**bar.model_dump(), ma20=ma20[i], ma50=ma50[i], rsi14=rsi[i],
+                bb50_std=deviations[i],
+                bb50_upper=None if deviations[i] is None else ma50[i]+2*deviations[i],
+                bb50_lower=None if deviations[i] is None else ma50[i]-2*deviations[i])
             for i, bar in enumerate(ordered)]
 
 

@@ -30,8 +30,10 @@ def evaluate_candidate(candidate: MaterialEventCandidate) -> MaterialityResult:
 
 def detect_and_score_market_events(prior: TechnicalBar | None, current: TechnicalBar,
                                    contexts: dict[str, ScoringContext] | None = None, *,
-                                   is_fixture: bool = False) -> tuple[MaterialityResult, ...]:
-    return tuple(map(evaluate_candidate, detect_market_events(prior, current, contexts, is_fixture=is_fixture)))
+                                   is_fixture: bool = False, recent_bars: list[TechnicalBar] | None = None,
+                                   relative_volume: float | None = None) -> tuple[MaterialityResult, ...]:
+    return tuple(map(evaluate_candidate, detect_market_events(prior, current, contexts,
+        is_fixture=is_fixture, recent_bars=recent_bars, relative_volume=relative_volume)))
 
 
 def detect_and_score_fundamental_events(prior: FundamentalPeriod | None, current: FundamentalPeriod,

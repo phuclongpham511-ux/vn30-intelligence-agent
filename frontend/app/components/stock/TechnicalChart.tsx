@@ -11,7 +11,7 @@ import TechnicalLegend from "./TechnicalLegend";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
 
-type ChartRefs = { chart: IChartApi; candles: ISeriesApi<"Candlestick">; ma20: ISeriesApi<"Line">; ma50: ISeriesApi<"Line">; volume?: ISeriesApi<"Histogram">; rsi?: ISeriesApi<"Line"> };
+type ChartRefs = { chart: IChartApi; candles: ISeriesApi<"Candlestick">; ma20: ISeriesApi<"Line">; ma50: ISeriesApi<"Line">; bbUpper: ISeriesApi<"Line">; bbLower: ISeriesApi<"Line">; volume?: ISeriesApi<"Histogram">; rsi?: ISeriesApi<"Line"> };
 export default function TechnicalChart({ ticker, onRows }: { ticker: string; onRows: (rows: TechnicalBar[]) => void }) {
   const {t,locale,number:localNumber}=useLocale();
   const host = useRef<HTMLDivElement>(null);
@@ -23,7 +23,7 @@ export default function TechnicalChart({ ticker, onRows }: { ticker: string; onR
   const [attempt, setAttempt] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [indicators, setIndicators] = useState<Indicators>({MA20:true, MA50:true, Volume:true, RSI:true});
+  const [indicators, setIndicators] = useState<Indicators>({MA20:true, MA50:true, BB:false, Volume:true, RSI:true});
   const { resolvedTheme } = useTheme();
   const [paletteVersion, setPaletteVersion] = useState(0);
   useEffect(() => {
@@ -60,12 +60,14 @@ export default function TechnicalChart({ ticker, onRows }: { ticker: string; onR
     const candles = chart.addSeries(CandlestickSeries, { borderVisible: false, priceFormat: { type: "price", precision: 0, minMove: 1 } }, 0);
     const ma20 = chart.addSeries(LineSeries, { lineWidth: 1, priceLineVisible: false, lastValueVisible: false }, 0);
     const ma50 = chart.addSeries(LineSeries, { lineWidth: 1, priceLineVisible: false, lastValueVisible: false }, 0);
+    const bbUpper = chart.addSeries(LineSeries, { visible:false, lineWidth:1, lineStyle:2, priceLineVisible:false, lastValueVisible:false }, 0);
+    const bbLower = chart.addSeries(LineSeries, { visible:false, lineWidth:1, lineStyle:3, priceLineVisible:false, lastValueVisible:false }, 0);
     const crosshair = (event: MouseEventParams) => {
       const candle = event.seriesData.get(candles);
       setSelected(candle ? currentRows.current.find(row => row.date === String(candle.time)) ?? null : null);
     };
     chart.subscribeCrosshairMove(crosshair);
-    api.current = { chart, candles, ma20, ma50 };
+    api.current = { chart, candles, ma20, ma50, bbUpper, bbLower };
     return () => { chart.unsubscribeCrosshairMove(crosshair); chart.remove(); api.current = null; };
   }, []);
 
@@ -99,7 +101,10 @@ export default function TechnicalChart({ ticker, onRows }: { ticker: string; onR
     candles.applyOptions({priceFormat:{type:"custom",minMove:1,formatter:(value: number) => localNumber(value,0)}});
     candles.setData(data.candles); refs.volume?.setData(data.volume);
     ma20.applyOptions({visible:indicators.MA20,color:color("--ma20")});
-    ma50.applyOptions({visible:indicators.MA50,color:color("--ma50")});
+    ma50.applyOptions({visible:indicators.MA50||indicators.BB,color:color("--ma50")});
+    refs.bbUpper.applyOptions({visible:indicators.BB,color:color("--ma50")});
+    refs.bbLower.applyOptions({visible:indicators.BB,color:color("--ma50")});
+    refs.bbUpper.setData(data.bb50_upper); refs.bbLower.setData(data.bb50_lower);
     ma20.setData(data.ma20); ma50.setData(data.ma50);
     refs.rsi?.applyOptions({color:color("--rsi")}); refs.rsi?.setData(data.rsi14);
   }, [rows, resolvedTheme, indicators, paletteVersion, locale]);
@@ -114,7 +119,7 @@ export default function TechnicalChart({ ticker, onRows }: { ticker: string; onR
     <div className="space-y-3 border-b p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2"><h2>{t("Technical Chart")}</h2><span className="text-xs text-muted-foreground">{t("Daily OHLCV · VND")}</span></div>
       <TechnicalToolbar range={range} onRange={setRange} indicators={indicators} onIndicators={setIndicators} reset={() => api.current?.chart.timeScale().fitContent()}/>
-      <TechnicalLegend bar={bar}/>
+      <TechnicalLegend bar={bar} bb={indicators.BB}/>
     </div>
     <div className="relative">
       <div ref={host} className="h-[520px] w-full" role="img" aria-label={t("{ticker} daily candlesticks, MA20, MA50, volume and RSI14; values are available in the technical data table",{ticker})}/>
@@ -123,6 +128,7 @@ export default function TechnicalChart({ ticker, onRows }: { ticker: string; onR
       </div>}
     </div>
     <p className="px-4 py-2 text-[10px] text-muted-foreground">{t("Price / Volume / RSI panes · RSI reference levels: 30 and 70 · Indicators warm up within the selected period; unavailable values are omitted.")}</p>
+    {indicators.BB&&<p className="px-4 pb-2 text-[10px] text-muted-foreground">{t("BB uses 50 completed daily sessions and sample standard deviation; SMA50 is the middle band.")}</p>}
     <div className="flex flex-wrap justify-between gap-2 border-t px-4 py-3 text-[10px] text-muted-foreground"><span>{t("{count} sessions",{count:rows.length})} · {rows[0]?.source ?? t("Provider data")} · {t("Drag to pan / scroll to zoom")}</span><a href="https://www.tradingview.com/" target="_blank" rel="noreferrer" className="underline">TradingView Lightweight Charts™ · Copyright (с) 2025 TradingView, Inc.</a></div>
   </section>;
 }

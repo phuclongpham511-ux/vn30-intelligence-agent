@@ -41,7 +41,9 @@ def build_context(snapshot, technical, prior_features, volume, excess_return, co
            "prior_excess_count": sum(r["excess_return"] is not None for r in prior)}
     market_rank = percentile(excess_return, [r["excess_return"] for r in prior], config.min_history, True)
     mapping = {"abnormal_price_move": ("daily_return", True), "unusual_volume": ("volume", False),
-               "ma_cross": ("ma_spread", True), "rsi_regime_entry": ("rsi_distance", False)}
+               "ma_cross": ("ma_spread", True), "rsi_regime_entry": ("rsi_distance", False),
+               "bollinger_lower_reversal_volume": ("daily_return", True),
+               "bollinger_upper_reversal_volume": ("daily_return", True)}
     contexts = {}
     for event, (feature, absolute) in mapping.items():
         own = percentile(raw[feature], [r[feature] for r in prior], config.min_history, absolute)

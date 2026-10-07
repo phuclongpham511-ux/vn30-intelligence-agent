@@ -51,7 +51,8 @@ def test_engine_input_schemas_exclude_population_features():
     # certificates in the evaluation layer are deliberately outside this seam.
     assert set(MarketBar.model_fields) == {
         'ticker', 'date', 'open', 'high', 'low', 'close', 'volume', 'source', 'currency'}
-    assert set(TechnicalBar.model_fields) == set(MarketBar.model_fields) | {'ma20', 'ma50', 'rsi14'}
+    assert set(TechnicalBar.model_fields) == set(MarketBar.model_fields) | {
+        'ma20', 'ma50', 'rsi14', 'bb50_upper', 'bb50_lower', 'bb50_std'}
     context = {f.name for f in fields(ScoringContext)}
     assert context == {'own_history_abnormality', 'market_relative_abnormality',
         'sector_relative_abnormality', 'economic_magnitude', 'days_since_similar_event', 'source_quality'}

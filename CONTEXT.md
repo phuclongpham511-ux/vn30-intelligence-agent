@@ -277,6 +277,25 @@ Long-term SSI snapshot retention requires explicit storage-right confirmation
 benchmark frame/cohort, protected cases and sealed 2025–2026 holdout remain unchanged.
 See [source decision](research/provenance/technical_data_readiness_v1/SOURCE_DECISION.md).
 
+### Bollinger Technical Events V1 — 2026-10-07
+
+BB(50,2) uses 50 completed daily closes: SMA50 +/- two sample standard deviations
+(ddof=1); first 49 values remain null. Stock research's existing chart has an
+optional BB control, sharing SMA50 as its middle line and exposing backend values
+in the crosshair legend and raw table. Live quotes never enter this calculation.
+`bollinger_lower_reversal_volume` / `bollinger_upper_reversal_volume` require an
+inclusive low/lower or high/upper touch within 0–2 completed observed sessions,
+then a strict close back inside the current band and above/below the previous close.
+The confirmation session is the event date; its positive volume must have the
+existing trailing unusual-volume midrank >= .95 (default replay: 60 prior sessions).
+Zero-width bands cannot emit events. At most one event per direction/session is
+emitted; a touch can reconfirm within its short window, with existing recurrence
+Novelty rather than automatic transition novelty. Significance reuses price
+abnormality context; volume is evidence/eligibility, not an extra scoring channel.
+These are provisional technical observations, not return predictions or trade
+recommendations. PIT/admission/calibration status remains unchanged; no Watchlist
+delivery or chart event markers are introduced.
+
 ### Watchlist Intelligence V1 — browser-local monitoring slice implemented
 
 The existing Watchlist page now supports following/removing available stocks,
