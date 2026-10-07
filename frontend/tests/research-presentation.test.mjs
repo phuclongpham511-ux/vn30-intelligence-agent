@@ -7,6 +7,8 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
 const require=createRequire(import.meta.url);
 function component(file, overrides={}) {
+  overrides={'./stock/LivePrice':{LivePrices:({children})=>children,LivePrice:()=>null},
+    '@/lib/useLiveMarket':{useLiveIndex:()=>({data:null,failed:false})},...overrides};
   const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{
     filename:file,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
   const exports={};
@@ -70,12 +72,12 @@ test('Hot Topics selects only same-cluster images and excludes no-image stories'
  assert.match(render({...base,representative_article:preferred,articles:[preferred,sibling]}),/src="https:\/\/example.org\/preferred.jpg"/);
 });
 
-test('Explore keeps the VN-Index summary and mascot without a chart navigation link',()=>{
+test('Explore preserves its index hero and exposes the requested VN-Index detail link',()=>{
  const Market=component('../app/components/ExploreMarket.tsx',{
   './mascot/Mascot':{MascotIllustration:({size})=>React.createElement('span',{'data-mascot-size':size}),MascotState:({children})=>children},
   './news/TopStory':()=>null});
  const html=renderToStaticMarkup(React.createElement(Market));
- assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.doesNotMatch(html,/href="\/indices\/VNINDEX"|View research|Open VN-Index research/);assert.match(html,/data-mascot-size="128"/);
+ assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
  assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary|panel flex/);
 });
 

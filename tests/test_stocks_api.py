@@ -1,15 +1,13 @@
 import pytest
-from scripts.seed_stocks import seed_stocks
 from src.models import Stock
 from src.services.stocks import get_market_provider
 from main import app
 
 
 def test_database_driven_stock_routes(client, session):
-    seed_stocks(session)
     session.add(Stock(symbol="VNM"))
     session.commit()
-    assert len(client.get("/stocks").json()) == 4
+    assert len(client.get("/stocks").json()) == 1
     assert client.get("/stocks/vnm").json()["symbol"] == "VNM"
     assert client.get("/stocks/UNKNOWN").status_code == 404
 

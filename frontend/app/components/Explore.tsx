@@ -28,10 +28,11 @@ export default function Explore({ ticker }: { ticker: string }) {
       }).catch(error => { if (error.name !== "AbortError") setError(error.message === "STOCK_NOT_FOUND" ? "This ticker has not been added. Find it in Explore to get started." : "The data provider is temporarily unavailable. Please try again."); });
     return () => controller.abort();
   }, [ticker, attempt]);
-  if (error) return <StockError ticker={ticker} message={error} retry={() => setAttempt(attempt + 1)}/>;
-  if (!data) return <StockLoading ticker={ticker}/>;
+  const header=<StockHeader stock={data?.stock||{symbol:ticker,company_name:null,exchange:null}} market={data?.market}/>;
+  if (error) return <div className="page-stack">{header}<StockError ticker={ticker} message={error} retry={() => setAttempt(attempt + 1)}/></div>;
+  if (!data) return <div className="page-stack">{header}<StockLoading ticker={ticker}/></div>;
   return <div className="page-stack">
-    <StockHeader stock={data.stock} market={data.market}/>
+    {header}
     <nav aria-label={t("Stock sections")} className="flex flex-wrap gap-4 text-sm text-primary"><a href="#stock-price" className="hover:underline">{t("Price & technicals")}</a><a href="#stock-fundamentals" className="hover:underline">{t("Fundamentals")}</a><a href="#stock-news" className="hover:underline">{t("News mentioning {ticker}",{ticker})}</a><a href="#stock-community" className="hover:underline">{t("Community discussions")}</a></nav>
     <div id="stock-price" className="scroll-mt-24"><TechnicalChart ticker={ticker} onRows={setTechnicalRows}/></div>
     <MarketSnapshot market={data.market}/>

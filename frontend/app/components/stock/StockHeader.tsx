@@ -1,13 +1,13 @@
 "use client";
 import {useLocale} from "@/lib/i18n";
 import Link from "next/link";
-import { ArrowLeft, ArrowUpRight, ArrowDownRight, Clock3 } from "lucide-react";
+import { ArrowLeft, Clock3 } from "lucide-react";
 import type { Stock, Market } from "@/lib/types";
-import { englishCompanyName, direction } from "@/lib/presentation";
-export default function StockHeader({ stock, market }: { stock: Stock; market: Market }) {
-  const {t,date:localDate,number:localNumber,percent:localPercent}=useLocale();
+import { englishCompanyName } from "@/lib/presentation";
+import {LivePrices,LivePrice} from './LivePrice';
+export default function StockHeader({ stock, market }: { stock: Omit<Stock,'id'>; market?: Market }) {
+  const {t,date:localDate}=useLocale();
   const name = englishCompanyName(stock);
-  const move = market.daily_return;
   return <div>
     <Link href="/" className="mb-6 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft size={13}/>{t("Back to Explore")}</Link>
     <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
@@ -16,10 +16,8 @@ export default function StockHeader({ stock, market }: { stock: Stock; market: M
           {name && <p className="mt-2 text-sm text-muted-foreground">{name}</p>}
         </div>
       </div>
-      <div className="sm:text-right"><div className="financial text-[32px] font-semibold leading-tight tracking-tight">{localNumber(market.close)} <span className="text-sm font-normal text-muted-foreground">VND</span></div>
-        <div className={`financial mt-1 flex items-center gap-1.5 text-sm sm:justify-end ${direction(move)}`}>{typeof move === "number" && move !== 0 && (move > 0 ? <ArrowUpRight size={16}/> : <ArrowDownRight size={16}/>)}<span>{localPercent(move, true)}</span><span className="ml-1 text-xs text-muted-foreground">{t("daily change")}</span></div>
-      </div>
+      <LivePrices symbols={[stock.symbol]} interval={10000}><LivePrice symbol={stock.symbol} prominent/></LivePrices>
     </div>
-    <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground"><span className="flex items-center gap-1.5"><Clock3 size={12}/>{t("As of")} {localDate(market.as_of)}</span><span>{t("Source:")} {market.source}</span><span>{t("Daily data · Not realtime")}</span></div>
+    {market&&<div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-muted-foreground"><span>{t("Completed daily analytics")}</span><span className="flex items-center gap-1.5"><Clock3 size={12}/>{t("As of")} {localDate(market.as_of)}</span><span>{t("Source:")} {market.source}</span></div>}
   </div>;
 }

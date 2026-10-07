@@ -3,14 +3,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects import postgresql
 from sqlmodel import SQLModel, select
-from scripts.seed_stocks import seed_stocks
 from src.models import Stock, User, Watchlist, WatchlistItem, MonitoringPreference, Dimension, Priority
 
 
-def test_seed_is_idempotent(session):
-    assert seed_stocks(session) == 3
-    assert seed_stocks(session) == 0
-    assert {stock.symbol for stock in session.exec(select(Stock)).all()} == {"TCB", "FPT", "HPG"}
+def test_new_database_does_not_seed_a_fixed_supported_universe(session):
+    assert session.exec(select(Stock)).all() == []
 
 
 def test_dynamic_ticker_and_unique_symbol(session):

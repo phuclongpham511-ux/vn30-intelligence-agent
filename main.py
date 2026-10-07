@@ -13,7 +13,11 @@ async def lifespan(app: FastAPI):
     # Local first-run setup only; production schema deployment stays explicit.
     if get_settings().app_env == "development":
         create_tables()
-    yield
+    try:
+        yield
+    finally:
+        from src.services.live_market import close_live_market
+        close_live_market()
 
 
 app = FastAPI(title="VN30 Intelligence Agent", version="0.1.0", lifespan=lifespan)

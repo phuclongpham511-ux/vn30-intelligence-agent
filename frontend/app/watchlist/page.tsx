@@ -15,6 +15,7 @@ import type { WatchlistState, WatchlistUpdates } from "@/lib/watchlist";
 import { loadCommunityUpdates } from "@/lib/community";
 import type { CommunityUpdate } from "@/lib/community";
 import { CommunityDiscussions } from "../components/stock/StockCommunity";
+import {LivePrices,LivePrice} from '../components/stock/LivePrice';
 
 export default function WatchlistPage() {
   const {t,ui,date:localDate}=useLocale();
@@ -86,7 +87,7 @@ export default function WatchlistPage() {
   const newCommunityCount = new Set(community?.flatMap(row => unreviewedThreads(row.data?.items || [], state.communitySeen[row.symbol])) || []).size;
   const communityIncomplete = community?.some(row => !row.data || row.data.coverage_partial);
   const communityAvailable = community?.some(row => row.data !== null);
-  return <div className="page-stack">
+  return <LivePrices symbols={ready?state.symbols:[]} interval={20000}><div className="page-stack">
     <div className="flex items-start justify-between gap-3"><div><div className="eyebrow mb-3">{t("Workspace / Watchlist")}</div><h1>{t("Watchlist")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("What changed for the stocks you follow?")}</p></div>
       <Button variant="outline" disabled={!ready || !state.symbols.length || loading || communityLoading} onClick={() => setAttempt(value => value + 1)}>{t("Refresh updates")}</Button>
     </div>
@@ -117,7 +118,7 @@ export default function WatchlistPage() {
           const discussions = community?.find(stock => stock.symbol === symbol)?.data || null;
           return <article key={symbol} className="grid gap-4 p-5 md:grid-cols-[170px_minmax(0,1fr)]" aria-label={t("{ticker} monitoring",{ticker:symbol})}>
             <div><Link href={`/stocks/${encodeURIComponent(symbol)}`} className="text-lg font-semibold text-primary hover:underline">{symbol}</Link><p className="mt-1 text-xs text-muted-foreground">{englishCompanyName(universe.stocks.find(stock => stock.symbol === symbol) || { company_name: null })}</p>
-              <button className="mt-3 text-xs text-muted-foreground underline" aria-label={t("Remove {ticker} from Watchlist",{ticker:symbol})} disabled={storageError} onClick={() => save(unfollowStock(state, symbol))}>{t("Remove")}</button>
+              <div className="mt-3"><LivePrice symbol={symbol}/></div><button className="mt-3 text-xs text-muted-foreground underline" aria-label={t("Remove {ticker} from Watchlist",{ticker:symbol})} disabled={storageError} onClick={() => save(unfollowStock(state, symbol))}>{t("Remove")}</button>
             </div>
             <div className="min-w-0">
               {loading ? <p className="text-sm text-muted-foreground">{t("Checking news…")}</p>
@@ -143,5 +144,5 @@ export default function WatchlistPage() {
           </article>;
         })}</section>
       </>}
-  </div>;
+  </div></LivePrices>;
 }

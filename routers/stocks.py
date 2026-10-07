@@ -11,8 +11,33 @@ from src.schemas.data import MarketBar, MarketSnapshot, FundamentalSnapshot, New
 from src.services.stocks import find_stock, get_market_provider, list_stocks, validate_symbol
 from src.services import data
 from src.services.universe import browse_universe
+from src.services.live_market import get_live_market
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
+
+
+@router.get('/live')
+def live_market(symbols: str = Query(max_length=1049), client_id: str = Query(default='default', pattern=r'^[A-Za-z0-9-]{1,64}$'), session: Session = Depends(get_session), live=Depends(get_live_market)):
+    from src.providers.ssi.live import normalize_symbols
+    try:
+        requested = normalize_symbols(symbols)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+    valid = [s for s in requested if (record := session.get(Security, s)) and record.is_active]
+    result = live.read(valid, client_id=client_id)
+    result['items'].update({s: {'status':'unavailable','snapshot':None} for s in requested if s not in valid})
+    return result
+
+
+@router.post('/live-release')
+def release_live_market(client_id: str = Query(pattern=r'^[A-Za-z0-9-]{1,64}$'), live=Depends(get_live_market)):
+    live.release(client_id)
+    return {'status':'released'}
+
+
+@router.get('/live-index')
+def live_index(live=Depends(get_live_market)):
+    return live.index()
 
 
 def require_stock(symbol: str, session: Session = Depends(get_session),

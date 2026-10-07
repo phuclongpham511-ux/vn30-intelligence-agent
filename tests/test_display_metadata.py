@@ -1,13 +1,12 @@
 from sqlmodel import select
 from src.models import Stock
-from scripts.seed_stocks import seed_stocks
 
 
-def test_curated_english_seed_metadata(session):
-    seed_stocks(session)
-    seed_stocks(session)
+def test_explicit_english_metadata_is_preserved(session):
+    session.add(Stock(symbol='DYNAMIC',display_name_en='Example listed issuer'))
+    session.commit()
     stocks = session.exec(select(Stock)).all()
-    assert len(stocks) == 3
+    assert len(stocks) == 1
     assert all(stock.display_name_en for stock in stocks)
 
 
