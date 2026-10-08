@@ -9,6 +9,48 @@ def source(priority='standard', sid='one'):
                   publisher_group=sid, scheduling_priority=priority)
 
 
+def test_postgres_projection_shares_evidence_lock_until_dirty_acknowledgement(session, monkeypatch):
+    from types import SimpleNamespace
+    from src.news.read_cache import refresh_cache
+    from src.news.service import _persist_cycle
+    from src.news.adapters import ArticleInput
+    now = datetime.now(timezone.utc)
+    events = []
+    class PostgresSessionSeam:
+        def get_bind(self):
+            return SimpleNamespace(dialect=SimpleNamespace(name='postgresql'))
+        def execute(self, statement, *args, **kwargs):
+            sql = str(statement)
+            if 'pg_advisory_xact_lock' in sql:
+                events.append(sql)
+                return None  # emulate the PostgreSQL primitive; real SQL uses SQLite
+            if 'UPDATE newsstory' in sql:
+                events.append('dirty_ack')
+            return session.execute(statement, *args, **kwargs)
+        def commit(self):
+            events.append('commit')
+            return session.commit()
+        def __getattr__(self, name):
+            return getattr(session, name)
+    seam = PostgresSessionSeam()
+    _persist_cycle(seam, [source()], now=now, force=True, fetch=lambda _: [ArticleInput(
+        'Steel industry output expands', 'https://one.example/a', now,
+        'https://image.example/a.png', 'media:thumbnail')])
+    writer_lock = next(value for value in events if 'pg_advisory' in value)
+    events.clear()
+    from src.news.read import build_research_rows
+    def record_build(*args, **kwargs):
+        events.append('build')
+        return build_research_rows(*args, **kwargs)
+    monkeypatch.setattr('src.news.read.build_research_rows', record_build)
+    refresh_cache(seam, set(), now=now)
+    lock_index = events.index(writer_lock)
+    assert 'dirty_ack' in events
+    assert lock_index < events.index('build') < events.index('dirty_ack')
+    assert 'commit' not in events[lock_index:events.index('dirty_ack')]
+    assert events.index('dirty_ack') < len(events)-1 and events[-1] == 'commit'
+
+
 def vn_time(day, hour, minute=0):
     return datetime(2026, 10, day, hour-7, minute, tzinfo=timezone.utc)
 

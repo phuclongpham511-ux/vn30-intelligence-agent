@@ -5,6 +5,35 @@ from src.news.adapters import ArticleInput
 from src.news.service import ingest_cycle
 
 
+def test_quick_news_keeps_coverage_ranking_while_archive_keeps_recency(session, client, monkeypatch):
+    session.add_all([Stock(symbol='XYZ'), Security(symbol='XYZ', exchange='HOSE', last_synced_at=datetime.now(timezone.utc))])
+    session.commit()
+    from datetime import timedelta
+    now = datetime.now(timezone.utc)
+    sources = [Source(source_id=x, name=x, endpoint=f'https://{x}.example/feed', country='VN',
+                      language='vi', category='VN', publisher_group=x) for x in ('one', 'two')]
+    broad = 'XYZ appoints new chief executive'
+    recent = 'XYZ reports quarterly revenue growth'
+    for source in sources:
+        ingest_cycle(session, [source], force=True, now=now, fetch=lambda s: [ArticleInput(
+            broad, f'https://{s.source_id}.example/a', now-timedelta(hours=1),
+            'https://image.example/a.png', 'media:thumbnail')])
+    ingest_cycle(session, [sources[0]], force=True, now=now, fetch=lambda _: [ArticleInput(
+        recent, 'https://one.example/b', now, 'https://image.example/b.png', 'media:thumbnail')])
+    def forbidden(*args, **kwargs):
+        raise AssertionError('Quick News must not fetch upstream or rebuild projections')
+    monkeypatch.setattr('src.news.service.acquire', forbidden)
+    monkeypatch.setattr('src.news.read.build_research_rows', forbidden)
+    query = '/news/feed?research_category=COMPANY&ticker=XYZ&limit=10'
+    assert client.get(query).json()[0]['representative_article']['title'] == recent
+    quick = client.get(query+'&ranking=attention').json()
+    assert quick[0]['representative_article']['title'] == broad
+    assert quick[0]['story']['source_count'] == 2
+    assert len(quick[0]['articles']) == 2
+    assert quick[0]['thumbnail_url']
+    assert client.get(query+'&ranking=unknown').status_code == 422
+
+
 def test_archives_keep_single_source_evidence_while_hot_requires_coverage_and_image(session, client):
     session.add_all([Stock(symbol='XYZ'), Security(symbol='XYZ',exchange='HOSE',last_synced_at=datetime.now(timezone.utc))]); session.commit()
     now = datetime.now(timezone.utc)

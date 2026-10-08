@@ -34,6 +34,17 @@ test('typed UI messages interpolate values without changing tickers or source te
   assert.equal(translate('en','Follow {ticker}',{ticker:'XYZ'}),'Follow XYZ');
   assert.equal(translate('vi','News'),'Tin tức');
 });
+
+test('Quick News header and loading chrome preserve EN/VI dictionary keys',()=>{
+  const {default:News}=component('../app/components/stock/StockNews.tsx',{
+    '../news/SourceCoverage':()=>null,'../news/TopStory':()=>null});
+  for(const language of ['en','vi']) {
+    const html=render(News,{ticker:'XYZ'},language);
+    assert.ok(html.includes(translate(language,'Quick news · {ticker}',{ticker:'XYZ'})));
+    assert.ok(html.includes(translate(language,'Loading quick news…')));
+    assert.doesNotMatch(html,/Â|â€/);
+  }
+});
 test('locale formatting preserves real zero, missing values, precision and Vietnam date boundaries',()=>{
   const vi=localeTools('vi'),en=localeTools('en');
   assert.equal(vi.number(1234.56),'1.234,56');

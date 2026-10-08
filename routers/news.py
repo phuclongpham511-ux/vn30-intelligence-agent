@@ -156,9 +156,10 @@ def topics(session: DB, options: dict = Depends(filters)):
 
 @router.get('/feed', response_model=list[StoryResponse])
 def feed(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] = 'COMPANY',
+         ranking: Literal['recency', 'attention'] = 'recency',
          offset: int = Query(default=0, ge=0, le=10000),
          options: dict = Depends(filters)):
-    return research_rows(session, options, research_category, offset=offset, now=datetime.now(timezone.utc))
+    return research_rows(session, options, research_category, attention=ranking == 'attention', offset=offset, now=datetime.now(timezone.utc))
 
 
 @router.get('/feed/page', response_model=FeedPageResponse)

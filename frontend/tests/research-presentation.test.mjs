@@ -90,3 +90,47 @@ test('stock news archive link opens the semantic Company view',()=>{
  assert.match(html,/Quick news · XYZ/);
  assert.match(html,/href="\/news\?ticker=XYZ&amp;view=company"/);
 });
+
+test('Quick News keeps one leading story, bounded related headlines and source evidence',()=>{
+ const items=Array.from({length:7},(_,n)=>({story:{id:`s${n}`,representative_title:`Story ${n}`,source_count:2},
+  representative_article:{...article,id:`a${n}`,title:`Story ${n}`,thumbnail_url:'https://example.org/image.jpg'},articles:[article]}));
+ let state=0;
+ const News=component('../app/components/stock/StockNews.tsx',{
+  react:{...React,useEffect:()=>{},useState:initial=>[state++===0?items:initial,()=>{}]},
+  '../news/SourceCoverage':()=>null,'../news/TopStory':TopStory});
+ const html=renderToStaticMarkup(React.createElement(News,{ticker:'XYZ'}));
+ assert.equal((html.match(/object-cover/g)||[]).length,1);
+ for(let n=0;n<5;n++) assert.match(html,new RegExp(`Story ${n}`));
+ assert.doesNotMatch(html,/Story 5|Story 6/);
+ assert.match(html,/Show more headlines \(2\)/);
+ assert.match(html,/Publisher/);
+ assert.match(html,/2 independent sources/);
+});
+
+test('Quick News polls the cached attention-ranked Company feed and aborts on unmount',async()=>{
+ const original={fetch:globalThis.fetch,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval};
+ let effect, poll, period, cleared;
+ const requests=[];
+ try {
+  globalThis.fetch=async(url,options)=>{requests.push({url,options});return {ok:true,json:async()=>[]};};
+  globalThis.setInterval=(callback,delay)=>{poll=callback;period=delay;return 42;};
+  globalThis.clearInterval=id=>{cleared=id;};
+  const News=component('../app/components/stock/StockNews.tsx',{
+   react:{...React,useEffect:callback=>{effect=callback;},useState:initial=>[initial,()=>{}]},
+   '../news/SourceCoverage':()=>null,'../news/TopStory':()=>null});
+  renderToStaticMarkup(React.createElement(News,{ticker:'XYZ'}));
+  const cleanup=effect();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(period,60_000);
+  const url=new URL(requests[0].url,'https://local.example');
+  assert.equal(url.pathname,'/api/news/feed');
+  assert.equal(url.searchParams.get('research_category'),'COMPANY');
+  assert.equal(url.searchParams.get('ranking'),'attention');
+  assert.equal(url.searchParams.get('ticker'),'XYZ');
+  assert.equal(url.searchParams.get('limit'),'10');
+  poll();await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(requests.length,2);
+  cleanup();assert.equal(cleared,42);
+  assert.ok(requests.every(row=>row.options.signal.aborted));
+ } finally {Object.assign(globalThis,original);}
+});

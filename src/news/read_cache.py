@@ -1,7 +1,7 @@
 """Worker-built research snapshot. HTTP filters/ranks persisted evidence only."""
 from datetime import datetime, timedelta, timezone
 from sqlmodel import select
-from sqlalchemy import update
+from sqlalchemy import update, text
 from sqlalchemy.exc import IntegrityError
 from src.news.models import NewsReadCache, NewsStory
 from src.news.normalization import utc
@@ -20,6 +20,9 @@ def refresh_cache(session, changed, *, now, observations=None):
             session.commit()
         except IntegrityError:
             session.rollback()
+    # Share evidence-writer ownership through dirty-marker acknowledgement.
+    if session.get_bind().dialect.name == 'postgresql':
+        session.execute(text('SELECT pg_advisory_xact_lock(73193001)'))
     # Serialize projection writers too: two workers can finish different sources.
     session.execute(update(NewsReadCache).where(NewsReadCache.id == 'research')
                     .values(updated_at=NewsReadCache.updated_at).execution_options(synchronize_session=False))
@@ -83,7 +86,7 @@ def refresh_cache(session, changed, *, now, observations=None):
     return meaningful
 
 
-def research_rows(session, options, category=None, *, hot=False, offset=0, now=None):
+def research_rows(session, options, category=None, *, hot=False, attention=False, offset=0, now=None):
     from src.news.read import StoryResponse, representative, cluster_thumbnail
     from src.news.service import story_score
     from src.news.research import attention_order
@@ -132,9 +135,9 @@ def research_rows(session, options, category=None, *, hot=False, offset=0, now=N
         row.thumbnail_url, row.thumbnail_article_id = image.thumbnail_url, image.id
         row.research_category = entry['categories'][chosen.id]
         row.ranking_score = story_score(row.story, now)
-        row.ranking_reason = ('Independent publishers first, capped article activity, then latest activity' if hot
+        row.ranking_reason = ('Independent publishers first, capped article activity, then latest activity' if hot or attention
                               else 'Latest publication first; earliest source represents each story')
         output.append(row)
     # Recency/window filtering is lightweight and exact, including snapshot pagination.
-    order = attention_order if hot else lambda row: (-max(utc(a.published_at or a.first_seen_at).timestamp() for a in row.articles), row.story.id)
+    order = attention_order if hot or attention else lambda row: (-max(utc(a.published_at or a.first_seen_at).timestamp() for a in row.articles), row.story.id)
     return sorted(output, key=order)[offset:offset+options['limit']]
