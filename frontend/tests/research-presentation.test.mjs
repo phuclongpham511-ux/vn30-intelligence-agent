@@ -83,7 +83,8 @@ test('Explore preserves its index hero and exposes the requested VN-Index detail
 
 test('stock news archive link opens the semantic Company view',()=>{
  const News=component('../app/components/stock/StockNews.tsx',{
-  '../news/ArticleRow':()=>null,'../news/SourceCoverage':()=>null});
+  '../news/SourceCoverage':()=>null,'../news/TopStory':()=>null});
  const html=renderToStaticMarkup(React.createElement(News,{ticker:'XYZ'}));
+ assert.match(html,/Quick news · XYZ/);
  assert.match(html,/href="\/news\?ticker=XYZ&amp;view=company"/);
 });
