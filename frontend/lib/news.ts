@@ -1,6 +1,6 @@
 export type NewsArticle = {
   id: string; title: string; url: string; source_name: string; published_at: string | null;
-  first_seen_at: string; topics: string[]; tickers: string[]; sectors: string[];
+  first_seen_at: string; last_seen_at?:string; topics: string[]; tickers: string[]; sectors: string[];
   thumbnail_url?: string | null; thumbnail_provenance?: string | null;
 };
 export type NewsSource = {

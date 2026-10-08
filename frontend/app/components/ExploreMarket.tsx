@@ -11,9 +11,9 @@ export default function ExploreMarket(){
   const {t,ui,locale,date:localDate}=useLocale();
   const live=useLiveIndex();const index=live.data?.snapshot||null;const indexError=live.failed;const indexLoading=!live.data&&!live.failed;
   const [stories,setStories]=useState<TopStoryData[]|null>(null);const [newsError,setNewsError]=useState(false);const [attempt,setAttempt]=useState(0);
-  useEffect(()=>{const controller=new AbortController();
-    const loadNews=async()=>{try{const r=await fetch('/api/news/hot?limit=4',{signal:controller.signal,cache:'no-store'});if(!r.ok)throw Error();const rows=await r.json();if(!controller.signal.aborted){setStories(rows);setNewsError(false);}}catch{if(!controller.signal.aborted)setNewsError(true);}};
-    void loadNews();const timer=setInterval(()=>{void loadNews();},5*60*1000);return()=>{controller.abort();clearInterval(timer);};
+  useEffect(()=>{const controller=new AbortController();let busy=false;
+    const loadNews=async()=>{if(busy)return;busy=true;try{const r=await fetch('/api/news/hot?limit=4',{signal:controller.signal,cache:'no-store'});if(!r.ok)throw Error();const rows=await r.json();if(!controller.signal.aborted){setStories(rows);setNewsError(false);}}catch{if(!controller.signal.aborted)setNewsError(true);}finally{busy=false;}};
+    void loadNews();const timer=setInterval(()=>{void loadNews();},60_000);return()=>{controller.abort();clearInterval(timer);};
   },[attempt]);
   const movement=indexMovement(index);
   return <>
@@ -36,8 +36,8 @@ export default function ExploreMarket(){
     <section aria-labelledby="hot-topics"><h2 id="hot-topics">{t("Hot Topics")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("Independent publisher coverage · also available in News")}</p>
       {newsError&&<p role="alert" className="mt-3 text-sm">{t("Hot Topics is temporarily unavailable.")} <button onClick={()=>setAttempt(v=>v+1)} className="text-primary underline">{t("Retry")}</button></p>}
       {!stories&&!newsError&&<MascotState state="loading" role="status">{t("Loading publisher reporting…")}</MascotState>}
-      {stories&&!stories.length&&<MascotState state="noMatches">{t("No multi-source stories with available images qualify yet.")}</MascotState>}
-      <div className="mt-3 grid gap-x-8 md:grid-cols-2">{stories?.map(item=><TopStory key={item.story.id} item={item} requireImage onImageUnavailable={()=>setStories(rows=>rows?.filter(row=>row.story.id!==item.story.id)||[])}/>)}</div>
+      {stories&&!stories.length&&<MascotState state="noMatches">{t("No stories with independent publisher coverage qualify yet.")}</MascotState>}
+      <div className="mt-3 grid gap-x-8 md:grid-cols-2">{stories?.map(item=><TopStory key={item.story.id} item={item} requireImage/>)}</div>
     </section>
   </>;
 }

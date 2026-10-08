@@ -46,7 +46,9 @@ def test_mocked_http_and_size_limit(monkeypatch):
         def __exit__(self, *args): pass
         def read(self, size): return Path('tests/fixtures/news/feed.xml').read_bytes()
     calls = []
-    def open_(request, timeout):
+    def open_(request, timeout, context):
+        import ssl
+        assert context.verify_mode == ssl.CERT_REQUIRED and context.check_hostname
         calls.append((request.full_url, timeout))
         return Response()
     monkeypatch.setattr('src.news.adapters.urlopen', open_)
@@ -54,6 +56,21 @@ def test_mocked_http_and_size_limit(monkeypatch):
     assert calls == [('https://one.example/rss', 20)]
     monkeypatch.setattr('src.news.adapters.MAX_FEED_BYTES', 1)
     with pytest.raises(ValueError): fetch_feed(source())
+
+
+def test_compressed_feed_is_bounded_after_expansion(monkeypatch):
+    import gzip
+    payload = Path('tests/fixtures/news/feed.xml').read_bytes()
+    class Response:
+        def __enter__(self): return self
+        def __exit__(self, *args): pass
+        def read(self, size): return gzip.compress(payload)
+    monkeypatch.setattr('src.news.adapters.urlopen', lambda *args, **kw: Response())
+    assert len(parse_feed(fetch_feed(source()), source())) == 2
+    payload = b' ' * 10_000
+    monkeypatch.setattr('src.news.adapters.MAX_FEED_BYTES', 1_000)
+    with pytest.raises(ValueError, match='Expanded feed exceeds size limit'):
+        fetch_feed(source())
 
 
 @pytest.mark.parametrize('payload', [b'<html>Challenge</html>', b'<!DOCTYPE rss><rss/>', b'<!ENTITY e "x"><rss/>'])
@@ -69,6 +86,7 @@ def test_atom_publication_semantics():
 
 @pytest.mark.parametrize('sid,date,expected', [
     ('tuoitre', '10/4/2026 5:38:00\u202fPM', '2026-10-04T10:38:00+00:00'),
+    ('baochinhphu', '10/8/2026 12:54:00 PM', '2026-10-08T05:54:00+00:00'),
     ('vietnambiz', 'Sat, 03 Oct 2026 15:12:54 GMT+7', '2026-10-03T08:12:54+00:00'),
 ])
 def test_publisher_date_adapters(sid, date, expected):

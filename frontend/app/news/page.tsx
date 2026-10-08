@@ -1,23 +1,18 @@
 "use client";
 import {useLocale} from "@/lib/i18n";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MascotState } from "../components/mascot/Mascot";
 import { Button } from "../components/ui/button";
 import SourceCoverage from "../components/news/SourceCoverage";
 import TopStory from "../components/news/TopStory";
-import type { TopStoryData } from "../components/news/TopStory";
+import {useNewsArchive} from "@/lib/useNewsArchive";
 import CommunityPulse from "../components/news/CommunityPulse";
 import { emptyNewsFilters, newsQuery, readNewsFilters, newsViewQuery, readNewsView, newsSectionLabels } from "@/lib/news";
 import type { NewsFilters, NewsSource, NewsView } from "@/lib/news";
 
-type Story = TopStoryData;
-type Data = { feed: Story[] };
 
 export default function NewsPage() {
   const {t,ui}=useLocale();
-  const [data, setData] = useState<Data | null>(null);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<NewsFilters>(emptyNewsFilters);
   const [draft, setDraft] = useState<NewsFilters>(emptyNewsFilters);
   const [sources, setSources] = useState<NewsSource[]>([]);
@@ -48,32 +43,8 @@ export default function NewsPage() {
       window.history.replaceState(null, '', `/news${query ? `?${query}` : ''}`);
     }
   }, [filters, ready, view]);
-  const load = useCallback(async (signal?: AbortSignal) => {
-    if (!ready || view === 'community') return;
-    setLoading(true); setError(false);
-    try {
-      const query = newsQuery(filters);
-      const category = {company:'COMPANY', industry:'INDUSTRY', briefing:'MARKET_BRIEF'}[view];
-      const paths = [`feed?research_category=${category}&limit=30&${query}`];
-      const results = await Promise.all(paths.map(async path => {
-        const response = await fetch(`/api/news/${path}`, { signal, cache: "no-store" });
-        if (!response.ok) throw new Error("News unavailable");
-        return response.json();
-      }));
-      if (!signal?.aborted) setData({ feed: results[0] });
-    } catch {
-      if (!signal?.aborted) setError(true);
-    } finally {
-      if (!signal?.aborted) setLoading(false);
-    }
-  }, [filters, ready, view]);
-  useEffect(() => {
-    const controller = new AbortController();
-    setData(null);
-    void load(controller.signal);
-    const timer = setInterval(() => void load(controller.signal), 15 * 60 * 1000);
-    return () => { controller.abort(); clearInterval(timer); };
-  }, [load, attempt]);
+  const category=view==='community'?null:{company:'COMPANY',industry:'INDUSTRY',briefing:'MARKET_BRIEF'}[view];
+  const {page:data,loading,error,loadMore}=useNewsArchive(ready&&category?`research_category=${category}&${newsQuery(filters)}`:null,attempt);
   return <div className="page-stack">
     <div className="flex items-start justify-between gap-4"><div><div className="eyebrow mb-3">{t("News")}</div><h1>{t("Market Today")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("Company reporting, industry developments and market-wide attention.")}</p></div><Button variant="outline" disabled={loading && view !== "community"} onClick={() => setAttempt(value => value + 1)}>{t("Refresh")}</Button></div>
     <SourceCoverage attempt={attempt}/>
@@ -99,8 +70,13 @@ export default function NewsPage() {
     {view !== "community" && loading && !data && <MascotState state="loading" role="status">{t("Loading news…")}</MascotState>}
     {view !== "community" && data && <>
       <section aria-label={ui(newsSectionLabels[view])}>
-        {!data.feed.length && <MascotState state="noMatches">{t("No qualifying recent reporting matches this view. Coverage may be incomplete.")}</MascotState>}
-        <div className="mt-3 grid gap-x-8 md:grid-cols-2">{data.feed.map(item => <TopStory key={item.story.id} item={item}/>)}</div>
+        {!data.items.length && <MascotState state="noMatches">{t("No qualifying recent reporting matches this view. Coverage may be incomplete.")}</MascotState>}
+        <div className="mt-3 divide-y">{data.items.map(item => <TopStory key={item.story.id} item={item}/>)}</div>
+        <div className="mt-6 flex flex-col items-center gap-2">
+          {data.has_more&&<Button variant="outline" disabled={loading} onClick={loadMore}>{t(loading?"Loading more…":"Show more")}</Button>}
+          <p className="text-xs text-muted-foreground">{t("Only reporting with source thumbnails is shown.")}</p>
+          <p className="text-xs text-muted-foreground">{t("Reporting from the last 72 hours. Older items appear when you choose Show more.")}</p>
+        </div>
       </section>
     </>}
   </div>;

@@ -9,7 +9,7 @@ def test_archives_keep_single_source_evidence_while_hot_requires_coverage_and_im
     session.add_all([Stock(symbol='XYZ'), Security(symbol='XYZ',exchange='HOSE',last_synced_at=datetime.now(timezone.utc))]); session.commit()
     now = datetime.now(timezone.utc)
     sources = [Source(source_id=x,name=x,endpoint=f'https://{x}.example/feed',country='VN',language='vi',category='VN',publisher_group=x) for x in ('one','two')]
-    inputs = [ArticleInput(title, f'https://one.example/{n}', now) for n,title in enumerate([
+    inputs = [ArticleInput(title, f'https://one.example/{n}', now, 'https://one.example/image.png', 'media:thumbnail') for n,title in enumerate([
         'XYZ appoints new chief executive', 'Steel industry production grows', 'Central bank monetary policy changes', 'A beautiful weekend destination'])]
     ingest_cycle(session,[sources[0]],fetch=lambda _:inputs,now=now,force=True)
     response = client.get('/news/feed?research_category=COMPANY')

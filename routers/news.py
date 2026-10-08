@@ -9,6 +9,9 @@ from src.news.registry import load_sources
 from src.news.normalization import utc
 from src.news.service import articles, story_score, trending, relevant_article, equity_tagger
 
+from src.news.read import StoryResponse, representative, cluster_thumbnail
+from src.news.read_cache import research_rows
+
 router = APIRouter(prefix='/news', tags=['news'])
 DB = Annotated[Session, Depends(get_session)]
 
@@ -22,37 +25,6 @@ def filters(country: str | None = None, source: str | None = None,
     return dict(country=country, source=source, topic=topic, ticker=ticker, sector=sector, category=category, financial_only=financial_only, limit=limit)
 
 
-class StoryResponse(BaseModel):
-    story: NewsStory
-    articles: list[NewsArticle]
-    representative_article: NewsArticle
-    thumbnail_url: str | None = None
-    thumbnail_article_id: str | None = None
-    ranking_score: float
-    ranking_reason: str = 'Independent publisher diversity, capped activity and recency'
-    research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] | None = None
-
-
-def representative(rows, priorities):
-    # Selection never changes diversity or ranking. Ties are stable across ingestion order.
-    return min(rows, key=lambda a: (priorities.get(a.source_id, 100),
-        -utc(a.published_at or a.first_seen_at).timestamp(), a.canonical_url, a.id))
-
-
-def cluster_thumbnail(chosen, members, priorities):
-    from urllib.parse import urlsplit
-    def valid(article):
-        try:
-            url = urlsplit(article.thumbnail_url or '')
-            return url.scheme in ('https', 'http') and bool(url.hostname) and not url.username and not url.password
-        except ValueError:
-            return False
-    if valid(chosen):
-        return chosen
-    candidates = [a for a in members if valid(a)]
-    return representative(candidates, priorities) if candidates else None
-
-
 class TrendingResponse(BaseModel):
     topic: str
     story_count: int
@@ -61,6 +33,13 @@ class TrendingResponse(BaseModel):
     previous_mentions: int
     mention_velocity: float
     score: float
+
+
+class FeedPageResponse(BaseModel):
+    items: list[StoryResponse]
+    as_of: datetime
+    has_more: bool
+    next_offset: int | None
 
 
 class SourceResponse(BaseModel):
@@ -75,11 +54,24 @@ class SourceResponse(BaseModel):
     last_success_at: datetime | None
     last_error: str | None
     articles_received: int | None
+    priority: str | None = None
+    next_due_at: datetime | None = None
+    refresh_requested_at: datetime | None = None
+    refresh_execution: str = 'pending requests require scripts.ingest_data --watch'
+    consecutive_failures: int = 0
+    fetch_duration_seconds: float | None = None
+    newly_inserted_articles: int = 0
+    fetch_attempts: int = 0
+    successful_fetches: int = 0
+    failed_fetches: int = 0
+    refresh_requests: int = 0
 
 
 @router.get('/sources', response_model=list[SourceResponse])
 def sources(session: DB):
+    from src.news.scheduling import cadence_minutes, load_schedule, next_due
     now = datetime.now(timezone.utc)
+    config = load_schedule()
     states = {state.source_id: state for state in session.exec(select(NewsSourceState)).all()}
     output = []
     for source in load_sources():
@@ -90,38 +82,55 @@ def sources(session: DB):
             status = 'not_attempted'
         elif state.last_error:
             status = 'error'
-        elif state.last_success_at is None or utc(state.last_success_at) < now - timedelta(minutes=2 * source.poll_interval_minutes):
+        elif state.last_success_at is None or utc(state.last_success_at) < now - timedelta(minutes=2 * cadence_minutes(source, now, config)):
             status = 'stale'
         else:
             status = 'healthy'
         output.append(SourceResponse(
             source_id=source.source_id, name=source.name, country=source.country,
             category=source.category, enabled=source.enabled,
-            poll_interval_minutes=source.poll_interval_minutes, status=status,
+            poll_interval_minutes=cadence_minutes(source, now, config), status=status,
             last_attempt_at=utc(state.last_attempt_at) if state and state.last_attempt_at else None,
             last_success_at=utc(state.last_success_at) if state and state.last_success_at else None,
             last_error=state.last_error if state else None,
             articles_received=state.articles_received if state and state.last_attempt_at else None,
+            priority=source.scheduling_priority, next_due_at=next_due(source, state, now, config),
+            refresh_requested_at=utc(state.refresh_requested_at) if state and state.refresh_requested_at else None,
+            **{field: getattr(state, field) for field in ('consecutive_failures', 'fetch_duration_seconds',
+                'newly_inserted_articles', 'fetch_attempts', 'successful_fetches', 'failed_fetches', 'refresh_requests')} if state else {},
         ))
     return output
 
 
+@router.post('/refresh')
+def refresh_news(session: DB):
+    from src.news.scheduling import request_due_refresh
+    return request_due_refresh(session, load_sources())
+
+
 @router.get('/latest', response_model=list[NewsArticle])
 def latest(session: DB, options: dict = Depends(filters)):
+    from src.news.scheduling import request_due_refresh
+    request_due_refresh(session, load_sources())
     limit = options.pop('limit')
     return articles(session, **options)[:limit]
 
 
 @router.get('/top', response_model=list[StoryResponse])
-def top(session: DB, options: dict = Depends(filters)):
+def top(session: DB, require_image: bool = False, options: dict = Depends(filters)):
+    from src.news.scheduling import request_due_refresh
+    request_due_refresh(session, load_sources())
     limit = options.pop('limit')
     now = datetime.now(timezone.utc)
+    if require_image:
+        rows = research_rows(session, {**options, 'limit': 10000}, now=now)
+        return sorted(rows, key=lambda row: (-row.ranking_score, row.story.id))[:limit]
     rows = articles(session, now=now, **options)
+    current = articles(session, now=now)
     grouped = {}
     for article in rows:
         grouped.setdefault(article.story_id, []).append(article)
     output = []
-    tagger = equity_tagger(session)
     priorities = {s.source_id: s.representative_priority for s in load_sources()}
     for story_id, matching in grouped.items():
         story = session.get(NewsStory, story_id)
@@ -129,7 +138,9 @@ def top(session: DB, options: dict = Depends(filters)):
             chosen = representative(matching, priorities)
             # Filters select discoveries/representatives; disclosure retains all
             # evidence for the selected Story, including other publishers.
-            members = [a for a in session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all() if relevant_article(a, tagger)]
+            members = [a for a in current if a.story_id == story_id]
+            if require_image and cluster_thumbnail(chosen, members, priorities) is None:
+                continue
             evidence = [chosen, *sorted((a for a in members if a.id != chosen.id), key=lambda a: (a.source_id, a.canonical_url))]
             story = story.model_copy(update={'source_count': len({a.publisher_group for a in members}), 'article_count': len(members)})
             output.append(StoryResponse(story=story, articles=evidence, representative_article=chosen, ranking_score=story_score(story, now)))
@@ -143,59 +154,32 @@ def topics(session: DB, options: dict = Depends(filters)):
     return trending(articles(session, now=now, hours=12, **options), now)[:limit]
 
 
-def research_rows(session, options, category=None, *, hot=False):
-    from src.news.research import research_category, attention_order
-    tagger = equity_tagger(session)
-    eligible = {row.symbol: row for row in tagger.stocks}
-    # Re-tag copies for older articles without destructive migration or lost provenance.
-    selected = []
-    options = dict(options)
-    limit = options.pop('limit')
-    ticker = options.pop('ticker', None)
-    for article in articles(session, **options):
-        tags = tagger.tag(article.title, article.category)
-        copy = article.model_copy(update={'tickers': tags.tickers,
-            'sectors': sorted(set(article.sectors) | set(tags.sectors))})
-        kind = research_category(copy, [eligible[symbol] for symbol in tags.tickers])
-        if kind and (not category or kind == category) and (not ticker or ticker.upper() in copy.tickers):
-            selected.append((copy, kind))
-    grouped = {}
-    for article, kind in selected:
-        grouped.setdefault(article.story_id, []).append((article, kind))
-    priorities = {s.source_id: s.representative_priority for s in load_sources()}
-    output = []
-    for story_id, matching in grouped.items():
-        story = session.get(NewsStory, story_id)
-        if not story:
-            continue
-        chosen = representative([row[0] for row in matching], priorities)
-        kind = next(kind for row, kind in matching if row.id == chosen.id)
-        members = [a for a in session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id)).all() if relevant_article(a, tagger)]
-        source_count = len({a.publisher_group for a in members})
-        # Archives retain single-source evidence; discovery requires independent coverage.
-        if hot and source_count < 2:
-            continue
-        image = cluster_thumbnail(chosen, members, priorities)
-        if hot and image is None:
-            continue
-        story = story.model_copy(update={'source_count': source_count, 'article_count': len(members),
-            'last_updated_at': max(a.first_seen_at for a in members)})
-        output.append(StoryResponse(story=story, articles=[chosen, *[a for a in members if a.id != chosen.id]],
-            representative_article=chosen, thumbnail_url=image.thumbnail_url if image else None,
-            thumbnail_article_id=image.id if image else None, research_category=kind, ranking_score=story_score(story, datetime.now(timezone.utc)),
-            ranking_reason='Independent publishers first, capped article activity, then latest activity'))
-    return sorted(output, key=attention_order)[:limit]
-
-
 @router.get('/feed', response_model=list[StoryResponse])
 def feed(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] = 'COMPANY',
+         offset: int = Query(default=0, ge=0, le=10000),
          options: dict = Depends(filters)):
-    return research_rows(session, options, research_category)
+    return research_rows(session, options, research_category, offset=offset, now=datetime.now(timezone.utc))
+
+
+@router.get('/feed/page', response_model=FeedPageResponse)
+def feed_page(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] = 'COMPANY',
+              offset: int = Query(default=0, ge=0, le=10000),
+              as_of: datetime | None = None, options: dict = Depends(filters)):
+    now = datetime.now(timezone.utc)
+    if as_of is not None and (as_of.tzinfo is None or as_of > now):
+        raise HTTPException(status_code=422, detail='as_of must be a past timezone-aware timestamp')
+    cutoff = as_of or now
+    size = options['limit']
+    size = min(size, 12)
+    rows = research_rows(session, {**options, 'limit': size+1}, research_category, offset=offset, now=cutoff)
+    has_more = len(rows) > size and offset+size <= 10000
+    return FeedPageResponse(items=rows[:size], as_of=cutoff, has_more=has_more,
+        next_offset=offset+size if has_more else None)
 
 
 @router.get('/hot', response_model=list[StoryResponse])
 def hot(session: DB, options: dict = Depends(filters)):
-    return research_rows(session, options, hot=True)
+    return research_rows(session, options, hot=True, now=datetime.now(timezone.utc))
 
 
 @router.get('/stories/{story_id}', response_model=StoryResponse)

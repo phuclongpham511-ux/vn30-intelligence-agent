@@ -85,13 +85,13 @@ def test_unified_worker_persisted_restart_cadence_and_source_failure(tmp_path, m
     result = ingest_data.run_cycle(engine)
     assert result['news']['bad']['status'] == 'error'
     assert result['community'][SOURCE_ID]['status'] == 'ok' and ingest_data.failed(result)
-    assert calls == ['good', 'bad', 'community']
+    assert sorted(calls) == ['bad', 'community', 'good']
     engine.dispose()  # actual reconnect to persisted state, not an in-memory timer
     engine = create_engine(url); create_tables(engine)
     clock[0] += timedelta(minutes=1)
     result = ingest_data.run_cycle(engine)
     assert result == {'universe': {'status': 'skipped'}, 'groups': {'status': 'skipped'}, 'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}}
-    assert calls == ['good', 'bad', 'community']
+    assert sorted(calls) == ['bad', 'community', 'good']
     with Session(engine) as session:
         assert utc(session.get(NewsSourceState, 'good').last_success_at) == NOW
         assert utc(session.get(CommunitySourceState, SOURCE_ID).last_success_at) == NOW

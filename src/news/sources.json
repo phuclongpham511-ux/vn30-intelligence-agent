@@ -12,7 +12,8 @@
     "publisher_group": "fpt",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:34.305578+00:00",
-    "representative_priority": 10
+    "representative_priority": 10,
+    "scheduling_priority": "standard"
   },
   {
     "source_id": "cafef",
@@ -27,7 +28,8 @@
     "publisher_group": "vccorp",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:34.566207+00:00",
-    "representative_priority": 11
+    "representative_priority": 11,
+    "scheduling_priority": "priority"
   },
   {
     "source_id": "vneconomy",
@@ -42,7 +44,8 @@
     "publisher_group": "vneconomy",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:34.721504+00:00",
-    "representative_priority": 12
+    "representative_priority": 12,
+    "scheduling_priority": "priority"
   },
   {
     "source_id": "vietstock",
@@ -57,7 +60,8 @@
     "publisher_group": "vietstock",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:34.906579+00:00",
-    "representative_priority": 13
+    "representative_priority": 13,
+    "scheduling_priority": "priority"
   },
   {
     "source_id": "vietnambiz",
@@ -72,7 +76,8 @@
     "publisher_group": "vietnambiz",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:35.129511+00:00",
-    "representative_priority": 14
+    "representative_priority": 14,
+    "scheduling_priority": "priority"
   },
   {
     "source_id": "vietnamnet",
@@ -87,7 +92,8 @@
     "publisher_group": "vietnamnet",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:35.656311+00:00",
-    "representative_priority": 15
+    "representative_priority": 15,
+    "scheduling_priority": "standard"
   },
   {
     "source_id": "tuoitre",
@@ -102,7 +108,8 @@
     "publisher_group": "tuoitre",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:35.858546+00:00",
-    "representative_priority": 16
+    "representative_priority": 16,
+    "scheduling_priority": "standard"
   },
   {
     "source_id": "thanhnien",
@@ -117,7 +124,8 @@
     "publisher_group": "thanhnien",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:36.140236+00:00",
-    "representative_priority": 17
+    "representative_priority": 17,
+    "scheduling_priority": "standard"
   },
   {
     "source_id": "dantri",
@@ -132,7 +140,8 @@
     "publisher_group": "dantri",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:36.245805+00:00",
-    "representative_priority": 18
+    "representative_priority": 18,
+    "scheduling_priority": "standard"
   },
   {
     "source_id": "vnbusiness",
@@ -147,6 +156,167 @@
     "publisher_group": "vnbusiness",
     "timezone": "Asia/Ho_Chi_Minh",
     "verified_at": "2026-10-04T14:07:36.536444+00:00",
-    "representative_priority": 19
+    "representative_priority": 19,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "congthuong",
+    "name": "Công Thương",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://congthuong.vn/rss/tai-chinh.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "congthuong",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:43.895512+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "hanoimoi",
+    "name": "Hà Nội Mới",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://hanoimoi.vn/rss/kinh-te",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "hanoimoi",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:43.900512+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "sggp",
+    "name": "Sài Gòn Giải Phóng",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://www.sggp.org.vn/rss/tai-chinh-chung-khoan-44.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "sggp",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:43.936512+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "tienphong",
+    "name": "Tiền Phong",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://tienphong.vn/rss/tai-chinh-chung-khoan-105.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "tienphong",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:43.955543+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "nhandan",
+    "name": "Nhân Dân",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://nhandan.vn/rss/kinhte-1185.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "nhandan",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:43.978542+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "vietnamplus",
+    "name": "VietnamPlus",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://www.vietnamplus.vn/rss/kinhte-311.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "vna",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:43.996543+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "baotintuc",
+    "name": "Báo Tin Tức",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://baotintuc.vn/rss/kinh-te-128.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "vna",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:44.016545+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "thoibaotaichinh",
+    "name": "Thời Báo Tài Chính",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://thoibaotaichinhvietnam.vn/rss_feed/",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "baotaichinhdautu",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:44.043545+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "priority"
+  },
+  {
+    "source_id": "baochinhphu",
+    "name": "Báo Chính Phủ",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://baochinhphu.vn/home.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "chinhphu",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:44.055543+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "tinnhanhchungkhoan",
+    "name": "Đầu Tư Chứng Khoán",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://www.tinnhanhchungkhoan.vn/rss/chung-khoan-1.rss",
+    "enabled": true,
+    "poll_interval_minutes": 20,
+    "category": "VN",
+    "publisher_group": "baotaichinhdautu",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-08T06:21:44.073540+00:00",
+    "representative_priority": 100,
+    "scheduling_priority": "priority"
   }
 ]

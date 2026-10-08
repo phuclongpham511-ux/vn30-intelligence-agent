@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import pytest
 from sqlmodel import select
 from src.models import Stock
 from src.news.adapters import parse_feed, ArticleInput
@@ -10,11 +11,20 @@ from routers.news import representative
 NOW = datetime(2026, 10, 5, tzinfo=timezone.utc)
 
 
+@pytest.fixture(autouse=True)
+def fixed_read_clock(monkeypatch):
+    class Clock(datetime):
+        @classmethod
+        def now(cls, tz=None): return NOW
+    monkeypatch.setattr('routers.news.datetime', Clock)
+    monkeypatch.setattr('src.news.service.datetime', Clock)
+
+
 def source(sid='one', priority=100):
     return Source(source_id=sid, name=sid, endpoint='https://example.org/feed', country='VN', language='vi', category='VN', publisher_group=sid, representative_priority=priority)
 
 
-def test_explicit_feed_thumbnail_only():
+def test_feed_thumbnail_metadata_including_description():
     template = '<rss xmlns:media="http://search.yahoo.com/mrss/"><channel><item><title>Stocks</title><link>https://example.org/a</link>{}</item></channel></rss>'
     for metadata, url, provenance in [
         ('<media:thumbnail url="https://example.org/photo.jpg"/>', 'https://example.org/photo.jpg', 'media:thumbnail'),
@@ -23,7 +33,10 @@ def test_explicit_feed_thumbnail_only():
         ('<media:thumbnail url="javascript:alert(1)"/>', None, None),
         ('<media:thumbnail url="https://user:secret@example.org/p"/>', None, None),
         ('<media:thumbnail url="/relative.jpg"/>', None, None),
-        ('<description>&lt;img src="https://example.org/fake.jpg"/&gt;</description>', None, None),
+        ('<description>&lt;img src="https://example.org/photo.jpg"/&gt;</description>', 'https://example.org/photo.jpg', 'rss:description:image'),
+        ('<description>&lt;img src="/photo.jpg"/&gt;</description>', 'https://example.org/photo.jpg', 'rss:description:image'),
+        ('<description>&lt;img src="javascript:alert(1)"/&gt;</description>', None, None),
+        ('<description>&lt;img width="1" src="https://example.org/tracker"/&gt;</description>', None, None),
         ('', None, None),
     ]:
         row = parse_feed(template.format(metadata).encode(), source())[0]
@@ -37,7 +50,7 @@ def test_representative_preserves_evidence_diversity_and_ranking(session, client
         item = ArticleInput('XYZ bank earnings rise strongly', f'https://example.org/{src.source_id}', NOW, 'https://example.org/image.jpg', 'media:thumbnail')
         ingest_cycle(session, [src], fetch=lambda _: [item], now=NOW, force=True)
     response = client.get('/news/top').json()[0]
-    assert response['representative_article']['source_id'] == 'two'
+    assert response['representative_article']['source_id'] == 'one'
     assert response['representative_article']['thumbnail_provenance'] == 'media:thumbnail'
     assert response['story']['source_count'] == 2
     assert len(response['articles']) == len(session.exec(select(NewsArticle)).all()) == 2

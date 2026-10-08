@@ -28,6 +28,21 @@ def create_tables(engine=None):
         with target.begin() as connection:
             connection.execute(text('ALTER TABLE communitysourcestate ADD COLUMN items_received INTEGER'))
     news_columns = {column['name'] for column in inspect(target).get_columns('newsarticle')}
+    state_columns = {column['name'] for column in inspect(target).get_columns('newssourcestate')}
+    if 'read_cache_dirty' not in {column['name'] for column in inspect(target).get_columns('newsstory')}:
+        with target.begin() as connection:
+            connection.execute(text('ALTER TABLE newsstory ADD COLUMN read_cache_dirty BOOLEAN NOT NULL DEFAULT TRUE'))
+    with target.begin() as connection:
+        dates = ('next_due_at', 'lease_until', 'refresh_requested_at', 'last_refresh_request_at')
+        types = {'priority': 'VARCHAR', 'lease_token': 'VARCHAR',
+                 'fetch_duration_seconds': 'FLOAT',
+                 **{field: ('TIMESTAMP WITH TIME ZONE' if target.dialect.name == 'postgresql' else 'DATETIME') for field in dates},
+                 **{field: 'INTEGER NOT NULL DEFAULT 0' for field in
+                    ('consecutive_failures', 'newly_inserted_articles', 'refresh_requests',
+                     'fetch_attempts', 'successful_fetches', 'failed_fetches')}}
+        for field, kind in types.items():
+            if field not in state_columns:
+                connection.execute(text(f'ALTER TABLE newssourcestate ADD COLUMN {field} {kind}'))
     with target.begin() as connection:
         for field in ('thumbnail_url', 'thumbnail_provenance'):
             if field not in news_columns:

@@ -4,6 +4,12 @@ from datetime import datetime
 import xml.etree.ElementTree as ET
 from zoneinfo import ZoneInfo
 from urllib.request import Request, urlopen
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
+import gzip
+import io
+import ssl
+import truststore
 from src.news.normalization import canonical_url, clean_title, parse_time
 from src.news.registry import Source
 
@@ -19,7 +25,7 @@ class ArticleInput:
     thumbnail_provenance: str | None = None
 
 
-def feed_image(node):
+def feed_image(node, base_url=''):
     media = '{http://search.yahoo.com/mrss/}'
     candidates = [(n.get('url'), 'media:thumbnail') for n in node.iter(media + 'thumbnail')]
     candidates += [(n.get('url'), 'media:content') for n in node.iter(media + 'content')
@@ -28,6 +34,15 @@ def feed_image(node):
     atom = '{http://www.w3.org/2005/Atom}'
     candidates += [(n.get('href'), 'atom:enclosure') for n in node.findall(atom + 'link')
                    if n.get('rel') == 'enclosure' and n.get('type', '').startswith('image/')]
+    for field, provenance in [('description', 'rss:description:image'),
+            ('{http://purl.org/rss/1.0/modules/content/}encoded', 'rss:content:image'),
+            (atom+'summary', 'atom:summary:image')]:
+        fragment=node.findtext(field)
+        if fragment:
+            for image in BeautifulSoup(fragment[:100000], 'html.parser').select('img[src]'):
+                if image.get('width') == '1' or image.get('height') == '1':
+                    continue
+                candidates.append((urljoin(base_url,image['src']), provenance))
     for url, provenance in candidates:
         try:
             if url:
@@ -37,12 +52,17 @@ def feed_image(node):
     return None, None
 
 
-def fetch_feed(source: Source) -> bytes:
+def fetch_feed(source: Source, *, timeout_seconds=20) -> bytes:
     request = Request(str(source.endpoint), headers={'User-Agent': 'VN30News/1.0 (public RSS metadata reader)', 'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml'})
-    with urlopen(request, timeout=20) as response:
+    with urlopen(request, timeout=timeout_seconds, context=truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)) as response:
         data = response.read(MAX_FEED_BYTES + 1)
     if len(data) > MAX_FEED_BYTES:
         raise ValueError('Feed exceeds size limit')
+    if data.startswith(b'\x1f\x8b'):
+        with gzip.GzipFile(fileobj=io.BytesIO(data)) as expanded:
+            data=expanded.read(MAX_FEED_BYTES+1)
+        if len(data)>MAX_FEED_BYTES:
+            raise ValueError('Expanded feed exceeds size limit')
     return data
 
 
@@ -73,7 +93,7 @@ def parse_feed(data: bytes, source: Source) -> list[ArticleInput]:
             continue
         date = value('pubDate') or value('published') or node.findtext('{http://purl.org/dc/elements/1.1/}date')
         # Atom updated is not necessarily the original publication time.
-        if source.source_id == 'tuoitre' and date:
+        if source.source_id in ('tuoitre', 'baochinhphu') and date:
             try:
                 published = datetime.strptime(' '.join(date.split()), '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo(source.timezone))
             except ValueError:
@@ -82,7 +102,7 @@ def parse_feed(data: bytes, source: Source) -> list[ArticleInput]:
             if source.source_id == 'vietnambiz' and date:
                 date = date.replace('GMT+7', '+0700')
             published = parse_time(date, source.timezone)
-        image, provenance = feed_image(node)
+        image, provenance = feed_image(node, url)
         items.append(ArticleInput(title, url, published, image, provenance))
     return items
 
@@ -90,7 +110,9 @@ def parse_feed(data: bytes, source: Source) -> list[ArticleInput]:
 ADAPTERS = {'RSS': lambda source: parse_feed(fetch_feed(source), source)}
 
 
-def acquire(source: Source) -> list[ArticleInput]:
+def acquire(source: Source, *, timeout_seconds=20) -> list[ArticleInput]:
     if source.method not in ADAPTERS:
         raise ValueError('No adapter registered for source method')
+    if source.method == 'RSS':
+        return parse_feed(fetch_feed(source, timeout_seconds=timeout_seconds), source)
     return ADAPTERS[source.method](source)

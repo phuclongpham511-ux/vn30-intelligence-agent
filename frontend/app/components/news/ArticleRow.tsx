@@ -3,12 +3,14 @@ import {useLocale} from "@/lib/i18n";
 import Link from "next/link";
 import type { NewsArticle } from "@/lib/news";
 import { safeExternalUrl } from "@/lib/presentation";
+import NewsThumbnail from "./NewsThumbnail";
 
 export default function ArticleRow({ article }: { article: NewsArticle }) {
   const {t,date:localDate}=useLocale();
   const date = article.published_at || article.first_seen_at;
   const url = safeExternalUrl(article.url);
-  return <article className="border-b py-4 last:border-0">
+  return <NewsThumbnail images={[article.thumbnail_url]} revision={article.last_seen_at}>{image=><article className="border-b py-4 last:border-0">
+    <div className="flex items-start gap-4">{image}<div className="min-w-0 flex-1">
     <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
       <span>{article.source_name}</span>
       <span>{!article.published_at && t("First seen")+" "}<time dateTime={date}>{localDate(date,true)}</time></span>
@@ -19,5 +21,6 @@ export default function ArticleRow({ article }: { article: NewsArticle }) {
       {[...article.topics, ...article.sectors].filter((v, i, arr) => arr.indexOf(v) === i).map(tag => <span key={tag} className="rounded border px-2 py-0.5">{tag}</span>)}
     </div>
     {url && <a className="mt-3 inline-block text-xs text-primary underline-offset-4 hover:underline focus-visible:outline" href={url} target="_blank" rel="noopener noreferrer">{t("Read original ↗")}</a>}
-  </article>;
+    </div></div>
+  </article>}</NewsThumbnail>;
 }

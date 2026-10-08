@@ -39,11 +39,16 @@ def test_hot_same_story_image_and_foreign_ingestion_gate(session, client):
     assert all(s.country == 'VN' and s.category == 'VN' for s in load_sources())
 
 
-def test_no_image_story_kept_in_archive_not_visual_hot(session, client):
+def test_no_image_story_waits_until_source_provides_thumbnail(session, client):
     now = datetime.now(timezone.utc)
     for sid in ('one', 'two'):
         ingest_cycle(session, [source(sid)], fetch=lambda _, sid=sid: [ArticleInput('Retail sector production grows', f'https://{sid}.example/noimage', now)], now=now, force=True)
     assert client.get('/news/hot').json() == []
+    assert client.get('/news/feed?research_category=INDUSTRY').json() == []
+    assert len(client.get('/news/top').json()) == 1
+    assert client.get('/news/top?require_image=true').json() == []
+    ingest_cycle(session,[source('two')],fetch=lambda _:[ArticleInput('Retail sector production grows','https://two.example/noimage',now,'https://two.example/photo.png','media:thumbnail')],now=now,force=True)
+    assert len(client.get('/news/hot').json()) == 1
     assert len(client.get('/news/feed?research_category=INDUSTRY').json()) == 1
 
 
@@ -51,9 +56,13 @@ def test_stock_fixture_alone_is_not_company_eligibility(session, client):
     from src.models import Stock
     now = datetime.now(timezone.utc)
     session.add(Stock(symbol='XYZ')); session.commit()
-    ingest_cycle(session, [source()], fetch=lambda _: [ArticleInput('XYZ earnings rise', 'https://one.example/x', now)], now=now, force=True)
+    ingest_cycle(session, [source()], fetch=lambda _: [ArticleInput('XYZ earnings rise', 'https://one.example/x', now,'https://one.example/photo.jpg','media:thumbnail')], now=now, force=True)
     assert client.get('/news/feed?research_category=COMPANY').json() == []
     session.add(Security(symbol='XYZ', exchange='HOSE', last_synced_at=now)); session.commit()
+    # Discovery changes rebuild the persisted projection in the worker, not HTTP.
+    from src.news.models import NewsReadCache
+    session.delete(session.get(NewsReadCache, 'universe_version')); session.commit()
+    ingest_cycle(session, [], now=now)
     assert len(client.get('/news/feed?research_category=COMPANY').json()) == 1
 
 
@@ -65,6 +74,8 @@ def test_historical_foreign_members_do_not_leak_or_inflate_current_evidence(sess
         ingest_cycle(session,[source(sid)],fetch=lambda _,sid=sid:[ArticleInput('Steel industry output expands',f'https://{sid}.example/a',now,'https://image.example/a.png','media:thumbnail')],now=now,force=True)
     foreign=session.exec(select(NewsArticle).where(NewsArticle.source_id=='two')).one()
     foreign.country='US';foreign.category='GLOBAL';session.add(foreign);session.commit()
+    from src.news.read_cache import refresh_cache
+    refresh_cache(session, {foreign.story_id}, now=now)
     assert len(session.exec(select(NewsArticle)).all())==2
     assert session.get(NewsStory,foreign.story_id).source_count==2
     assert len(client.get('/news/latest').json())==1
@@ -96,7 +107,7 @@ def test_hot_image_preference_is_stable_and_never_crosses_stories(session, clien
             ArticleInput('Steel industry production grows',f'https://{sid}.example/image',now,'https://image.example/a.png','media:thumbnail'),
             ArticleInput('Retail sector demand declines',f'https://{sid}.example/noimage',now)],now=now,force=True)
     rows=client.get('/news/hot').json()
-    assert len(rows)==1 and 'Steel industry' in rows[0]['representative_article']['title']
+    assert len(rows)==1 and rows[0]['thumbnail_url']=='https://image.example/a.png'
 
 
 def test_word_order_title_case_and_foreign_geography():
@@ -117,7 +128,8 @@ def test_irrelevant_cluster_member_cannot_supply_image_or_publisher_count(sessio
     # Model the already-persisted cluster identified during review.
     other=members[1];other.story_id=members[0].story_id;session.add(other);session.commit()
     assert client.get('/news/hot').json()==[]
-    for path in ('/news/top','/news/feed?research_category=MARKET_BRIEF'):
+    assert client.get('/news/feed?research_category=MARKET_BRIEF').json()==[]
+    for path in ('/news/top',):
         row=client.get(path).json()[0]
         assert len(row['articles'])==1 and row['story']['source_count']==1
         assert row.get('thumbnail_url') is None

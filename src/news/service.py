@@ -17,12 +17,11 @@ def story_score(story: NewsStory, now: datetime) -> float:
     return round((3 * math.log1p(story.source_count) + activity) * 2 ** (-age / 24), 4)
 
 
-def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=False, matcher=None, tagger=None):
+def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=False, matcher=None, tagger=None, changed=None, observations=None):
     supplied_now = now
     now = utc(now or datetime.now(timezone.utc))
     matcher = matcher or LexicalStoryMatcher()
     from src.services.universe import discovery_metadata
-    tagger = tagger or Tagger(discovery_metadata(session))
     result = {}
     for source in sources:
         now = utc(supplied_now or datetime.now(timezone.utc))
@@ -39,8 +38,10 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                 session.execute(text('SELECT pg_advisory_xact_lock(73193001)'))
             state = session.get(NewsSourceState, source.source_id) or NewsSourceState(source_id=source.source_id)
             state.last_attempt_at = now
-            stories = list(session.exec(select(NewsStory).where(NewsStory.first_seen_at >= now - timedelta(hours=matcher.window_hours if isinstance(matcher, LexicalStoryMatcher) else 72))).all())
+            stories = None
             added = 0
+            if incoming and tagger is None:
+                tagger = Tagger(discovery_metadata(session))
             for item in incoming:
                 title = clean_title(item.title)
                 if not title:
@@ -50,9 +51,13 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                 existing = session.exec(select(NewsArticle).where(or_(NewsArticle.url_hash == url_hash, (NewsArticle.source_id == source.source_id) & (NewsArticle.title_hash == title_hash)))).first()
                 if existing:
                     existing.last_seen_at = now
+                    if observations is not None:
+                        observations[existing.id] = now
                     # Refresh derived tags after taxonomy/universe changes, without
                     # changing publisher evidence or renewing story activity.
                     tags = tagger.tag(existing.title, existing.category)
+                    altered = (existing.topics != tags.topics or existing.tickers != tags.tickers or existing.sectors != tags.sectors or existing.scope != tags.scope or
+                               bool(item.thumbnail_url and (canonical_url(item.thumbnail_url) != existing.thumbnail_url or item.thumbnail_provenance != existing.thumbnail_provenance)))
                     existing.topics, existing.tickers, existing.sectors = tags.topics, tags.tickers, tags.sectors
                     existing.scope = tags.scope
                     if item.thumbnail_url:
@@ -61,7 +66,10 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                     session.add(existing)
                     session.flush()
                     story = session.get(NewsStory, existing.story_id)
-                    if story:
+                    if story and altered:
+                        story.read_cache_dirty = True
+                        if changed is not None:
+                            changed.add(story.id)
                         members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story.id)).all()
                         for field in ('topics', 'tickers', 'sectors'):
                             setattr(story, field, sorted({v for a in members for v in getattr(a, field)}))
@@ -74,6 +82,8 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                 tags = tagger.tag(title, source.category)
                 if source.category == 'GLOBAL' and not tags.topics:
                     continue
+                if stories is None:
+                    stories = list(session.exec(select(NewsStory).where(NewsStory.first_seen_at >= now - timedelta(hours=matcher.window_hours if isinstance(matcher, LexicalStoryMatcher) else 72))).all())
                 story = matcher.match(title, tags, stories, now)
                 if story is None:
                     story = NewsStory(representative_title=title, first_seen_at=now, last_updated_at=now)
@@ -96,6 +106,9 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
                 for field in ('topics', 'tickers', 'sectors'):
                     setattr(story, field, sorted({v for a in members for v in getattr(a, field)}))
                 story.last_updated_at = now
+                story.read_cache_dirty = True
+                if changed is not None:
+                    changed.add(story.id)
                 story.trend_score = story_score(story, now)
                 session.add(story)
                 added += 1
@@ -115,6 +128,111 @@ def ingest_cycle(session: Session, sources, *, fetch=acquire, now=None, force=Fa
             session.add(state)
             session.commit()
             result[source.source_id] = {'status': 'error', 'error': state.last_error}
+    return result
+
+
+def ingest_cycle(session: Session, sources, *, fetch=None, now=None, force=False,
+                 matcher=None, tagger=None, config=None):
+    """Claim in the database, fetch at most two feeds, serialize incremental writes."""
+    from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED
+    from time import perf_counter
+    import logging
+    from sqlalchemy import update
+    from src.news.scheduling import load_schedule, next_due, claim, cadence_minutes, release_slot
+    from src.news.read_cache import refresh_cache
+    config = config or load_schedule()
+    clock = lambda: utc(now or datetime.now(timezone.utc))
+    active = [s for s in sources if s.enabled and s.country == 'VN' and s.category == 'VN']
+    states = {s.source_id: s for s in session.exec(select(NewsSourceState)).all()}
+    due = sorted((s for s in active if force or next_due(s, states.get(s.source_id), clock(), config) <= clock()),
+                 key=lambda s: (next_due(s, states.get(s.source_id), clock(), config), s.source_id))
+    result, changed, observations = {}, set(), {}
+    attempted = 0
+    def fetch_one(source):
+        started = perf_counter()
+        try:
+            incoming = fetch(source) if fetch is not None else acquire(source, timeout_seconds=config.timeout_seconds)
+            return incoming, None, perf_counter()-started
+        except Exception as exc:
+            return None, type(exc).__name__, perf_counter()-started
+    # Submit only active slots, never claim a long queued batch whose lease might expire.
+    with ThreadPoolExecutor(max_workers=config.max_concurrent, thread_name_prefix='news-fetch') as pool:
+        pending = {}
+        cursor = iter(due)
+        exhausted = False
+        while pending or not exhausted:
+            while not exhausted and len(pending) < config.max_concurrent:
+                if attempted >= config.max_sources_per_cycle:
+                    exhausted = True
+                    break
+                source = next(cursor, None)
+                if source is None:
+                    exhausted = True
+                    break
+                token = claim(session, source, clock(), config, force=force)
+                if token:
+                    attempted += 1
+                    pending[pool.submit(fetch_one, source)] = (source, token)
+            if not pending:
+                continue
+            finished, _ = wait(pending, return_when=FIRST_COMPLETED)
+            for future in finished:
+                source, token = pending.pop(future)
+                incoming, error, duration = future.result()
+                completed = clock()
+                # Fenced ownership check before evidence writes. Expired workers discard results.
+                fence = session.execute(update(NewsSourceState).where(
+                    NewsSourceState.source_id == source.source_id,
+                    NewsSourceState.lease_token == token, NewsSourceState.lease_until > completed
+                ).values(lease_until=completed+timedelta(minutes=10)).execution_options(synchronize_session=False))
+                if not fence.rowcount:
+                    session.rollback()
+                    release_slot(session, token)
+                    session.commit()
+                    result[source.source_id] = {'status': 'lease_lost'}
+                    continue
+                if error is None:
+                    source_changes, source_observations = set(), {}
+                    row = _persist_cycle(session, [source], fetch=lambda _: incoming, now=completed,
+                                         force=True, matcher=matcher, tagger=tagger, changed=source_changes, observations=source_observations)[source.source_id]
+                    error = row.get('error')
+                    if error is None:
+                        changed.update(source_changes)
+                        observations.update(source_observations)
+                else:
+                    row = {'status': 'error', 'error': error}
+                session.expire_all()
+                state = session.get(NewsSourceState, source.source_id)
+                if state.lease_token != token:
+                    session.rollback()
+                    continue
+                state.last_error = error
+                state.fetch_duration_seconds = duration
+                state.newly_inserted_articles = row.get('added', 0)
+                state.refresh_requested_at = None
+                state.lease_until, state.lease_token = None, None
+                if error:
+                    state.consecutive_failures += 1
+                    state.failed_fetches += 1
+                    # One attempt per cycle, no immediate transport retries.
+                    minutes = min(1440, config.failure_backoff_minutes * 2 ** min(state.consecutive_failures-1, 6))
+                    state.articles_received = 0
+                else:
+                    state.consecutive_failures = 0
+                    state.successful_fetches += 1
+                    minutes = cadence_minutes(source, completed, config)
+                state.next_due_at = completed+timedelta(minutes=minutes)
+                session.add(state)
+                release_slot(session, token)
+                session.commit()
+                result[source.source_id] = {**row, 'fetch_duration_seconds': round(duration, 4)}
+    refreshed = refresh_cache(session, changed, now=clock(), observations=observations)
+    logging.getLogger(__name__).info('news_cycle %s', {
+        'attempts': attempted, 'successes': sum(v.get('status') == 'ok' for v in result.values()),
+        'failures': sum(v.get('status') == 'error' for v in result.values()),
+        'new_articles': sum(v.get('added', 0) for v in result.values()),
+        'skipped_not_due': len(active)-len(due), 'deferred_due': max(0, len(due)-attempted),
+        'story_updates': len(changed), 'hot_cache_refreshes': int(refreshed)})
     return result
 
 
@@ -138,9 +256,16 @@ def relevant_article(article, tagger):
         primary_issuers(article.title, [row for row in tagger.stocks if row.symbol in tags.tickers]))
 
 
-def articles(session, *, country=None, source=None, topic=None, ticker=None, sector=None, category=None, financial_only=False, now=None, hours=72):
+def articles(session, *, country=None, source=None, topic=None, ticker=None, sector=None, category=None, financial_only=False, now=None, hours=72, story_ids=None, include_future_publication=False):
     now = utc(now or datetime.now(timezone.utc))
-    query = select(NewsArticle).where(NewsArticle.first_seen_at >= now - timedelta(hours=hours), NewsArticle.country == 'VN', NewsArticle.category == 'VN')
+    cutoff = now - timedelta(hours=hours)
+    query = select(NewsArticle).where(NewsArticle.first_seen_at <= now,
+        or_(NewsArticle.published_at.is_(None), NewsArticle.published_at <= now + (timedelta(minutes=10) if include_future_publication else timedelta())),
+        or_(NewsArticle.published_at >= cutoff,
+            NewsArticle.published_at.is_(None) & (NewsArticle.first_seen_at >= cutoff)),
+        NewsArticle.country == 'VN', NewsArticle.category == 'VN')
+    if story_ids is not None:
+        query = query.where(NewsArticle.story_id.in_(story_ids))
     for field, value in [('country', country), ('source_id', source), ('category', category)]:
         if value:
             query = query.where(getattr(NewsArticle, field) == value)

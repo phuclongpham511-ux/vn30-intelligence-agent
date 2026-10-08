@@ -18,26 +18,29 @@ export default function StockNews({ ticker }: { ticker: string }) {
   useEffect(() => {
     const controller = new AbortController();
     setItems(null); setError(false); setExpanded(false);
+    let busy=false;
+    const load=()=>{if(busy)return;busy=true;
     fetch(`/api/news/feed?research_category=COMPANY&ticker=${encodeURIComponent(ticker)}&limit=10`, { signal: controller.signal, cache: "no-store" })
       .then(async response => {
         if (!response.ok) throw new Error("Unavailable");
         const rows = await response.json();
-        if (!controller.signal.aborted) setItems(rows);
-      }).catch(() => { if (!controller.signal.aborted) setError(true); });
-    return () => controller.abort();
+        if (!controller.signal.aborted) setItems(rows);setError(false);
+      }).catch(() => { if (!controller.signal.aborted) setError(true); }).finally(()=>{busy=false;});};
+    load();const timer=setInterval(load,60_000);
+    return () => {controller.abort();clearInterval(timer);};
   }, [ticker, attempt]);
   const remaining=items?.slice(1)||[];
   const visible=expanded?remaining:remaining.slice(0,4);
   const allHref=`/news?${newsViewQuery({...emptyNewsFilters,ticker},"company")}`;
-  return <section className="panel overflow-hidden" aria-label={t("Quick news · {ticker}",{ticker})}>
+  return <section className="panel overflow-hidden" aria-label={t("Quick news Â· {ticker}",{ticker})}>
     <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
-      <div><h2>{t("Quick news · {ticker}",{ticker})}</h2><p className="mt-1 text-xs text-muted-foreground">{t("Company stories ranked by independent coverage and recency.")}</p></div>
+      <div><h2>{t("Quick news Â· {ticker}",{ticker})}</h2><p className="mt-1 text-xs text-muted-foreground">{t("Company stories ranked by independent coverage and recency.")}</p></div>
       <Link href={allHref} className="shrink-0 text-xs text-primary hover:underline">{t("View all")}</Link>
     </div>
     <div className="px-5 py-4">
       <SourceCoverage/>
       {error ? <p role="alert" className="py-4 text-sm">{t("News is temporarily unavailable.")} <button className="text-primary underline" onClick={() => setAttempt(value => value + 1)}>{t("Retry")}</button></p>
-        : items === null ? <p role="status" className="py-4 text-sm text-muted-foreground">{t("Loading quick news…")}</p>
+        : items === null ? <p role="status" className="py-4 text-sm text-muted-foreground">{t("Loading quick newsâ€¦")}</p>
         : items.length ? <>
           <TopStory item={items[0]}/>
           {remaining.length>0&&<div className="divide-y border-t">

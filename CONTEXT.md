@@ -16,7 +16,7 @@ The product is a research and monitoring system, not an automated trading or rec
 
 Stock discovery uses SSI FastConnect ordinary-equity metadata across HOSE, HNX and UPCOM. Persisted/watchlisted stocks are personalization, not the supported universe. A separate metadata snapshot refreshes daily in the canonical ingestion worker (failed attempts retry after 15 minutes); HTTP discovery reads the cache. Unknown instrument types are excluded. Stock records and market history remain lazy.
 
-News uses Company / Industry / Market Brief. A deterministic headline/read-layer mapping preserves older Article/Story records and provenance. Company, Industry and Market Brief are semantic research archives and retain single-source reporting with explicit source counts. Only visual Hot Topics requires at least two independent publisher groups and a valid same-Story thumbnail; Hot Topics ranks publisher breadth first, capped article activity second, then latest activity. This is publisher attention, not Materiality or corroborated truth. Company requires a primary-subject identity in the current SSI ordinary-equity cache, never legacy fixtures or arbitrary organization names. Broad macro/market and primary sector framing take precedence over incidental tickers. Vietnamese publishers are the only active News sources; removed foreign publisher history remains stored but excluded from current feeds and cluster evidence. Recognized foreign subjects require explicit Vietnam relevance or a primary listed issuer. Headline classification and company-name coverage remain partial.
+News uses Company / Industry / Market Brief. A deterministic headline/read-layer mapping preserves older Article/Story records and provenance. Company, Industry and Market Brief are semantic research archives and retain single-source reporting with explicit source counts. Hot Topics requires at least two independent publisher groups in one recent Story (re-ingestion never adds a mention) and a usable same-Story source thumbnail; Hot Topics ranks publisher breadth first, capped article activity second, then latest activity. This is publisher attention, not Materiality or corroborated truth. Company requires a primary-subject identity in the current SSI ordinary-equity cache, never legacy fixtures or arbitrary organization names. Broad macro/market and primary sector framing take precedence over incidental tickers. Vietnamese publishers are the only active News sources; removed foreign publisher history remains stored but excluded from current feeds and cluster evidence. Recognized foreign subjects require explicit Vietnam relevance or a primary listed issuer. Headline classification and company-name coverage remain partial.
 
 Community shows a short evidence-grounded title, a bounded representative sentence and discussion/source/time metadata. Terms, complete bounded evidence, original URLs and source status remain inspectable in disclosures. Original source text may retain its source language; interface labels remain English. Same-day Vietnam filtering, native identities, review state and source isolation are unchanged; Community Momentum remains unimplemented.
 
@@ -24,7 +24,8 @@ Explore is the market landing page: latest SSI VN-Index summary, multi-publisher
 
 News navigation is Industry → Company → Market Brief → Community Pulse. Hot Topics is a promotion layer on Explore; it does not hide matching stories in News categories. Compact search shows typed matches or up to eight browser-local recent ticker selections with individual remove and Clear history controls, never the full universe dropdown. Watchlist membership and review semantics are unchanged.
 
-Community Pulse explicitly selects Today or Last 24 hours; no automatic fallback relabels yesterday as today. The worker must run separately (`uv run python -m scripts.ingest_data --watch`) for continuing source freshness. HTTP refresh reads persisted evidence; it does not launch ingestion. Overnight empty Today and stale sources after stopping the worker are honest states, not deleted content.
+Community Pulse explicitly selects Today or Last 24 hours; no automatic fallback relabels yesterday as today. Open web sessions trigger coalesced background ingestion through `/ingestion/refresh`, respecting persisted source cadence. For source freshness without an open browser, run `uv run python -m scripts.ingest_data --watch`. Read endpoints continue to read persisted evidence. Overnight empty Today and stale sources after stopping the worker are honest states, not deleted content.
+When the web shell opens, it records durable due-source News refresh intent and requests a coalesced convenience cycle for other domains. News acquisition requires the canonical worker; persisted data remains readable while it runs.
 
 ### Material Event
 
@@ -336,9 +337,9 @@ outside this V1 slice.
 
 ### News refinement and Community Pulse V1 — 2026-10-05
 
-Top Stories now exposes one deterministic registry-selected representative with
+Top Stories exposes one earliest-published representative (unknown dates sort last), with
 additional publisher evidence behind a disclosure; ranking/diversity is unchanged.
-Explicit feed media metadata may provide a thumbnail. Sector is demoted to Advanced
+RSS media/enclosure metadata or an image in the feed description/content may provide a thumbnail; article bodies are not retained. Sector is demoted to Advanced
 headline-tag filtering because current company sector mapping is missing and actual
 coverage is sparse. No sector values were invented.
 
@@ -430,3 +431,52 @@ The user-facing product is **Woofi**. Repository and internal technical names re
 Product chrome supports English and Vietnamese through a typed frontend dictionary/context. A saved browser preference takes precedence; otherwise Vietnamese browser locales select Vietnamese and other locales select English. Headlines, excerpts, Community themes/evidence, company and publisher names, ticker symbols and quotes retain their source language. Localization changes presentation, never numerical ground truth or research semantics.
 
 News tabs display Industry → Company → Market → Community Pulse (Ngành → Doanh nghiệp → Thị trường → Cộng đồng). The visible Market label replaces Market Brief; internal `briefing` / `MARKET_BRIEF` identities remain unchanged. Category tabs identify the view without repeated category headings below them.
+
+
+### News refresh and thumbnails V2 — 2026-10-08
+
+Twenty public Vietnamese publisher RSS feeds are enabled. Ten additions were checked
+against non-empty recent live feeds; related publishers share a publisher group.
+News lists show one earliest-published representative per existing lexical Story,
+with additional original reporting behind a disclosure. Matching remains approximate,
+with conflicting-number protection; publisher attention is not factual corroboration.
+Archive rows require a source image and sort by latest publication in a Story. Their read window is 72 hours
+from publication (first-seen only when publication is absent), without deleting stored
+evidence or renewing age on duplicate ingestion. `/news/feed/page` exposes bounded
+pages and an `as_of` timestamp so later arrivals do not shift a Show more sequence.
+The UI initially requests 12 Stories. Only explicit Show more reveals the next 12;
+minute refreshes update only already-revealed pages. New category/filter selection
+starts a fresh first page. Source images stay inside their own Story; missing/broken
+images hide the news item, per user preference. No illustration substitutes a source photo.
+Web sessions request refresh at opening and every five minutes. News refresh intent is
+durable and worker-owned, with adaptive per-source scheduling described below. News,
+Hot Topics and stock News re-read each minute; no OS supervisor is introduced.
+
+
+### Adaptive News ingestion V1 — 2026-10-08
+
+Twenty RSS sources retain their evidence and publisher groups. Six configurable
+financial/stock publishers use 30-minute weekday-session cadence, standard sources
+120 minutes; lunch/off-hours use 240 and weekends 360 minutes. Asia/Ho_Chi_Minh
+09:00–11:30 / 13:00–15:00 on weekdays is a scheduling heuristic, not a holiday
+calendar or a guarantee that an exchange is open. Config lives in src/news/schedule.json
+and each registry entry's scheduling_priority. Legacy alternate registries retain
+explicit fixed cadence when that field is absent.
+
+The canonical worker wakes each minute, fetches at most six sources per cycle and
+uses two shared database-leased fetch slots. Source leases, fenced writes, failure
+backoff and refresh intent survive process restart. No immediate transport retry:
+failed attempts back off 30, 60, 120… minutes, capped at 24 hours. Socket timeout is
+20 seconds, feed bytes/items remain bounded. Lease expiry is ten minutes.
+
+News/Hot Topics/illustrated Quick News read worker-built persisted research rows.
+Due/stale visits only record deduplicated refresh intent; they never fetch upstream
+or rebuild projections. No worker means pending intent plus cached/empty data, not
+a completed refresh. Source status reports pending requests and worker requirement.
+Dirty Story markers survive interruption between evidence and projection commits.
+Only changed Stories are projected; universe refresh can reclassify existing rows.
+Empty/duplicate-only cycles reuse the projection. Recency and 72-hour eligibility
+are filtered cheaply at read time; a 96-hour derivative retention buffer supports
+ordinary pagination snapshots. Cache caps at 10,000 Stories; full original evidence
+stays stored. Raw /news/latest, unillustrated /news/top and detail remain evidence
+reads, not low-cost visual cache routes. See docs/ADAPTIVE_NEWS_INGESTION_V1.md.

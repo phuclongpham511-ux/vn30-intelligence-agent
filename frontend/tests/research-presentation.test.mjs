@@ -15,14 +15,16 @@ function component(file, overrides={}) {
   new Function('require','exports',code)(name=>overrides[name] || require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
   return exports.default;
 }
-const TopStory=component('../app/components/news/TopStory.tsx');
+const NewsThumbnail=component('../app/components/news/NewsThumbnail.tsx');
+const TopStory=component('../app/components/news/TopStory.tsx',{'./NewsThumbnail':NewsThumbnail});
 const article={id:'a',title:'Issuer update',url:'https://example.org/a',source_name:'Publisher',published_at:null,first_seen_at:'2026-10-06T05:00:00Z',tickers:[],topics:[],sectors:[]};
-test('news thumbnail preserves full aspect and missing/unsafe images leave no frame',()=>{
+test('news rows render source images and hide missing or unsafe image stories',()=>{
   const render=image=>renderToStaticMarkup(React.createElement(TopStory,{item:{story:{id:'s',representative_title:article.title,source_count:2},representative_article:{...article,thumbnail_url:image},articles:[article],research_category:'COMPANY'}}));
-  assert.match(render('https://example.org/image.jpg'),/object-contain/);
-  assert.doesNotMatch(render(null),/<img|object-contain/);
-  assert.doesNotMatch(render('javascript:alert(1)'),/<img/);
-  assert.match(render(null),/Company/);
+  assert.match(render('https://example.org/image.jpg'),/object-cover/);
+  assert.equal(render(null),'');
+  assert.equal(render('javascript:alert(1)'),'');
+  assert.doesNotMatch(render('javascript:alert(1)'),/src="javascript:/);
+  assert.match(render('https://example.org/image.jpg'),/Company/);
 });
 test('Explore renders a bounded universe with direct research links and no add prerequisite',()=>{
   const rows=Array.from({length:60},(_,n)=>({symbol:`X${n}`,exchange:n%2?'HNX':'HOSE',display_name_en:'Issuer'}));
@@ -61,13 +63,13 @@ test('shared stock search initially stays empty instead of rendering the market 
   assert.doesNotMatch(html,/role="option"|<select/);
 });
 
-test('Hot Topics selects only same-cluster images and excludes no-image stories',()=>{
+test('Hot Topics selects only same-cluster images and hides no-image stories',()=>{
  const render=item=>renderToStaticMarkup(React.createElement(TopStory,{item,requireImage:true}));
  const base={story:{id:'s',source_count:2},representative_article:article,articles:[article]};
  assert.equal(render(base),'');
  const sibling={...article,id:'b',thumbnail_url:'https://example.org/sibling.jpg'};
  assert.match(render({...base,articles:[article,sibling]}),/sibling.jpg/);
- assert.doesNotMatch(render({...base,thumbnail_url:'https://other.example/unrelated.jpg'}),/<img/);
+ assert.doesNotMatch(render({...base,thumbnail_url:'https://other.example/unrelated.jpg'}),/src="https:\/\/other.example/);
  const preferred={...article,thumbnail_url:'https://example.org/preferred.jpg'};
  assert.match(render({...base,representative_article:preferred,articles:[preferred,sibling]}),/src="https:\/\/example.org\/preferred.jpg"/);
 });

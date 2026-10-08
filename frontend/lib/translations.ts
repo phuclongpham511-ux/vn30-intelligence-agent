@@ -1,4 +1,11 @@
 export const vietnamese = {
+  "Only reporting with source thumbnails is shown.": "Chỉ hiển thị tin có ảnh từ nguồn. Tin thiếu ảnh đang được tạm ẩn.",
+  "{count} reports": "{count} bài viết",
+  "Loading more…": "Đang tải thêm…",
+  "Show more": "Xem thêm",
+  "Reporting from the last 72 hours. Older items appear when you choose Show more.": "Tin trong 72 giờ gần đây. Bấm Xem thêm để đọc những tin cũ hơn.",
+  "No stories with independent publisher coverage qualify yet.": "Chưa có câu chuyện nào được nhiều nhà xuất bản độc lập đề cập.",
+
   "Bollinger Bands (50, 2)": "Dải Bollinger (50, 2)",
   "Upper BB": "Biên BB trên",
   "Lower BB": "Biên BB dưới",

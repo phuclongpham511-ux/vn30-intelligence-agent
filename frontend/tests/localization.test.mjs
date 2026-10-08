@@ -20,7 +20,7 @@ function render(Component,props={},language='vi') {
 }
 const passthrough=({children})=>children;
 const button=({variant,asChild,...props})=>React.createElement('button',props);
-const article={id:'a',title:'News',url:'https://example.org/a',source_name:'Company',published_at:null,first_seen_at:'2026-10-06T05:00:00Z',tickers:['XYZ'],topics:[],sectors:[]};
+const article={thumbnail_url:'https://example.org/photo.jpg',id:'a',title:'News',url:'https://example.org/a',source_name:'Company',published_at:null,first_seen_at:'2026-10-06T05:00:00Z',tickers:['XYZ'],topics:[],sectors:[]};
 
 test('saved EN/VI selection overrides browser locale; invalid preference falls back deterministically',()=>{
   assert.equal(readLanguage('en','vi-VN'),'en');
@@ -45,7 +45,8 @@ test('locale formatting preserves real zero, missing values, precision and Vietn
   assert.equal(vi.date('broken'),translate('vi','Unavailable'));
 });
 test('news chrome localizes while even dictionary-matching source titles and publisher names stay original',()=>{
-  const {default:TopStory}=component('../app/components/news/TopStory.tsx');
+  const {default:NewsThumbnail}=component('../app/components/news/NewsThumbnail.tsx');
+  const {default:TopStory}=component('../app/components/news/TopStory.tsx',{'./NewsThumbnail':NewsThumbnail});
   const props={item:{story:{id:'s',source_count:2},representative_article:article,articles:[article],research_category:'MARKET_BRIEF'}};
   for(const language of ['vi','en']) {
     const html=render(TopStory,props,language);

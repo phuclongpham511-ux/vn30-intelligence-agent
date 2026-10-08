@@ -19,12 +19,13 @@ class Source(BaseModel):
     timezone: str = 'UTC'
     verified_at: str | None = None
     representative_priority: int = Field(default=100, ge=0)
+    scheduling_priority: Literal['priority', 'standard'] | None = None
 
 
 def load_sources(path: str | None = None) -> list[Source]:
     """Reload operator-controlled JSON each cycle; no deployment needed to toggle feeds."""
     file = Path(path) if path else Path(__file__).with_name('sources.json')
-    sources = [Source.model_validate(row) for row in json.loads(file.read_text())]
+    sources = [Source.model_validate(row) for row in json.loads(file.read_text(encoding='utf-8'))]
     if len({s.source_id for s in sources}) != len(sources):
         raise ValueError('Duplicate source_id')
     return sources

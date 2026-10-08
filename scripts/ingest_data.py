@@ -11,10 +11,12 @@ from src.community.daily import ingest_cycle as ingest_community
 from src.services.universe import sync_universe, sync_index_groups
 
 
-def run_cycle(engine, *, registry=None, force_news=False):
+def run_cycle(engine, *, registry=None, force_news=False, include_news=True):
     results = {}
     # Separate sessions/transactions: a failed domain cannot poison the other.
     for domain in ('universe', 'groups', 'news', 'community'):
+        if domain == 'news' and not include_news:
+            continue
         try:
             with Session(engine) as session:
                 results[domain] = (sync_universe(session) if domain == 'universe' else
@@ -44,6 +46,8 @@ def run(engine, *, watch=False, registry=None, force_news=False, stop=None):
 
 
 def main():
+    import logging
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
     parser = argparse.ArgumentParser(description='SSI universe + News + Community metadata worker')
     parser.add_argument('--watch', action='store_true')
     parser.add_argument('--registry', help='Alternate News source registry JSON path')

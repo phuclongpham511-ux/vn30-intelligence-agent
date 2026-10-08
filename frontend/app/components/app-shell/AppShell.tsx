@@ -42,6 +42,14 @@ function ThemeToggle() {
 }
 function Shell({children}: {children:React.ReactNode}) {
   const [open,setOpen]=useState(false);const {t,language,setLanguage}=useLocale();
+  useEffect(()=>{
+    const controller=new AbortController();
+    let busy=false;
+    const refresh=async()=>{if(busy)return;busy=true;try{await fetch('/api/ingestion/refresh',{method:'POST',cache:'no-store',signal:controller.signal});}catch{}finally{busy=false;}};
+    void refresh();
+    const timer=setInterval(()=>{void refresh();},5*60*1000);
+    return ()=>{controller.abort();clearInterval(timer);};
+  },[]);
   return <div className="min-h-screen"><a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:p-3">{t('Skip to content')}</a>
     <aside className="fixed inset-y-0 left-0 hidden w-60 border-r bg-[var(--sidebar)] lg:block"><Navigation/></aside><div className="min-w-0 lg:ml-60">
     <header className="sticky top-0 z-30 flex min-h-[72px] flex-wrap items-center gap-2 border-b bg-background/95 px-3 py-2 backdrop-blur-sm sm:flex-nowrap sm:py-0 md:px-8">

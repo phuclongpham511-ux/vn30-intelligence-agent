@@ -6,6 +6,7 @@ import { Button } from "../components/ui/button";
 import { MascotState } from "../components/mascot/Mascot";
 import SourceCoverage from "../components/news/SourceCoverage";
 import ArticleRow from "../components/news/ArticleRow";
+import NewsThumbnail from "../components/news/NewsThumbnail";
 import StockSearch from "../components/stock/StockSearch";
 import { useStocks } from "../components/stock/StockUniverse";
 import { englishCompanyName } from "@/lib/presentation";
@@ -129,10 +130,10 @@ export default function WatchlistPage() {
                     {fresh.length > 0 && <button className="text-xs text-primary underline disabled:opacity-50" disabled={storageError} aria-label={t("Mark {ticker} reviewed",{ticker:symbol})} onClick={() => save(markReviewed(state, symbol, developments))}>{t("Mark reviewed")}</button>}
                   </div>
                   {!developments.length ? <p className="mt-3 text-sm text-muted-foreground">{t("No recent ticker-matched stories ingested. This does not prove that nothing changed; coverage or tags may be incomplete.")}</p>
-                    : <ul className="mt-3 divide-y">{developments.slice(0,3).map(story => <li key={story.story_id} className="py-3 first:pt-0">
+                    : <ul className="mt-3 divide-y">{developments.slice(0,3).map(story => <NewsThumbnail key={story.story_id} images={story.articles.map(article=>article.thumbnail_url)} revision={story.articles.map(article=>article.last_seen_at||'').join('|')}>{image=><li className="py-3 first:pt-0"><div className="flex items-start gap-3">{image}<div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground"><span>{t(story.source_count===1?"{count} independent source":"{count} independent sources",{count:story.source_count})}</span><span>{t("First matched")} <time dateTime={story.first_seen_at}>{localDate(story.first_seen_at,true)}</time></span>{fresh.includes(story.story_id) && <span className="text-primary">{ui(reviewedBefore?"New":"Unreviewed")}</span>}</div>
-                      <h3 className="mt-1 text-sm leading-6">{story.title}</h3><details className="mt-2 text-xs"><summary className="cursor-pointer text-primary">{t("View source evidence")}</summary>{story.articles.map(article => <ArticleRow key={article.id} article={article}/>)}</details>
-                    </li>)}</ul>}
+                      <h3 className="mt-1 text-sm leading-6">{story.title}</h3><details className="mt-2 text-xs"><summary className="cursor-pointer text-primary">{t("View source evidence")}</summary>{story.articles.map(article => <ArticleRow key={article.id} article={article}/>)}</details></div></div>
+                    </li>}</NewsThumbnail>)}</ul>}
                   {developments.length > 3 && <p className="text-xs text-muted-foreground">{t("Showing 3 of {count} developments. Open News for more reporting.",{count:developments.length})}</p>}
                 </>}
               <div className="mt-5 border-t pt-4"><CommunityDiscussions ticker={symbol} data={discussions}
