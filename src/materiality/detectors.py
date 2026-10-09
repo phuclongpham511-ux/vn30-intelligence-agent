@@ -50,11 +50,14 @@ def _candidate(current, kind, category, direction, evidence, context, is_fixture
 def detect_market_events(prior: TechnicalBar | None, current: TechnicalBar,
                          contexts: dict[str, ScoringContext] | None = None, *,
                          is_fixture: bool = False, recent_bars: list[TechnicalBar] | None = None,
-                         relative_volume: float | None = None) -> tuple[MaterialEventCandidate, ...]:
+                         relative_volume: float | None = None,
+                         factual_decisions: dict | None = None) -> tuple[MaterialEventCandidate, ...]:
     """Consume adjacent rows from technical_history, preserving VND/share units.
 
     is_fixture applies to the entire input pair and supplied scoring context.
     Existing normalized market schemas do not carry fixture provenance.
+    Omitted factual_decisions preserves the frozen V0 replay contract. D1 runtime
+    always supplies both decisions; significance is never an existence gate there.
     """
     _validate_pair(prior, current)
     if prior and prior.date >= current.date:
@@ -80,7 +83,7 @@ def detect_market_events(prior: TechnicalBar | None, current: TechnicalBar,
                  [_evidence(row, "rsi14", "index") for row in (prior, current)], True)
 
     context = contexts.get(EventType.ABNORMAL_PRICE_MOVE.value)
-    if prior and context and context.own_history_abnormality is not None:
+    if factual_decisions is None and prior and context and context.own_history_abnormality is not None:
         # Reuse the existing factual return calculation; do not duplicate analytics.
         daily_return = market_snapshot(current.ticker, [prior, current], current.source).daily_return
         if _valid(daily_return):
@@ -90,8 +93,11 @@ def detect_market_events(prior: TechnicalBar | None, current: TechnicalBar,
                  [_evidence(row, "close", current.currency) for row in (prior, current)] +
                  [EvidenceItem("daily_return", daily_return, current.source, unit="fraction", as_of=current.date)])
     context = contexts.get(EventType.UNUSUAL_VOLUME.value)
-    if context and context.own_history_abnormality is not None and _valid(current.volume):
+    if factual_decisions is None and context and context.own_history_abnormality is not None and _valid(current.volume):
         emit(EventType.UNUSUAL_VOLUME, EventDirection.NEUTRAL, [_evidence(current, "volume", "shares")])
+    if factual_decisions is not None:
+        events.extend(detect_d1_factual_events(current.model_dump(), factual_decisions, contexts,
+                                              is_fixture=is_fixture))
     recent = recent_bars if recent_bars is not None else ([prior, current] if prior else [current])
     if not recent or recent[-1] != current or (prior and (len(recent) < 2 or recent[-2] != prior)):
         raise ValueError("Recent bars must end with the current/prior pair")
@@ -99,21 +105,57 @@ def detect_market_events(prior: TechnicalBar | None, current: TechnicalBar,
         _validate_pair(left, right)
         if left.date >= right.date:
             raise ValueError("Recent bars must be strictly chronological")
-    events.extend(_bollinger_events(prior, current, recent, contexts, relative_volume, is_fixture))
+    events.extend(_bollinger_events(prior, current, recent, contexts, relative_volume, is_fixture, factual_decisions))
     return tuple(events)
 
 
-def _bollinger_events(prior, current, recent, contexts, relative_volume, is_fixture):
+def _d1_evidence(decision, source, session, prefix):
+    return [EvidenceItem(prefix + key, decision[key], source,
+                         unit=decision['unit'] if key == 'q95' else None,
+                         as_of=session) for key in ('q95', 'n', 'order_index', 'predicate_version')]
+
+
+def detect_d1_factual_events(current, decisions, contexts, *, is_fixture=False):
+    """Emit supported D1 facts independently of significance and other-family data."""
+    if current is None:
+        return ()
+    session = current.get('session') or current['date']
+    source = current['source']
+    events = []
+    for family in ('abnormal_price_move', 'unusual_volume'):
+        decision = decisions[family]
+        if decision['predicate_result'] != 'EXISTS':
+            continue
+        price = family == 'abnormal_price_move'
+        direction = (EventDirection.POSITIVE if decision['direction'] == 'up' else
+                     EventDirection.NEGATIVE if decision['direction'] == 'down' else EventDirection.NEUTRAL)
+        evidence = _d1_evidence(decision, source, session, 'd1_')
+        evidence.append(EvidenceItem('daily_return' if price else 'volume',
+                                    decision['signed_return'] if price else decision['current_value'],
+                                    source, unit='fraction' if price else 'shares', as_of=session))
+        if price:
+            evidence.append(EvidenceItem('close', current['close'], source, unit=current['currency'], as_of=session))
+        events.append(MaterialEventCandidate(ticker=current['ticker'], event_type=family,
+            category=MaterialityCategory.MARKET, direction=direction, observed_at=session,
+            evidence=tuple(evidence), reason_codes=(f'detected:{family}', decision['predicate_version']),
+            **vars(contexts.get(family, ScoringContext())), is_fixture=is_fixture))
+    return tuple(events)
+
+
+def _bollinger_events(prior, current, recent, contexts, relative_volume, is_fixture, factual_decisions=None):
     """Inclusive touch, strict recovery on confirmation; delay 0..2 observations.
 
-    Existing trailing volume midrank >= .95 is a provisional confirmation gate,
-    not a calibrated Materiality cutoff. It uses confirmation-day volume only.
+    D1 runtime shares the confirmation-day unusual-volume fact. The omitted-fact
+    legacy V0 contract retains its provisional midrank gate, not a calibrated cutoff.
     Reconfirmation can occur inside the short window; event memory lowers novelty.
     """
     volume = contexts.get(EventType.UNUSUAL_VOLUME.value)
     rank = volume.own_history_abnormality if volume else None
-    if (not prior or not _valid(rank, current.volume, current.bb50_std) or
-            rank < .95 or current.volume <= 0 or current.bb50_std <= 0):
+    volume_confirmed = (_valid(rank) and rank >= .95 if factual_decisions is None else
+                        factual_decisions['unusual_volume']['predicate_result'] == 'EXISTS')
+    # Positive volume is a separate pattern rule. D1 itself permits valid zeros.
+    if (not prior or not volume_confirmed or not _valid(current.volume, current.bb50_std) or
+            current.volume <= 0 or current.bb50_std <= 0):
         return []
     output = []
     for kind, band, extreme, direction in (
@@ -146,6 +188,9 @@ def _bollinger_events(prior, current, recent, contexts, relative_volume, is_fixt
             _evidence(current, 'volume', 'shares'),
             EvidenceItem('volume_percentile', rank, current.source, unit='fraction', as_of=current.date),
             EvidenceItem('relative_volume', relative_volume, current.source, unit='ratio', as_of=current.date)))
+        if factual_decisions is not None:
+            evidence.extend(_d1_evidence(factual_decisions['unusual_volume'], current.source,
+                                         current.date, 'd1_volume_'))
         # No extra volume/BB score channel: reuse the price context, volume gates eligibility.
         context = contexts.get(kind.value)
         if context is None:

@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import health, stocks, watchlists, news, community, ingestion
+from routers import health, stocks, watchlists, news, community, ingestion, technical
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from src.providers.base import ProviderError
@@ -27,6 +27,7 @@ app.include_router(watchlists.router)
 app.include_router(news.router)
 app.include_router(community.router)
 app.include_router(ingestion.router)
+app.include_router(technical.router)
 
 
 @app.exception_handler(ProviderError)

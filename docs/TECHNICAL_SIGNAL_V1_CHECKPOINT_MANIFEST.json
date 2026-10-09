@@ -1,0 +1,642 @@
+{
+  "base_commit": "e64986e0cb011d8af40a122e14d5bb47f540ba22",
+  "source_head": "e64986e0cb011d8af40a122e14d5bb47f540ba22",
+  "patch_sha256": "7eff79565e5e48313f1684192179ce17810adc4f4df16e20bc3a302fcb07fa06",
+  "files": [
+    {
+      "path": "main.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\main.py",
+      "mode": "reviewed_technical_patch",
+      "source_sha256": "38e0cda3e52750138173664a287d65eac4f7fb615b3555df10f98c02fbce4dcb",
+      "checkpoint_sha256": "38e0cda3e52750138173664a287d65eac4f7fb615b3555df10f98c02fbce4dcb",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Import/register the one Technical GET router; leave existing routes/lifespan unchanged."
+    },
+    {
+      "path": "src/evaluation/benchmark/episodes.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\evaluation\\benchmark\\episodes.py",
+      "mode": "reviewed_technical_patch",
+      "source_sha256": "19b39a37fa458cd0a80f6a63fc5caa911f43e133827cbfec1aca6a3a44f0f9b1",
+      "checkpoint_sha256": "46dc3a461f4bdd5355f27ca4787c1861a4ec732941199f737a56a764e4264829",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Frozen facade delegating to shared D4 lifecycle with legacy default behavior."
+    },
+    {
+      "path": "src/evaluation/benchmark/facts.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\evaluation\\benchmark\\facts.py",
+      "mode": "reviewed_technical_patch",
+      "source_sha256": "f33a3dc4e45180f23d2072dee489e6e5d1175f44e869896e4982a05b01227735",
+      "checkpoint_sha256": "bb7e0d18d7bf50955b7dbcd5d6243dbef7e38e1bcb2439f2dbfcad510c3e8af1",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Frozen D1 facade preserving legacy predicate-version spelling and transition functions."
+    },
+    {
+      "path": "src/evaluation/context.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\evaluation\\context.py",
+      "mode": "reviewed_technical_patch",
+      "source_sha256": "45745885255de3a0ace38318ec1a248be2caef02b88737d71691d8625109f6f7",
+      "checkpoint_sha256": "45745885255de3a0ace38318ec1a248be2caef02b88737d71691d8625109f6f7",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Guard null current volume before relative-volume division; missing stays null."
+    },
+    {
+      "path": "src/materiality/__init__.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\materiality\\__init__.py",
+      "mode": "reviewed_technical_patch",
+      "source_sha256": "ad1850a4394608f35e2d7fd601399540f03fc7c112d365aea5810a81988529fc",
+      "checkpoint_sha256": "ad1850a4394608f35e2d7fd601399540f03fc7c112d365aea5810a81988529fc",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Export D1/D4 runtime and D5 packet seams."
+    },
+    {
+      "path": "src/materiality/detectors.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\materiality\\detectors.py",
+      "mode": "reviewed_technical_patch",
+      "source_sha256": "dacfdc50035ab080423b17c2a18f7c1f057542e3f0fce05b1ec55d2a0ce4a9dc",
+      "checkpoint_sha256": "dacfdc50035ab080423b17c2a18f7c1f057542e3f0fce05b1ec55d2a0ce4a9dc",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Optional canonical D1 existence and shared Bollinger volume confirmation; omitted-fact V0 behavior retained."
+    },
+    {
+      "path": "src/materiality/service.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\materiality\\service.py",
+      "mode": "reviewed_technical_patch",
+      "source_sha256": "8b8c6de620c6a39383b7c025b56158d33d76c73645ed7786c759a9bc50ca4257",
+      "checkpoint_sha256": "8b8c6de620c6a39383b7c025b56158d33d76c73645ed7786c759a9bc50ca4257",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Add D1/D4 public runtime entry points and common factual candidate seam."
+    },
+    {
+      "path": "src/analytics/factual.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\analytics\\factual.py",
+      "mode": "new_technical_file",
+      "source_sha256": "8bf2adb719603c0dde6a36cfe235153de1517db4f54a16d81bf35813a5b69abe",
+      "checkpoint_sha256": "8bf2adb719603c0dde6a36cfe235153de1517db4f54a16d81bf35813a5b69abe",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/analytics/episodes.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\analytics\\episodes.py",
+      "mode": "new_technical_file",
+      "source_sha256": "25e900bba022241aff0364a337dbef0d737e2af2e872652da9401f5b177091b4",
+      "checkpoint_sha256": "25e900bba022241aff0364a337dbef0d737e2af2e872652da9401f5b177091b4",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/materiality/factual.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\materiality\\factual.py",
+      "mode": "new_technical_file",
+      "source_sha256": "e9ed2360008738bbc30602a9aebd26c850565bb099092e28ce318e8e5712ff63",
+      "checkpoint_sha256": "e9ed2360008738bbc30602a9aebd26c850565bb099092e28ce318e8e5712ff63",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/materiality/episodes.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\materiality\\episodes.py",
+      "mode": "new_technical_file",
+      "source_sha256": "d616a2aa6675474d62e75f06b98fd32aa5ee7376c04f7fe42d7e1cc109d2a90c",
+      "checkpoint_sha256": "d616a2aa6675474d62e75f06b98fd32aa5ee7376c04f7fe42d7e1cc109d2a90c",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/materiality/delivery.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\materiality\\delivery.py",
+      "mode": "new_technical_file",
+      "source_sha256": "56515c9c8d0c4f9f0177f838873c4ef8cb35858f20d0f7ff07ffb374f1539d83",
+      "checkpoint_sha256": "56515c9c8d0c4f9f0177f838873c4ef8cb35858f20d0f7ff07ffb374f1539d83",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/services/technical_eod.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\services\\technical_eod.py",
+      "mode": "new_technical_file",
+      "source_sha256": "4bbcce5614096c4285dbc4aeceaab90b9f5e5bd7a26f3fc07d9d116eb8824bee",
+      "checkpoint_sha256": "4bbcce5614096c4285dbc4aeceaab90b9f5e5bd7a26f3fc07d9d116eb8824bee",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/services/session_evidence.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\services\\session_evidence.py",
+      "mode": "new_technical_file",
+      "source_sha256": "f9e8c3ed10f957a14b7e3f5de5139c8a38f774397ae78bdf825b30b82270e456",
+      "checkpoint_sha256": "f9e8c3ed10f957a14b7e3f5de5139c8a38f774397ae78bdf825b30b82270e456",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/services/technical_api.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\services\\technical_api.py",
+      "mode": "new_technical_file",
+      "source_sha256": "f3f16dd5d785af2774951d00e631526ddf8d4b413ed1df5ced7ea603e7a6d6d7",
+      "checkpoint_sha256": "f3f16dd5d785af2774951d00e631526ddf8d4b413ed1df5ced7ea603e7a6d6d7",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "routers/technical.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\routers\\technical.py",
+      "mode": "new_technical_file",
+      "source_sha256": "035a36312d0b76d92ec2ea2e34a8ef9f3c99210f3a41c0efe2fd057a9cc355e9",
+      "checkpoint_sha256": "035a36312d0b76d92ec2ea2e34a8ef9f3c99210f3a41c0efe2fd057a9cc355e9",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "tests/test_d1_runtime.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\tests\\test_d1_runtime.py",
+      "mode": "new_technical_file",
+      "source_sha256": "781d0c0d9e7368b23e979ef8a2891356a3101dbee4d231394f59d736694d8085",
+      "checkpoint_sha256": "781d0c0d9e7368b23e979ef8a2891356a3101dbee4d231394f59d736694d8085",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "tests/test_d4_runtime.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\tests\\test_d4_runtime.py",
+      "mode": "new_technical_file",
+      "source_sha256": "6550b58c6d87e3fb1e2f8c7540e24b78ca15b48342a21ec54b8d12aff88a3607",
+      "checkpoint_sha256": "6550b58c6d87e3fb1e2f8c7540e24b78ca15b48342a21ec54b8d12aff88a3607",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "tests/test_d5_packet.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\tests\\test_d5_packet.py",
+      "mode": "new_technical_file",
+      "source_sha256": "5f25762209f3aa4f2ad7b65f8a4fb9a5b85bb53b78a01383d87bfd9141fcfa89",
+      "checkpoint_sha256": "5f25762209f3aa4f2ad7b65f8a4fb9a5b85bb53b78a01383d87bfd9141fcfa89",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "tests/test_technical_eod_consumer.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\tests\\test_technical_eod_consumer.py",
+      "mode": "new_technical_file",
+      "source_sha256": "b6323c5a2addb641b5d002b68d2acfae4b7a8d9ff4879cb0b698619b556246b4",
+      "checkpoint_sha256": "b6323c5a2addb641b5d002b68d2acfae4b7a8d9ff4879cb0b698619b556246b4",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "tests/test_eod_readiness.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\tests\\test_eod_readiness.py",
+      "mode": "new_technical_file",
+      "source_sha256": "508b38893327a141ce782813d7c47a026cd9bbab88b16bae3d797c89d1e7beb6",
+      "checkpoint_sha256": "508b38893327a141ce782813d7c47a026cd9bbab88b16bae3d797c89d1e7beb6",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "tests/test_technical_daily_api.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\tests\\test_technical_daily_api.py",
+      "mode": "new_technical_file",
+      "source_sha256": "eeb8d6ab1b749501f9d50ab176c9b8e69f01311d2b9736f88dfdc4d6704ee7d9",
+      "checkpoint_sha256": "eeb8d6ab1b749501f9d50ab176c9b8e69f01311d2b9736f88dfdc4d6704ee7d9",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "docs/D1_FACTUAL_RUNTIME_V1.md",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\docs\\D1_FACTUAL_RUNTIME_V1.md",
+      "mode": "new_technical_file",
+      "source_sha256": "fe88985b413376478cf0d908c722a2f5fce60d75280ec3565e41a96acf00a051",
+      "checkpoint_sha256": "fe88985b413376478cf0d908c722a2f5fce60d75280ec3565e41a96acf00a051",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "docs/D4_RUNTIME_EPISODES_V1.md",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\docs\\D4_RUNTIME_EPISODES_V1.md",
+      "mode": "new_technical_file",
+      "source_sha256": "a52ccf399d76ea15622f5e6abff3d118db305d69d5920965fe3a83e0cf6b7eb0",
+      "checkpoint_sha256": "a52ccf399d76ea15622f5e6abff3d118db305d69d5920965fe3a83e0cf6b7eb0",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "docs/D5_A_RANKING_PACKET_V1.md",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\docs\\D5_A_RANKING_PACKET_V1.md",
+      "mode": "new_technical_file",
+      "source_sha256": "ec6407b7eda8d5f182c4347181d1db3f0254bca97af199fe6e7a8b48de5fb5cd",
+      "checkpoint_sha256": "ec6407b7eda8d5f182c4347181d1db3f0254bca97af199fe6e7a8b48de5fb5cd",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "docs/D5_B1_EOD_RUNTIME_CONSUMER_V1.md",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\docs\\D5_B1_EOD_RUNTIME_CONSUMER_V1.md",
+      "mode": "new_technical_file",
+      "source_sha256": "08816c2911faa1f5f01e750f49ba3a0dbeac1534cad910c16be0150bdf1d22ab",
+      "checkpoint_sha256": "08816c2911faa1f5f01e750f49ba3a0dbeac1534cad910c16be0150bdf1d22ab",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "docs/EOD_READINESS_CALENDAR_EVIDENCE_V1.md",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\docs\\EOD_READINESS_CALENDAR_EVIDENCE_V1.md",
+      "mode": "new_technical_file",
+      "source_sha256": "a35d7087c1acbb985b04ce57879a0d2f02edfc5b6ab7d86fae6af92cd60fe1c0",
+      "checkpoint_sha256": "a35d7087c1acbb985b04ce57879a0d2f02edfc5b6ab7d86fae6af92cd60fe1c0",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "docs/D5_B2_GATED_READ_ONLY_API_V1.md",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\docs\\D5_B2_GATED_READ_ONLY_API_V1.md",
+      "mode": "new_technical_file",
+      "source_sha256": "1173471ca11171572bb969d7e82dfbbe463d90c695fa73613b82faeeb495f854",
+      "checkpoint_sha256": "1173471ca11171572bb969d7e82dfbbe463d90c695fa73613b82faeeb495f854",
+      "normalized_text_identical": true,
+      "ownership": "Technical Signal Engine V1",
+      "exact_scope": "Completed Technical V1 source/test/implementation report; copied byte-for-byte."
+    },
+    {
+      "path": "src/corporate_actions/models.py",
+      "source_path": "C:\\Users\\PC\\.codex\\worktrees\\technical-development-reconciled\\vn30-intelligence-agent\\src\\corporate_actions\\models.py",
+      "mode": "selective_minimum_dependency",
+      "ownership": "Technical CA-context contract dependency",
+      "exact_scope": "Only add pending_verification to CorporateActionContext.reason Literal; do not copy any other model/Dividend change.",
+      "source_sha256": "bcdbd3d81a650cc814926614d0fd1056b1f573da3e59e944a44411bb3c688b25",
+      "checkpoint_sha256": "f4b2f890f4c72f2b7146fdbb40e44c3fca8b0c978efdc6794a0dcf33fa399e3e",
+      "normalized_text_identical": false
+    }
+  ],
+  "excluded_source_wip": [
+    {
+      "path": "CONTEXT.md",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "d050669a5ed2a8afd47ad5f53ed5f547fefa7d17cebb24bac9545dd22ce3a63f"
+    },
+    {
+      "path": "frontend/app/components/Explore.tsx",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "3922ae7e425f325454f3acda6987fa0b212b65586010a5d68c526b40872161b3"
+    },
+    {
+      "path": "frontend/lib/translations.ts",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "6fefecda9c7314377477839f87cf3798ca629d0a9ceecae936081bc9bad73781"
+    },
+    {
+      "path": "routers/stocks.py",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "b2c0388852bcba561f168e9259f636c3d9624c646017e79b7a6903b26ba027da"
+    },
+    {
+      "path": "scripts/ingest_data.py",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "8e2db6e79c9afd0140af791ba0ae7c18c46ded903ee83ab42e1aaf26e401e4fc"
+    },
+    {
+      "path": "src/corporate_actions/models.py",
+      "status": " M",
+      "category": "Excluded residual Dividend model WIP",
+      "source_sha256": "bcdbd3d81a650cc814926614d0fd1056b1f573da3e59e944a44411bb3c688b25",
+      "scope": "source_updated_at/source_title/evidence_text fields, source_updated_at validator, has_pending_correction function; only reason enum member transferred."
+    },
+    {
+      "path": "src/corporate_actions/repository.py",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "b360246e869856c2adc4f33795818de23bcf730076c8153dd4d2376a1d12b373"
+    },
+    {
+      "path": "src/corporate_actions/storage.py",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "6a9c7de9c3a9705d7d8f571044e562d7d4c6e24e2c379987029d0cc8de309106"
+    },
+    {
+      "path": "src/db/session.py",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "7810eab484ad7f39759e649f75b6d90e7592b377e87c8835e041cbc3fe1ce1f1"
+    },
+    {
+      "path": "tests/test_data_reliability.py",
+      "status": " M",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "a052c2e47723b4b2fbb4de994feaf958726adceaf8bf60132e28f9d5156ea731"
+    },
+    {
+      "path": "docs/DIVIDENDS_AUTO_V1.md",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "d372b4246d9833808a4ce058fc3665763571a506edb55012d84578dc05ccc29d"
+    },
+    {
+      "path": "docs/TECHNICAL_CALIBRATION_EXPERIMENT.md",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "0e693eed451050e38da25bc7acf56c29ae22f8c2deed5a524f2b48299408d7bf"
+    },
+    {
+      "path": "docs/TECHNICAL_CALIBRATION_V2.md",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "8e0dec8a9f7d6acffec5526c6eaa19c9113f4d5d0b9cef2454969777e7f794cc"
+    },
+    {
+      "path": "docs/TECHNICAL_V3_FINALIZATION_PHASE1.md",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "226c4ce082f337b5f572e3af107c85dd549dffabc197de3f85554d8aa7e24f3a"
+    },
+    {
+      "path": "docs/VALIDATION_PRELABEL_PROTOCOL.md",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "e1da7364e8d627858f4a8b265e3a20e0643a9133c0b79f596109a0c01cb5d8fa"
+    },
+    {
+      "path": "docs/VALIDATION_V2_PRELABEL_PROTOCOL.md",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "6f0e43dfa4778d1d4efffce507fd44a1721a01a57d7029ca695a99c487678104"
+    },
+    {
+      "path": "frontend/app/components/stock/StockDividends.tsx",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "bd3abb388674584eedea861d6d8a1103f547441e05e82101b8ce5ab8f463da82"
+    },
+    {
+      "path": "frontend/lib/dividends.ts",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "075f86455da775a408b0fc817e0e411a255eb44f59566ba5ccd51b0dd97ed9df"
+    },
+    {
+      "path": "frontend/tests/dividends.test.mjs",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "42844b76501fe6e10f8aaef078e03a60d4c18dd6f205f168cf1877e756af2520"
+    },
+    {
+      "path": "research/provenance/technical_data_readiness_v1/DECISION_INVARIANCE_AUDIT.md",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "8c4ab2744feb4400854d8466301841a7a714b7d4441b37288f48d26423a8f079"
+    },
+    {
+      "path": "research/provenance/technical_data_readiness_v1/decision_invariance_audit.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "a78790e660e08e39ce5e04f03935066f232aed248eb8505feb5fd11a6aa16ff9"
+    },
+    {
+      "path": "scripts/compare_materiality_calibration.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "955c4b509ac92e2e3f9727e56a3bab88573e31e3f361ad8de77d2471346703d8"
+    },
+    {
+      "path": "scripts/evaluate_development_v3.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "37ed02c2caeebad2fa0fcd95f73e51fc82cc5bb2fd828b7b148fd644240cc42e"
+    },
+    {
+      "path": "scripts/evaluate_frozen_validation.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "7d91e317f17514a9758e0ea6c0900977e3ca591b3b5955e1cff5943a9f76ac9a"
+    },
+    {
+      "path": "scripts/evaluate_validation_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "c787238106c6d0d8000c5650dd0d20990643d410fdb5d83c590d050a4e92d7d4"
+    },
+    {
+      "path": "scripts/ingest_dividends.py",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "68ce087295b889ca75333ada244cc7d8a684b09513263bcefd6483d2ea793e22"
+    },
+    {
+      "path": "scripts/prepare_development_v3.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "3b28296097e43e873e794a37199e583c801680628d24ffe67bbda3043e39c691"
+    },
+    {
+      "path": "scripts/prepare_validation.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "680c066ccac417a0a307c95856b687a7b621e0ce45e4ae12e0f9f8e1cd0a08fa"
+    },
+    {
+      "path": "scripts/prepare_validation_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "d4313b4b0c8dbc35e9b2dfb3f8a9702231c939e3acc925f44c4b7d792e60f3e6"
+    },
+    {
+      "path": "scripts/report_frozen_validation.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "786d593a9b6e1368334f5d6f2ecae0f1648a88cf8080b62d0440a4791a9ae7db"
+    },
+    {
+      "path": "scripts/resume_calibration_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "c87cb5f6e8720d443271396696d4cc5d424125b2d36266a22ca1df9578eaa537"
+    },
+    {
+      "path": "scripts/run_calibration_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "0e7186a866bcc8f5e464fdc27178b491ec3d3e92cd831d94012d4cc2cbcb833d"
+    },
+    {
+      "path": "src/corporate_actions/ingestion.py",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "490ea7a95a11d989904136713e4cf7ff000d82f0cf6c67c2145c98fad94d7895"
+    },
+    {
+      "path": "src/corporate_actions/read.py",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "485b11a161c9c24de9e3142ec4faf2527e649888050303a7eb7f42e79513e432"
+    },
+    {
+      "path": "src/corporate_actions/source.json",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "37e201dd09cf8bd5297dc9aa54675f6f41d7db63b3d9d9efe6b68239aada0b0d"
+    },
+    {
+      "path": "src/corporate_actions/vsdc.py",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "7b5235341d855b6a165d05d52119c1f9a99feffbc31a84d9c7b8a7ff5b42df2d"
+    },
+    {
+      "path": "src/evaluation/calibration.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "0a535b3e4e73221036c937562ed4f0fe8aa29faff74d07601dc34f6079827802"
+    },
+    {
+      "path": "src/evaluation/calibration_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "243f93cef5b58271c9479093a7e046836ebd9db2578ab1bd7a496552b80adab8"
+    },
+    {
+      "path": "src/evaluation/development_v3.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "bf80ba180876ad045e57a7e6dfe4a592f0ec5fe8766e580fa5300b5c69f764bd"
+    },
+    {
+      "path": "src/evaluation/development_v3_evaluation.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "8add4c54dbafed21170a88657303fbfa659ec398a6a299875bfe12a3a955ba79"
+    },
+    {
+      "path": "src/evaluation/review_artifacts.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "4193e2d771fc270848079660be07b0b9bf4efec0515996ee1e583561e6f39a3c"
+    },
+    {
+      "path": "src/evaluation/review_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "4914a83ba5a169a18507cd735bb44459f322ff0afebdfa454e9cd7130e50ff02"
+    },
+    {
+      "path": "src/evaluation/validation_sampling.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "89fb06bc60c992e3613958127ad1468d175138b3224b38b61ee25c7574b97e87"
+    },
+    {
+      "path": "src/evaluation/validation_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "536429792e8f7331bcb7b19cc40bd8785dd5193645cd8d2822de745a284b8f4c"
+    },
+    {
+      "path": "tests/test_calibration_comparison.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "32ebea02120b23b4923c8021cff9fdfe02205390a2400e9010e34395da56cc62"
+    },
+    {
+      "path": "tests/test_calibration_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "00761c35a149afc19f5a4f1e1814cff1281df1895e2aa085253d6b5d70c9506f"
+    },
+    {
+      "path": "tests/test_decision_invariance_audit.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "d061c2a58188a3eba87f38f3dbcb56b0f91c3a1c4cb8782340ea3024518be604"
+    },
+    {
+      "path": "tests/test_development_v3.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "cafb360dea4ca61a670ead726bef8914a6b59b219617778b91cc8266b0344b1d"
+    },
+    {
+      "path": "tests/test_development_v3_evaluation.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "8e83c74988e813f110f36c87f4973b9fcd6fe417fc22e934be33ce6d58fe7edb"
+    },
+    {
+      "path": "tests/test_dividend_ingestion.py",
+      "status": "??",
+      "category": "Dividend / corporate-action acquisition or UI WIP",
+      "source_sha256": "2738f21bde57a892859a6354bcbe35fbd05f1cece3b20e92fd95b2226b658f5e"
+    },
+    {
+      "path": "tests/test_frozen_validation.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "7490d172842fda16435ba9a45b42f0455bf818b64ef60a458f40ecca493ccac4"
+    },
+    {
+      "path": "tests/test_validation_sampling.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "ba957b59bc4650a4982845436e31652354233176e6c481bef6a2539a7d1e022f"
+    },
+    {
+      "path": "tests/test_validation_v2.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "9cb3e803c02f73755764322c8e41c95dfcadb81a3578473fc07f828691fca956"
+    },
+    {
+      "path": "tests/test_validation_v2_evaluation.py",
+      "status": "??",
+      "category": "Calibration / evaluation / research WIP",
+      "source_sha256": "375afc43525a2eb79bf498fe604c32bbf6b964fb4f59d1130df040e41d9600d4"
+    }
+  ],
+  "source_snapshot": {
+    "modified_tracked": 17,
+    "untracked": 65,
+    "staged": 0,
+    "dirty_files": 82
+  },
+  "additional_checkpoint_documents": [
+    "docs/TECHNICAL_SIGNAL_V1_CHECKPOINT_MANIFEST.json",
+    "docs/TECHNICAL_SIGNAL_V1_CHECKPOINT.md"
+  ],
+  "discovered_dependencies": [
+    {
+      "file": "src/corporate_actions/models.py",
+      "reason": "Unmodified D4 corporate-action neutrality test supplies pending_verification context; base Literal rejects it.",
+      "minimum_change": "One allowed reason enum member; no context lookup/ingestion/scoring change.",
+      "initial_isolated_failure": "test_corporate_action_enrichment_cannot_change_episode_relationships: Pydantic literal validation error"
+    }
+  ]
+}

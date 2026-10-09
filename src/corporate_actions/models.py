@@ -110,7 +110,7 @@ class CorporateActionContext(ActionModel):
     as_of: datetime | None = None
     actions: tuple[CorporateActionObservation, ...] = ()
     coverage: Literal['INCOMPLETE'] = 'INCOMPLETE'
-    reason: Literal['not_configured', 'not_observed', 'source_unavailable', 'verified_exact_session'] = 'not_configured'
+    reason: Literal['not_configured', 'not_observed', 'source_unavailable', 'pending_verification', 'verified_exact_session'] = 'not_configured'
 
     @field_validator('as_of')
     @classmethod

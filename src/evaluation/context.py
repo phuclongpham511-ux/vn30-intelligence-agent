@@ -33,7 +33,7 @@ def build_context(snapshot, technical, prior_features, volume, excess_return, co
     rsi_distance = abs(technical.rsi14 - 50) if technical.rsi14 is not None else None
     raw = {"daily_return": snapshot.daily_return, "volume": volume,
            "return_zscore": zscore(snapshot.daily_return, returns),
-           "relative_volume": volume / mean(volumes) if volumes and mean(volumes) > 0 else None,
+           "relative_volume": volume / mean(volumes) if volume is not None and volumes and mean(volumes) > 0 else None,
            "volume_zscore": zscore(volume, volumes),
            "volatility_regime": stdev(returns) * sqrt(252) if len(returns) >= 2 else None,
            "excess_return": excess_return, "ma_spread": spread, "rsi_distance": rsi_distance,
