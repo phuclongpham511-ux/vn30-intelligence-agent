@@ -144,6 +144,48 @@ def test_cross_source_story_and_independent_diversity(session):
     assert stories[0].source_count == 2
 
 
+@pytest.mark.parametrize('changed_slug', [False, True])
+def test_cafef_correction_preserves_identity_and_original_age(session, changed_slug):
+    original = 'https://cafef.vn/old-headline-188261008155658978.chn'
+    corrected = 'https://cafef.vn/new-headline-188261008155658978.chn' if changed_slug else original
+    published = NOW - timedelta(hours=2)
+    ingest(session, [item('ABC earnings rise', original, published)], sources=[source('cafef')])
+    before = session.exec(select(NewsArticle)).one()
+    article_id, story_id = before.id, before.story_id
+    ingest(session, [item('ABC earnings corrected', corrected, NOW)],
+           sources=[source('cafef')], now=NOW+timedelta(minutes=30))
+    article = session.exec(select(NewsArticle)).one()
+    story = session.exec(select(NewsStory)).one()
+    assert (article.id, article.story_id) == (article_id, story_id)
+    assert article.title == 'ABC earnings corrected'
+    assert article.canonical_url == corrected
+    assert utc(article.published_at) == published
+    assert utc(article.first_seen_at) == NOW
+    assert utc(story.last_updated_at) == NOW
+    assert story.representative_title == article.title
+    assert (story.article_count, story.source_count) == (1, 1)
+
+
+@pytest.mark.parametrize('url', [
+    'https://cafef.vn/other-188261008155658979.chn',
+    'https://cafef.vn.evil.example/other-188261008155658978.chn',
+    'https://other.example/other-188261008155658978.chn',
+])
+def test_cafef_identity_does_not_merge_other_articles_or_hosts(session, url):
+    ingest(session, [item('ABC earnings rise', 'https://cafef.vn/old-188261008155658978.chn')], sources=[source('cafef')])
+    ingest(session, [item('XYZ manufacturing production falls', url)], sources=[source('cafef')])
+    assert len(session.exec(select(NewsArticle)).all()) == 2
+
+
+def test_other_publisher_cannot_correct_original_publisher_title(session):
+    url = 'https://one.example/original'
+    ingest(session, [item('ABC earnings rise', url)])
+    ingest(session, [item('ABC earnings corrected', url)], sources=[source('two')])
+    article = session.exec(select(NewsArticle)).one()
+    assert article.title == 'ABC earnings rise'
+    assert article.source_id == 'one'
+
+
 def test_story_matching_threshold_time_numbers():
     matcher = LexicalStoryMatcher()
     s = NewsStory(id='a', representative_title='Federal Reserve cuts interest rates', first_seen_at=NOW, topics=['Rates'])

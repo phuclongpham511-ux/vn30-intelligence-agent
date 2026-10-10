@@ -34,6 +34,19 @@ def canonical_url(value: str) -> str:
     return urlunsplit((p.scheme.lower(), p.netloc.lower(), p.path or '/', urlencode(sorted(query)), ''))
 
 
+def cafef_article_suffix(value: str) -> str | None:
+    """Verified CafeF article identity survives a corrected headline slug.
+
+    Keep the full original URL as evidence; this is only a lookup key.
+    Other publishers and host lookalikes retain exact URL identity.
+    """
+    p = urlsplit(value)
+    if p.hostname not in ('cafef.vn', 'www.cafef.vn') or p.query:
+        return None
+    match = re.search(r'-(\d{15,20})\.chn$', p.path)
+    return match.group(0) if match else None
+
+
 def parse_time(value: str | None, source_timezone: str = 'UTC') -> datetime | None:
     if not value:
         return None

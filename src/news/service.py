@@ -6,7 +6,7 @@ from src.models import Stock
 from src.news.adapters import acquire
 from src.news.models import NewsArticle, NewsStory, NewsSourceState
 from src.news.matching import LexicalStoryMatcher
-from src.news.normalization import canonical_url, clean_title, digest, normalized, utc
+from src.news.normalization import canonical_url, cafef_article_suffix, clean_title, digest, normalized, utc
 from src.news.tagging import Tagger
 
 
@@ -49,14 +49,30 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
                 url = canonical_url(item.url)
                 title_hash, url_hash = digest(normalized(title)), digest(url)
                 existing = session.exec(select(NewsArticle).where(or_(NewsArticle.url_hash == url_hash, (NewsArticle.source_id == source.source_id) & (NewsArticle.title_hash == title_hash)))).first()
+                suffix = cafef_article_suffix(url) if source.source_id == 'cafef' else None
+                if existing is None and suffix:
+                    candidates = session.exec(select(NewsArticle).where(
+                        NewsArticle.source_id == source.source_id,
+                        NewsArticle.canonical_url.endswith(suffix))
+                        .order_by(NewsArticle.first_seen_at, NewsArticle.id).limit(10)).all()
+                    existing = next((a for a in candidates if cafef_article_suffix(a.canonical_url) == suffix), None)
                 if existing:
+                    previous_title = existing.title
+                    # A known URL/native identity can be corrected without becoming
+                    # another article or renewing publication/first-seen time.
+                    correction = (existing.source_id == source.source_id and
+                        (existing.url_hash == url_hash or bool(suffix and cafef_article_suffix(existing.canonical_url) == suffix))
+                        and existing.title != title)
+                    if correction:
+                        existing.title, existing.title_hash = title, title_hash
+                        existing.url, existing.canonical_url, existing.url_hash = url, url, url_hash
                     existing.last_seen_at = now
                     if observations is not None:
                         observations[existing.id] = now
                     # Refresh derived tags after taxonomy/universe changes, without
                     # changing publisher evidence or renewing story activity.
                     tags = tagger.tag(existing.title, existing.category)
-                    altered = (existing.topics != tags.topics or existing.tickers != tags.tickers or existing.sectors != tags.sectors or existing.scope != tags.scope or
+                    altered = (correction or existing.topics != tags.topics or existing.tickers != tags.tickers or existing.sectors != tags.sectors or existing.scope != tags.scope or
                                bool(item.thumbnail_url and (canonical_url(item.thumbnail_url) != existing.thumbnail_url or item.thumbnail_provenance != existing.thumbnail_provenance)))
                     existing.topics, existing.tickers, existing.sectors = tags.topics, tags.tickers, tags.sectors
                     existing.scope = tags.scope
@@ -67,6 +83,8 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
                     session.flush()
                     story = session.get(NewsStory, existing.story_id)
                     if story and altered:
+                        if correction and story.representative_title == previous_title:
+                            story.representative_title = title
                         story.read_cache_dirty = True
                         if changed is not None:
                             changed.add(story.id)

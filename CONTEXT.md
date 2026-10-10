@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+### Product acceptance V1 — 2026-10-10
+
+Local integrated acceptance used real SSI, public News/Community acquisition and
+the accepted October 9 FPT PROVISIONAL packet in an isolated database. It does
+not certify production readiness or deploy pilot evidence into the product DB.
+Known exact-URL headline corrections and CafeF numeric article identities now
+preserve Article/Story identity, publisher ownership and original age when the
+headline/slug changes; Watchlist revision receipts reopen the existing item.
+Existing duplicate records are not automatically merged. Worker availability,
+an intermittent database ingestion failure, active-session streaming and explicit
+Technical database wiring remain rollout limits. See
+docs/PRODUCT_ACCEPTANCE_V1_2026-10-10.md for live/fixture coverage and validation.
+
 ### Unified Watchlist Intelligence V1 — 2026-10-10
 
 Watchlist combines exact ticker-matched Company stories, public discussions from
