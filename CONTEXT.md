@@ -1,5 +1,26 @@
 # Woofi — Domain Context
 
+### Unified Watchlist Intelligence V1 — 2026-10-10
+
+Watchlist combines exact ticker-matched Company stories, public discussions from
+the last 24 hours, and the latest accepted Operational EOD packet. The bounded,
+SELECT-only `/watchlists/intelligence` projection reads cached metadata/evidence;
+it acquires nothing and does not recalculate D1/D4/D5. The legacy monitoring API,
+account CRUD scaffolds, follow/remove behavior and demand-leased live prices remain.
+Watchlist search requests small cached metadata pages instead of the full universe.
+
+Browser-local review receipts namespace News/Community/Technical identities and
+record content revisions and explicit review times. Publisher duplicates, image
+retries, source rechecks and engagement-only changes do not create unread updates.
+Known source text corrections reopen a story; withdrawn evidence is withheld.
+Legacy IDs migrate only previously reviewed content, with unknown historical time.
+Review controls acknowledge displayed items only; refresh/navigation never review.
+Counts describe the loaded page and become unknown when review storage is unreadable.
+PROVISIONAL Technical packets, no meaningful change, incomplete evidence, future
+delayed gates, overdue source checks and withdrawals have distinct states.
+News/Community lack a native retraction ledger; absence is not claimed as a confirmed
+retraction. See docs/WATCHLIST_INTELLIGENCE_V1.md for bounds, evidence and validation.
+
 ### Technical Stock Detail integration — 2026-10-10
 
 Stock Detail shows delayed PROVISIONAL Technical Insights above the chart.

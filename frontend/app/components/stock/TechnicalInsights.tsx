@@ -9,14 +9,14 @@ const labels = {
   bollinger_lower_reversal_volume: "Lower Bollinger reversal with volume",
   bollinger_upper_reversal_volume: "Upper Bollinger reversal with volume",
 } as const;
-export function TechnicalInsightsView({ticker, data, loading, error, retry}: {
-  ticker: string; data: TechnicalResponse | null; loading: boolean; error: boolean; retry: () => void;
+export function TechnicalInsightsView({ticker, data, loading, error, retry, sectionId='stock-technical-insights'}: {
+  ticker: string; data: TechnicalResponse | null; loading: boolean; error: boolean; retry: () => void; sectionId?:string;
 }) {
   const {t,ui,date} = useLocale();
   const accepted = !loading && !error && data?.kind === "provisional_packet" ? data : null;
   const diagnostic = !loading && !error && data?.kind === "diagnostic" ? data : null;
   const retracted = diagnostic?.reason_codes.some(code => /revis|retract|supersed|definition_changed/.test(code));
-  return <section id="stock-technical-insights" aria-label={t("Technical Insights")} className="scroll-mt-24 rounded-xl border p-4 sm:p-5">
+  return <section id={sectionId} aria-label={t("Technical Insights")} className="scroll-mt-24 rounded-xl border p-4 sm:p-5">
     <div className="flex flex-wrap items-center justify-between gap-2"><h2 className="text-sm font-medium">{t("Technical Insights")}</h2>
       {accepted && <span className="rounded border border-amber-500/40 bg-amber-500/10 px-2 py-1 text-[10px] font-medium text-amber-700 dark:text-amber-300">PROVISIONAL</span>}</div>
     {loading ? <p role="status" className="mt-3 text-sm text-muted-foreground">{t("Loading Technical Insights…")}</p>

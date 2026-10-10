@@ -1,7 +1,7 @@
 """Browser-local monitoring; account-owned persistence remains an explicit scaffold."""
 from datetime import datetime, timedelta, timezone
 from typing import Annotated, Literal
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Response
 from pydantic import BaseModel, Field, field_validator
 from sqlmodel import Session, select
 from src.db.session import get_session
@@ -21,6 +21,18 @@ class MonitoringRequest(BaseModel):
     @classmethod
     def normalize_symbols(cls, values):
         return list(dict.fromkeys(SymbolRequest(symbol=value).symbol for value in values))
+
+
+class IntelligenceRequest(MonitoringRequest):
+    offset: int = Field(default=0, ge=0, le=996)
+    page_size: int = Field(default=12, ge=1, le=12)
+
+
+@router.post('/intelligence')
+def watchlist_intelligence(body: IntelligenceRequest, response: Response, session: Annotated[Session, Depends(get_session)]):
+    from src.services.watchlist_intelligence import intelligence
+    response.headers['Cache-Control'] = 'no-store'
+    return intelligence(session, body.symbols, offset=body.offset, size=body.page_size)
 
 
 class Development(BaseModel):
