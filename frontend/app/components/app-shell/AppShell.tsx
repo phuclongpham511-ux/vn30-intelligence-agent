@@ -61,5 +61,6 @@ function Shell({children}: {children:React.ReactNode}) {
     </div></div>;
 }
 export default function AppShell({children}: {children:React.ReactNode}) {
-  return <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange><LanguageProvider><StockUniverse><Shell>{children}</Shell></StockUniverse></LanguageProvider></ThemeProvider>;
+  const path=usePathname();
+  return <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange><LanguageProvider><StockUniverse enabled={path==='/watchlist'}><Shell>{children}</Shell></StockUniverse></LanguageProvider></ThemeProvider>;
 }

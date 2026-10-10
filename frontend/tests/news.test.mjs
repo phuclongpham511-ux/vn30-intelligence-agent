@@ -34,3 +34,11 @@ test('News starts at Industry and preserves Company links while Hot Topics stays
  assert.equal(readNewsView('').view,'industry');
  assert.equal(readNewsView('?'+newsViewQuery(emptyNewsFilters,'company')).view,'company');
 });
+import {uniqueHotTopics} from '../lib/news.ts';
+test('Hot Topics deduplicates by Story identity while preserving representatives and archive input',()=>{
+ const rows=[{story:{id:'one'},representative_article:{id:'earliest'}},{story:{id:'one'},representative_article:{id:'later'}},{story:{id:'two'}}];
+ const result=uniqueHotTopics(rows);
+ assert.equal(result.length,2);assert.equal(result[0],rows[0]);
+ assert.equal(result[0].representative_article.id,'earliest');
+ assert.equal(rows.length,3);
+});

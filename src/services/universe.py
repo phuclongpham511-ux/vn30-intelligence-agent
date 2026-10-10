@@ -1,7 +1,7 @@
 """Persisted SSI ordinary-equity discovery; acquisition belongs to the worker."""
 from datetime import datetime, timedelta, timezone
 from sqlmodel import Session, select
-from sqlalchemy import func
+from sqlalchemy import case, func
 from src.models import Security, SecurityUniverseState, IndexMembershipState
 from src.news.normalization import normalized, utc
 from src.providers.ssi import SsiMarketDataProvider
@@ -70,22 +70,36 @@ def sync_universe(session: Session, *, provider=None, now=None, force=False):
         return {'status': 'error', 'error': state.last_error}
 
 
-def browse_universe(session: Session, *, q='', exchange=None, offset=0, limit=100, now=None):
+def browse_universe(session: Session, *, q='', exchange=None, index_group=None, symbols=None,
+                    offset=0, limit=100, now=None):
     now = now or datetime.now(timezone.utc)
     state = session.get(SecurityUniverseState, 'ssi')
     query = select(Security).where(Security.is_active == True)
+    groups = index_groups(session, now=now)
+    if index_group:
+        # Missing membership means no evidence of inclusion, never all equities.
+        query = query.where(Security.symbol.in_(groups['groups'].get(index_group, [])))
+    if symbols is not None:
+        query = query.where(Security.symbol.in_(symbols))
     if exchange:
         query = query.where(Security.exchange == exchange)
     if q.strip():
-        query = query.where(Security.search_text.contains(normalized(q), autoescape=True))
+        text = normalized(q)
+        query = query.where(Security.search_text.contains(text, autoescape=True) if text else False)
+    order = [Security.symbol]
+    if q.strip() and normalized(q):
+        text = normalized(q)
+        ticker = func.lower(Security.symbol)
+        order.insert(0, case((ticker == text, 0), (ticker.startswith(text, autoescape=True), 1),
+                             (ticker.contains(text, autoescape=True), 2), else_=3))
     total = session.exec(select(func.count()).select_from(query.subquery())).one()
     total_universe = session.exec(select(func.count()).select_from(Security).where(Security.is_active == True)).one()
     status = ('not_attempted' if not state else 'error' if state.last_error else
         'stale' if not state.last_success_at or now - utc(state.last_success_at) > 2 * REFRESH_INTERVAL else 'healthy')
-    return dict(items=session.exec(query.order_by(Security.symbol).offset(offset).limit(limit)).all(),
+    return dict(items=session.exec(query.order_by(*order).offset(offset).limit(limit)).all(),
         total=total, total_universe=total_universe, offset=offset, limit=limit, status=status,
         last_synced_at=utc(state.last_success_at) if state and state.last_success_at else None,
-        index_groups=index_groups(session, now=now))
+        index_groups=groups)
 
 
 def sync_index_groups(session, *, provider=None, now=None, force=False):

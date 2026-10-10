@@ -56,3 +56,47 @@ def test_index_membership_cache_composes_with_discovery_and_survives_refresh_fai
     assert sync_index_groups(session,provider=SimpleNamespace(get_index_memberships=fail),now=now+timedelta(days=1))['status']=='error'
     cached=client.get('/stocks/universe').json()['index_groups']
     assert cached['groups']['VN100']==['AAA'] and cached['status']=='error'
+
+
+def test_bounded_discovery_composes_index_exchange_search_and_recent_identities(session, client):
+    from src.services.universe import sync_universe, sync_index_groups
+    now = datetime.now(timezone.utc)
+    rows = [SecurityMetadata(symbol=f'X{n:02}', exchange='HNX' if n % 2 else 'HOSE',
+                             company_name='Công ty Alpha') for n in range(32)]
+    rows += [SecurityMetadata(symbol='AAA', exchange='UPCOM', company_name='X01 issuer')]
+    sync_universe(session, provider=SimpleNamespace(get_security_universe=lambda:
+        SecurityUniverse(raw_count=len(rows), exclusions={}, securities=rows)), now=now)
+    sync_index_groups(session, provider=SimpleNamespace(get_index_memberships=lambda:
+        {'VN30': [f'X{n:02}' for n in range(20)], 'VN100': [r.symbol for r in rows]}), now=now)
+    page = client.get('/stocks/universe?limit=10&offset=10&index_group=VN30').json()
+    assert len(page['items']) == 10 and page['total'] == 20 and page['total_universe'] == 33
+    assert page['items'][0]['symbol'] == 'X10'
+    filtered = client.get('/stocks/universe?limit=10&index_group=VN30&exchange=HNX&q=cong%20ty').json()
+    assert filtered['total'] == 10 and all(r['exchange'] == 'HNX' for r in filtered['items'])
+    assert client.get('/stocks/universe?q=X01&limit=6').json()['items'][0]['symbol'] == 'X01'
+    assert client.get('/stocks/universe?q=???').json()['total'] == 0
+    recent = client.get('/stocks/universe?symbols=X01,X02,MISSING&limit=8').json()
+    assert [r['symbol'] for r in recent['items']] == ['X01', 'X02']
+    assert client.get('/stocks/universe?symbols=bad%20ticker').status_code == 422
+    assert client.get('/stocks/universe?symbols=' + ','.join(f'X{n}' for n in range(51))).status_code == 422
+    assert client.get('/stocks/universe?index_group=FAKE').status_code == 422
+    assert client.get('/stocks/universe?index_group=HNX30').json()['total'] == 0
+
+
+def test_index_filter_retains_dated_cache_after_failure_without_inventing_members(session, client):
+    from src.services.universe import sync_universe, sync_index_groups
+    from src.models import Security
+    now = datetime.now(timezone.utc)
+    sync_universe(session, provider=SimpleNamespace(get_security_universe=lambda:
+        SecurityUniverse(raw_count=1, exclusions={}, securities=[SecurityMetadata(symbol='AAA', exchange='HOSE')])), now=now)
+    assert client.get('/stocks/universe?index_group=VN30').json()['items'] == []
+    provider = SimpleNamespace(get_index_memberships=lambda: {'VN30': ['AAA']})
+    sync_index_groups(session, provider=provider, now=now)
+    def fail(): raise TimeoutError()
+    sync_index_groups(session, provider=SimpleNamespace(get_index_memberships=fail), now=now+timedelta(days=1))
+    cached = client.get('/stocks/universe?index_group=VN30').json()
+    assert cached['items'][0]['symbol'] == 'AAA'
+    assert cached['index_groups']['status'] == 'error' and cached['index_groups']['last_synced_at']
+    record = session.get(Security, 'AAA'); record.is_active = False
+    session.add(record); session.commit()
+    assert client.get('/stocks/universe?index_group=VN30').json()['total'] == 0

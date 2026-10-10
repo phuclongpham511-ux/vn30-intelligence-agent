@@ -6,7 +6,23 @@ export function browseSecurities(stocks: Security[], q = '', exchange = '', page
   return { items: matches.slice(page * size, (page + 1) * size), total: matches.length };
 }
 export type IndexGroups = { groups: Record<string,string[]>; status: string; last_synced_at?: string | null; source: string };
-type UniversePage = { items: Security[]; total: number; status: string; last_synced_at?: string | null; index_groups?: IndexGroups };
+export type UniversePage = { items: Security[]; total: number; total_universe: number; offset: number; limit: number; status: string; last_synced_at?: string | null; index_groups?: IndexGroups };
+export type EquityQuery = { query?: string; exchange?: string; group?: string; page?: number; size?: number; symbols?: string[] };
+export function equityPageUrl({query='',exchange='',group='',page=0,size=10,symbols}:EquityQuery={}) {
+  const params=new URLSearchParams({limit:String(size),offset:String(page*size)});
+  if(query.trim())params.set('q',query.trim());
+  if(exchange)params.set('exchange',exchange);
+  if(group)params.set('index_group',group);
+  if(symbols)params.set('symbols',symbols.join(','));
+  return `/api/stocks/universe?${params}`;
+}
+export async function loadEquityPage(url:string,signal?:AbortSignal,fetcher:typeof fetch=fetch):Promise<UniversePage> {
+  const response=await fetcher(url,{signal,cache:'no-store'});
+  if(!response.ok)throw new Error('Equity metadata could not be loaded.');
+  const page:UniversePage=await response.json();
+  if(!Array.isArray(page.items)||!Number.isInteger(page.total)||page.total<0||!Number.isInteger(page.total_universe)||page.total_universe<0||!Number.isInteger(page.offset)||page.offset<0||!Number.isInteger(page.limit)||page.limit<1||page.items.length>page.limit)throw new Error('Incomplete equity universe');
+  return page;
+}
 export async function loadUniverse(fetcher: typeof fetch = fetch, signal?: AbortSignal) {
   const stocks: Security[] = [];
   let metadata: UniversePage;

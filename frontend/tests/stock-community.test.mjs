@@ -44,6 +44,18 @@ test("Stock Detail renders matched public evidence, safe original links and unav
   assert.doesNotMatch(unsafe, /javascript:/);
 });
 
+test('compact Home pulse shows at most three evidence themes with source links and explicit activity semantics',()=>{
+ const data={...pulse,as_of:'2026-10-06T10:30:00Z',themes:Array.from({length:4},(_,n)=>({...pulse.themes[0],id:`theme-${n}`,label:`Observed topic ${n}`,representative_id:thread.id})),sources:[{...pulse.sources[0],status:'stale'}]};
+ const html=render({data,compact:true,showHeading:false});
+ assert.equal((html.match(/<h3/g)||[]).length,3);
+ assert.doesNotMatch(html,/Observed topic 3|All evidence/);
+ assert.match(html,/Discussion activity, not sentiment/);assert.match(html,/Sample evaluated/);
+ assert.match(html,/Sources need a fresh worker check/);assert.match(html,/F319/);
+ assert.equal((html.match(/>Original discussion ↗<\/a>/g)||[]).length,6); // Direct links + bounded disclosed evidence.
+ assert.match(html,/Source coverage/);assert.match(html,/Last successful fetch/);
+ assert.doesNotMatch(html,/0 replies|0 views|FOMO|sentiment score/);
+});
+
 test("Stock Detail distinguishes healthy empty, stale, acquisition error, never checked and read failure", () => {
   assert.match(render({ data: { ...pulse, items: [] } }), /No same-day discussions matched XYZ/);
   for (const [status, message] of [["stale", /may be stale/], ["error", /latest source acquisition failed/],

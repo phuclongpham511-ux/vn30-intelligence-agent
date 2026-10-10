@@ -37,3 +37,8 @@ export function newsQuery(filters: NewsFilters): string {
   }
   return params.toString();
 }
+// Promotion deduplicates only its own list; category archives keep their stories.
+export function uniqueHotTopics<T extends {story:{id:string}}>(rows:T[]):T[] {
+  const seen=new Set<string>();
+  return rows.filter(row=>{if(seen.has(row.story.id))return false;seen.add(row.story.id);return true;});
+}

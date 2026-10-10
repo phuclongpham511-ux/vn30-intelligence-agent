@@ -32,7 +32,7 @@ test('Explore renders a bounded universe with direct research links and no add p
     './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
     './stock/StockSearch':()=>React.createElement('input',{role:'combobox'}),
     'next/navigation':{useRouter:()=>({push:()=>{}})},
-    './stock/StockUniverse':{useStocks:()=>({stocks:rows,loading:false,error:'',status:'healthy'})},
+    '@/lib/useEquityPage':{useEquityPage:()=>({data:{items:rows.slice(0,10),total:60,total_universe:60,offset:0,limit:10,status:'healthy'},loading:false,error:false})},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
     './mascot/Mascot':{MascotState:({children})=>children}});
   const html=renderToStaticMarkup(React.createElement(Picker));
@@ -47,12 +47,24 @@ test('Explore does not present an unknown universe count as zero',()=>{
     './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
     './stock/StockSearch':()=>React.createElement('input',{role:'combobox'}),
     'next/navigation':{useRouter:()=>({push:()=>{}})},
-    './stock/StockUniverse':{useStocks:()=>({stocks:[],loading:true,error:'',status:'not_attempted'})},
+    '@/lib/useEquityPage':{useEquityPage:()=>({data:null,loading:true,error:false})},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
     './mascot/Mascot':{MascotState:({children})=>children}});
   const html=renderToStaticMarkup(React.createElement(Picker));
   assert.match(html,/Universe count unavailable/);
   assert.doesNotMatch(html,/0 Vietnam equities/);
+});
+
+test('an unacquired empty metadata cache keeps universe and result counts unknown',()=>{
+ const Picker=component('../app/components/TickerPicker.tsx',{
+  './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
+  './stock/StockSearch':()=>React.createElement('input',{role:'combobox'}),
+  'next/navigation':{useRouter:()=>({push:()=>{}})},
+  '@/lib/useEquityPage':{useEquityPage:()=>({data:{items:[],total:0,total_universe:0,offset:0,limit:10,status:'not_attempted'},loading:false,error:false})},
+  './ui/button':{Button:({variant,...props})=>React.createElement('button',props)}});
+ const html=renderToStaticMarkup(React.createElement(Picker));
+ assert.match(html,/Universe count unavailable/);assert.match(html,/Equity metadata has not been acquired yet/);
+ assert.doesNotMatch(html,/0 Vietnam equities|of 0 results/);
 });
 
 test('shared stock search initially stays empty instead of rendering the market directory',()=>{
@@ -77,7 +89,7 @@ test('Hot Topics selects only same-cluster images and hides no-image stories',()
 test('Explore preserves its index hero and exposes the requested VN-Index detail link',()=>{
  const Market=component('../app/components/ExploreMarket.tsx',{
   './mascot/Mascot':{MascotIllustration:({size})=>React.createElement('span',{'data-mascot-size':size}),MascotState:({children})=>children},
-  './news/TopStory':()=>null});
+  './news/TopStory':()=>null,'./news/CommunityPulse':()=>null});
  const html=renderToStaticMarkup(React.createElement(Market));
  assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
  assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary|panel flex/);

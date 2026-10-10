@@ -1,12 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {indexMovement,indexAggregate,indexDate} from '../lib/marketIndex.ts';
+import {indexMovement,indexAggregate,indexDate,indexDisplayStatus} from '../lib/marketIndex.ts';
 test('index movement maps only observed direction, preserving unavailable and zero',()=>{
  assert.equal(indexMovement({change:5.88}).mascot,'marketUp');
  assert.equal(indexMovement({change:-3}).mascot,'marketDown');
  assert.equal(indexMovement({change:0}).mascot,'marketNeutral');
  assert.equal(indexMovement({change:null}).mascot,'marketUncertain');
  assert.equal(indexMovement(null).label,'Direction unavailable');
+});
+
+test('index freshness expires in an open browser, including Vietnam midnight, without changing observed values',()=>{
+ const now=new Date('2026-10-09T03:00:00Z');
+ const fresh={status:'fresh',session:'active',snapshot:{trading_date:'2026-10-09',updated_at:'2026-10-09T02:59:30Z'}};
+ assert.equal(indexDisplayStatus(fresh,false,now),'fresh');
+ assert.equal(indexDisplayStatus(fresh,true,now),'stale');
+ assert.equal(indexDisplayStatus({...fresh,status:'stale'},false,now),'stale');
+ assert.equal(indexDisplayStatus(fresh,false,new Date('2026-10-09T03:02:00Z')),'stale');
+ const close={...fresh,session:'closed',snapshot:{trading_date:'2026-10-09',updated_at:'2026-10-09T07:59:00Z'}};
+ assert.equal(indexDisplayStatus(close,false,new Date('2026-10-09T10:00:00Z')),'fresh');
+ assert.equal(indexDisplayStatus(close,false,new Date('2026-10-09T17:00:01Z')),'stale');
+ assert.equal(indexDisplayStatus(null,false,now),'unavailable');
+ assert.equal(indexDisplayStatus({...fresh,snapshot:{...fresh.snapshot,updated_at:'invalid'}},false,now),'stale');
+ assert.equal(indexDisplayStatus({...fresh,snapshot:{...fresh.snapshot,updated_at:'2026-10-09T03:01:00Z'}},false,now),'stale');
 });
 
 test('index aggregate formatting preserves null and real zero with explicit units',()=>{

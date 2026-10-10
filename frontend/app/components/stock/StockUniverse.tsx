@@ -4,7 +4,7 @@ import type { Security } from "@/lib/types";
 import { loadUniverse, type IndexGroups } from "@/lib/universe";
 type Universe = { groups: IndexGroups; stocks: Security[]; loading: boolean; error: string; status: string; lastSynced: string | null; refresh: () => void };
 const Context = createContext<Universe | null>(null);
-export function StockUniverse({ children }: { children: React.ReactNode }) {
+export function StockUniverse({ children, enabled=true }: { children: React.ReactNode; enabled?: boolean }) {
   const [groups, setGroups] = useState<IndexGroups>({groups:{},status:"not_attempted",source:"SSI:FastConnect"});
   const [stocks, setStocks] = useState<Security[]>([]);
   const [status, setStatus] = useState('not_attempted');
@@ -14,6 +14,7 @@ export function StockUniverse({ children }: { children: React.ReactNode }) {
   const [version, setVersion] = useState(0);
   const refresh = useCallback(() => setVersion(value => value + 1), []);
   useEffect(() => {
+    if (!enabled) return;
     const controller = new AbortController();
     setLoading(true); setError("");
     loadUniverse(fetch, controller.signal).then(result => {
@@ -21,7 +22,7 @@ export function StockUniverse({ children }: { children: React.ReactNode }) {
     }).catch(error => { if (error.name !== "AbortError") setError("Could not load the equity universe. Please retry."); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [version]);
+  }, [version, enabled]);
   return <Context.Provider value={{ groups, stocks, loading, error, status, lastSynced, refresh }}>{children}</Context.Provider>;
 }
 export function useStocks() { const value = useContext(Context); if (!value) throw new Error("StockUniverse is required"); return value; }

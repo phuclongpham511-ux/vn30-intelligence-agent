@@ -531,3 +531,28 @@ are filtered cheaply at read time; a 96-hour derivative retention buffer support
 ordinary pagination snapshots. Cache caps at 10,000 Stories; full original evidence
 stays stored. Raw /news/latest, unillustrated /news/top and detail remain evidence
 reads, not low-cost visual cache routes. See docs/ADAPTIVE_NEWS_INGESTION_V1.md.
+
+### Explore / Home V2 — 2026-10-10
+
+Home (`/`) now places a prominent sourced VN-Index summary above compact Hot
+Topics and Community Pulse, with direct section links and ten-row equity browsing.
+The index keeps observed point/percent direction, evaluated trading date, source
+time and session; browser-side age checks prevent an old active snapshot or a
+previous Vietnam calendar day's value from remaining fresh. Missing aggregates
+stay unavailable. Existing Woofi logo and mascot assets are reused.
+
+Explore uses one bounded cached `/stocks/universe` page per request. Exchange,
+index membership, company/ticker query and offset compose on the server. Search
+ranks exact/prefix ticker matches first and requests at most six matches; empty
+queries show at most eight browser-local recent selections. Individual removal,
+Clear history, unavailable saved tickers and keyboard selection are retained.
+The full-universe context loads only on Watchlist, preserving its existing flow.
+No discovery read acquires history or refreshes SSI membership.
+
+Hot Topics deduplicates only its promotion list by Story identity and keeps the
+existing earliest representative, publisher evidence and same-Story source image
+rules. News category archives retain those Stories. Community reuses the existing
+persisted Today/Last 24 hours APIs, displays at most three extractive themes,
+original discussion links, source coverage/freshness and activity counts distinct
+from sentiment. Its complete News view and Stock Detail/Watchlist default renderer
+remain available. See docs/EXPLORE_HOME_V2.md for validation and data limits.

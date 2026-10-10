@@ -59,9 +59,19 @@ def stocks(session: Session = Depends(get_session)):
 @router.get('/universe')
 def universe(q: str = Query(default='', max_length=120),
              exchange: Literal['HOSE', 'HNX', 'UPCOM'] | None = None,
+             index_group: Literal['VN30', 'VN100', 'HNX30'] | None = None,
+             symbols: str | None = Query(default=None, max_length=1049),
              offset: int = Query(default=0, ge=0), limit: int = Query(default=100, ge=1, le=500),
              session: Session = Depends(get_session)):
-    return browse_universe(session, q=q, exchange=exchange, offset=offset, limit=limit)
+    requested = None
+    if symbols is not None:
+        from src.providers.ssi.live import normalize_symbols
+        try:
+            requested = normalize_symbols(symbols)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from None
+    return browse_universe(session, q=q, exchange=exchange, index_group=index_group,
+                           symbols=requested, offset=offset, limit=limit)
 
 
 @router.get('/index-snapshot')
