@@ -13,17 +13,43 @@ from src.schemas.stocks import SymbolRequest
 from src.services.technical_api import (LocalEvidenceReader, LocalEvidenceInvalid,
     TechnicalRequestBudget, TechnicalAPIResponse, TechnicalAPIDiagnostic,
     diagnostic, evaluate_local_packet)
+from src.services.technical_eod_store import TechnicalOperationalAPIPacket, read_operational_packet
 
 router = APIRouter(prefix='/technical', tags=['technical'])
+
+
+def get_evaluation_clock():
+    return datetime.now(timezone.utc)
+
+
+@router.get('/{ticker}/daily/operational', response_model=TechnicalOperationalAPIPacket | TechnicalAPIDiagnostic)
+def operational_daily(ticker: str, request: Request, response: Response,
+          requested_session: date = Query(alias='session'), db: Session = Depends(get_session),
+          cutoff: datetime = Depends(get_evaluation_clock)):
+    if (set(request.query_params) != {'session'} or len(request.query_params.getlist('session')) != 1
+            or request.query_params['session'] != requested_session.isoformat()):
+        raise HTTPException(422, 'Only one YYYY-MM-DD session parameter is supported')
+    try:
+        symbol=SymbolRequest(symbol=ticker).symbol
+    except ValueError:
+        raise HTTPException(422, 'Invalid ticker') from None
+    try:
+        if cutoff.utcoffset() is None:
+            raise ValueError('Aware server clock required')
+        cutoff=cutoff.astimezone(timezone.utc)
+        if requested_session >= cutoff.astimezone(ZONE).date():
+            response.status_code=422
+            return diagnostic(symbol,requested_session,cutoff,'session_not_completed_or_invalid_generation_time',status='INVALID_REQUEST')
+        return read_operational_packet(db,symbol,requested_session,cutoff)
+    except Exception:
+        response.status_code=503
+        return diagnostic(symbol,requested_session,datetime.now(timezone.utc),
+            'technical_eod_infrastructure_failure',status='INFRASTRUCTURE_FAILURE')
 
 
 @lru_cache
 def get_local_evidence_reader():
     return LocalEvidenceReader(Path(__file__).resolve().parents[1] / 'runtime' / 'technical_eod_evidence')
-
-
-def get_evaluation_clock():
-    return datetime.now(timezone.utc)
 
 
 @lru_cache

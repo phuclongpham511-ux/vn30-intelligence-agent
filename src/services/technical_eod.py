@@ -83,13 +83,21 @@ def _observation_time():
     return datetime.now(timezone.utc)
 
 
-def read_eod_history(ticker, provider, start, end) -> EODHistoryRead:
+def fingerprint_eod_observations(observations):
+    """Logical read content fingerprint, not a SSI vendor-vintage identifier."""
+    import json
+    canonical = json.dumps([o.model_dump(mode='json') for o in sorted(observations,
+        key=lambda o: o.observation_time)], sort_keys=True, allow_nan=False)
+    return sha256(canonical.encode()).hexdigest()
+
+
+def read_eod_history(ticker, provider, start, end, *, fresh=False) -> EODHistoryRead:
     """Reuse the normalized/cache-backed reader; no transport or persistence here."""
     if type(start) is not date or type(end) is not date or not 0 <= (end-start).days <= MAX_HISTORY_DAYS:
         raise ValueError('EOD acquisition requires an ordered bounded date range')
     if provider.source != 'SSI:FastConnect':
         raise ProviderError('Technical EOD requires the qualified SSI daily source')
-    bars = history(ticker, provider, start, end)
+    bars = provider.get_history_fresh(ticker, start, end) if fresh else history(ticker, provider, start, end)
     receipt = _observation_time()
     if len(bars) > MAX_SESSION_RECORDS:
         raise ValueError('Bounded EOD history record limit exceeded')
@@ -98,11 +106,8 @@ def read_eod_history(ticker, provider, start, end) -> EODHistoryRead:
         availability_basis='end_of_day_assumption', source=bar.source, payload=bar)
         for bar in bars)
     # Logical content fingerprint, NOT a SSI vendor-vintage ID.
-    import json
-    canonical = json.dumps([o.model_dump(mode='json') for o in sorted(observations,
-        key=lambda o: o.observation_time)], sort_keys=True, allow_nan=False)
     return EODHistoryRead(observations=observations, observed_at=receipt,
-        source_version=sha256(canonical.encode()).hexdigest())
+        source_version=fingerprint_eod_observations(observations))
 
 
 def summarize_eod_result(result: TechnicalDailySignalPacket | TechnicalEODDiagnostic) -> dict:
@@ -164,12 +169,13 @@ class _CAContextReader:
             return CorporateActionContext(as_of=as_of, reason='source_unavailable')
 
 
-def evaluate_technical_eod_packet(ticker, trading_session, *, evaluation_as_of,
+def _evaluate_technical_eod_packet(ticker, trading_session, *, evaluation_as_of,
                                   generated_at, db_session, provider=None,
                                   history_read: EODHistoryRead | None = None,
                                   calendar: VerifiedSessionCalendar | CalendarEvidence | None = None,
                                   history_start: date | None = None,
-                                  corporate_actions=None) -> TechnicalDailySignalPacket | TechnicalEODDiagnostic:
+                                  corporate_actions=None,
+                                  _provisional=None) -> TechnicalDailySignalPacket | TechnicalEODDiagnostic:
     """One explicit completed stock-day; no new calendar, API, archive or worker.
 
     For live reads, acquire read_eod_history FIRST and choose the explicit as-of
@@ -273,15 +279,32 @@ def evaluate_technical_eod_packet(ticker, trading_session, *, evaluation_as_of,
         current = next((o for o in observations if o.payload.date==target),None)
         completion = None
         if current is not None:
-            proofs = [p for p in known_completion if p.session==target]
-            if len(proofs)!=1:
-                return diagnostic('INCOMPLETE_EVIDENCE', 'eod_completion_proof_unavailable_or_duplicate')
-            completion=proofs[0]
-            if (not completion_matches_bar(completion,current.payload,history_read.source_version,cutoff,security.exchange)
-                    or _aware(completion.observed_at)>receipt):
-                return diagnostic('INCOMPLETE_EVIDENCE', 'eod_completion_evidence_invalid_or_not_available')
-            summary.update(completion_assurance='VERIFIED',completion_evidence=completion.model_dump(mode='json'),
-                completion_verification_basis='caller_attestation_not_automatic_ssi_finalization')
+            if _provisional is None:
+                proofs = [p for p in known_completion if p.session==target]
+                if len(proofs)!=1:
+                    return diagnostic('INCOMPLETE_EVIDENCE', 'eod_completion_proof_unavailable_or_duplicate')
+                completion=proofs[0]
+                if (not completion_matches_bar(completion,current.payload,history_read.source_version,cutoff,security.exchange)
+                        or _aware(completion.observed_at)>receipt):
+                    return diagnostic('INCOMPLETE_EVIDENCE', 'eod_completion_evidence_invalid_or_not_available')
+                summary.update(completion_assurance='VERIFIED',completion_evidence=completion.model_dump(mode='json'),
+                    completion_verification_basis='caller_attestation_not_automatic_ssi_finalization')
+            else:
+                from .provisional_eod import ProvisionalEODAssessment
+                if (not isinstance(_provisional, ProvisionalEODAssessment)
+                        or _provisional.status != 'PROVISIONAL'
+                        or _provisional.ticker != symbol or _provisional.session != target
+                        or _provisional.source_version != history_read.source_version
+                        or _provisional.calendar_version != calendar.version
+                        or _aware(_provisional.second_received_at) > cutoff):
+                    return diagnostic('INCOMPLETE_EVIDENCE', 'provisional_attestation_mismatch')
+                summary.update(completion_assurance='PROVISIONAL',
+                    provisional_policy_version=_provisional.policy_version,
+                    provisional_publication_source=_provisional.publication_source,
+                    provisional_first_received_at=_provisional.first_received_at.isoformat(),
+                    provisional_second_received_at=_provisional.second_received_at.isoformat())
+        elif _provisional is not None:
+            return diagnostic('INCOMPLETE_EVIDENCE','provisional_target_bar_unavailable')
         elif target==cutoff.astimezone(ZONE).date():
             return diagnostic('INCOMPLETE_EVIDENCE','eod_completion_observation_unavailable')
         else:
@@ -347,6 +370,7 @@ def evaluate_technical_eod_packet(ticker, trading_session, *, evaluation_as_of,
                 'current_security_metadata_not_historical_listing_vintage') +
                 (('reader_cache_fetch_time_unavailable',) if fetched is None else ()) +
                 (('calendar_continuity_unresolved',) if blocked_days else ()) +
+                (('operational_provisional_not_finality_verified',) if _provisional is not None else ()) +
                 ('prior_daily_availability_assumed_not_verified',))
         snapshot = dict(calendar=[d.isoformat() for d in days], bars=raw_rows, provenance=provenance,
             is_fixture=history_read.is_fixture, episode_history_boundary='unknown')
@@ -370,3 +394,17 @@ def evaluate_technical_eod_packet(ticker, trading_session, *, evaluation_as_of,
         return diagnostic('INCOMPLETE_EVIDENCE', 'invalid_or_incomplete_eod_evidence')
     except Exception:
         return diagnostic('INFRASTRUCTURE_FAILURE', 'technical_eod_infrastructure_failure')
+
+
+def evaluate_technical_eod_packet(ticker, trading_session, *, evaluation_as_of,
+                                  generated_at, db_session, provider=None,
+                                  history_read: EODHistoryRead | None = None,
+                                  calendar: VerifiedSessionCalendar | CalendarEvidence | None = None,
+                                  history_start: date | None = None,
+                                  corporate_actions=None) -> TechnicalDailySignalPacket | TechnicalEODDiagnostic:
+    """Unchanged VERIFIED consumer boundary; provisional inputs are not accepted."""
+    return _evaluate_technical_eod_packet(ticker, trading_session,
+        evaluation_as_of=evaluation_as_of, generated_at=generated_at,
+        db_session=db_session, provider=provider, history_read=history_read,
+        calendar=calendar, history_start=history_start,
+        corporate_actions=corporate_actions)

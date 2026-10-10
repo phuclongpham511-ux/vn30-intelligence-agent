@@ -90,7 +90,7 @@ def test_unified_worker_persisted_restart_cadence_and_source_failure(tmp_path, m
     engine = create_engine(url); create_tables(engine)
     clock[0] += timedelta(minutes=1)
     result = ingest_data.run_cycle(engine)
-    assert result == {'universe': {'status': 'skipped'}, 'groups': {'status': 'skipped'}, 'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}}
+    assert result == {'universe': {'status': 'skipped'}, 'groups': {'status': 'skipped'}, 'news': {}, 'community': {SOURCE_ID: {'status': 'skipped'}}, 'technical_eod': {'status': 'IDLE'}}
     assert sorted(calls) == ['bad', 'community', 'good']
     with Session(engine) as session:
         assert utc(session.get(NewsSourceState, 'good').last_success_at) == NOW

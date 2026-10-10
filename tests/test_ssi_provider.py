@@ -59,6 +59,20 @@ def test_pagination_clipping_sorting_duplicates_and_cache(make_provider):
     assert len(requests)==3
 
 
+def test_fresh_history_bypasses_five_minute_cache(make_provider):
+    requests=[]
+    def respond(request):
+        requests.append(dict(request.url.params))
+        return httpx.Response(200,json={'data':[row()] if request.url.params['pageIndex']=='1' else []})
+    provider=make_provider(respond)
+    start,end=date(2024,9,19),date(2024,9,20)
+    assert len(provider.get_history('XYZ',start,end))==1
+    assert len(provider.get_history('XYZ',start,end))==1
+    assert len(requests)==2
+    assert len(provider.get_history_fresh('XYZ',start,end))==1
+    assert len(requests)==4
+
+
 def test_conflicting_duplicate_rejected(make_provider):
     provider=make_provider(lambda request:httpx.Response(200,json={'data':[row(),row(close='19700')]}))
     with pytest.raises(ProviderError):

@@ -13,7 +13,7 @@ from time import monotonic
 from typing import Annotated, Literal
 from urllib.parse import urlsplit, parse_qsl
 
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, model_validator
 from sqlalchemy import func
 from sqlmodel import select
 
@@ -31,7 +31,7 @@ MAX_LOCAL_BYTES = 4 * 1024 * 1024
 LIMITATIONS = ('source_receipt_not_certified_historical_vendor_vintage',
               'local_operational_evidence_required_not_acquired_by_api')
 OPAQUE = re.compile(r'^[A-Za-z0-9][A-Za-z0-9_.:-]{0,255}$')
-PRIVATE = re.compile(r'(?i)([a-z]:[\\/]|\\\\|(?:^|\s)/(?:home|users|tmp|etc|var)/|'
+PRIVATE = re.compile(r'(?i)((?<![a-z0-9])[a-z]:[\\/]|\\\\|(?:^|\s)/(?:home|users|tmp|etc|var)/|'
                      r'\b(?:api[_-]?key|api[_-]?secret|token|password|authorization)\s*[=:])')
 SECRET_KEYS = {'token', 'access_token', 'api_key', 'apikey', 'secret', 'password', 'authorization'}
 
@@ -162,6 +162,12 @@ class TechnicalAPIPacket(EODModel):
     kind: Literal['packet'] = 'packet'
     safe_to_display_as_verified: Literal[True] = True
     packet: TechnicalDailySignalPacket
+
+    @model_validator(mode='after')
+    def require_verified_completion(self):
+        if self.packet.data_provenance.get('completion_assurance') != 'VERIFIED':
+            raise ValueError('Verified API packet requires verified completion assurance')
+        return self
 
 
 TechnicalAPIResponse = Annotated[TechnicalAPIPacket | TechnicalAPIDiagnostic, Field(discriminator='kind')]

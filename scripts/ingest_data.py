@@ -9,12 +9,13 @@ from src.news.registry import load_sources
 from src.news.service import ingest_cycle
 from src.community.daily import ingest_cycle as ingest_community
 from src.services.universe import sync_universe, sync_index_groups
+from src.services.technical_eod_store import run_technical_eod_cycle
 
 
 def run_cycle(engine, *, registry=None, force_news=False, include_news=True):
     results = {}
     # Separate sessions/transactions: a failed domain cannot poison the other.
-    for domain in ('universe', 'groups', 'news', 'community'):
+    for domain in ('universe', 'groups', 'news', 'community', 'technical_eod'):
         if domain == 'news' and not include_news:
             continue
         try:
@@ -22,14 +23,15 @@ def run_cycle(engine, *, registry=None, force_news=False, include_news=True):
                 results[domain] = (sync_universe(session) if domain == 'universe' else
                     sync_index_groups(session) if domain == 'groups' else
                     ingest_cycle(session, load_sources(registry), force=force_news)
-                    if domain == 'news' else ingest_community(engine))
+                    if domain == 'news' else ingest_community(engine) if domain=='community'
+                    else run_technical_eod_cycle(engine))
         except Exception as exc:
             results[domain] = {'status': 'error', 'error': type(exc).__name__}
     return results
 
 
 def failed(results):
-    return any(domain.get('status') == 'error' or any(
+    return any(domain.get('status') in ('error','STOPPED','INCOMPLETE_EVIDENCE','LEASE_LOST') or any(
         isinstance(row, dict) and row.get('status') == 'error' for row in domain.values()
     ) for domain in results.values())
 

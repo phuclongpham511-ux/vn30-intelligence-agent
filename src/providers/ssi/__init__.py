@@ -238,6 +238,10 @@ class SsiMarketDataProvider:
 
     @lru_cache(maxsize=128)
     def _history(self, symbol, start, end, today, bucket):
+        return self._fetch_history(symbol, start, end, today)
+
+    def _fetch_history(self, symbol, start, end, today):
+        """Same bounded normalized transport, with no process-cache lookup."""
         def fetch():
             first, last = daily_bounds(start, end)
             bars = {}
@@ -278,6 +282,18 @@ class SsiMarketDataProvider:
             return []
         # Return copies so callers cannot mutate the cached canonical bars.
         return [bar.model_copy() for bar in self._history(symbol, start, end, today, int(time.time() // 300))]
+
+    def get_history_fresh(self, symbol, start, end):
+        """Force a new authenticated bounded OHLC request for operational receipts."""
+        self._ready()
+        symbol = self._symbol(symbol)
+        if not symbol or start > end or (end - start).days > 730:
+            raise ProviderError("Use a valid symbol and an ordered range of at most 730 days.")
+        today = self._today()
+        end = min(end, today - timedelta(days=1))
+        if start > end:
+            return []
+        return [bar.model_copy() for bar in self._fetch_history(symbol, start, end, today)]
 
     def get_latest(self, symbol):
         today = self._today()

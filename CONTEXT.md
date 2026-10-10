@@ -430,6 +430,33 @@ The user-facing product is **Woofi**. Repository and internal technical names re
 
 Product chrome supports English and Vietnamese through a typed frontend dictionary/context. A saved browser preference takes precedence; otherwise Vietnamese browser locales select Vietnamese and other locales select English. Headlines, excerpts, Community themes/evidence, company and publisher names, ticker symbols and quotes retain their source language. Localization changes presentation, never numerical ground truth or research semantics.
 
+### Technical EOD operational persistence — 2026-10-10
+
+The owner reports direct SSI permission for free authorized API use, historical
+storage/retention, derived analytics, third-party redistribution and commercial
+use within Woofi. This is owner-reported authorization, not independently
+reviewed legal documentation; the former assumed storage-right blocker is removed.
+
+Qualified PROVISIONAL EOD jobs now use the configured database and canonical
+ingestion worker. Only metadata receipts persist before acceptance. Independent
+HOSE calendar/publication evidence, matching fresh authenticated SSI reads at
+least six hours apart, and a second request at least 24 hours after the qualified
+publication remain mandatory. Atomic versioned snapshots preserve normalized
+evidence and existing D1/D4/D5 outputs. Later source revisions retract affected
+provisional outputs; corrected versions require requalification. Expiring fenced
+leases and durable due times support restart recovery and cache-first operation.
+
+The read-only `/technical/{ticker}/daily/operational?session=YYYY-MM-DD` endpoint
+serves accepted PROVISIONAL packets with explicit session, assurance, receipts,
+version and revision-check freshness, or unavailable/incomplete diagnostics.
+HTTP does not acquire SSI data or score packets. The separate VERIFIED gate is
+unchanged. Operational tables are excluded from verified benchmarks and
+certification; this slice does not reopen calibration or protected historical cases.
+Real FPT data produced a durable accepted provisional packet for 2026-10-08.
+The 24-hour publication gate prevents same-day provisional admission. Future
+qualified-session acquisition, wider ticker scheduling, process supervision and
+Stock Detail integration remain rollout work; see docs/TECHNICAL_EOD_PERSISTENCE_V1.md.
+
 News tabs display Industry → Company → Market → Community Pulse (Ngành → Doanh nghiệp → Thị trường → Cộng đồng). The visible Market label replaces Market Brief; internal `briefing` / `MARKET_BRIEF` identities remain unchanged. Category tabs identify the view without repeated category headings below them.
 
 
