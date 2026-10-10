@@ -1,1 +1,6 @@
 * text=auto eol=lf
+
+# Qualified evidence is pinned to its original bytes, including CRLF endings.
+# Preserve it without text normalization or automatic content merging.
+docs/TECHNICAL_V1_HOSE_PUBLICATION_2026-10-08.json binary
+docs/TECHNICAL_V1_FPT_SECURITY_RECEIPT_2026-10-09.json binary
