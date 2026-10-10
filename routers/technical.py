@@ -13,13 +13,35 @@ from src.schemas.stocks import SymbolRequest
 from src.services.technical_api import (LocalEvidenceReader, LocalEvidenceInvalid,
     TechnicalRequestBudget, TechnicalAPIResponse, TechnicalAPIDiagnostic,
     diagnostic, evaluate_local_packet)
-from src.services.technical_eod_store import TechnicalOperationalAPIPacket, read_operational_packet
+from src.services.technical_eod_store import (TechnicalOperationalAPIPacket, TechnicalOperationalLatestDiagnostic,
+    read_operational_packet, read_latest_operational_packet)
 
 router = APIRouter(prefix='/technical', tags=['technical'])
 
 
 def get_evaluation_clock():
     return datetime.now(timezone.utc)
+
+
+@router.get('/{ticker}/daily/operational/latest',
+    response_model=TechnicalOperationalAPIPacket | TechnicalOperationalLatestDiagnostic)
+def latest_operational_daily(ticker: str, request: Request, response: Response,
+        db: Session = Depends(get_session), cutoff: datetime = Depends(get_evaluation_clock)):
+    response.headers['Cache-Control'] = 'no-store'
+    if request.query_params:
+        raise HTTPException(422, 'Latest accepted lookup supports no query parameters')
+    try:
+        symbol = SymbolRequest(symbol=ticker).symbol
+    except ValueError:
+        raise HTTPException(422, 'Invalid ticker') from None
+    try:
+        return read_latest_operational_packet(db,symbol,cutoff)
+    except Exception:
+        response.status_code = 503
+        return TechnicalOperationalLatestDiagnostic(ticker=symbol,
+            evaluation_as_of=datetime.now(timezone.utc), readiness_status='INFRASTRUCTURE_FAILURE',
+            reason_codes=('technical_eod_infrastructure_failure',),
+            missing_evidence=('accepted_operational_snapshot',))
 
 
 @router.get('/{ticker}/daily/operational', response_model=TechnicalOperationalAPIPacket | TechnicalAPIDiagnostic)

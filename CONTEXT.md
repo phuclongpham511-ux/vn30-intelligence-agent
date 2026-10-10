@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+### Technical Stock Detail integration — 2026-10-10
+
+Stock Detail shows delayed PROVISIONAL Technical Insights above the chart.
+Its latest lookup selects persisted, actually accepted sessions; a later pending
+job does not hide accepted evidence, while retraction withholds the withdrawn
+result without silently falling back. Unknown coverage has no invented date.
+The evaluated session and source-check timestamp remain visible. Up to three
+unchanged D5 insights, a genuine no-meaningful-change result, or explicit
+incomplete/unavailable states are shown. Minute/focus revalidation reads cached
+backend evidence only, clears old results and rejects obsolete requests.
+PROVISIONAL stays separate from VERIFIED; D1/D4/D5 algorithms are unchanged.
+See docs/TECHNICAL_STOCK_DETAIL_V1.md.
+
 ## Product purpose
 
 Woofi helps active retail investors identify which changes deserve attention across Vietnamese equities.

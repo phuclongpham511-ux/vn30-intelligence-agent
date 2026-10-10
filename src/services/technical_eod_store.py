@@ -22,11 +22,35 @@ from .provisional_eod import (POLICY_VERSION, AuthenticatedSsiReadReceipt,
     capture_fresh_ssi_read, compact_ssi_receipt, assess_provisional_eod,
     evaluate_provisional_technical_eod_packet)
 from .technical_eod import EODModel, MAX_HISTORY_DAYS
-from .technical_api import MAX_LOCAL_BYTES, BoundedCorporateActionReader, diagnostic, public_payload
+from .technical_api import MAX_LOCAL_BYTES, BoundedCorporateActionReader, TechnicalAPIDiagnostic, diagnostic, public_payload
 
 LEASE_TIME = timedelta(minutes=10)
 RECHECK_TIME = timedelta(hours=24)
 MAX_JOBS = 128
+
+
+class TechnicalOperationalLatestDiagnostic(TechnicalAPIDiagnostic):
+    """Latest lookup may have no known session; never manufacture a date."""
+    requested_session: date | None = None
+
+
+def read_latest_operational_packet(session, ticker, cutoff):
+    cutoff = aware(cutoff)
+    symbol = SymbolRequest(symbol=ticker).symbol
+    # Prefer the latest session that was actually accepted, including its
+    # retracted state. A new pending job must not hide an older accepted result;
+    # a withdrawn accepted result must not silently resurrect an older packet.
+    job = session.exec(select(TechnicalEODJob).where(TechnicalEODJob.ticker == symbol)
+        .order_by((TechnicalEODJob.version > 0).desc(), TechnicalEODJob.trading_session.desc())
+        .limit(1)).first()
+    if job is None:
+        return TechnicalOperationalLatestDiagnostic(ticker=symbol, evaluation_as_of=cutoff,
+            readiness_status='INCOMPLETE_EVIDENCE', reason_codes=('missing_persisted_eod_snapshot',),
+            missing_evidence=('accepted_operational_snapshot',))
+    from src.evaluation.benchmark.inputs import ZONE
+    if job.trading_session >= cutoff.astimezone(ZONE).date():
+        return diagnostic(symbol,job.trading_session,cutoff,'session_not_completed_or_invalid_generation_time')
+    return read_operational_packet(session,symbol,job.trading_session,cutoff)
 
 
 class ProvisionalEODDefinition(EODModel):
