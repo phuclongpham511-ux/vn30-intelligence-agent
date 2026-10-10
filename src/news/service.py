@@ -8,6 +8,7 @@ from src.news.models import NewsArticle, NewsStory, NewsSourceState
 from src.news.matching import LexicalStoryMatcher
 from src.news.normalization import canonical_url, cafef_article_suffix, clean_title, digest, normalized, utc
 from src.news.tagging import Tagger
+from src.services.ingestion_owner import collector_owned
 
 
 def story_score(story: NewsStory, now: datetime) -> float:
@@ -168,6 +169,7 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
     return result
 
 
+@collector_owned
 def ingest_cycle(session: Session, sources, *, fetch=None, now=None, force=False,
                  matcher=None, tagger=None, config=None):
     """Claim in the database, fetch at most two feeds, serialize incremental writes."""

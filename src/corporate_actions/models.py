@@ -4,7 +4,7 @@ from enum import StrEnum
 from typing import Literal
 from urllib.parse import urlsplit
 
-from pydantic import ConfigDict, Field, field_validator, model_validator
+from pydantic import ConfigDict, Field, field_validator, model_serializer, model_validator
 from src.schemas.data import DataModel
 from src.schemas.stocks import SymbolRequest
 
@@ -48,6 +48,9 @@ class CorporateActionNotice(ActionModel):
     source_id: str | None = None
     component_id: str | None = None
     source_revision: str | None = None
+    source_updated_at: datetime | None = None
+    source_title: str | None = None
+    evidence_text: str | None = Field(default=None, max_length=6000)
     terms: ActionTerms | None = None
     verified: bool = False
     withdrawn: bool = False
@@ -59,7 +62,17 @@ class CorporateActionNotice(ActionModel):
     def normalized_symbol(cls, value):
         return SymbolRequest(ticker=value).symbol
 
-    @field_validator('announced_at')
+    @model_serializer(mode='wrap')
+    def preserve_legacy_shape(self, handler):
+        # Absent extensions must not alter legacy content hashes/packet shapes.
+        # Explicit nulls in stored WIP remain explicit; source text is unchanged.
+        output = handler(self)
+        for field in ('source_updated_at', 'source_title', 'evidence_text'):
+            if field not in self.model_fields_set:
+                output.pop(field, None)
+        return output
+
+    @field_validator('announced_at', 'source_updated_at')
     @classmethod
     def announcement_timezone(cls, value):
         return aware_utc(value) if value is not None else None

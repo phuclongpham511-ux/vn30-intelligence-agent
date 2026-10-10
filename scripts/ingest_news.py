@@ -14,6 +14,7 @@ from src.news.adapters import acquire
 from src.news.registry import load_sources
 from src.news.normalization import utc
 from src.news.service import ingest_cycle
+from src.services.ingestion_owner import collector_owner
 
 
 def main():
@@ -25,6 +26,15 @@ def main():
     args = parser.parse_args()
     if args.force and args.watch:
         parser.error('--force cannot be combined with --watch')
+    engine = get_engine()
+    with collector_owner(engine) as owned:
+        if not owned:
+            print(json.dumps({'status': 'collector_busy'}), flush=True)
+            return 1
+        return _run_owned(args, engine)
+
+
+def _run_owned(args, engine):
     if args.smoke:
         failed = False
         for source in load_sources(args.registry):
@@ -43,10 +53,10 @@ def main():
                 failed = True
                 print(json.dumps({'source': source.source_id, 'status': 'error', 'error': type(exc).__name__}))
         return 1 if failed else 0
-    create_tables()
+    create_tables(engine)
     try:
         while True:
-            with Session(get_engine()) as session:
+            with Session(engine) as session:
                 result = ingest_cycle(session, load_sources(args.registry), force=args.force)
                 print(json.dumps(result), flush=True)
             if not args.watch:

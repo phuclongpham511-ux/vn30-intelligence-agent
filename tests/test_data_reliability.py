@@ -142,12 +142,12 @@ def test_watch_continues_after_failure_and_wait_is_interruptible(session, monkey
     assert len(calls) == 2 and 'RuntimeError' in capsys.readouterr().out
 
 
-def test_worker_entrypoint_handles_keyboard_interrupt_and_restores_signal(monkeypatch):
+def test_worker_entrypoint_handles_keyboard_interrupt_and_restores_signal(session, monkeypatch):
     import signal
     original = signal.getsignal(signal.SIGTERM)
     monkeypatch.setattr('sys.argv', ['ingest_data', '--watch'])
     monkeypatch.setattr(ingest_data, 'create_tables', lambda: None)
-    monkeypatch.setattr(ingest_data, 'get_engine', lambda: None)
+    monkeypatch.setattr(ingest_data, 'get_engine', lambda: session.get_bind())
     def interrupt(*args, **kwargs): raise KeyboardInterrupt
     monkeypatch.setattr(ingest_data, 'run', interrupt)
     assert ingest_data.main() == 0

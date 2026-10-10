@@ -10,8 +10,10 @@ from src.news.service import ingest_cycle
 from src.community.daily import ingest_cycle as ingest_community
 from src.services.universe import sync_universe, sync_index_groups
 from src.services.technical_eod_store import run_technical_eod_cycle
+from src.services.ingestion_owner import collector_owned, collector_owner
 
 
+@collector_owned
 def run_cycle(engine, *, registry=None, force_news=False, include_news=True):
     results = {}
     # Separate sessions/transactions: a failed domain cannot poison the other.
@@ -31,12 +33,22 @@ def run_cycle(engine, *, registry=None, force_news=False, include_news=True):
 
 
 def failed(results):
+    if results.get('status') == 'collector_busy':
+        return True
     return any(domain.get('status') in ('error','STOPPED','INCOMPLETE_EVIDENCE','LEASE_LOST') or any(
         isinstance(row, dict) and row.get('status') == 'error' for row in domain.values()
     ) for domain in results.values())
 
 
 def run(engine, *, watch=False, registry=None, force_news=False, stop=None):
+    with collector_owner(engine) as owned:
+        if not owned:
+            print(json.dumps({'status': 'collector_busy'}), flush=True)
+            return 1
+        return _run_owned(engine, watch=watch, registry=registry, force_news=force_news, stop=stop)
+
+
+def _run_owned(engine, *, watch=False, registry=None, force_news=False, stop=None):
     stop = stop if stop is not None else Event()
     while not stop.is_set():
         result = run_cycle(engine, registry=registry, force_news=force_news)
@@ -57,16 +69,21 @@ def main():
     args = parser.parse_args()
     if args.watch and args.force_news:
         parser.error('--force-news cannot be combined with --watch')
-    create_tables()
-    stop = Event()
-    previous = signal.signal(signal.SIGTERM, lambda *_: stop.set())
-    try:
-        return run(get_engine(), watch=args.watch, registry=args.registry,
-            force_news=args.force_news, stop=stop)
-    except KeyboardInterrupt:
-        return 0
-    finally:
-        signal.signal(signal.SIGTERM, previous)
+    engine = get_engine()
+    with collector_owner(engine) as owned:
+        if not owned:
+            print(json.dumps({'status': 'collector_busy'}), flush=True)
+            return 1
+        create_tables()
+        stop = Event()
+        previous = signal.signal(signal.SIGTERM, lambda *_: stop.set())
+        try:
+            return run(engine, watch=args.watch, registry=args.registry,
+                force_news=args.force_news, stop=stop)
+        except KeyboardInterrupt:
+            return 0
+        finally:
+            signal.signal(signal.SIGTERM, previous)
 
 
 if __name__ == '__main__':

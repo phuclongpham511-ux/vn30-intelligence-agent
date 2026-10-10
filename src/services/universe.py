@@ -5,6 +5,7 @@ from sqlalchemy import case, func
 from src.models import Security, SecurityUniverseState, IndexMembershipState
 from src.news.normalization import normalized, utc
 from src.providers.ssi import SsiMarketDataProvider
+from src.services.ingestion_owner import collector_owned
 
 REFRESH_INTERVAL = timedelta(hours=24)
 RETRY_INTERVAL = timedelta(minutes=15)
@@ -25,6 +26,7 @@ def discovery_metadata(session):
     return list(stocks.values())
 
 
+@collector_owned
 def sync_universe(session: Session, *, provider=None, now=None, force=False):
     now = now or datetime.now(timezone.utc)
     state = session.get(SecurityUniverseState, 'ssi') or SecurityUniverseState()
@@ -102,6 +104,7 @@ def browse_universe(session: Session, *, q='', exchange=None, index_group=None, 
         index_groups=groups)
 
 
+@collector_owned
 def sync_index_groups(session, *, provider=None, now=None, force=False):
     now = now or datetime.now(timezone.utc)
     state = session.get(IndexMembershipState, 'ssi') or IndexMembershipState()

@@ -67,6 +67,10 @@ class CorporateActionRepository:
     def context_for(self, symbol: str, session_date: date, *, as_of: datetime):
         cutoff = aware_utc(as_of)
         try:
+            known = self.get_actions_for_symbol(symbol, as_of=cutoff)
+            if any(not a.verified and not a.withdrawn and
+                    (a.verification_note or '').startswith('Unresolved correction') for a in known):
+                return CorporateActionContext(as_of=cutoff, reason='pending_verification')
             actions = self.get_actions_effective_on(symbol, session_date, as_of=cutoff)
         except SQLAlchemyError:
             return CorporateActionContext(as_of=cutoff, reason='source_unavailable')

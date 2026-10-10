@@ -10,6 +10,7 @@ from src.community.models import CommunityThread, CommunitySourceState, Communit
 from src.models import Stock
 from src.news.normalization import canonical_url, clean_title, utc
 from src.news.tagging import Tagger, contains
+from src.services.ingestion_owner import collector_owned
 
 SOURCE_ID = 'f319_public'
 SOURCE_NAME = 'F319 · newf319.com'
@@ -128,12 +129,16 @@ def community_tags(title, stocks):
     return sorted(tickers), tags.topics
 
 
+@collector_owned
 def ingest(session, *, fetch=acquire, now=None):
     supplied_now = now
     now = utc(now or datetime.now(timezone.utc))
     state = session.get(CommunitySourceState, SOURCE_ID)
     if state and state.last_attempt_at and utc(state.last_attempt_at) > now - timedelta(minutes=POLL_MINUTES):
         return {'status': 'skipped'}
+    state = state or CommunitySourceState(source_id=SOURCE_ID)
+    state.last_attempt_at = now
+    session.add(state); session.commit()
     try:
         incoming = fetch()
         observed_at = utc(supplied_now or datetime.now(timezone.utc))

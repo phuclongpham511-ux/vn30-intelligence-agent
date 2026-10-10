@@ -15,5 +15,5 @@ class RefreshResponse(BaseModel):
 @router.post('/refresh', response_model=RefreshResponse)
 def refresh():
     status = request_refresh()
-    return JSONResponse(status_code=202 if status == 'started' else 200,
+    return JSONResponse(status_code=202 if status == 'pending_worker' else 200,
         content=RefreshResponse(status=status).model_dump())

@@ -12,6 +12,7 @@ from src.community.acquisition import SOURCES, acquire
 from src.community.service import community_tags
 from src.models import Stock
 from src.services.universe import discovery_metadata
+from src.services.ingestion_owner import collector_owned
 
 
 def time_window(now, kind='today'):
@@ -28,6 +29,7 @@ def in_window(published, window):
     return published is not None and window['start'] <= utc(published) <= window['end']
 
 
+@collector_owned
 def ingest_source(session, source, *, fetch=acquire, now=None):
     supplied_now = now
     now = utc(now or datetime.now(timezone.utc))
@@ -36,6 +38,10 @@ def ingest_source(session, source, *, fetch=acquire, now=None):
     state = session.get(CommunitySourceState, source.id)
     if state and state.last_attempt_at and utc(state.last_attempt_at) > now - timedelta(minutes=source.interval):
         return {'status': 'skipped'}
+    # Persist the attempt before network work: interruption cannot erase cooldown.
+    state = state or CommunitySourceState(source_id=source.id)
+    state.last_attempt_at = now
+    session.add(state); session.commit()
     try:
         stocks = discovery_metadata(session)
         incoming, threads = fetch(source, stocks)
@@ -87,6 +93,7 @@ def ingest_source(session, source, *, fetch=acquire, now=None):
         return {'status': 'error', 'error': state.last_error}
 
 
+@collector_owned
 def ingest_cycle(engine, *, sources=SOURCES, fetch=acquire, now=None):
     results = {}
     for source in sources:

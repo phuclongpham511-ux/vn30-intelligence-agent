@@ -38,19 +38,31 @@ uv run python -m scripts.ingest_data --watch
 ```
 
 One-off mode evaluates both domains and exits nonzero if either reports a failure.
-Watch mode reevaluates every 60 seconds; existing persisted News source intervals
-and Community's 30-minute interval determine due work. Each domain uses its own
+Watch mode reevaluates every 60 seconds; existing adaptive News source intervals
+and Community's 15-minute source intervals determine due work. Each domain uses its own
 session; source/domain failures are reported by exception type only and do not
 terminate the watch loop. Ctrl+C/SIGTERM stops cleanly; in-flight bounded acquisition
 may finish first. Restart does not reset timestamps or force fetches. Skipped work
 does not change last-success state. Run only one collector: do not also run the
-legacy domain-specific `--watch` commands. These remain available for targeted
-diagnostics; News `--smoke` does not persist data. `--force-news` is an explicit
+legacy domain-specific `--watch` commands. A database-scoped collector mutex now
+enforces exclusivity for the full watch lifetime and for targeted News/Community
+commands, including `--smoke` and `--force`. A second collector exits nonzero with
+`collector_busy`. These commands remain available for targeted diagnostics when
+the canonical collector is stopped; News `--smoke` does not persist data. `--force-news` is an explicit
 one-off News override, forbidden with `--watch`; it does not bypass Community cadence.
 
 This worker does not start inside FastAPI. Automatic launch/process restart is
 the responsibility of a future external deployment supervisor, not implemented here.
 The worker is sequential and the 60-second wait follows completion of each cycle.
+HTTP `/ingestion/refresh` returns 202 `pending_worker` after recording due-News
+intent; opening the browser does not start a collector. Community therefore requires
+the same running canonical worker. Keep a third terminal open at repository root
+with `uv run python -m scripts.ingest_data --watch`. Use the same absolute
+`DATABASE_URL` as FastAPI. Stop that terminal with Ctrl+C before starting a replacement;
+do not run old and new collectors on the same database during a migration.
+Process death releases the local SQLite OS mutex; persisted source leases and
+cooldowns still govern recovery. Never delete the `.ingestion.lock` file to bypass
+ownership. See [runtime compatibility and handoff](docs/RUNTIME_COMPATIBILITY_INGESTION_V1.md).
 
 Successful Community acquisitions append one CommunityThreadObservation per sampled
 thread (thread ID, actual observation time, nullable lifetime replies/views), alongside

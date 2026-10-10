@@ -1,5 +1,25 @@
 # Woofi — Domain Context
 
+### Runtime compatibility and acquisition ownership V1 — 2026-10-11
+
+The canonical collector is `scripts.ingest_data --watch`, outside FastAPI. One
+database-scoped owner covers News, Community and metadata acquisition across
+processes, including the whole idle watch interval and legacy diagnostic commands.
+HTTP `/ingestion/refresh` now records durable due-News intent only and returns
+`pending_worker`; it never launches acquisition. Community uses the same persistent
+collector and its existing 15-minute source cadence. Attempts are committed before
+fetch so an interrupted acquisition cannot reset cooldown on restart. News source
+leases, bounded fetch slots and adaptive scheduling remain unchanged.
+
+CorporateActionNotice accepts three known provenance fields from real product DB
+Dividend WIP: source_updated_at, source_title and evidence_text. Absent fields retain
+the previous serialized shape; supplied values, including nulls, are retained.
+Unresolved corrections withhold corporate context pending verification. This is
+reader compatibility, not completed Dividend Intelligence or a change to D1/D4/D5,
+Technical EOD admission, scoring or worker coverage. All 30 captured product rows
+round-trip losslessly on an isolated copy. No live database or pilot evidence was
+modified. See docs/RUNTIME_COMPATIBILITY_INGESTION_V1.md for validation and handoff.
+
 ### Product acceptance V1 — 2026-10-10
 
 Local integrated acceptance used real SSI, public News/Community acquisition and
@@ -74,8 +94,8 @@ Explore is the market landing page: latest SSI VN-Index summary, multi-publisher
 
 News navigation is Industry → Company → Market Brief → Community Pulse. Hot Topics is a promotion layer on Explore; it does not hide matching stories in News categories. Compact search shows typed matches or up to eight browser-local recent ticker selections with individual remove and Clear history controls, never the full universe dropdown. Watchlist membership and review semantics are unchanged.
 
-Community Pulse explicitly selects Today or Last 24 hours; no automatic fallback relabels yesterday as today. Open web sessions trigger coalesced background ingestion through `/ingestion/refresh`, respecting persisted source cadence. For source freshness without an open browser, run `uv run python -m scripts.ingest_data --watch`. Read endpoints continue to read persisted evidence. Overnight empty Today and stale sources after stopping the worker are honest states, not deleted content.
-When the web shell opens, it records durable due-source News refresh intent and requests a coalesced convenience cycle for other domains. News acquisition requires the canonical worker; persisted data remains readable while it runs.
+Community Pulse explicitly selects Today or Last 24 hours; no automatic fallback relabels yesterday as today. For News and Community freshness, run `uv run python -m scripts.ingest_data --watch` alongside the API. Read endpoints continue to read persisted evidence. Overnight empty Today and stale sources after stopping the worker are honest states, not deleted content.
+When the web shell opens, `/ingestion/refresh` records durable due-source News refresh intent only. It does not launch a collector for any domain. The canonical worker handles News, Community and metadata on their existing persisted schedules; cached data remains readable without a worker.
 
 ### Material Event
 

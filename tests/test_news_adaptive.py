@@ -167,7 +167,7 @@ def test_two_workers_and_simultaneous_visitors_share_database_claims(tmp_path):
         first = pool.submit(worker)
         assert started.wait(2)
         second = pool.submit(worker)
-        assert second.result(timeout=2) == {}
+        assert second.result(timeout=2) == {'status': 'collector_busy'}
         release.set()
         assert first.result(timeout=3)['one']['status'] == 'ok'
     assert calls == ['fetch']
@@ -234,7 +234,7 @@ def test_global_slots_bound_different_sources_across_workers(tmp_path):
     with ThreadPoolExecutor(max_workers=2) as pool:
         first = pool.submit(worker, [source(sid='a'), source(sid='b')])
         assert occupied.wait(2)
-        assert pool.submit(worker, [source(sid='c'), source(sid='d')]).result(timeout=2) == {}
+        assert pool.submit(worker, [source(sid='c'), source(sid='d')]).result(timeout=2) == {'status': 'collector_busy'}
         release.set()
         assert len(first.result(timeout=3)) == 2
     assert set(calls) == {'a','b'}
