@@ -8,6 +8,9 @@ not certify production readiness or deploy pilot evidence into the product DB.
 Known exact-URL headline corrections and CafeF numeric article identities now
 preserve Article/Story identity, publisher ownership and original age when the
 headline/slug changes; Watchlist revision receipts reopen the existing item.
+Authoritative URL/native identities precede headline deduplication. Distinct CafeF
+native IDs remain separate even with equal headlines; collision-qualified title
+keys retain reprint deduplication, and slug-only corrections refresh source links.
 Existing duplicate records are not automatically merged. Worker availability,
 an intermittent database ingestion failure, active-session streaming and explicit
 Technical database wiring remain rollout limits. See

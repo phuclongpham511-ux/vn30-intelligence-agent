@@ -166,6 +166,56 @@ def test_cafef_correction_preserves_identity_and_original_age(session, changed_s
     assert (story.article_count, story.source_count) == (1, 1)
 
 
+@pytest.mark.parametrize('changed_slug', [False, True])
+def test_cafef_correction_to_another_articles_headline_preserves_both(session, changed_slug):
+    original = 'https://cafef.vn/original-188261008155658978.chn'
+    corrected = 'https://cafef.vn/corrected-188261008155658978.chn' if changed_slug else original
+    other = 'https://cafef.vn/other-188261008155658979.chn'
+    ingest(session, [item('ABC earnings rise', original),
+                     item('XYZ manufacturing production falls', other)], sources=[source('cafef')])
+    before = {a.canonical_url: (a.id, a.story_id) for a in articles(session, now=NOW)}
+    result = ingest(session, [item('XYZ manufacturing production falls', corrected)],
+                    sources=[source('cafef')], now=NOW+timedelta(minutes=30))
+    assert result['cafef']['status'] == 'ok'
+    rows = {a.canonical_url: a for a in articles(session, now=NOW+timedelta(minutes=30))}
+    assert len(rows) == 2 and corrected in rows and other in rows
+    assert (rows[corrected].id, rows[corrected].story_id) == before[original]
+    assert (rows[other].id, rows[other].story_id) == before[other]
+    assert rows[corrected].title == 'XYZ manufacturing production falls'
+    assert utc(rows[corrected].first_seen_at) == NOW
+    assert utc(rows[corrected].published_at) == NOW
+    assert session.get(NewsStory, before[original][1]).article_count == 1
+    assert session.get(NewsStory, before[other][1]).article_count == 1
+
+
+def test_cafef_distinct_native_articles_with_same_headline_remain_idempotent(session):
+    inputs = [item('ABC earnings rise', 'https://cafef.vn/first-188261008155658978.chn'),
+              item('ABC earnings rise', 'https://cafef.vn/second-188261008155658979.chn')]
+    assert ingest(session, inputs, sources=[source('cafef')])['cafef']['status'] == 'ok'
+    before = {a.canonical_url: a.id for a in articles(session, now=NOW)}
+    assert len(before) == 2
+    assert ingest(session, inputs, sources=[source('cafef')], now=NOW+timedelta(minutes=30))['cafef']['status'] == 'ok'
+    assert {a.canonical_url: a.id for a in articles(session, now=NOW+timedelta(minutes=30))} == before
+    story = session.exec(select(NewsStory)).one()
+    assert (story.article_count, story.source_count) == (2, 1)
+
+
+def test_exact_url_correction_collision_preserves_other_publishers_title_dedup(session):
+    ingest(session, [item('ABC earnings rise', 'https://one.example/a'),
+                     item('XYZ manufacturing production falls', 'https://one.example/b')])
+    before = {a.canonical_url: a.id for a in articles(session, now=NOW)}
+    assert ingest(session, [item('XYZ manufacturing production falls', 'https://one.example/a')],
+                  now=NOW+timedelta(minutes=30))['one']['status'] == 'ok'
+    assert {a.canonical_url: a.id for a in articles(session, now=NOW+timedelta(minutes=30))} == before
+    assert ingest(session, [item('XYZ manufacturing production falls', 'https://one.example/reprint')],
+                  now=NOW+timedelta(minutes=60))['one']['added'] == 0
+    assert ingest(session, [item('DEF mining output grows', 'https://one.example/b')],
+                  now=NOW+timedelta(minutes=90))['one']['status'] == 'ok'
+    assert ingest(session, [item('XYZ manufacturing production falls', 'https://one.example/another-reprint')],
+                  now=NOW+timedelta(minutes=120))['one']['added'] == 0
+    assert {a.canonical_url: a.id for a in articles(session, now=NOW+timedelta(minutes=120))} == before
+
+
 @pytest.mark.parametrize('url', [
     'https://cafef.vn/other-188261008155658979.chn',
     'https://cafef.vn.evil.example/other-188261008155658978.chn',

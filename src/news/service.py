@@ -17,6 +17,16 @@ def story_score(story: NewsStory, now: datetime) -> float:
     return round((3 * math.log1p(story.source_count) + activity) * 2 ** (-age / 24), 4)
 
 
+def _title_key(session, source_id, title_hash, identity, article_id=None):
+    # Preserve the existing publisher-title uniqueness constraint without merging
+    # authoritative identities which happen to share a corrected headline.
+    owner = session.exec(select(NewsArticle).where(
+        NewsArticle.source_id == source_id, NewsArticle.title_hash == title_hash)).first()
+    # Retain the normalized-headline prefix so ordinary reprint lookup can still
+    # find this row if the unsuffixed key's owner later corrects its own headline.
+    return title_hash + ':' + digest(identity) if owner and owner.id != article_id else title_hash
+
+
 def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=False, matcher=None, tagger=None, changed=None, observations=None):
     supplied_now = now
     now = utc(now or datetime.now(timezone.utc))
@@ -48,7 +58,7 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
                     continue
                 url = canonical_url(item.url)
                 title_hash, url_hash = digest(normalized(title)), digest(url)
-                existing = session.exec(select(NewsArticle).where(or_(NewsArticle.url_hash == url_hash, (NewsArticle.source_id == source.source_id) & (NewsArticle.title_hash == title_hash)))).first()
+                existing = session.exec(select(NewsArticle).where(NewsArticle.url_hash == url_hash)).first()
                 suffix = cafef_article_suffix(url) if source.source_id == 'cafef' else None
                 if existing is None and suffix:
                     candidates = session.exec(select(NewsArticle).where(
@@ -56,15 +66,23 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
                         NewsArticle.canonical_url.endswith(suffix))
                         .order_by(NewsArticle.first_seen_at, NewsArticle.id).limit(10)).all()
                     existing = next((a for a in candidates if cafef_article_suffix(a.canonical_url) == suffix), None)
+                if existing is None and not suffix:
+                    existing = session.exec(select(NewsArticle).where(
+                        NewsArticle.source_id == source.source_id,
+                        or_(NewsArticle.title_hash == title_hash,
+                            NewsArticle.title_hash.startswith(title_hash + ':')))
+                        .order_by(NewsArticle.first_seen_at, NewsArticle.id)).first()
                 if existing:
                     previous_title = existing.title
                     # A known URL/native identity can be corrected without becoming
                     # another article or renewing publication/first-seen time.
                     correction = (existing.source_id == source.source_id and
                         (existing.url_hash == url_hash or bool(suffix and cafef_article_suffix(existing.canonical_url) == suffix))
-                        and existing.title != title)
+                        and (existing.title != title or existing.canonical_url != url))
                     if correction:
-                        existing.title, existing.title_hash = title, title_hash
+                        existing.title_hash = _title_key(session, source.source_id, title_hash,
+                                                        suffix or url, existing.id)
+                        existing.title = title
                         existing.url, existing.canonical_url, existing.url_hash = url, url, url_hash
                     existing.last_seen_at = now
                     if observations is not None:
@@ -110,7 +128,8 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
                     session.flush()
                 article = NewsArticle(source_id=source.source_id, source_name=source.name,
                     publisher_group=source.publisher_group, title=title, url=url, canonical_url=url,
-                    title_hash=title_hash, url_hash=url_hash, published_at=published,
+                    title_hash=_title_key(session, source.source_id, title_hash, suffix or url),
+                    url_hash=url_hash, published_at=published,
                     first_seen_at=now, last_seen_at=now, country=source.country, language=source.language,
                     category=source.category, scope=tags.scope, topics=tags.topics, tickers=tags.tickers,
                     sectors=tags.sectors, story_id=story.id,

@@ -78,6 +78,30 @@ def test_news_reingestion_duplicate_sources_revisions_withdrawal_and_stable_anch
     assert intelligence(session,['XYZ'],now=now)['stocks'][0]['news']['items']==[]
 
 
+@pytest.mark.parametrize('headline_changed', [False, True])
+def test_cafef_corrected_link_revises_existing_watchlist_item(session,monkeypatch,client,headline_changed):
+    monkeypatch.setattr('src.services.watchlist_intelligence.load_sources',lambda:[source('cafef')])
+    now=datetime.now(timezone.utc)
+    published=now-timedelta(hours=2)
+    original='https://cafef.vn/original-188261008155658978.chn'
+    corrected='https://cafef.vn/corrected-188261008155658978.chn'
+    session.add(Stock(symbol='XYZ'));session.commit()
+    ingest(session,[item('XYZ earnings rise',original,published)],sources=[source('cafef')],now=published)
+    before=client.post('/watchlists/intelligence',json={'symbols':['XYZ']}).json()['stocks'][0]['news']['items'][0]
+    title='XYZ reports revised earnings' if headline_changed else 'XYZ earnings rise'
+    assert ingest(session,[item(title,corrected,now)],sources=[source('cafef')],now=now)['cafef']['status']=='ok'
+    after=client.post('/watchlists/intelligence',json={'symbols':['XYZ']}).json()['stocks'][0]['news']['items']
+    assert len(after)==1
+    assert (after[0]['id'],after[0]['entity_id'],after[0]['occurred_at'])==(before['id'],before['entity_id'],before['occurred_at'])
+    assert after[0]['url']==corrected and after[0]['title']==title
+    assert after[0]['revision']!=before['revision']
+    assert set(after[0]['revision_members'])==set(before['revision_members'])
+    assert after[0]['revision_members']!=before['revision_members']
+    assert ingest(session,[item(title,corrected,now)],sources=[source('cafef')],now=now+timedelta(minutes=1))['cafef']['status']=='ok'
+    unchanged=client.post('/watchlists/intelligence',json={'symbols':['XYZ']}).json()['stocks'][0]['news']['items'][0]
+    assert (unchanged['id'],unchanged['revision_members'])==(after[0]['id'],after[0]['revision_members'])
+
+
 def test_community_content_revisions_ignore_engagement_and_expire_honestly(session,monkeypatch):
     configure(monkeypatch)
     now=datetime.now(timezone.utc)

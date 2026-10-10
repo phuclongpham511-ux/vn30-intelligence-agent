@@ -140,3 +140,53 @@ CONTEXT.md and this report on local branch `codex/woofi-product-acceptance-v1`.
 Runtime databases and detailed acquired API evidence remain ignored under
 `data/product_acceptance/`. Remote main remains the supplied base. Temporary
 acceptance services were stopped after validation.
+
+## Main-integration review follow-up — 2026-10-10
+
+The integration review found two correction edges in the original checkpoint:
+headline deduplication could intercept a known native identity or cause a
+publisher-title uniqueness failure, and a changed slug with an unchanged headline
+left the old source link in the projection. Focused synthetic regressions
+reproduced the identity collision before the correction.
+
+The follow-up prioritizes authoritative exact URL/native identity. Different
+CafeF native IDs remain separate even when their headlines match. Existing
+publisher-title uniqueness is retained without schema changes: occupied title
+keys receive an identity qualifier while retaining the normalized-headline hash
+prefix. Ordinary reprint lookup recognizes both forms, including when another
+article subsequently changes away from the shared headline. A chained-correction
+regression failed before this final adjustment and passes afterward.
+
+Slug-only updates refresh the current link and worker projection. Watchlist API
+regressions preserve item/member identity and original age, change the correction
+revision, and keep retries at the same revision. Existing records are not merged
+or deleted; historical duplicate reconciliation and absence of an immutable
+correction ledger remain limitations.
+
+The follow-up changes only News persistence, its regressions and project
+documentation. D1/D4/D5, Technical EOD, acquisition cadence/leases/bounds and source
+configuration remain byte-identical to the supplied main base. Both Standards
+and Spec review axes report no remaining findings. Integration validation results
+are recorded below.
+
+Mandatory integration gates passed on the final source:
+
+- `python -B -m pytest tests/test_news.py tests/test_news_adaptive.py
+  tests/test_news_correction.py tests/test_watchlist_intelligence.py -q --tb=short
+  -p no:cacheprovider`: **72 passed**.
+- `python -B -m pytest -q --tb=short -p no:cacheprovider`: **923 passed**
+  (182.76 seconds). The existing Starlette/httpx deprecation warning remains.
+- `npm test`: **87 passed**, zero failures.
+- `npm run typecheck`: passed.
+- `npm run build`: passed on the Acceptance worktree; the serving Downloads
+  build and runtime were not replaced.
+
+Backend gates used the existing dependency environment with source imports from
+this worktree, synthetic in-memory/temporary databases and empty provider
+credentials. No live ingestion, production database reset or FPT supervision
+execution occurred. Seven other worktrees retained their HEAD/index/status and
+source hashes. Ports 3000/8000 continued serving the Downloads checkout.
+
+The original Acceptance commit is retained; review corrections are a separate
+descendant checkpoint. Publishing this code does not migrate or deploy runtime
+data and does not establish production readiness.
