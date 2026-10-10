@@ -56,3 +56,19 @@ class TechnicalEODRetrievalReceipt(SQLModel, table=True):
     job_id: str = Field(index=True)
     received_at: datetime = Field(sa_type=DateTime(timezone=True))
     payload: dict = Field(sa_type=JSON)
+
+
+class TechnicalEODSupervision(SQLModel, table=True):
+    """One explicitly configured pilot; source metadata and coordinator recovery."""
+    id: str = Field(default='pilot',primary_key=True)
+    ticker: str
+    calendar: dict = Field(sa_type=JSON)
+    publications: dict = Field(default_factory=dict,sa_type=JSON)
+    source_receipts: dict = Field(default_factory=dict,sa_type=JSON)
+    next_cycle_at: datetime = Field(sa_type=DateTime(timezone=True))
+    next_discovery_at: datetime = Field(sa_type=DateTime(timezone=True))
+    lease_token: str | None = None
+    lease_until: datetime | None = Field(default=None,sa_type=DateTime(timezone=True))
+    failures: int = 0
+    halted: bool = False
+    last_result: dict = Field(default_factory=dict,sa_type=JSON)

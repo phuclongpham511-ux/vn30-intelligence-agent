@@ -12,8 +12,8 @@ from sqlmodel import Session, select
 
 from src.models import Security
 from src.models.technical_eod import (TechnicalEODJob, TechnicalEODSnapshot,
-    TechnicalEODWorkerLease, TechnicalEODRetrievalReceipt)
-from src.providers.base import ProviderError
+    TechnicalEODWorkerLease, TechnicalEODRetrievalReceipt,TechnicalEODSupervision)
+from src.providers.base import ProviderError,ProviderTransientError
 from src.schemas.stocks import SymbolRequest
 from src.materiality.delivery import TechnicalDailySignalPacket
 from .session_evidence import CalendarEvidence, aware, bar_fingerprint
@@ -163,7 +163,7 @@ def enqueue_provisional_eod(session, ticker, target, *, history_start,
     return key
 
 
-def _claim(engine, now):
+def _claim(engine, now, tickers=None, supervision_token=None):
     """One shared SSI slot; network work runs outside the transaction."""
     with Session(engine) as session:
         if session.get(TechnicalEODWorkerLease,'ssi-eod') is None:
@@ -179,8 +179,18 @@ def _claim(engine, now):
         if not changed.rowcount:
             session.rollback()
             return None
-        job=session.exec(select(TechnicalEODJob).where(TechnicalEODJob.status!='STOPPED',
-            TechnicalEODJob.next_due_at <= now).order_by(TechnicalEODJob.next_due_at,TechnicalEODJob.id).limit(1)).first()
+        query=select(TechnicalEODJob).where(TechnicalEODJob.status!='STOPPED',
+            TechnicalEODJob.next_due_at <= now)
+        pilot=session.get(TechnicalEODSupervision,'pilot')
+        if pilot:
+            if (not pilot.halted and pilot.lease_token==supervision_token and supervision_token
+                    and _dbtime(pilot.lease_until)>now):
+                query=query.where(TechnicalEODJob.ticker==pilot.ticker)
+            else:
+                query=query.where(TechnicalEODJob.ticker!=pilot.ticker)
+        if tickers is not None:
+            query=query.where(TechnicalEODJob.ticker.in_(tickers))
+        job=session.exec(query.order_by(TechnicalEODJob.next_due_at,TechnicalEODJob.id).limit(1)).first()
         if job is None:
             session.rollback()
             return None
@@ -245,12 +255,16 @@ def _audit_receipt(session, job, receipt):
             received_at=receipt.received_at,payload=payload))
 
 
-def run_technical_eod_cycle(engine, *, clock=None, acquire=None):
+def run_technical_eod_cycle(engine, *, clock=None, acquire=None, tickers=None,supervision_token=None):
     """At most one fresh bounded read; persisted cache/timing decide whether it is due."""
     clock=clock or (lambda:datetime.now(timezone.utc))
     acquire=acquire or capture_fresh_ssi_read
     now=aware(clock())
-    claimed=_claim(engine,now)
+    if tickers is not None:
+        tickers=tuple(SymbolRequest(symbol=t).symbol for t in tickers)
+        if not tickers or len(tickers)>1:
+            raise ValueError('Exactly one supervised ticker is supported')
+    claimed=_claim(engine,now,tickers,supervision_token)
     if claimed is None:
         return {'status':'IDLE'}
     token,original=claimed
@@ -352,6 +366,8 @@ def run_technical_eod_cycle(engine, *, clock=None, acquire=None):
             return {'status':'PROVISIONAL','cache_reused':False,'snapshot_id':row.id,
                 'snapshot_version':row.version,'retracted_snapshot_count':len(retracted)}
         return _finish(engine,token,original,at,publish)
+    except ProviderTransientError:
+        return end('INCOMPLETE_EVIDENCE',('ssi_transient_acquisition_failure',),delay=timedelta(hours=1))
     except ProviderError:
         return end('STOPPED',('ssi_acquisition_failed_operator_resume_required',))
     except Exception:

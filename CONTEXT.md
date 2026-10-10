@@ -493,6 +493,17 @@ durable and worker-owned, with adaptive per-source scheduling described below. N
 Hot Topics and stock News re-read each minute; no OS supervisor is introduced.
 
 
+### Technical supervised EOD pilot V1 — 2026-10-10
+
+Technical supervised acquisition is a separate, explicitly configured single-ticker
+pilot. It extends independently qualified HOSE evidence, stores metadata receipts
+between reads and reuses the existing provisional snapshot producer. Each cycle
+may obtain at most one bounded SSI history scope; HTTP remains a persisted read.
+The six-hour matching-read and 24-hour publication gates, VERIFIED separation
+and D1/D4/D5 behavior remain unchanged. Missed runs recover from durable due times,
+leases and receipts; revisions retract affected provisional snapshots. See
+docs/TECHNICAL_SUPERVISED_EOD_V1.md for scope, supervision and remaining limits.
+
 ### Adaptive News ingestion V1 — 2026-10-08
 
 Twenty RSS sources retain their evidence and publisher groups. Six configurable

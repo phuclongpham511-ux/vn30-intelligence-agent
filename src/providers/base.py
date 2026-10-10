@@ -11,6 +11,10 @@ class ProviderNotReadyError(ProviderError):
     pass
 
 
+class ProviderTransientError(ProviderError):
+    """Transport/rate/server failure, with no upstream payload or auth details."""
+
+
 class MarketDataProvider(Protocol):
     source: str
     def validate_symbol(self, symbol: str) -> bool: ...

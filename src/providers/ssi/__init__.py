@@ -12,7 +12,7 @@ from ssi_sdk import Auth, Config
 from ssi_sdk.constant import EP_DATA_OHLC, EP_DATA_SECURITIES_BY_BOARD, EP_DATA_INDEX_LIST, EP_DATA_INDEX_SUMMARY
 
 from src.config.settings import get_settings
-from src.providers.base import ProviderError, ProviderNotReadyError
+from src.providers.base import ProviderError, ProviderNotReadyError, ProviderTransientError
 from src.schemas.data import MarketBar
 from src.schemas.stocks import SecurityMetadata, SecurityUniverse
 
@@ -103,6 +103,13 @@ class SsiMarketDataProvider:
         except Exception as exc:
             logger.warning("provider=ssi ticker=%s operation=%s error_type=%s",
                            symbol, operation, type(exc).__name__)
+            import httpx
+            from ssi_sdk.exceptions import APIError, RateLimitError, AuthenticationError
+            if (not isinstance(exc,AuthenticationError) and (
+                    isinstance(exc,(httpx.TimeoutException,httpx.NetworkError,RateLimitError))
+                    or isinstance(exc,APIError) and (exc.status_code==429 or
+                        isinstance(exc.status_code,int) and 500<=exc.status_code<=599))):
+                raise ProviderTransientError("SSI acquisition temporarily unavailable.") from None
             raise ProviderError("SSI Market Data is temporarily unavailable. Please retry later.") from None
 
     @staticmethod

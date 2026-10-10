@@ -130,3 +130,13 @@ operational rollout work. No same-day policy tier has been introduced.
 Next milestone: remediate existing
 frontend dependency findings, and qualify supervised bounded acquisition for
 future sessions/tickers. Push/deployment still require separate authorization.
+
+## Hardening follow-up — 2026-10-10
+
+Integration was locally checkpointed as `162d1de`; compatible dependency
+remediation was checkpointed as `beb3b9a`. Current audit is zero vulnerabilities.
+The preserved validation above describes the earlier integration milestone.
+Final hardening validation passed 897 backend tests, 73 frontend tests, typecheck,
+production build and the real FPT desktop/mobile browser runner with Next 16.3.8.
+Supervised FPT-only discovery/acquisition and durable recovery are documented in
+TECHNICAL_SUPERVISED_EOD_V1.md. No same-day tier, push or deployment was introduced.
