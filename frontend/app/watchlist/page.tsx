@@ -21,6 +21,7 @@ function UpdateSection({label,page,symbol,state,disabled,review,sourceNames={}}:
   rows.sort((a,b)=>Number(isUnread(state,symbol,b))-Number(isUnread(state,symbol,a)) || b.occurred_at.localeCompare(a.occurred_at) || a.id.localeCompare(b.id));
   const shown=expanded?rows:rows.slice(0,3);
   const fresh=rows.filter(item=>isUnread(state,symbol,item)).length;
+  if(!rows.length)return <details className="border-t py-2 text-xs text-muted-foreground"><summary className="cursor-pointer">{label} · {t('No observed updates on this page')}</summary><p className="mt-2">{t('Coverage incomplete; counts describe observed items only.')}</p></details>;
   return <section className="border-t pt-3" aria-label={label}>
     <div className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-medium">{label} · {disabled?t('Count unavailable'):t('{count} unreviewed on this page',{count:fresh})}</h3>
       {shown.length>0&&<button aria-label={t('Mark displayed {kind} reviewed',{kind:label})} className="text-xs text-primary underline disabled:opacity-50" disabled={disabled} onClick={()=>review(shown)}>{t('Review displayed')}</button>}</div>
@@ -40,7 +41,7 @@ function UpdateSection({label,page,symbol,state,disabled,review,sourceNames={}}:
           <div className="mt-1 flex flex-wrap gap-4 text-xs">{url&&<a href={url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{t('Read original ↗')}</a>}
             <button aria-label={t('Mark this update reviewed')} disabled={disabled} className="text-primary underline disabled:opacity-50" onClick={()=>review([item])}>{t('Mark reviewed')}</button></div>
           <details className="mt-2 text-xs"><summary className="cursor-pointer text-muted-foreground">{t('View source evidence')}</summary>
-            {item.kind==='news'?(item.evidence as NewsArticle[]).map(article=><ArticleRow key={article.id} article={article}/>)
+            {item.kind==='news'?(item.evidence as NewsArticle[]).map(article=><ArticleRow key={article.id} article={article} requireImage={false}/>)
               :<pre className="mt-2 whitespace-pre-wrap break-all rounded bg-muted/40 p-3">{JSON.stringify(item.evidence,null,2)}</pre>}
             {item.evidence_truncated&&<p className="mt-2">{t('Additional source evidence is available in News.')}</p>}
           </details>
@@ -99,12 +100,14 @@ export default function WatchlistPage() {
   },[ready,symbolsKey,offset,attempt]);
   const refresh=()=>{setOffset(0);setAttempt(n=>n+1);};
   const loaded=data?.stocks.flatMap(row=>[...(row.news?.items||[]),...(row.community?.items||[]),...(row.technical?.items||[])].filter(item=>isUnread(state,row.symbol,item)))||[];
+  const activityCount=(symbol:string)=>{const row=data?.stocks.find(stock=>stock.symbol===symbol);return [...(row?.news?.items||[]),...(row?.community?.items||[]),...(row?.technical?.items||[])].filter(item=>isUnread(state,symbol,item)).length;};
+  const orderedSymbols=[...state.symbols].sort((a,b)=>activityCount(b)-activityCount(a)||state.symbols.indexOf(a)-state.symbols.indexOf(b));
   const more=data?.stocks.some(row=>row.news?.has_more||row.community?.has_more);
   const coverageIncomplete=data?.stocks.some(row=>row.status==='unavailable'||row.news?.truncated||!technicalCountKnown(row.technical))||data?.news_sources.some(s=>s.enabled&&s.status!=='healthy')||data?.community_sources.some(s=>s.enabled&&s.status!=='healthy');
   return <LivePrices symbols={ready?state.symbols:[]} interval={20000}><div className="page-stack">
     <div className="flex flex-wrap items-start justify-between gap-3"><div><div className="eyebrow mb-3">{t('Workspace / Watchlist')}</div><h1>{t('Watchlist')}</h1><p className="mt-2 text-sm text-muted-foreground">{t('What changed for the stocks you follow?')}</p></div>
       <Button variant="outline" disabled={!ready||!state.symbols.length||loading} onClick={refresh}>{t('Refresh updates')}</Button></div>
-    <p className="text-xs text-muted-foreground">{t('Saved in this browser only. Reviews are explicit; opening content never marks it reviewed.')}</p>
+    <details className="text-xs text-muted-foreground"><summary>{ui('Review & storage')}</summary><p>{t('Saved in this browser only. Reviews are explicit; opening content never marks it reviewed.')}</p></details>
     {storageError&&<p role="alert" className="rounded border p-3 text-sm">{t('Browser storage is unavailable or saved data cannot be read. Your saved Watchlist has not been overwritten. Reload to retry.')}</p>}
     <form aria-label={t('Follow a stock')} className="flex flex-wrap items-end gap-3" onSubmit={event=>{event.preventDefault();if(selected&&persist(current=>followStock(current,selected)))setSelected('');}}>
       <div className="w-full min-w-0 sm:w-80"><p className="mb-1 text-xs">{t('Stock to follow')}</p><StockSearch label="Stock to follow" onSelect={setSelected} disabled={!ready||storageError||state.symbols.length>=50}/></div>
@@ -122,7 +125,7 @@ export default function WatchlistPage() {
             <ul className="mt-2 space-y-1">{[...data.news_sources,...data.community_sources].map(source=><li key={source.source_id}>{source.name} · {ui(collectionLabels[source.status])} · {t('Source checked')}: {date(source.last_success_at,true)}</li>)}</ul>
           </details>
         </>}
-        <section className="panel divide-y" aria-label={t('Watched stocks')}>{state.symbols.map(symbol=>{
+        <section className="panel divide-y" aria-label={t('Watched stocks')}>{orderedSymbols.map(symbol=>{
           const row=data?.stocks.find(stock=>stock.symbol===symbol);
           const news=row?.news,community=row?.community,technical=row?.technical;
           const newItems=[...(news?.items||[]),...(community?.items||[]),...(technical?.items||[])].filter(item=>isUnread(state,symbol,item));
@@ -138,12 +141,12 @@ export default function WatchlistPage() {
                   {!newItems.length&&<button disabled={storageError} className="text-xs text-primary underline disabled:opacity-50" onClick={()=>review([])}>{t('Mark this check reviewed')}</button>}</div>
                 {news&&<UpdateSection key={'news-'+offset} label={t('News')} page={news} symbol={symbol} state={state} disabled={storageError} review={review}/>}
                 {community&&<UpdateSection key={'community-'+offset} label={t('Community')} page={community} symbol={symbol} state={state} disabled={storageError} review={review} sourceNames={Object.fromEntries(data?.community_sources.map(source=>[source.source_id,source.name])||[])}/>}
-                {technical&&<section aria-label={t('Technical updates')} className="border-t pt-3">
+                {technical&&<details open={technical.items.length>0} aria-label={t('Technical updates')} className="border-t pt-3"><summary className="cursor-pointer text-sm">{t('Technical updates')} · {ui(technical.waiting_for_gate?'Technical data pending the delayed EOD gate':technical.awaiting_source_check?'Delayed EOD gate elapsed; awaiting source check':technicalCountKnown(technical)?'Inspect technical evidence':'Count unavailable')}</summary>
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-medium">{t('Technical updates')} · {storageError||!technicalCountKnown(technical)?t('Count unavailable'):t('{count} unreviewed on this page',{count:technical.items.filter(item=>isUnread(state,symbol,item)).length})}</h3>
                     {technical.items.length>0&&<button aria-label={t('Mark displayed {kind} reviewed',{kind:t('Technical updates')})} disabled={storageError} className="text-xs text-primary underline disabled:opacity-50" onClick={()=>review(technical.items.slice(0,3))}>{t('Review displayed')}</button>}</div>
                   {technical.waiting_for_gate||technical.awaiting_source_check?<div className="text-sm text-muted-foreground"><p>{t(technical.waiting_for_gate?'Technical data pending the delayed EOD gate':'Delayed EOD gate elapsed; awaiting source check')}</p><p className="mt-1 text-xs">{t('Next source check due')}: {date(technical.next_check_due_at,true)}</p><p className="mt-1 text-xs">{t('Source checked')}: {date(technical.last_checked_at,true)}</p></div>
                     :<TechnicalInsightsView sectionId={'watchlist-technical-'+symbol} ticker={symbol} data={technical.data} loading={false} error={false} retry={refresh}/>}
-                </section>}
+                </details>}
               </>}
               <div className="flex flex-wrap gap-4 text-xs"><Link className="text-primary hover:underline" href={'/stocks/'+encodeURIComponent(symbol)}>{t('Open {ticker} stock detail',{ticker:symbol})}</Link><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'company')}>{t('News mentioning {ticker}',{ticker:symbol})}</Link><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'community')}>{t('Community Pulse')}</Link></div>
             </div>

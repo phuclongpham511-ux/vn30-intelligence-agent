@@ -9,6 +9,7 @@ import {readLanguage,translate} from '../lib/translations.ts';
 import {LanguageContext,localeTools} from '../lib/i18n.ts';
 const require=createRequire(import.meta.url);
 function component(file,overrides={}) {
+  overrides={'./LivePrice':{LivePrices:({children})=>children},'../components/stock/LivePrice':{LivePrices:({children})=>children},'../stock/LivePrice':{TickerMovement:()=>null},...overrides};
   const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{
     filename:file,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
   const exports={};
@@ -61,9 +62,9 @@ test('news chrome localizes while even dictionary-matching source titles and pub
   const props={item:{story:{id:'s',source_count:2},representative_article:article,articles:[article],research_category:'MARKET_BRIEF'}};
   for(const language of ['vi','en']) {
     const html=render(TopStory,props,language);
-    assert.match(html,/>News<\/a>/);assert.match(html,/>Company<\/span>/);assert.match(html,/>XYZ<\/a>/);
+    assert.match(html,/>News<\/a>/);assert.match(html,/>Company<\/span>/);assert.match(html,/>XYZ<\/strong>/);
     assert.doesNotMatch(html,/Market Brief/);
-    assert.match(html,language==='vi'?/Thị trường/:/>Market<\/span>/);
+    assert.match(html,language==='vi'?/Bằng chứng/:/Evidence/);
   }
 });
 test('Community UI translates, source theme/excerpt remains original and unknown counts stay unknown',()=>{
@@ -104,4 +105,19 @@ test('Woofi shell uses local supplied logo, compact language control and no Dail
   assert.match(html,/src="\/assets\/woofi-logo.png"/);assert.match(html,/alt="Woofi"/);
   assert.match(html,/aria-label="Ngôn ngữ"/);assert.match(html,/Giới thiệu Woofi/);
   assert.doesNotMatch(html,/Daily data|VN30 Intelligence|Vietnam Equity Intelligence/);
+});
+
+test('real ticker renderer uses yellow zero, neutral missing, and exposes the stale reference session',()=>{
+ const snapshot={ticker:'XYZ',last_price:10000,reference_price:10000,change:0,change_percent:0,trading_date:'2026-10-09',updated_at:'2026-10-09T07:45:00Z',source:'Fixture:test',session:'closed'};
+ const {LivePrices,LivePrice,TickerMovement}=component('../app/components/stock/LivePrice.tsx',{'@/lib/useLiveMarket':{useLiveMarket:()=>({data:{items:{XYZ:{status:'stale',snapshot}},session:'closed'},failed:false})}});
+ const tree=React.createElement(LivePrices,{symbols:['XYZ'],interval:30000},React.createElement(React.Fragment,null,React.createElement(LivePrice,{symbol:'XYZ'}),React.createElement(TickerMovement,{symbol:'XYZ'}),React.createElement(TickerMovement,{symbol:'MISSING'})));
+ const html=render(()=>tree,{},'en');
+ assert.match(html,/class="unchanged"/);assert.match(html,/0.00%/);assert.match(html,/Stale market data/);assert.match(html,/9 Oct 2026/);assert.match(html,/class="text-muted-foreground"/);assert.match(html,/Market data unavailable/);
+});
+test('raw source evidence stays inspectable when its thumbnail is missing',()=>{
+ const {default:Thumbnail}=component('../app/components/news/NewsThumbnail.tsx');
+ const {default:Row}=component('../app/components/news/ArticleRow.tsx',{'./NewsThumbnail':Thumbnail});
+ const props={article:{...article,thumbnail_url:null}};
+ assert.equal(render(Row,props),'');
+ assert.match(render(Row,{...props,requireImage:false}),/News/);assert.match(render(Row,{...props,requireImage:false}),/https:\/\/example.org\/a/);
 });

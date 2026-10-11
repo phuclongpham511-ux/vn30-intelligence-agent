@@ -7,7 +7,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
 const require=createRequire(import.meta.url);
 function component(file, overrides={}) {
-  overrides={'./stock/LivePrice':{LivePrices:({children})=>children,LivePrice:()=>null},
+  overrides={'../stock/LivePrice':{TickerMovement:()=>null},'./LivePrice':{LivePrices:({children})=>children},'./stock/LivePrice':{LivePrices:({children})=>children,LivePrice:()=>null},
     '@/lib/useLiveMarket':{useLiveIndex:()=>({data:null,failed:false})},...overrides};
   const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{
     filename:file,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
@@ -24,7 +24,7 @@ test('news rows render source images and hide missing or unsafe image stories',(
   assert.equal(render(null),'');
   assert.equal(render('javascript:alert(1)'),'');
   assert.doesNotMatch(render('javascript:alert(1)'),/src="javascript:/);
-  assert.match(render('https://example.org/image.jpg'),/Company/);
+  assert.match(render('https://example.org/image.jpg'),/Publisher/);
 });
 test('Explore renders a bounded universe with direct research links and no add prerequisite',()=>{
   const rows=Array.from({length:60},(_,n)=>({symbol:`X${n}`,exchange:n%2?'HNX':'HOSE',display_name_en:'Issuer'}));
@@ -92,7 +92,7 @@ test('Explore preserves its index hero and exposes the requested VN-Index detail
   './news/TopStory':()=>null,'./news/CommunityPulse':()=>null});
  const html=renderToStaticMarkup(React.createElement(Market));
  assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
- assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary|panel flex/);
+ assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary/);
 });
 
 test('stock news archive link opens the semantic Company view',()=>{
@@ -111,16 +111,18 @@ test('Quick News keeps one leading story, bounded related headlines and source e
   react:{...React,useEffect:()=>{},useState:initial=>[state++===0?items:initial,()=>{}]},
   '../news/SourceCoverage':()=>null,'../news/TopStory':TopStory});
  const html=renderToStaticMarkup(React.createElement(News,{ticker:'XYZ'}));
- assert.equal((html.match(/object-cover/g)||[]).length,1);
+ assert.equal((html.match(/object-cover/g)||[]).length,5);
  for(let n=0;n<5;n++) assert.match(html,new RegExp(`Story ${n}`));
  assert.doesNotMatch(html,/Story 5|Story 6/);
  assert.match(html,/Show more headlines \(2\)/);
  assert.match(html,/Publisher/);
- assert.match(html,/2 independent sources/);
+ assert.doesNotMatch(html,/View other reporting|independent sources/);
+ assert.equal((html.match(/data-story-id=/g)||[]).length,5);
 });
 
 test('Quick News polls the cached attention-ranked Company feed and aborts on unmount',async()=>{
- const original={fetch:globalThis.fetch,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval};
+ const original={fetch:globalThis.fetch,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval,document:globalThis.document,window:globalThis.window};
+ globalThis.document={visibilityState:'visible',addEventListener(){},removeEventListener(){}};globalThis.window={addEventListener(){},removeEventListener(){}};
  let effect, poll, period, cleared;
  const requests=[];
  try {

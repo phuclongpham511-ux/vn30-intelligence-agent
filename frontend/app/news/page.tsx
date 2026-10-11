@@ -5,9 +5,11 @@ import { MascotState } from "../components/mascot/Mascot";
 import { Button } from "../components/ui/button";
 import SourceCoverage from "../components/news/SourceCoverage";
 import TopStory from "../components/news/TopStory";
+import {LivePrices} from "../components/stock/LivePrice";
+import {newsSymbols} from "@/lib/newsPresentation";
 import {useNewsArchive} from "@/lib/useNewsArchive";
 import CommunityPulse from "../components/news/CommunityPulse";
-import { emptyNewsFilters, newsQuery, readNewsFilters, newsViewQuery, readNewsView, newsSectionLabels } from "@/lib/news";
+import { emptyNewsFilters, newsQuery, readNewsFilters, newsViewQuery, readNewsView, newsSectionLabels, readCommunityWindow } from "@/lib/news";
 import type { NewsFilters, NewsSource, NewsView } from "@/lib/news";
 
 
@@ -18,12 +20,14 @@ export default function NewsPage() {
   const [sources, setSources] = useState<NewsSource[]>([]);
   const [ready, setReady] = useState(false);
   const [view, setView] = useState<NewsView>("industry");
+  const [communityWindow, setCommunityWindow] = useState<'today'|'last24h'>('today');
   const [attempt, setAttempt] = useState(0);
   useEffect(() => {
     const sync = () => {
       const initial = readNewsFilters(window.location.search);
       const mode = readNewsView(window.location.search);
       setView(mode.view);
+      setCommunityWindow(readCommunityWindow(window.location.search));
       setFilters(initial); setDraft(initial); setReady(true);
     };
     sync();
@@ -39,10 +43,10 @@ export default function NewsPage() {
   }, []);
   useEffect(() => {
     if (ready) {
-      const query = newsViewQuery(filters, view);
+      const query = newsViewQuery(filters, view, communityWindow);
       window.history.replaceState(null, '', `/news${query ? `?${query}` : ''}`);
     }
-  }, [filters, ready, view]);
+  }, [filters, ready, view, communityWindow]);
   const category=view==='community'?null:{company:'COMPANY',industry:'INDUSTRY',briefing:'MARKET_BRIEF'}[view];
   const {page:data,loading,error,loadMore}=useNewsArchive(ready&&category?`research_category=${category}&${newsQuery(filters)}`:null,attempt);
   return <div className="page-stack">
@@ -65,17 +69,16 @@ export default function NewsPage() {
     </form>
     </details>}
     {view !== "community" && newsQuery(filters) && <p className="text-xs text-muted-foreground">{t("Publisher sections show this filtered view. These filters do not change story ranking or factual tags.")}</p>}
-    {view === "community" && <CommunityPulse ticker="" topic="" attempt={attempt}/>}
+    {view === "community" && <CommunityPulse key={filters.ticker} ticker={filters.ticker} topic="" attempt={attempt} initialWindow={communityWindow} onWindowChange={setCommunityWindow}/>}
     {view !== "community" && error && <MascotState state="dataUnavailable" role="alert">{t("News is temporarily unavailable.")} {data && t("Previously loaded headlines are shown below.")} <button className="ml-2 text-primary underline" onClick={() => setAttempt(value => value + 1)}>{t("Retry")}</button></MascotState>}
     {view !== "community" && loading && !data && <MascotState state="loading" role="status">{t("Loading news…")}</MascotState>}
     {view !== "community" && data && <>
       <section aria-label={ui(newsSectionLabels[view])}>
         {!data.items.length && <MascotState state="noMatches">{t("No qualifying recent reporting matches this view. Coverage may be incomplete.")}</MascotState>}
-        <div className="mt-3 divide-y">{data.items.map(item => <TopStory key={item.story.id} item={item}/>)}</div>
+        <LivePrices symbols={newsSymbols(data.items)} interval={30000}><div className="mt-3 divide-y">{data.items.map(item => <TopStory key={item.story.id} item={item}/>)}</div></LivePrices>
         <div className="mt-6 flex flex-col items-center gap-2">
           {data.has_more&&<Button variant="outline" disabled={loading} onClick={loadMore}>{t(loading?"Loading more…":"Show more")}</Button>}
-          <p className="text-xs text-muted-foreground">{t("Only reporting with source thumbnails is shown.")}</p>
-          <p className="text-xs text-muted-foreground">{t("Reporting from the last 72 hours. Older items appear when you choose Show more.")}</p>
+          <details className="text-xs text-muted-foreground"><summary>{ui("About this feed")}</summary><p>{t("Only reporting with source thumbnails is shown.")}</p><p>{t("Reporting from the last 72 hours. Older items appear when you choose Show more.")}</p></details>
         </div>
       </section>
     </>}

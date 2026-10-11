@@ -1,5 +1,6 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
+import {cacheRefresh} from "./cacheRefresh.ts";
 import type {TopStoryData} from "@/app/components/news/TopStory";
 
 type Page={items:TopStoryData[]; as_of:string; next_offset:number|null; has_more:boolean};
@@ -47,8 +48,8 @@ export function useNewsArchive(query:string|null,attempt:number) {
     };
     more.current=()=>{void load(true);};
     void load();
-    const timer=setInterval(()=>{void load();},60_000);
-    return()=>{controller.abort();clearInterval(timer);};
+    const stop=cacheRefresh(()=>{void load();});
+    return()=>{controller.abort();stop();};
   },[query,attempt]);
   return {page,loading,error,loadMore:()=>more.current()};
 }

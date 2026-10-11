@@ -1,3 +1,4 @@
+import {movement} from './live-market.ts';
 /** Never infer English from raw names, ASCII spelling, or ticker-specific branches. */
 export function englishCompanyName(stock: { display_name_en?: string | null; company_name?: string | null }): string | null {
   return stock.display_name_en?.trim() || null;
@@ -16,7 +17,7 @@ export function formatDate(value: string | null, short = false): string {
   return Number.isNaN(date.valueOf()) ? "Unavailable" : new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", ...(short ? {} : { year: "numeric" }), timeZone: "UTC" }).format(date);
 }
 export function direction(value: unknown): string {
-  return typeof value === "number" ? value > 0 ? "positive" : value < 0 ? "negative" : "" : "";
+  return movement(typeof value === "number" ? value : null).color;
 }
 export function safeExternalUrl(value: string | null): string | null {
   if (!value) return null;

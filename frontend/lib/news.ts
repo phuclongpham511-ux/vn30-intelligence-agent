@@ -19,10 +19,14 @@ export function readNewsView(search: string): { view: NewsView } {
   const view = value === 'company' || value === 'briefing' || value === 'community' ? value : 'industry';
   return { view };
 }
-export function newsViewQuery(filters: NewsFilters, view: NewsView): string {
+export function readCommunityWindow(search: string): 'today' | 'last24h' {
+  return new URLSearchParams(search).get('window') === 'last24h' ? 'last24h' : 'today';
+}
+export function newsViewQuery(filters: NewsFilters, view: NewsView, communityWindow: 'today' | 'last24h' = 'today'): string {
   const params = new URLSearchParams(newsQuery(filters));
   const canonical = readNewsView(`view=${view}`).view;
   if (canonical !== 'industry') params.set("view", canonical);
+  if (canonical === 'community' && communityWindow === 'last24h') params.set('window', communityWindow);
   return params.toString();
 }
 export function readNewsFilters(search: string): NewsFilters {

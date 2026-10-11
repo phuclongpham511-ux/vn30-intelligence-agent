@@ -5,11 +5,11 @@ import type { NewsArticle } from "@/lib/news";
 import { safeExternalUrl } from "@/lib/presentation";
 import NewsThumbnail from "./NewsThumbnail";
 
-export default function ArticleRow({ article }: { article: NewsArticle }) {
+export default function ArticleRow({ article, requireImage=true }: { article: NewsArticle; requireImage?:boolean }) {
   const {t,date:localDate}=useLocale();
   const date = article.published_at || article.first_seen_at;
   const url = safeExternalUrl(article.url);
-  return <NewsThumbnail images={[article.thumbnail_url]} revision={article.last_seen_at}>{image=><article className="border-b py-4 last:border-0">
+  return <NewsThumbnail required={requireImage} images={[article.thumbnail_url]} revision={article.last_seen_at}>{image=><article className="border-b py-4 last:border-0">
     <div className="flex items-start gap-4">{image}<div className="min-w-0 flex-1">
     <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
       <span>{article.source_name}</span>

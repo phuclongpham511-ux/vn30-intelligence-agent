@@ -7,7 +7,7 @@ export type LiveIndex = {snapshot:(import('./marketIndex').IndexSnapshot & {upda
 
 export const visibleSymbols=(symbols:string[])=>[...new Set(symbols.map(s=>s.trim().toUpperCase()))].sort().join(',');
 export function movement(change:number|null|undefined) {
-  return change==null ? {label:'Unavailable',color:'text-muted-foreground'} : change>0 ? {label:'Up',color:'text-emerald-600 dark:text-emerald-400'} : change<0 ? {label:'Down',color:'text-red-600 dark:text-red-400'} : {label:'Unchanged',color:'text-muted-foreground'};
+  return change==null || !Number.isFinite(change) ? {label:'Unavailable',color:'text-muted-foreground'} : change>0 ? {label:'Up',color:'positive'} : change<0 ? {label:'Down',color:'negative'} : {label:'Unchanged',color:'unchanged'};
 }
 export function indexMascot(session:Session,change:number|null|undefined) {
   return session==='active' ? 'marketWatching' : change!=null && change>0 ? 'marketUp' : change!=null && change<0 ? 'marketDown' : 'marketNeutral';

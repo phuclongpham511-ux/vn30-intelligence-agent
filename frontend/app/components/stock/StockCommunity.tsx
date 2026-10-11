@@ -45,7 +45,7 @@ export function CommunityDiscussions({ ticker, data, loading, error, retry, seen
         </details>
         {!data.items.length && <p className="mt-4 text-sm text-muted-foreground">{t("No {window} discussions matched {ticker}.",{window:ui(data.window.kind==="last24h"?"last-24-hour":"same-day"),ticker:ticker==="Market"?t("this view"):ticker})} {ui(data.coverage_partial ? "Sources need a fresh worker check; coverage is incomplete." : "No matching published items were acquired for this window.")} {t("This does not mean no discussion occurred.")}</p>}
         <div className="mt-4 divide-y">{data.themes.slice(0,compact?3:undefined).map(theme => <article key={theme.id} className="py-4 first:pt-0">
-          <h3 className="text-sm font-medium">{theme.label === 'Discussion phrasing' || theme.label === 'Recurring discussion phrase' ? (data.items.find(row => theme.evidence_ids.includes(row.id))?.title || theme.summary).slice(0, 100) : theme.label}</h3>
+          <h3 className="text-sm font-medium">{theme.label === 'Discussion phrasing' || theme.label === 'Recurring discussion phrase' ? (data.items.find(row => theme.evidence_ids.includes(row.id))?.title || theme.summary).slice(0, 100) : ui(theme.label)}</h3>
           <p className="mt-1 line-clamp-2 break-words text-sm leading-6">{theme.summary}</p>
           <p className="mt-2 text-xs text-muted-foreground">{t(theme.item_count===1?"{count} discussion":"{count} discussions",{count:theme.item_count})} · {t(theme.source_count===1?"{count} source":"{count} sources",{count:theme.source_count})} · {t("Latest")} <time dateTime={theme.latest_at}>{localDate(theme.latest_at,true)}</time></p>
           {compact&&<p className="mt-2 text-xs text-muted-foreground">{theme.source_ids.map(sourceName).join(' · ')}{originalDiscussion(theme)&&<a href={originalDiscussion(theme)!} target="_blank" rel="noopener noreferrer" className="ml-3 text-primary hover:underline">{t('Original discussion ↗')}</a>}</p>}
@@ -57,7 +57,7 @@ export function CommunityDiscussions({ ticker, data, loading, error, retry, seen
         </article>)}</div>
         {!compact&&data.items.length > 0 && <details className="mt-3 text-xs"><summary className="cursor-pointer text-primary">{t("All evidence")} · {ui(data.window.label)} ({t(data.items.length===1?"{count} original item":"{count} original items",{count:data.items.length})})</summary>{renderEvidence(data.items.map(row => row.id))}</details>}
         {data.truncated && <p className="mt-2 text-xs text-muted-foreground">{t("Analysis is limited to the latest 300 items in this window; sample coverage is incomplete.")}</p>}
-        {data.items.length > 0 && <p className="mt-3 text-xs text-muted-foreground">{t("Themes can overlap. Reposts count once; source breadth describes discussion, not corroboration.")}</p>}
+        {data.items.length > 0 && <details className="mt-3 text-xs text-muted-foreground"><summary>{ui("Sample & sources")}</summary><p>{t("Themes can overlap. Reposts count once; source breadth describes discussion, not corroboration.")}</p></details>}
       </>}
   </section>;
 }

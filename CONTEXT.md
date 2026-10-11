@@ -606,6 +606,23 @@ Clear history, unavailable saved tickers and keyboard selection are retained.
 The full-universe context loads only on Watchlist, preserving its existing flow.
 No discovery read acquires history or refreshes SSI membership.
 
+### Visual-first UI and News freshness V1 — 2026-10-11
+
+News and Hot Topics retain deterministic representatives and publisher evidence,
+with compact illustrated rows and a separate `/news/stories/[id]` Evidence view.
+Up to three existing article-associated tickers share page-scoped SSI demand;
+movement does not imply news causation. Positive/negative/zero/missing movement
+uses green/red/yellow/neutral, independently of freshness. Home uses Investor
+Attention for bounded discussion activity, and places the approved mascot directly
+left of the index. Watchlist retains explicit correction-aware review semantics.
+
+Visible News readers re-read persisted data every minute and on focus/visibility
+return, retaining pagination depth and snapshot semantics. Collector policy,
+leases, cooldowns, D1/D4/D5 and EOD rules are unchanged. The October 11 read-only
+database audit found correct persisted category ordering: Industry newest October
+9, Company October 10, Market October 11. See docs/WOOFI_UI_UX_REDESIGN_V1.md for
+real-source versus isolated replay acceptance and limitations.
+
 Hot Topics deduplicates only its promotion list by Story identity and keeps the
 existing earliest representative, publisher evidence and same-Story source image
 rules. News category archives retain those Stories. Community reuses the existing

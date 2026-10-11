@@ -1,7 +1,8 @@
 export type IndexSnapshot = {index:string;level:number;change:number|null;change_percent:number|null;total_volume:number|null;total_value:number|null;trading_date:string;source:string;fetched_at:string};
+import {movement} from './live-market.ts';
 export function indexMovement(data:IndexSnapshot|null) {
   const change=data?.change;
-  return change==null || !Number.isFinite(change) ? {label:'Direction unavailable',mascot:'marketUncertain',color:'text-muted-foreground'} as const : change>0 ? {label:'Up',mascot:'marketUp',color:'text-emerald-600 dark:text-emerald-400'} as const : change<0 ? {label:'Down',mascot:'marketDown',color:'text-red-600 dark:text-red-400'} as const : {label:'Unchanged',mascot:'marketNeutral',color:'text-muted-foreground'} as const;
+  return {...movement(change),label:change==null||!Number.isFinite(change)?'Direction unavailable':movement(change).label,mascot:change==null||!Number.isFinite(change)?'marketUncertain':change>0?'marketUp':change<0?'marketDown':'marketNeutral'};
 }
 
 export const signedIndex=(value:number|null,suffix='',locale='en-GB')=>value==null?'Unavailable':`${value>0?'+':''}${value.toLocaleString(locale,{minimumFractionDigits:2,maximumFractionDigits:2})}${suffix}`;

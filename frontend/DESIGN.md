@@ -50,8 +50,14 @@ Base:
 Semantic colors:
 - green only for positive observed financial/market changes;
 - red only for negative observed financial/market changes;
+- yellow/gold for a measured unchanged financial value (zero), with a readable unchanged label or symbol;
 - amber for warnings, incomplete evidence, or data-quality limitations;
 - neutral gray/slate for unavailable or secondary data.
+
+Movement and freshness are independent: zero does not establish a current session.
+Missing percentages stay neutral and never become zero. Light-theme unchanged
+uses dark gold for contrast. News ticker chips describe headline associations,
+not causation or verified investment impact.
 
 Avoid:
 - broad purple palettes;
@@ -171,6 +177,18 @@ Requirements:
 - Do not repeat the same metric across multiple cards and tables without a clear reason.
 - Make null/unavailable states explicit.
 - Keep source/as-of information accessible.
+
+News and Hot Topics show one existing deterministic representative per Story,
+with an actual same-Story source thumbnail, headline, publisher and publication
+time. Additional reporting belongs in the linked Evidence view. Primary illustrated
+feeds retain the source-image requirement; raw Evidence remains accessible without
+an image. At most three ticker chips appear initially, with existing batched quotes.
+
+Home places the approved mascot immediately left of the VN-Index number. Investor
+Attention shows bounded discussion activity and sample coverage, without sentiment
+classification when evidence is insufficient. Watchlist puts observed unreviewed
+activity first; quiet sections and source/storage diagnostics use disclosure.
+Material stale, unavailable and provisional states remain visible.
 
 ## Interaction
 
