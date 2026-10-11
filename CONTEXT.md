@@ -623,6 +623,14 @@ database audit found correct persisted category ordering: Industry newest Octobe
 9, Company October 10, Market October 11. See docs/WOOFI_UI_UX_REDESIGN_V1.md for
 real-source versus isolated replay acceptance and limitations.
 
+News issuer associations now require deterministic, whole-token qualified context
+or a unique metadata identity (`issuer-context-v1`). Currency/ordinary acronym
+mentions alone abstain. Worker-built proofs bind the exact article ID/headline;
+chips, SSI demand and ticker feed filters require those proofs. Legacy tags remain
+inspectable as unverified plain labels, without issuer links. Versioned derivative
+cache rebuilding preserves original Article/Story evidence and stays worker-owned.
+See docs/WOOFI_NEWS_ENTITY_RESOLUTION_V1.md for policy, tests and migration limits.
+
 Hot Topics deduplicates only its promotion list by Story identity and keeps the
 existing earliest representative, publisher evidence and same-Story source image
 rules. News category archives retain those Stories. Community reuses the existing

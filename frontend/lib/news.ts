@@ -3,6 +3,10 @@ export type NewsArticle = {
   first_seen_at: string; last_seen_at?:string; topics: string[]; tickers: string[]; sectors: string[];
   thumbnail_url?: string | null; thumbnail_provenance?: string | null;
 };
+export type TickerAssociation = {
+  symbol:string; article_id:string; article_title:string;
+  kind:'issuer_identity'|'explicit_stock'|'issuer_activity'; matched_text:string; policy:string;
+};
 export type NewsSource = {
   source_id: string; name: string; country: string; category: "VN" | "GLOBAL";
   enabled: boolean; poll_interval_minutes: number;

@@ -497,7 +497,10 @@ export const vietnamese = {
   "Filters active": "Đang áp dụng bộ lọc",
   "disabled": "tắt",
   "Mark {count} discussion reviewed": "Đánh dấu đã xem {count} thảo luận",
-  "{count} original item": "{count} nội dung gốc"
+  "{count} original item": "{count} nội dung gốc",
+  "Issuer context": "Ngữ cảnh doanh nghiệp",
+  "Unverified": "Chưa xác minh",
+  "Stored tag; issuer association unverified.": "Nhãn đã lưu; chưa xác minh liên kết doanh nghiệp."
 } as const;
 export type TranslationKey = keyof typeof vietnamese;
 export type Language = "en" | "vi";

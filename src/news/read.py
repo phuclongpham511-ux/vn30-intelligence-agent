@@ -1,10 +1,25 @@
 from datetime import datetime, timezone
 from typing import Literal
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, Field, model_validator
 from src.news.models import NewsArticle, NewsStory
 from src.news.normalization import utc
 from src.news.service import articles, story_score, equity_tagger
 from src.news.registry import load_sources
+from src.news.tagging import ENTITY_POLICY
+
+
+class TickerAssociation(BaseModel):
+    symbol: str
+    article_id: str
+    article_title: str
+    kind: Literal['issuer_identity', 'explicit_stock', 'issuer_activity']
+    matched_text: str
+    policy: str
+
+
+def ticker_associations(tagger, articles):
+    return [TickerAssociation(**match, article_id=article.id, article_title=article.title)
+            for article in articles for match in tagger.resolve(article.title)]
 
 class StoryResponse(BaseModel):
     story: NewsStory
@@ -15,6 +30,14 @@ class StoryResponse(BaseModel):
     ranking_score: float
     ranking_reason: str = 'Independent publisher diversity, capped activity and recency'
     research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] | None = None
+    ticker_associations: list[TickerAssociation] = Field(default_factory=list)
+
+    @model_validator(mode='after')
+    def qualified_associations(self):
+        evidence = {a.id: a.title for a in self.articles}
+        self.ticker_associations = [a for a in self.ticker_associations
+            if a.policy == ENTITY_POLICY and a.matched_text and evidence.get(a.article_id) == a.article_title]
+        return self
 
     @field_validator('story', mode='before')
     @classmethod
@@ -93,6 +116,7 @@ def build_research_rows(session, options, category=None, *, hot=False, offset=0,
         story = story.model_copy(update={'source_count': source_count, 'article_count': len(members),
             'last_updated_at': max(a.first_seen_at for a in members)})
         output.append(StoryResponse(story=story, articles=[chosen, *[a for a in members if a.id != chosen.id]],
+            ticker_associations=ticker_associations(tagger, members),
             representative_article=chosen, thumbnail_url=image.thumbnail_url if image else None,
             thumbnail_article_id=image.id if image else None, research_category=kind, ranking_score=story_score(story, now),
             ranking_reason='Independent publishers first, capped article activity, then latest activity' if hot else 'Latest publication first; earliest source represents each story'))

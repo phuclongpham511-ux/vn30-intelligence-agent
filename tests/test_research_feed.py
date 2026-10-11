@@ -83,7 +83,8 @@ def test_language_context_disambiguates_currency_roles_and_locations_from_symbol
     tagger = Tagger([SimpleNamespace(symbol=s, company_name=None, sector=None) for s in ('ABC','XYZ','USD','CEO','HCM','VTV')])
     assert tagger.tag('ABC huy động 285 triệu USD', 'VN').tickers == ['ABC']
     assert tagger.tag('CEO XYZ appoints a new director', 'VN').tickers == ['XYZ']
-    assert tagger.tag('CEO reports higher earnings', 'VN').tickers == ['CEO']
+    assert tagger.tag('CEO reports higher earnings', 'VN').tickers == []
+    assert tagger.tag('Cổ phiếu CEO reports higher earnings', 'VN').tickers == ['CEO']
     assert tagger.tag('Hạ tầng TP.HCM tăng trưởng', 'VN').tickers == []
     assert tagger.tag('Rời VTV, đạo diễn chuyển công việc', 'VN').tickers == []
     assert tagger.tag('Trở thành tỷ phú USD trong năm nay', 'VN').tickers == []

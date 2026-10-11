@@ -5,6 +5,7 @@ from sqlalchemy import update, text
 from sqlalchemy.exc import IntegrityError
 from src.news.models import NewsReadCache, NewsStory
 from src.news.normalization import utc
+from src.news.tagging import ENTITY_POLICY
 
 
 def refresh_cache(session, changed, *, now, observations=None):
@@ -32,7 +33,8 @@ def refresh_cache(session, changed, *, now, observations=None):
     version = str(universe.last_success_at) if universe else None
     metadata = session.get(NewsReadCache, 'universe_version')
     changed = set(changed) | set(session.exec(select(NewsStory.id).where(NewsStory.read_cache_dirty == True)).all())
-    rebuild = bootstrap or metadata is None or metadata.rows != [{'version': version}]
+    projection_version = [{'version': version, 'entity_policy': ENTITY_POLICY}]
+    rebuild = bootstrap or metadata is None or metadata.rows != projection_version
     if not changed and not rebuild and not observations:
         session.rollback()
         return False
@@ -77,7 +79,7 @@ def refresh_cache(session, changed, *, now, observations=None):
     cache.refresh_count += int(meaningful)
     session.add(cache)
     metadata = metadata or NewsReadCache(id='universe_version', updated_at=now)
-    metadata.rows, metadata.updated_at = [{'version': version}], now
+    metadata.rows, metadata.updated_at = projection_version, now
     session.add(metadata)
     if changed:
         session.execute(update(NewsStory).where(NewsStory.id.in_(changed))
@@ -113,8 +115,11 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
             if any(options.get(field) and options[field].casefold() != str(getattr(article, column)).casefold()
                    for field, column in [('country', 'country'), ('source', 'source_id'), ('category', 'category')]):
                 continue
+            qualified = {a.symbol for a in row.ticker_associations if a.article_id == article.id}
+            if options.get('ticker') and options['ticker'].upper() not in qualified:
+                continue
             if any(options.get(field) and options[field].casefold() not in {v.casefold() for v in getattr(article, column)}
-                   for field, column in [('topic', 'topics'), ('ticker', 'tickers'), ('sector', 'sectors')]):
+                   for field, column in [('topic', 'topics'), ('sector', 'sectors')]):
                 continue
             if options.get('financial_only') and not (article.topics or article.tickers or article.sectors):
                 continue
@@ -132,6 +137,7 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
         row.story.last_updated_at = max(a.first_seen_at for a in members)
         row.representative_article = chosen
         row.articles = [chosen, *[a for a in members if a.id != chosen.id]]
+        row.ticker_associations = [a for a in row.ticker_associations if a.article_id in {m.id for m in members}]
         row.thumbnail_url, row.thumbnail_article_id = image.thumbnail_url, image.id
         row.research_category = entry['categories'][chosen.id]
         row.ranking_score = story_score(row.story, now)

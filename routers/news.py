@@ -189,4 +189,11 @@ def detail(story_id: str, session: DB):
     if not story:
         raise HTTPException(status_code=404, detail='News story not found')
     rows = session.exec(select(NewsArticle).where(NewsArticle.story_id == story_id).order_by(NewsArticle.first_seen_at.desc())).all()
-    return StoryResponse(story=story, articles=rows, representative_article=representative(rows, {s.source_id: s.representative_priority for s in load_sources()}), ranking_score=story_score(story, datetime.now(timezone.utc)))
+    # Read qualified worker evidence only; legacy labels are still inspectable but
+    # do not become issuer links. No HTTP tagging/backfill or source acquisition.
+    from src.news.models import NewsReadCache
+    cache = session.get(NewsReadCache, 'research')
+    cached = next((entry['row'] for entry in cache.rows if entry['row']['story']['id'] == story_id), {}) if cache else {}
+    return StoryResponse(story=story, articles=rows, ticker_associations=cached.get('ticker_associations', []),
+        representative_article=representative(rows, {s.source_id: s.representative_priority for s in load_sources()}),
+        ranking_score=story_score(story, datetime.now(timezone.utc)))

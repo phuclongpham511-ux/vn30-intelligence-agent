@@ -59,7 +59,7 @@ test('locale formatting preserves real zero, missing values, precision and Vietn
 test('news chrome localizes while even dictionary-matching source titles and publisher names stay original',()=>{
   const {default:NewsThumbnail}=component('../app/components/news/NewsThumbnail.tsx');
   const {default:TopStory}=component('../app/components/news/TopStory.tsx',{'./NewsThumbnail':NewsThumbnail});
-  const props={item:{story:{id:'s',source_count:2},representative_article:article,articles:[article],research_category:'MARKET_BRIEF'}};
+  const props={item:{story:{id:'s',source_count:2},representative_article:article,articles:[article],research_category:'MARKET_BRIEF',ticker_associations:[{symbol:'XYZ',article_id:article.id,article_title:article.title,kind:'explicit_stock',matched_text:'xyz',policy:'issuer-context-v1'}]}};
   for(const language of ['vi','en']) {
     const html=render(TopStory,props,language);
     assert.match(html,/>News<\/a>/);assert.match(html,/>Company<\/span>/);assert.match(html,/>XYZ<\/strong>/);
@@ -119,5 +119,19 @@ test('raw source evidence stays inspectable when its thumbnail is missing',()=>{
  const {default:Row}=component('../app/components/news/ArticleRow.tsx',{'./NewsThumbnail':Thumbnail});
  const props={article:{...article,thumbnail_url:null}};
  assert.equal(render(Row,props),'');
- assert.match(render(Row,{...props,requireImage:false}),/News/);assert.match(render(Row,{...props,requireImage:false}),/https:\/\/example.org\/a/);
+ const raw=render(Row,{...props,requireImage:false});
+ assert.match(raw,/News/);assert.match(raw,/https:\/\/example.org\/a/);assert.match(raw,/Chưa xác minh/);assert.doesNotMatch(raw,/href="\/stocks\/XYZ"/);
+ const linked=render(Row,{...props,requireImage:false,associations:[{symbol:'XYZ',article_id:article.id,article_title:article.title,kind:'explicit_stock',matched_text:'xyz',policy:'issuer-context-v1'}]});
+ assert.match(linked,/href="\/stocks\/XYZ"/);assert.match(linked,/Ngữ cảnh doanh nghiệp: xyz/);
+});
+
+test('actual News card never renders legacy ticker chips, but retains qualified issuer navigation',()=>{
+ const {default:Thumbnail}=component('../app/components/news/NewsThumbnail.tsx');
+ const {default:TopStory}=component('../app/components/news/TopStory.tsx',{'./NewsThumbnail':Thumbnail});
+ const item={story:{id:'s',source_count:1},representative_article:{...article,title:'Tỷ giá USD giảm',tickers:['USD']},articles:[article]};
+ for(const language of ['vi','en']){
+  const html=render(TopStory,{item},language);assert.match(html,/Tỷ giá USD giảm/);assert.doesNotMatch(html,/ticker-chip|\/stocks\/USD|Mentioned stocks|Cổ phiếu được nhắc đến/);
+  const qualified={...item,representative_article:{...item.representative_article,title:'Cổ phiếu USD tăng giá'},ticker_associations:[{symbol:'USD',article_id:'a',article_title:'Cổ phiếu USD tăng giá',kind:'explicit_stock',matched_text:'usd',policy:'issuer-context-v1'}]};
+  assert.match(render(TopStory,{item:qualified},language),/href="\/stocks\/USD"/);
+ }
 });

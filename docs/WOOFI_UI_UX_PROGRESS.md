@@ -42,3 +42,21 @@ G. News diagnosis: consistent read-only backup; recomputed and persisted feed id
 5. One local feature checkpoint; original worktrees and canonical runtime preserved. No push or deploy. Next action is owner review and explicitly authorized integration.
 
 Next.js dev generated frontend AGENTS.md, CLAUDE.md and next-env.d.ts changes. Bytes are preserved externally in `next-generated/`; AGENTS/CLAUDE remain untracked and excluded. Production build restored tracked next-env to baseline.
+
+## P1 News issuer correction — 2026-10-11
+
+Original candidate `61fb13d` was blocked because currency USD became an equity
+association. Separate correction qualifies deterministic issuer evidence, rejects
+ambiguous bare language tokens and protects unverified legacy tags from stock
+links/SSI demand. No live data backfill or runtime cutover.
+
+- Focused backend 104 / full backend 973 / focused frontend 26 / full frontend 98
+  passed; typecheck and production build passed.
+- Standards and Spec re-reviews: zero blocking findings.
+- Isolated derivative upgrade preserved 2,416 Articles, 2,280 Stories and 30 Dividend
+  records verified by table-content hashes; second upgrade is a no-op.
+- Actual original USD case, genuine CII/SHS/PNJ/SHB and VIX/VPB associations,
+  replayed SSI freshness, Watchlist persistence and Stock Detail/mobile navigation
+  verified on ports 8150/3050. Preview stopped; canonical runtime unchanged.
+- Report: `docs/WOOFI_NEWS_ENTITY_RESOLUTION_V1.md`. Correction commit and final
+  normal-push verification are recorded in the external receipt/final handoff.
