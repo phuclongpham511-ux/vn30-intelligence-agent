@@ -39,12 +39,13 @@ def test_hot_same_story_image_and_foreign_ingestion_gate(session, client):
     assert all(s.country == 'VN' and s.category == 'VN' for s in load_sources())
 
 
-def test_no_image_story_waits_until_source_provides_thumbnail(session, client):
+def test_no_image_story_remains_eligible_and_later_gains_thumbnail(session, client):
     now = datetime.now(timezone.utc)
     for sid in ('one', 'two'):
         ingest_cycle(session, [source(sid)], fetch=lambda _, sid=sid: [ArticleInput('Retail sector production grows', f'https://{sid}.example/noimage', now)], now=now, force=True)
-    assert client.get('/news/hot').json() == []
-    assert client.get('/news/feed?research_category=INDUSTRY').json() == []
+    assert len(client.get('/news/hot').json()) == 1
+    assert client.get('/news/hot').json()[0]['thumbnail_url'] is None
+    assert len(client.get('/news/feed?research_category=INDUSTRY').json()) == 1
     assert len(client.get('/news/top').json()) == 1
     assert client.get('/news/top?require_image=true').json() == []
     ingest_cycle(session,[source('two')],fetch=lambda _:[ArticleInput('Retail sector production grows','https://two.example/noimage',now,'https://two.example/photo.png','media:thumbnail')],now=now,force=True)
@@ -107,7 +108,8 @@ def test_hot_image_preference_is_stable_and_never_crosses_stories(session, clien
             ArticleInput('Steel industry production grows',f'https://{sid}.example/image',now,'https://image.example/a.png','media:thumbnail'),
             ArticleInput('Retail sector demand declines',f'https://{sid}.example/noimage',now)],now=now,force=True)
     rows=client.get('/news/hot').json()
-    assert len(rows)==1 and rows[0]['thumbnail_url']=='https://image.example/a.png'
+    assert len(rows)==2
+    assert {row['thumbnail_url'] for row in rows}=={None,'https://image.example/a.png'}
 
 
 def test_word_order_title_case_and_foreign_geography():
@@ -128,7 +130,9 @@ def test_irrelevant_cluster_member_cannot_supply_image_or_publisher_count(sessio
     # Model the already-persisted cluster identified during review.
     other=members[1];other.story_id=members[0].story_id;session.add(other);session.commit()
     assert client.get('/news/hot').json()==[]
-    assert client.get('/news/feed?research_category=MARKET_BRIEF').json()==[]
+    market=client.get('/news/feed?research_category=MARKET_BRIEF').json()
+    assert len(market)==1 and market[0]['thumbnail_url'] is None
+    assert market[0]['story']['source_count']==1
     for path in ('/news/top',):
         row=client.get(path).json()[0]
         assert len(row['articles'])==1 and row['story']['source_count']==1

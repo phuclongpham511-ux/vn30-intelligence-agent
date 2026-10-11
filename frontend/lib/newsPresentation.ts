@@ -1,10 +1,12 @@
 import type {LiveItem} from './live-market.ts';
 import type {TickerAssociation} from './news.ts';
 
-type Article={id:string;title:string;tickers:string[]};
+type Article={id:string;title:string;tickers:string[];url?:string};
 type Story={representative_article:Article;ticker_associations?:TickerAssociation[]};
 export function qualifiedAssociations(article:Article,associations:TickerAssociation[]=[]){
-  return associations.filter(a=>a.policy==='issuer-context-v1'&&a.article_id===article.id&&a.article_title===article.title&&
+  return associations.filter(a=>a.policy==='issuer-context-v2'&&a.article_id===article.id&&a.article_title===article.title&&
+    (!a.article_url||a.article_url===article.url)&&
+    (a.evidence_origin!=='publisher_text'||!!(a.article_url&&a.text_receipt_id&&a.text_hash&&a.evidence_excerpt&&a.text_observed_at&&Number.isFinite(Date.parse(a.text_observed_at))))&&
     ['issuer_identity','explicit_stock','issuer_activity'].includes(a.kind)&&a.matched_text.trim()&&article.tickers.includes(a.symbol));
 }
 export const allRelatedTickers=(item:Story)=>[...new Set(qualifiedAssociations(item.representative_article,item.ticker_associations).map(a=>a.symbol))];

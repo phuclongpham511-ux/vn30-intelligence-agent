@@ -18,11 +18,11 @@ function component(file, overrides={}) {
 const NewsThumbnail=component('../app/components/news/NewsThumbnail.tsx');
 const TopStory=component('../app/components/news/TopStory.tsx',{'./NewsThumbnail':NewsThumbnail});
 const article={id:'a',title:'Issuer update',url:'https://example.org/a',source_name:'Publisher',published_at:null,first_seen_at:'2026-10-06T05:00:00Z',tickers:[],topics:[],sectors:[]};
-test('news rows render source images and hide missing or unsafe image stories',()=>{
+test('news rows retain valid stories when images are missing or unsafe',()=>{
   const render=image=>renderToStaticMarkup(React.createElement(TopStory,{item:{story:{id:'s',representative_title:article.title,source_count:2},representative_article:{...article,thumbnail_url:image},articles:[article],research_category:'COMPANY'}}));
   assert.match(render('https://example.org/image.jpg'),/object-cover/);
-  assert.equal(render(null),'');
-  assert.equal(render('javascript:alert(1)'),'');
+  assert.match(render(null),/Issuer update/);
+  assert.match(render('javascript:alert(1)'),/Issuer update/);
   assert.doesNotMatch(render('javascript:alert(1)'),/src="javascript:/);
   assert.match(render('https://example.org/image.jpg'),/Publisher/);
 });
@@ -75,10 +75,10 @@ test('shared stock search initially stays empty instead of rendering the market 
   assert.doesNotMatch(html,/role="option"|<select/);
 });
 
-test('Hot Topics selects only same-cluster images and hides no-image stories',()=>{
+test('Hot Topics selects only same-cluster images without hiding no-image stories',()=>{
  const render=item=>renderToStaticMarkup(React.createElement(TopStory,{item,requireImage:true}));
  const base={story:{id:'s',source_count:2},representative_article:article,articles:[article]};
- assert.equal(render(base),'');
+ assert.match(render(base),/Issuer update/);
  const sibling={...article,id:'b',thumbnail_url:'https://example.org/sibling.jpg'};
  assert.match(render({...base,articles:[article,sibling]}),/sibling.jpg/);
  assert.doesNotMatch(render({...base,thumbnail_url:'https://other.example/unrelated.jpg'}),/src="https:\/\/other.example/);
@@ -89,7 +89,7 @@ test('Hot Topics selects only same-cluster images and hides no-image stories',()
 test('Explore preserves its index hero and exposes the requested VN-Index detail link',()=>{
  const Market=component('../app/components/ExploreMarket.tsx',{
   './mascot/Mascot':{MascotIllustration:({size})=>React.createElement('span',{'data-mascot-size':size}),MascotState:({children})=>children},
-  './news/TopStory':()=>null,'./news/CommunityPulse':()=>null});
+  './news/TopStory':()=>null,'./news/MarketFocus':()=>null});
  const html=renderToStaticMarkup(React.createElement(Market));
  assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
  assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary/);

@@ -11,7 +11,7 @@ from src.news.tagging import ENTITY_POLICY
 def refresh_cache(session, changed, *, now, observations=None):
     from src.news.read import build_research_rows
     from src.news.service import equity_tagger
-    from src.news.research import research_category
+    from src.news.research import research_category, publisher_company_context
     from src.models import SecurityUniverseState
     cache = session.get(NewsReadCache, 'research')
     bootstrap = cache is None
@@ -33,7 +33,7 @@ def refresh_cache(session, changed, *, now, observations=None):
     version = str(universe.last_success_at) if universe else None
     metadata = session.get(NewsReadCache, 'universe_version')
     changed = set(changed) | set(session.exec(select(NewsStory.id).where(NewsStory.read_cache_dirty == True)).all())
-    projection_version = [{'version': version, 'entity_policy': ENTITY_POLICY}]
+    projection_version = [{'version': version, 'entity_policy': ENTITY_POLICY, 'research_policy': 'news-relevance-v2'}]
     rebuild = bootstrap or metadata is None or metadata.rows != projection_version
     if not changed and not rebuild and not observations:
         session.rollback()
@@ -48,14 +48,19 @@ def refresh_cache(session, changed, *, now, observations=None):
                                     if r['row']['story']['id'] not in changed}
     for row in rows:
         kinds = {}
+        text_admission = {}
         # Fresh validated copies have no shared SQLAlchemy instance state.
         row = type(row).model_validate_json(row.model_dump_json())
         for article in row.articles:
             tags = tagger.tag(article.title, article.category)
-            article.tickers = tags.tickers
+            article.tickers = sorted({p.symbol for p in row.ticker_associations if p.article_id == article.id})
             article.sectors = sorted(set(article.sectors) | set(tags.sectors))
-            kinds[article.id] = research_category(article, [eligible[s] for s in tags.tickers])
-        entries[row.story.id] = {'row': row.model_dump(mode='json'), 'categories': kinds}
+            kinds[article.id] = research_category(article, [eligible[s] for s in article.tickers])
+            if kinds[article.id] is None and publisher_company_context([p for p in row.ticker_associations if p.article_id == article.id]):
+                kinds[article.id] = 'COMPANY'
+                text_admission[article.id] = min(p.text_observed_at for p in row.ticker_associations
+                    if p.article_id == article.id and p.evidence_origin == 'publisher_text').isoformat()
+        entries[row.story.id] = {'row': row.model_dump(mode='json'), 'categories': kinds, 'text_admission': text_admission}
     # Duplicate observations only update the image retry revision; no tagging,
     # Story aggregation or Hot ranking rebuild is needed.
     for entry in entries.values():
@@ -103,12 +108,17 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
     output = []
     for entry in cache.rows:
         row = StoryResponse.model_validate(entry['row'])
+        row.ticker_associations = [p for p in row.ticker_associations if p.evidence_origin == 'headline'
+                                  or utc(p.text_observed_at) <= now]
         members = [a for a in row.articles if utc(a.first_seen_at) <= now and
                    cutoff <= utc(a.published_at or a.first_seen_at) <= now]
         if not members:
             continue
         matching = []
         for article in members:
+            admitted = entry.get('text_admission', {}).get(article.id)
+            if admitted and datetime.fromisoformat(admitted) > now:
+                continue
             kind = entry['categories'].get(article.id)
             if not kind or (category and kind != category):
                 continue
@@ -131,14 +141,12 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
             continue
         chosen = representative(matching, {})
         image = cluster_thumbnail(chosen, members, {})
-        if image is None:
-            continue
         row.story.source_count, row.story.article_count = count, len(members)
         row.story.last_updated_at = max(a.first_seen_at for a in members)
         row.representative_article = chosen
         row.articles = [chosen, *[a for a in members if a.id != chosen.id]]
         row.ticker_associations = [a for a in row.ticker_associations if a.article_id in {m.id for m in members}]
-        row.thumbnail_url, row.thumbnail_article_id = image.thumbnail_url, image.id
+        row.thumbnail_url, row.thumbnail_article_id = (image.thumbnail_url, image.id) if image else (None, None)
         row.research_category = entry['categories'][chosen.id]
         row.ranking_score = story_score(row.story, now)
         row.ranking_reason = ('Independent publishers first, capped article activity, then latest activity' if hot or attention

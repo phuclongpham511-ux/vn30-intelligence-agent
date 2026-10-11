@@ -31,13 +31,16 @@ def ingest(session, inputs, sources=None, now=NOW, **kw):
     return ingest_cycle(session, sources or [source()], now=now, force=True, fetch=lambda _: inputs, **kw)
 
 
-def test_feed_normalizes_without_retaining_body():
+def test_feed_normalizes_bounded_publisher_text_with_provenance():
     rows = parse_feed(Path('tests/fixtures/news/feed.xml').read_bytes(), source())
     assert len(rows) == 2
     assert rows[0].url == 'https://example.org/news/1'
     assert rows[0].published_at == datetime(2026, 10, 4, 5, tzinfo=timezone.utc)
     assert rows[1].published_at is None
-    assert 'SECRET' not in str([asdict(a) for a in rows])
+    assert rows[0].text == 'SECRET_FULL_BODY'  # synthetic fixture content
+    assert rows[1].text == 'SECRET_HTML_BODY'
+    assert all(row.text_provenance == 'rss:description' for row in rows)
+    assert all(len(row.text or '') <= 12000 for row in rows)
 
 
 def test_mocked_http_and_size_limit(monkeypatch):

@@ -100,6 +100,8 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
                         existing.thumbnail_provenance = item.thumbnail_provenance
                     session.add(existing)
                     session.flush()
+                    from src.news.text_evidence import retain_text
+                    altered = (existing.source_id == source.source_id and retain_text(session, existing, item, now)) or altered
                     story = session.get(NewsStory, existing.story_id)
                     if story and altered:
                         if correction and story.representative_title == previous_title:
@@ -138,6 +140,8 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
                     thumbnail_provenance=item.thumbnail_provenance)
                 session.add(article)
                 session.flush()
+                from src.news.text_evidence import retain_text
+                retain_text(session, article, item, now)
                 members = session.exec(select(NewsArticle).where(NewsArticle.story_id == story.id)).all()
                 story.article_count = len(members)
                 story.source_count = len({a.publisher_group for a in members})

@@ -89,3 +89,16 @@ class NewsArticle(SQLModel, table=True):
     def serialize_time(self, value):
         # SQLite returns naive UTC; never let a browser interpret it as local time.
         return utc(value).isoformat().replace('+00:00', 'Z') if value is not None else None
+
+
+class NewsTextReceipt(SQLModel, table=True):
+    """Immutable bounded text supplied by the same publisher feed acquisition."""
+    id: str = Field(primary_key=True)
+    article_id: str = Field(foreign_key='newsarticle.id', index=True)
+    article_title: str
+    canonical_url: str
+    text: str
+    text_hash: str
+    provenance: str
+    observed_at: datetime = Field(sa_type=DateTime(timezone=True))
+    sequence: int = 0

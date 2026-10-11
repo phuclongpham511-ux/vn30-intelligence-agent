@@ -124,7 +124,7 @@ def top(session: DB, require_image: bool = False, options: dict = Depends(filter
     now = datetime.now(timezone.utc)
     if require_image:
         rows = research_rows(session, {**options, 'limit': 10000}, now=now)
-        return sorted(rows, key=lambda row: (-row.ranking_score, row.story.id))[:limit]
+        return sorted((row for row in rows if row.thumbnail_url), key=lambda row: (-row.ranking_score, row.story.id))[:limit]
     rows = articles(session, now=now, **options)
     current = articles(session, now=now)
     grouped = {}
@@ -194,6 +194,13 @@ def detail(story_id: str, session: DB):
     from src.news.models import NewsReadCache
     cache = session.get(NewsReadCache, 'research')
     cached = next((entry['row'] for entry in cache.rows if entry['row']['story']['id'] == story_id), {}) if cache else {}
+    from src.news.tagging import ENTITY_POLICY
+    # Add qualified derived labels only to response copies. Keep original tags
+    # inspectable; the response validator rejects corrected-title/URL proofs.
+    rows = [article.model_copy(update={'tickers': sorted(set(article.tickers) | {
+        p['symbol'] for p in cached.get('ticker_associations', []) if p.get('policy') == ENTITY_POLICY
+        and p['article_id'] == article.id and p['article_title'] == article.title
+        and p.get('article_url', article.canonical_url) == article.canonical_url})}) for article in rows]
     return StoryResponse(story=story, articles=rows, ticker_associations=cached.get('ticker_associations', []),
         representative_article=representative(rows, {s.source_id: s.representative_priority for s in load_sources()}),
         ranking_score=story_score(story, datetime.now(timezone.utc)))

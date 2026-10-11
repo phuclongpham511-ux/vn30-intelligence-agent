@@ -25,6 +25,7 @@ export default function ArticleRow({ article, requireImage=true, associations=[]
       {[...article.topics, ...article.sectors].filter((v, i, arr) => arr.indexOf(v) === i).map(tag => <span key={tag} className="rounded border px-2 py-0.5">{tag}</span>)}
     </div>
     {url && <a className="mt-3 inline-block text-xs text-primary underline-offset-4 hover:underline focus-visible:outline" href={url} target="_blank" rel="noopener noreferrer">{t("Read original ↗")}</a>}
+    {qualified.some(p=>p.evidence_origin==='publisher_text')&&<details className="mt-3 text-xs text-muted-foreground"><summary className="cursor-pointer">{t('Issuer association evidence')}</summary>{qualified.filter(p=>p.evidence_origin==='publisher_text').map(p=><div key={p.symbol} className="mt-2"><p>{p.symbol} · {t('Publisher feed text')} · {p.kind}</p><blockquote className="mt-1 whitespace-pre-wrap">{p.evidence_excerpt}</blockquote><p className="mt-1 break-all">{t('Receipt')}: {p.text_receipt_id}</p></div>)}</details>}
     </div></div>
   </article>}</NewsThumbnail>;
 }

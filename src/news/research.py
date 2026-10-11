@@ -23,6 +23,13 @@ VIETNAM_CONTEXT = ('viet nam', 'vietnam', 'vn index', 'vnindex', 'vnd', 'dong vi
 ISSUER_PREFIX = r'^(?:(?:co phieu|ma|ticker|stock|ngan hang|bank|cong ty|company|tap doan|corporation|chung khoan|bao hiem|chu tich|ceo|cfo|director|chairman|lanh dao|tong giam doc|loi nhuan(?: sau thue)?|doanh thu|ket qua kinh doanh|earnings|profit|revenue|income|co tuc|nhan su|du an|cua|of|at)\s+)*$'
 
 
+def publisher_company_context(proofs):
+    """Body mention grants Company discovery only with sentence-level finance context."""
+    return any(p.evidence_origin == 'publisher_text' and
+        (p.kind == 'explicit_stock' or re.search(r'\b(?:doanh thu|loi nhuan|co tuc|co phieu|bao cao tai chinh|revenue|earnings|profit|dividend)\b', normalized(p.evidence_excerpt or '')))
+        for p in proofs)
+
+
 def primary_issuers(title, equities):
     """Conservative headline-subject identity, never a name-shaped organization guess."""
     text = normalized(title)

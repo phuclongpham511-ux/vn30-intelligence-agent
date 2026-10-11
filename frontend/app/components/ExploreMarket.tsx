@@ -11,7 +11,7 @@ import {uniqueHotTopics} from '@/lib/news';
 import {LivePrices} from './stock/LivePrice';
 import {newsSymbols} from '@/lib/newsPresentation';
 import {cacheRefresh} from '@/lib/cacheRefresh';
-import CommunityPulse from './news/CommunityPulse';
+import MarketFocus from './news/MarketFocus';
 export default function ExploreMarket(){
   const {t,ui,locale,date:localDate}=useLocale();
   const live=useLiveIndex();const index=live.data?.snapshot||null;const indexError=live.failed;const indexLoading=!live.data&&!live.failed;
@@ -26,7 +26,7 @@ export default function ExploreMarket(){
   const movement=indexMovement(index);
   return <>
     <header className="flex flex-col gap-5">
-      <div className="flex flex-wrap items-end justify-between gap-4"><div className="min-w-0"><div className="eyebrow mb-2">{t("Workspace / Explore")}</div><h1>{t("Vietnam equities")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("Market movement, publisher attention and stock research.")}</p></div><nav aria-label={t('Explore sections')} className="flex flex-wrap gap-4 text-xs text-primary"><a href="#hot-topics" className="hover:underline">{t('Hot Topics')}</a><a href="#community-pulse" className="hover:underline">{ui('Investor Attention')}</a><a href="#explore-stocks" className="hover:underline">{t('Explore stocks')}</a></nav></div>
+      <div className="flex flex-wrap items-end justify-between gap-4"><div className="min-w-0"><div className="eyebrow mb-2">{t("Workspace / Explore")}</div><h1>{t("Vietnam equities")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("Market movement, publisher attention and stock research.")}</p></div><nav aria-label={t('Explore sections')} className="flex flex-wrap gap-4 text-xs text-primary"><a href="#hot-topics" className="hover:underline">{t('Hot Topics')}</a><a href="#market-focus" className="hover:underline">{t('Market Focus')}</a><a href="#explore-stocks" className="hover:underline">{t('Explore stocks')}</a></nav></div>
       <div className="panel flex min-w-0 items-center gap-3 p-5 sm:gap-6 sm:p-6">
         <div className="w-20 shrink-0 sm:w-28"><MascotIllustration state={indexLoading?'loading':freshness!=='fresh'?'marketUncertain':indexMascot(live.data?.session||'unknown',index?.change)} size={128} className="max-w-full"/></div>
         <div className="min-w-0"><h2 id="market-state" className="text-sm text-muted-foreground"><Link href="/indices/VNINDEX" className="hover:underline">{t("VN-Index")} ↗</Link></h2>
@@ -51,7 +51,7 @@ export default function ExploreMarket(){
       <LivePrices symbols={newsSymbols(stories||[])} interval={30000}><div className="mt-3">{stories?.map(item=><TopStory key={item.story.id} item={item} requireImage compact/>)}</div></LivePrices>
 
     </section>
-    <section aria-labelledby="community-pulse" className="min-w-0 border-t pt-5 xl:border-l xl:border-t-0 xl:pl-8 xl:pt-0"><div className="mb-4 flex items-center justify-between gap-3"><h2 id="community-pulse" className="scroll-mt-32">{ui('Investor Attention')}</h2><Link href="/news?view=community" className="text-xs text-primary hover:underline">{t('All discussions ↗')}</Link></div><CommunityPulse ticker="" topic="" attempt={0} compact/></section>
+    <MarketFocus/>
     </div>
   </>;
 }

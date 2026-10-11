@@ -40,7 +40,7 @@ class Tags:
     scope: str
 
 
-ENTITY_POLICY = 'issuer-context-v1'
+ENTITY_POLICY = 'issuer-context-v2'
 # Language meanings, independent of the equity universe. These terms can still
 # identify a security through explicit stock notation or its unique legal name.
 AMBIGUOUS_LANGUAGE = frozenset(('it all are can for has his how new now one our out the who why you '
@@ -80,12 +80,12 @@ class Tagger:
             r'(?:(?:' + symbols + r')\s+(?:va|and)\s*)*$')
         self.symbol_pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(stock.symbol) for stock in self.stocks) + r')(?!\w)') if self.stocks else None
 
-    def resolve(self, title: str) -> list[dict]:
-        """Whole-token issuer evidence; no body is stored, so uncertain titles abstain."""
+    def resolve(self, title: str, *, body: str | None = None) -> list[dict]:
+        """Headline proofs plus sentence-scoped evidence in supplied publisher text."""
         text = normalized(title)
         matches = {}
         for name, owners in self.identity_owners.items():
-            if len(owners) == 1 and contains(text, name):
+            if len(owners) == 1 and f' {name} ' in f' {text} ':
                 symbol = next(iter(owners))
                 matches[symbol] = dict(symbol=symbol, kind='issuer_identity', matched_text=name, policy=ENTITY_POLICY)
         for match in self.symbol_pattern.finditer(title) if self.symbol_pattern else ():
@@ -117,6 +117,31 @@ class Tagger:
                             and not (currency_amount or location or broadcaster or role)):
                 matches.setdefault(match[0], dict(symbol=match[0], kind='explicit_stock' if explicit else 'issuer_activity',
                     matched_text=normalized(match[0]) + (' ' + activity[0] if activity and not explicit else ''), policy=ENTITY_POLICY))
+        for proof in matches.values():
+            proof['evidence_origin'] = 'headline'
+        if body:
+            # Headlines retain precedence. A bare ecosystem name never grants a
+            # body association; explicit stock wording or unique legal identity
+            # must occur in the same sentence as the candidate.
+            for sentence in re.split(r'(?<=[.!?;])\s+|\n+', body[:12000]):
+                for proof in self.resolve(sentence):
+                    if proof['kind'] not in ('issuer_identity', 'explicit_stock'):
+                        continue
+                    # Keep an inspectable supporting span, even in long prose.
+                    # Revalidate each bounded excerpt rather than cutting away
+                    # the stock wording/name that qualified the association.
+                    excerpt = None
+                    for start in range(0, len(sentence), 300):
+                        candidate = sentence[start:start+600]
+                        if any(p['symbol'] == proof['symbol'] and p['kind'] == proof['kind']
+                               and p['matched_text'] == proof['matched_text'] for p in self.resolve(candidate)):
+                            excerpt = candidate
+                            break
+                    if excerpt is None:
+                        continue
+                    proof = {**proof, 'evidence_origin': 'publisher_text',
+                             'evidence_excerpt': excerpt}
+                    matches.setdefault(proof['symbol'], proof)
         return [matches[symbol] for symbol in sorted(matches)]
 
     def tag(self, title: str, category: str) -> Tags:

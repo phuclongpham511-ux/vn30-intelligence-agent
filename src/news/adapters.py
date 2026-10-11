@@ -1,4 +1,4 @@
-"""Only adapters know feed formats. Descriptions/content are never returned or saved."""
+"""Bounded publisher feed metadata. No article-page requests or HTML execution."""
 from dataclasses import dataclass
 from datetime import datetime
 import xml.etree.ElementTree as ET
@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import gzip
 import io
 import ssl
+import re
 import truststore
 from src.news.normalization import canonical_url, clean_title, parse_time
 from src.news.registry import Source
@@ -23,6 +24,33 @@ class ArticleInput:
     published_at: datetime | None
     thumbnail_url: str | None = None
     thumbnail_provenance: str | None = None
+    text: str | None = None
+    text_provenance: str | None = None
+
+
+def feed_text(node):
+    # Prefer supplied article content to the shorter summary. Scripts, related
+    # links and navigation cannot become issuer evidence. No page scraping.
+    for field, origin in [('{http://purl.org/rss/1.0/modules/content/}encoded', 'rss:content'),
+            ('{http://www.w3.org/2005/Atom}content', 'atom:content'),
+            ('description', 'rss:description'),
+            ('{http://www.w3.org/2005/Atom}summary', 'atom:summary')]:
+        value = node.findtext(field)
+        if not value:
+            continue
+        soup = BeautifulSoup(value[:100000], 'html.parser')
+        for element in soup.select('script,style,nav,footer,aside'):
+            element.decompose()
+        for element in list(soup.find_all(True)):
+            if element.attrs is None:
+                continue
+            labels = ' '.join([element.get('id', ''), *element.get('class', [])])
+            if re.search(r'(?:^|[\s_-])(?:related|recommended|recommendation|read[-_]more|tin[-_]lien[-_]quan|suggested)(?:$|[\s_-])', labels, re.I):
+                element.decompose()
+        text = ' '.join(soup.get_text(' ', strip=True).split())[:12000]
+        if text:
+            return text, origin
+    return None, None
 
 
 def feed_image(node, base_url=''):
@@ -103,7 +131,8 @@ def parse_feed(data: bytes, source: Source) -> list[ArticleInput]:
                 date = date.replace('GMT+7', '+0700')
             published = parse_time(date, source.timezone)
         image, provenance = feed_image(node, url)
-        items.append(ArticleInput(title, url, published, image, provenance))
+        text, text_provenance = feed_text(node)
+        items.append(ArticleInput(title, url, published, image, provenance, text, text_provenance))
     return items
 
 

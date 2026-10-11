@@ -4,8 +4,9 @@ export type NewsArticle = {
   thumbnail_url?: string | null; thumbnail_provenance?: string | null;
 };
 export type TickerAssociation = {
-  symbol:string; article_id:string; article_title:string;
+  symbol:string; article_id:string; article_title:string; article_url?:string|null;
   kind:'issuer_identity'|'explicit_stock'|'issuer_activity'; matched_text:string; policy:string;
+  evidence_origin?:'headline'|'publisher_text'; evidence_excerpt?:string|null; text_receipt_id?:string|null; text_hash?:string|null; text_observed_at?:string|null;
 };
 export type NewsSource = {
   source_id: string; name: string; country: string; category: "VN" | "GLOBAL";

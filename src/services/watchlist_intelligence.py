@@ -3,11 +3,11 @@ from datetime import datetime, timedelta, timezone
 from hashlib import sha256
 import json
 
-from sqlalchemy import func
+from sqlalchemy import func, or_
 from sqlmodel import select
 
 from src.models import Stock, Security
-from src.news.models import NewsArticle
+from src.news.models import NewsArticle, NewsReadCache
 from src.news.normalization import utc, normalized
 from src.news.registry import load_sources
 from src.news.research import research_category
@@ -32,20 +32,34 @@ def ticker_membership(session, column, symbol):
     return select(values.c.value).where(values.c.value == symbol).exists()
 
 
-def news_page(session, symbol, identity, now, offset, size, source_ids):
+def news_page(session, symbol, identity, now, offset, size, source_ids, body_evidence=None):
+    body_evidence = body_evidence or {}
+    def proofs(article):
+        return [p for p in body_evidence.get(article.id, [])
+                if p.article_title == article.title and p.article_url == article.canonical_url]
+    def relevant(article):
+        return bool(proofs(article)) or research_category(article, [identity]) == 'COMPANY'
+    def version(article):
+        fields = [normalized(article.title), article.canonical_url,
+                  utc(article.published_at).isoformat() if article.published_at else None]
+        # Text corrections reopen only associations admitted through body evidence.
+        if proofs(article) and research_category(article, [identity]) != 'COMPANY':
+            fields.append(sorted((p.symbol, p.matched_text, p.text_hash) for p in proofs(article)))
+        return revision(fields)
+    membership = lambda: or_(ticker_membership(session, NewsArticle.tickers, symbol), NewsArticle.id.in_(list(body_evidence)))
     rows = session.exec(select(NewsArticle).where(
         NewsArticle.first_seen_at >= now-timedelta(hours=72),
         NewsArticle.first_seen_at <= now,
         NewsArticle.country == 'VN', NewsArticle.category == 'VN',
         NewsArticle.source_id.in_(source_ids),
-        ticker_membership(session, NewsArticle.tickers, symbol))
+        membership())
         .order_by(NewsArticle.first_seen_at.desc(), NewsArticle.id).limit(SCAN_LIMIT+1)).all()
     truncated = len(rows) > SCAN_LIMIT
     grouped = {}
     for article in rows[:SCAN_LIMIT]:
         if article.published_at and utc(article.published_at) > now:
             continue
-        if research_category(article, [identity]) != 'COMPANY':
+        if not relevant(article):
             continue
         grouped.setdefault(article.story_id, []).append(article)
     ids = sorted(grouped, key=lambda key: (max(utc(a.first_seen_at) for a in grouped[key]), key), reverse=True)
@@ -56,13 +70,13 @@ def news_page(session, symbol, identity, now, offset, size, source_ids):
         partition_by=NewsArticle.story_id, order_by=(NewsArticle.first_seen_at, NewsArticle.id)).label('position')).where(
             NewsArticle.story_id.in_(selected), NewsArticle.first_seen_at <= now,
             NewsArticle.source_id.in_(source_ids), NewsArticle.country=='VN', NewsArticle.category=='VN',
-            ticker_membership(session,NewsArticle.tickers,symbol)).subquery()
+            membership()).subquery()
     anchors = session.exec(select(NewsArticle).join(ranked, NewsArticle.id==ranked.c.article_id)
         .where(ranked.c.position <= 100).order_by(NewsArticle.first_seen_at,NewsArticle.id)
         .limit(size*100)).all() if selected else []
     archived = {}
     for article in anchors:
-        if (not article.published_at or utc(article.published_at)<=now) and research_category(article,[identity])=='COMPANY':
+        if (not article.published_at or utc(article.published_at)<=now) and relevant(article):
             archived.setdefault(article.story_id,[]).append(article)
     events = []
     for story_id in selected:
@@ -71,15 +85,13 @@ def news_page(session, symbol, identity, now, offset, size, source_ids):
         # evidence breadth, never another unread story or a content revision.
         evidence.sort(key=lambda a: (utc(a.first_seen_at), a.id))
         chosen = evidence[0]
-        version = revision([normalized(chosen.title), chosen.canonical_url,
-                            utc(chosen.published_at).isoformat() if chosen.published_at else None])
-        events.append(dict(id='news:'+story_id, entity_id=story_id, revision=version,
+        events.append(dict(id='news:'+story_id, entity_id=story_id, revision=version(chosen),
             kind='news', title=chosen.title, occurred_at=min(utc(a.first_seen_at) for a in evidence),
             url=chosen.url,
-            revision_members={a.id:revision([normalized(a.title),a.canonical_url,
-                utc(a.published_at).isoformat() if a.published_at else None]) for a in evidence},
+            revision_members={a.id:version(a) for a in evidence},
             source_count=len({a.publisher_group for a in evidence}),
-            evidence=[a.model_dump(mode='json') for a in evidence[:5]],
+            evidence=[a.model_copy(update={'tickers':sorted(set(a.tickers) | {p.symbol for p in proofs(a)})}).model_dump(mode='json') for a in evidence[:5]],
+            ticker_associations=[p.model_dump(mode='json') for a in evidence[:5] for p in proofs(a)],
             evidence_truncated=len(evidence)>5))
     return dict(items=events, has_more=len(ids)>offset+size,
                 truncated=truncated, window_start=now-timedelta(hours=72))
@@ -140,6 +152,16 @@ def intelligence(session, symbols, *, now=None, offset=0, size=12):
     now = utc(now or datetime.now(timezone.utc))
     if not symbols:
         return dict(as_of=now, offset=offset, page_size=size, stocks=[], news_sources=[], community_sources=[])
+    # Reuse qualified worker proofs once per bounded Watchlist request. HTTP does
+    # not read article text, resolve entities, fetch sources or rebuild the cache.
+    from src.news.read import StoryResponse
+    body_evidence = {symbol:{} for symbol in symbols}
+    cache = session.get(NewsReadCache, 'research')
+    for entry in cache.rows if cache else []:
+        row = StoryResponse.model_validate(entry['row'])
+        for proof in row.ticker_associations:
+            if proof.symbol in body_evidence and proof.evidence_origin == 'publisher_text' and utc(proof.text_observed_at) <= now:
+                body_evidence[proof.symbol].setdefault(proof.article_id, []).append(proof)
     stocks = {s.symbol:s for s in session.exec(select(Stock).where(
         Stock.symbol.in_(symbols), Stock.is_active == True)).all()}
     securities = {s.symbol:s for s in session.exec(select(Security).where(
@@ -161,7 +183,7 @@ def intelligence(session, symbols, *, now=None, offset=0, size=12):
             company_name=identity.company_name if identity else None,
             display_name_en=identity.display_name_en if identity else None,
             exchange=identity.exchange if identity else None)
-        row['news'] = news_page(session,symbol,identity,now,offset,size,news_ids) if identity else None
+        row['news'] = news_page(session,symbol,identity,now,offset,size,news_ids,body_evidence[symbol]) if identity else None
         row['community'] = community_page(session,symbol,now,offset,size,community_ids) if identity else None
         row['technical'] = technical_updates(session,symbol,now) if identity else None
         output.append(row)

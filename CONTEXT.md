@@ -638,3 +638,36 @@ persisted Today/Last 24 hours APIs, displays at most three extractive themes,
 original discussion links, source coverage/freshness and activity counts distinct
 from sentiment. Its complete News view and Stock Detail/Watchlist default renderer
 remain available. See docs/EXPLORE_HOME_V2.md for validation and data limits.
+
+### News Relevance and Stock Research UX V2 — development checkpoint, 2026-10-11
+
+This release supersedes earlier image-required and headline-only presentation
+rules. Qualified category archives and Hot Topics allow a missing image, with a
+neutral fallback. Hot Topics still requires two independent publisher groups.
+Each card retains the existing deterministic representative and links its original
+headline directly to the publisher. The secondary Source archive keeps complete
+Story evidence accessible; primary cards omit report counts and Evidence actions.
+
+The canonical ordinary-equity metadata remains the issuer authority. The
+`issuer-context-v2` worker projection adds bounded publisher feed text only when
+it supplies explicit stock wording or a unique issuer identity. Append-only text
+receipts bind article ID, exact current title, canonical URL, publisher ownership,
+sequence, hash and observation time. Supporting excerpts must contain the issuer
+wording. Related-link containers do not supply evidence. Currency/acronym
+mentions and inferred corporate ecosystems abstain. Primary feed and body-aware
+Watchlist HTTP reads reuse persisted proofs without acquiring or resolving body
+text. Legacy raw evidence reads retain their prior headline-only behavior. Original
+Article/Story rows and their legacy tags remain inspectable and are not backfilled.
+
+Home uses at most three recent qualified Company/Market Brief Stories in Market
+Focus, with no Community popularity or sentiment inputs. Watchlist shows compact
+ticker-first rows and every loaded unread item, with administrative information
+and independent explicit review controls in secondary disclosures. Body evidence
+is admitted through the same worker cache and correction-aware factual revisions;
+opening, expanding, refreshing and navigating never marks an item reviewed.
+
+Minute/focus News refresh, collector ownership/cooldowns, SSI, Community freshness,
+Technical D1/D4/D5/EOD and paused FPT supervision are unchanged. Validation uses an
+isolated archived SQLite copy plus labeled feed/SSI replay. Canonical runtime is
+not updated by this development checkpoint. See docs/WOOFI_NEWS_RELEVANCE_V2_SPEC.md
+and docs/WOOFI_NEWS_RELEVANCE_V2_ACCEPTANCE.md for scope and acceptance evidence.

@@ -262,3 +262,22 @@ Before accepting a frontend change, verify:
 6. Is Materiality represented as attention-worthiness rather than recommendation?
 7. Does the change support English and Vietnamese product chrome while preserving original source evidence?
 8. Did we avoid unnecessary new dependencies?
+
+## News Relevance and Stock Research UX V2 (current development contract)
+
+These rules supersede earlier image-required archive presentation. Keep one
+deterministic representative per Story and open its original publisher headline
+directly, with ticker links as separate siblings. Images are optional; preserve
+the neutral fallback. Primary cards show source and publication time, without
+Evidence/report-count actions. Put inspectable evidence in a secondary Source
+archive. Body-based issuer chips require a current URL-bound receipt, a supporting
+excerpt and observation time; unsupported stored tags remain unverified text.
+
+Home Market Focus has at most three recent qualified Company/Market Brief Stories.
+Do not rank it by forum activity, sentiment or a fabricated importance score.
+Watchlist centers ticker, observed price/direction and loaded unread activity.
+Quiet stocks remain visible. Keep all loaded unread items visible; place review,
+evidence, archive and coverage detail in secondary disclosures. Reviewing one
+source never reviews another, and no navigation or expansion changes review state.
+All new product chrome supports VI/EN and both themes. Financial movement colors
+remain independent of freshness and never imply news causation.

@@ -78,7 +78,7 @@ export default function NewsPage() {
         <LivePrices symbols={newsSymbols(data.items)} interval={30000}><div className="mt-3 divide-y">{data.items.map(item => <TopStory key={item.story.id} item={item}/>)}</div></LivePrices>
         <div className="mt-6 flex flex-col items-center gap-2">
           {data.has_more&&<Button variant="outline" disabled={loading} onClick={loadMore}>{t(loading?"Loading more…":"Show more")}</Button>}
-          <details className="text-xs text-muted-foreground"><summary>{ui("About this feed")}</summary><p>{t("Only reporting with source thumbnails is shown.")}</p><p>{t("Reporting from the last 72 hours. Older items appear when you choose Show more.")}</p></details>
+          <details className="text-xs text-muted-foreground"><summary>{ui("About this feed")}</summary><p>{t("Qualified reporting appears with or without a source image.")}</p><p>{t("Reporting from the last 72 hours. Older items appear when you choose Show more.")}</p><details className="mt-3"><summary>{t("Source archive")}</summary><ul className="mt-2 space-y-2">{data.items.map(item=><li key={item.story.id}><a className="underline focus-visible:ring-2 focus-visible:ring-primary" href={`/news/stories/${item.story.id}`}>{item.representative_article.title}</a></li>)}</ul></details></details>
         </div>
       </section>
     </>}
