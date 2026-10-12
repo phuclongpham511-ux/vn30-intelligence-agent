@@ -17,7 +17,7 @@ function useLive<T extends {session:import('./live-market').Session}>(url:string
       if(!response.ok)throw Error('Live market unavailable');
       return response.json();
     },result=>{if(result){setData(result);setFailed(false);}else setFailed(true);},interval,document,
-    {set:(fn,delay)=>window.setTimeout(fn,delay),clear:timer=>window.clearTimeout(timer as number)},release);
+    {set:(fn,delay)=>window.setTimeout(fn,delay),clear:timer=>window.clearTimeout(timer as number)},release,undefined,window);
   },[url,interval,version]);
   return {data,failed,refresh:()=>setVersion(value=>value+1)};
 }
