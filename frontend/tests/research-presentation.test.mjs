@@ -31,6 +31,7 @@ test('Explore renders a bounded universe with direct research links and no add p
   const Picker=component('../app/components/TickerPicker.tsx',{
     './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
     './stock/StockSearch':()=>React.createElement('input',{role:'combobox'}),
+    './stock/LivePrice':{LivePrices:({children})=>children,LivePrice:({symbol,compact})=>React.createElement('span',{'data-live-symbol':symbol,'data-compact':String(compact)})},
     'next/navigation':{useRouter:()=>({push:()=>{}})},
     '@/lib/useEquityPage':{useEquityPage:()=>({data:{items:rows.slice(0,10),total:60,total_universe:60,offset:0,limit:10,status:'healthy'},loading:false,error:false})},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
@@ -39,6 +40,9 @@ test('Explore renders a bounded universe with direct research links and no add p
   assert.match(html,/Explore stocks/);
   assert.doesNotMatch(html,/Available stocks|Validate and add/);
   assert.equal((html.match(/href="\/stocks\//g)||[]).length,10);
+  assert.equal((html.match(/data-compact="true"/g)||[]).length,10);
+  assert.equal((html.match(/aria-hidden="true"/g)||[]).length,10);
+  assert.match(html,/grid min-h-\[88px\] grid-cols-\[minmax\(0,1fr\)_auto_14px\] items-center/);
   assert.match(html,/of 60 results/);
 });
 
