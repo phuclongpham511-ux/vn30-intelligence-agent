@@ -1,7 +1,7 @@
 import type { FundamentalPeriod } from "./types.ts";
 export const FINANCIAL_LABELS = {
-  revenue: "Revenue", net_profit: "Net Profit",
-  revenue_growth_yoy: "Revenue YoY", net_profit_growth_yoy: "Net Profit YoY",
+  revenue: "Revenue", net_profit: "Profit after tax",
+  revenue_growth_yoy: "Revenue YoY", net_profit_growth_yoy: "Profit after tax YoY",
   gross_margin: "Gross Margin", net_margin: "Net Margin", roe: "ROE",
 } as const;
 export type FinancialKey = keyof typeof FINANCIAL_LABELS;

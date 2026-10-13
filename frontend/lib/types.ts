@@ -13,3 +13,10 @@ export type FundamentalPeriod = {
   revenue_growth_yoy: number | null; net_profit_growth_yoy: number | null;
   gross_margin_change: number | null; net_margin_change: number | null; roe_change: number | null;
 };
+export type FinancialChange = {metric:'revenue'|'net_profit';current_period:string;prior_period:string;current:number;previous:number|null;absolute_change:number|null;growth_yoy:number|null};
+export type FundamentalResearch = {
+  ticker:string; source:string; currency:'VND'; period_type:'annual'; rows:FundamentalPeriod[]; changes:FinancialChange[];
+  sector:string|null; industry:string|null; financial_identity_guard:boolean;
+  publication_date:null; consolidation:null; read_at:string; read_kind:'provider_or_process_cache';
+  available_period_types:string[]; available_statements:string[];
+};

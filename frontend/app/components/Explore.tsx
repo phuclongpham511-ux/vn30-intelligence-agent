@@ -63,7 +63,7 @@ export default function Explore({ticker}:{ticker:string}) {
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
       </div>
-      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<><p className="stock-note">{t('Source-reported annual financials. Missing values remain unavailable; valuation and full financial statements are not provided.')}</p><FundamentalTrends ticker={ticker} visible={tab==='fundamentals'}/></>}</div>
+      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} visible={tab==='fundamentals'}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker}/>}</div>
       <div role="tabpanel" id="stock-panel-news" aria-labelledby="stock-tab-news" tabIndex={0} hidden={tab!=='news'}>{tab==='news'&&<div className="page-stack"><StockNews ticker={ticker}/><StockCommunity ticker={ticker}/></div>}</div>
       {tab==='overview'&&<StockNews ticker={ticker} preview/>}

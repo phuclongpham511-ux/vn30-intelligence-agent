@@ -12,7 +12,7 @@ test("annual adapter sorts real years without interpolation or mutation", () => 
   assert.deepEqual(availableSeries(result,["revenue","roe"]),["revenue"]);
 });
 test("financial labels and formatting are English and missing stays distinct from zero", () => {
-  assert.equal(FINANCIAL_LABELS.net_profit,"Net Profit");
+  assert.equal(FINANCIAL_LABELS.net_profit,"Profit after tax");
   assert.equal(FINANCIAL_LABELS.revenue_growth_yoy,"Revenue YoY");
   assert.equal(compactVnd(null),"—");
   assert.equal(compactVnd(0),"0");

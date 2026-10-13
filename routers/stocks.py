@@ -185,6 +185,24 @@ def stock_fundamentals(record: Stock = Depends(require_stock),
     return data.fundamentals(record.symbol, provider)
 
 
+@router.get("/{symbol}/fundamentals/research")
+def stock_financial_research(symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
+                            limit: int = Query(default=8, ge=1, le=20),
+                            session: Session = Depends(get_session),
+                            provider: FundamentalDataProvider = Depends(data.get_fundamental_provider)):
+    """Existing financial provider + cached identity; SELECT only, no stock onboarding."""
+    from src.analytics.financial_research import financial_research
+    ticker = SymbolRequest(symbol=symbol).symbol
+    security = session.get(Security, ticker)
+    stock = find_stock(session, ticker)
+    if (security and not security.is_active) or not (security or stock and stock.is_active):
+        raise HTTPException(status_code=404, detail="Listed stock identity unavailable")
+    return financial_research(ticker, provider.get_financials(ticker), provider.source,
+        limit=limit, sector=stock.sector if stock else None, industry=stock.industry if stock else None,
+        names=(security.company_name if security else None, security.display_name_en if security else None,
+               stock.company_name if stock else None, stock.display_name_en if stock else None))
+
+
 @router.get("/{symbol}/news", response_model=list[NewsItem])
 def stock_news(limit: int = Query(default=5, ge=1, le=20),
                record: Stock = Depends(require_stock),
