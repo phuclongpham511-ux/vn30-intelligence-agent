@@ -12,7 +12,7 @@ export function LivePrices({symbols,interval,children}:{symbols:string[];interva
   useEffect(()=>{const timer=setInterval(()=>setClock(n=>n+1),30000);return()=>clearInterval(timer);},[]);
   return <Context.Provider value={value}>{children}</Context.Provider>;
 }
-export function LivePrice({symbol,prominent=false}:{symbol:string;prominent?:boolean}) {
+export function LivePrice({symbol,prominent=false,showSession=false}:{symbol:string;prominent?:boolean;showSession?:boolean}) {
   const {data,failed}=useContext(Context);const {ui,locale,date}=useLocale();
   const item=data?.items[symbol];const row=item?.snapshot;
   const status=quoteStatus(item,failed);
@@ -22,6 +22,7 @@ export function LivePrice({symbol,prominent=false}:{symbol:string;prominent?:boo
     <div className={prominent?'text-[32px] font-semibold':'font-medium'}>{format(row?.last_price)} {row&&<span className="text-xs font-normal text-muted-foreground">VND</span>}</div>
     {row&&<div className={`flex flex-wrap gap-x-2 ${prominent?'justify-end text-sm':''} ${direction.color}`}><span>{ui(direction.label)}</span>{row.change!=null&&<span>{format(row.change,true)}</span>}{row.change_percent!=null&&<span>{format(row.change_percent,true)}%</span>}</div>}
     <div className="mt-1 text-[10px] text-muted-foreground">{ui(status==='fresh'?'Current market':status==='stale'?'Stale market data':'Market data unavailable')}{row?' · '+date(row.updated_at,true):''}</div>
+    {showSession&&row&&<p className="mt-1 text-[10px] text-muted-foreground">{ui('Source session')}: {ui(row.session==='active'?'Active trading session':row.session==='break'?'Midday break':row.session==='closed'?'Market closed':'Session unconfirmed')} · {row.source}</p>}
     {row&&<details className="mt-1 text-[10px] text-muted-foreground"><summary>{ui('Source & session')}</summary><p>{row.source} · {ui('Trading date ·')} {date(row.trading_date)} · {ui('Reference price')} {format(row.reference_price)} VND</p></details>}
   </div>;
 }

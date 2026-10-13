@@ -11,7 +11,7 @@ import {cacheRefresh} from "@/lib/cacheRefresh";
 
 type Story = TopStoryData & { story: TopStoryData["story"] & { last_updated_at?: string | null } };
 
-export default function StockNews({ ticker }: { ticker: string }) {
+export default function StockNews({ ticker, preview=false }: { ticker: string; preview?:boolean }) {
   const {t}=useLocale();
   const [items, setItems] = useState<Story[] | null>(null);
   const [error, setError] = useState(false);
@@ -32,7 +32,7 @@ export default function StockNews({ ticker }: { ticker: string }) {
     return () => {controller.abort();stop();};
   }, [ticker, attempt]);
   const remaining=items?.slice(1)||[];
-  const visible=expanded?remaining:remaining.slice(0,4);
+  const visible=preview?remaining.slice(0,2):expanded?remaining:remaining.slice(0,4);
   const allHref=`/news?${newsViewQuery({...emptyNewsFilters,ticker},"company")}`;
   return <section className="panel overflow-hidden" aria-label={t("Quick news · {ticker}",{ticker})}>
     <div className="flex items-center justify-between gap-3 border-b px-5 py-4">
@@ -48,7 +48,7 @@ export default function StockNews({ ticker }: { ticker: string }) {
             <TopStory item={items[0]}/>
             {visible.map(item=><TopStory key={item.story.id} item={item} compact/>)}
           </LivePrices>
-          {remaining.length>4&&<button type="button" className="mt-3 text-xs text-primary hover:underline" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{expanded?t("Show fewer headlines"):t("Show more headlines ({count})",{count:remaining.length-4})}</button>}
+          {!preview&&remaining.length>4&&<button type="button" className="mt-3 text-xs text-primary hover:underline" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{expanded?t("Show fewer headlines"):t("Show more headlines ({count})",{count:remaining.length-4})}</button>}
         </>
         : <p className="py-4 text-sm text-muted-foreground">{t("No recent ingested headlines matched {ticker}. News may be missing or untagged; this does not indicate no meaningful change.",{ticker})}</p>}
     </div>

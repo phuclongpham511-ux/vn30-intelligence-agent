@@ -7,6 +7,7 @@ import { annualChartData, availableSeries, FINANCIAL_LABELS, type FinancialKey }
 import { direction } from "@/lib/presentation";
 import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
+import {stockRead} from '@/lib/stock-detail';
 
 const axis = { fill:"var(--muted-foreground)", fontSize:11 };
 const tip = { background:"var(--card)", border:"1px solid var(--border)", borderRadius:8, color:"var(--foreground)", fontSize:12 };
@@ -40,28 +41,31 @@ function ReportedData({ rows }: { rows: FundamentalPeriod[] }) {
   </details>;
 }
 
-export default function FundamentalTrends({ ticker }: { ticker: string }) {
-  const {t,ui,percent:localPercent,compact:localCompact}=useLocale();
+export default function FundamentalTrends({ ticker, visible=true }: { ticker: string; visible?:boolean }) {
   const [rows,setRows] = useState<FundamentalPeriod[]>([]);
   const [loading,setLoading] = useState(true), [error,setError] = useState(false), [attempt,setAttempt] = useState(0);
   useEffect(() => {
     const controller = new AbortController();
+    let disposed=false;
+    const timeout=setTimeout(()=>controller.abort(),20000);
     setLoading(true); setError(false); setRows([]);
-    fetch("/api/stocks/" + encodeURIComponent(ticker) + "/fundamentals/history?limit=4",{signal:controller.signal})
-      .then(async response => {
-        if (!response.ok) throw new Error("Unavailable");
-        const data = annualChartData(await response.json());
-        if (!controller.signal.aborted) setRows(data);
-      }).catch(() => {if (!controller.signal.aborted) setError(true);})
-      .finally(() => {if (!controller.signal.aborted) setLoading(false);});
-    return () => controller.abort();
+    stockRead<FundamentalPeriod[]>("/api/stocks/" + encodeURIComponent(ticker) + "/fundamentals/history?limit=4",controller.signal)
+      .then(data=>{if(!disposed)setRows(annualChartData(data));})
+      .catch(()=>{if(!disposed)setError(true);})
+      .finally(()=>{clearTimeout(timeout);if(!disposed)setLoading(false);});
+    return()=>{disposed=true;clearTimeout(timeout);controller.abort();};
   },[ticker,attempt]);
+  return visible?<FundamentalTrendsView rows={rows} loading={loading} error={error} retry={()=>setAttempt(value=>value+1)}/>:null;
+}
+
+export function FundamentalTrendsView({rows,loading,error,retry}:{rows:FundamentalPeriod[];loading:boolean;error:boolean;retry:()=>void}) {
+  const {t,ui,percent:localPercent,compact:localCompact}=useLocale();
   const profits = availableSeries(rows,profitabilityKeys);
   const growth = availableSeries(rows,["revenue_growth_yoy","net_profit_growth_yoy"]);
   const latest = rows.at(-1);
   return <section className="space-y-4 min-w-0" aria-labelledby="fundamental-trends-title">
     <div className="flex flex-wrap items-end justify-between gap-2"><div><div className="eyebrow mb-1">{t("Company performance")}</div><h2 id="fundamental-trends-title" className="text-xl">{t("Fundamental Trends")}</h2><p className="mt-1 text-xs text-muted-foreground">{t("Annual reported financials")}</p></div><span className="text-xs text-muted-foreground">{rows[0]?.period}{rows.length > 1 ? "–" + latest?.period : ""}{latest ? " · " + latest.source : ""}</span></div>
-    {loading ? <div className="grid gap-4 md:grid-cols-2" role="status" aria-label={t("Loading annual financial history")}><Skeleton className="h-72"/><Skeleton className="h-72"/></div> : error ? <div className="panel p-8 text-center" role="alert"><p className="mb-4">{t("Annual financial history is temporarily unavailable.")}</p><Button variant="outline" onClick={() => setAttempt(value => value + 1)}>{t("Retry financials")}</Button></div> : !rows.length ? <p className="panel p-8 text-sm text-muted-foreground">{t("No annual financial observations are available from the current provider.")}</p> : <>
+    {loading ? <div className="grid gap-4 md:grid-cols-2" role="status" aria-label={t("Loading annual financial history")}><Skeleton className="h-72"/><Skeleton className="h-72"/></div> : error ? <div className="panel p-8 text-center" role="alert"><p className="mb-4">{t("Annual financial history is temporarily unavailable.")}</p><Button variant="outline" onClick={retry}>{t("Retry financials")}</Button></div> : !rows.length ? <p className="panel p-8 text-sm text-muted-foreground">{t("No annual financial observations are available from the current provider.")}</p> : <>
       <div className="grid min-w-0 gap-4 md:grid-cols-2"><AnnualBars rows={rows} field="revenue"/><AnnualBars rows={rows} field="net_profit"/></div>
       <div className="grid min-w-0 gap-4 md:grid-cols-2">
         <article className="panel min-w-0 p-4 sm:p-5" aria-label={t("Historical growth")}><h3>{t("Growth")}</h3><p className="mt-1 text-xs text-muted-foreground">{t("Year-over-year · Positive / negative change")}</p>

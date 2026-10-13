@@ -1,6 +1,6 @@
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import Literal
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session
 from src.db.session import get_session
@@ -144,6 +144,21 @@ def stock_history(start: date | None = None, end: date | None = None,
 def stock_market(record: Stock = Depends(require_stock),
                  provider: MarketDataProvider = Depends(get_market_provider)):
     return data.market(record.symbol, provider)
+
+
+@router.get("/{symbol}/corporate-actions")
+def stock_corporate_actions(
+        symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
+        limit: int = Query(default=50, ge=1, le=100),
+        session: Session = Depends(get_session)):
+    """Existing source observations only: no onboarding, acquisition or inferred dates."""
+    from src.corporate_actions.repository import CorporateActionRepository
+    ticker = SymbolRequest(symbol=symbol).symbol
+    cutoff = datetime.now(timezone.utc)
+    observations = CorporateActionRepository(session).get_actions_for_symbol(ticker, as_of=cutoff)
+    items = sorted(observations, key=lambda item: (item.observed_at, item.action_id), reverse=True)
+    return dict(ticker=ticker, as_of=cutoff, coverage='INCOMPLETE',
+                items=items[:limit], has_more=len(items) > limit)
 
 
 @router.get("/{symbol}/technical-history", response_model=list[TechnicalBar])
