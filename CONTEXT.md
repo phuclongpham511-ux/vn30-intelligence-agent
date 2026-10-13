@@ -1,5 +1,19 @@
 # Woofi — Domain Context
 
+### Fundamental Data Engine V1 — 2026-10-13 (local development checkpoint)
+
+The existing vnstock/VCI provider now exposes metadata-qualified income, balance
+sheet and cash-flow packets with annual, quarterly and TTM Python projections.
+Deterministic ratios/growth retain formula/input/source evidence; bank raw padding,
+conflicted labels, missing inputs and incompatible periods fail closed. The
+Fundamental UI retains its four internal sections and five Stock Detail tabs,
+rendering structured API results and original statement tables. Legacy financial
+APIs remain unchanged. No new financial persistence, ingestion worker or migration.
+Live financial reads and replay contracts passed for FPT/PNJ/VCB; browser acceptance
+remains NOT_VERIFIED because preview execution was denied and was not retried.
+This is local source work only, without runtime deployment. See
+docs/FUNDAMENTAL_DATA_ENGINE_V1.md for mappings, formulas and limitations.
+
 ### Runtime compatibility and acquisition ownership V1 — 2026-10-11
 
 The canonical collector is `scripts.ingest_data --watch`, outside FastAPI. One

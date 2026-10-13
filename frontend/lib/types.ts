@@ -12,11 +12,19 @@ export type FundamentalPeriod = {
   revenue: number | null; net_profit: number | null; gross_margin: number | null; net_margin: number | null; roe: number | null;
   revenue_growth_yoy: number | null; net_profit_growth_yoy: number | null;
   gross_margin_change: number | null; net_margin_change: number | null; roe_change: number | null;
-};
-export type FinancialChange = {metric:'revenue'|'net_profit';current_period:string;prior_period:string;current:number;previous:number|null;absolute_change:number|null;growth_yoy:number|null};
+} & Partial<Record<'operating_income'|'operating_income_growth_yoy'|'profit_parent'|'total_assets'|'equity'|'total_liabilities'|'cash_operating'|'cash_investing'|'cash_financing'|'free_cash_flow'|'eps_reported'|'roa'|'debt_equity'|'liabilities_assets'|'current_ratio'|'quick_ratio'|'cash_conversion',number|null>> & {calculations?:Record<string,{formula:string;inputs:Record<string,unknown>[];reason:string|null}>;is_fixture?:boolean;frequency?:FinancialFrequency};
+export type FinancialFrequency='annual'|'quarterly'|'ttm';
+export type FinancialChange = {metric:'revenue'|'net_profit'|'operating_income';current_period:string;prior_period:string;current:number;previous:number|null;absolute_change:number|null;growth_yoy:number|null};
+export type FinancialStatementLine={code:string;name_en:string;name_vi:string;parent:string|null;unit:'VND'|'VND/share'|'source_units';value:number|null;raw_value:number|null;semantic_status:'reported'|'conflicted';source_labels?:Record<string,string|null>[]};
+export type FinancialStatementPeriod={ticker:string;source:string;currency:'VND';period:string;basis:string;consolidation:string|null;source_dates:Record<string,string|null>;items:FinancialStatementLine[];diagnostics:string[]};
 export type FundamentalResearch = {
-  ticker:string; source:string; currency:'VND'; period_type:'annual'; rows:FundamentalPeriod[]; changes:FinancialChange[];
+  ticker:string; source:string; currency:'VND'; period_type:FinancialFrequency; rows:FundamentalPeriod[]; changes:FinancialChange[];
   sector:string|null; industry:string|null; financial_identity_guard:boolean;
-  publication_date:null; consolidation:null; read_at:string; read_kind:'provider_or_process_cache';
+  publication_date:string|null; consolidation:string|null; read_at:string; read_kind:'provider_or_process_cache';
   available_period_types:string[]; available_statements:string[];
+  data_engine?:'financial-engine-v1';profile?:'non_financial'|'bank'|'financial_other'|'unknown';
+  chart_rows?:FundamentalPeriod[];statements?:Record<string,{status:string;basis:string;periods:FinancialStatementPeriod[]}>;
+  source_receipts?:{statement:string;status:string;observed_at:string;source_url:string;content_sha256:string|null;error_type:string|null;periods:{period:string;basis:string;source_dates:Record<string,string|null>;diagnostics:string[]}[]}[];
+  source_version?:string;metadata_sha256?:string;is_fixture?:boolean;limitations?:string[];
+  reconciliations?:{statement:string;period:string;field:string;annual_reported:number;quarter_sum:number;difference:number}[];
 };

@@ -6,6 +6,7 @@ import math
 import os
 import re
 import time
+from threading import RLock
 
 import pandas as pd
 
@@ -123,6 +124,19 @@ class VnstockMarketDataProvider:
 
 class VnstockFundamentalDataProvider:
     source = "vnstock:VCI"
+
+    def __init__(self):
+        self._report_lock = RLock()
+
+    @lru_cache(maxsize=128)
+    def _reports(self, symbol: str, bucket: int):
+        from src.providers.vnstock.financial_packet import fetch_packet
+        return guarded(symbol, 'financial_packet', lambda: fetch_packet(symbol, sdk))
+
+    def get_reports(self, symbol: str):
+        # Serialize concurrent cache misses to avoid duplicate report acquisitions.
+        with self._report_lock:
+            return self._reports(symbol, int(time.time() // 3600)).model_copy(deep=True)
 
     @lru_cache(maxsize=128)
     def _financials(self, symbol: str, bucket: int) -> tuple[FundamentalRecord, ...]:

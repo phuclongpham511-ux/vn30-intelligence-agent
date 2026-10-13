@@ -4,6 +4,8 @@ import {FINANCIAL_LABELS,type FinancialKey,annualChartData} from './fundamental-
 export const amountFields=['revenue','net_profit'] as const;
 export const growthFields=['revenue_growth_yoy','net_profit_growth_yoy'] as const;
 export const ratioFields=['gross_margin','net_margin','roe'] as const;
+export const engineAmounts=['revenue','net_profit','operating_income','profit_parent','total_assets','equity','total_liabilities','cash_operating','cash_investing','cash_financing','free_cash_flow'] as const;
+export const multipleFields=['debt_equity','current_ratio','quick_ratio','cash_conversion'] as const;
 export const researchSections=['overview','performance','statements','ratios'] as const;
 export type ResearchSection=typeof researchSections[number];
 export type AmountUnit='billions'|'millions'|'vnd';
@@ -16,13 +18,13 @@ export function financialResearchData(data:FundamentalResearch,ticker:string):Fu
   for(const row of data.rows){
     if(row.ticker!==ticker||row.source!==data.source||row.currency!=='VND'||!/^\d{4}$/.test(row.period)||periods.has(row.period))throw new Error('Invalid reporting period or ownership');
     periods.add(row.period);
-    for(const key of Object.keys(FINANCIAL_LABELS) as FinancialKey[])if(row[key]!==null&&(typeof row[key]!=='number'||!Number.isFinite(row[key])))throw new Error('Invalid financial value');
+    for(const key of [...amountFields,...growthFields,...ratioFields])if(row[key]!==null&&(typeof row[key]!=='number'||!Number.isFinite(row[key])))throw new Error('Invalid financial value');
     if(data.financial_identity_guard&&(row.revenue!==null||row.gross_margin!==null||row.net_margin!==null||row.revenue_growth_yoy!==null))throw new Error('Unsafe financial issuer fields');
   }
   const compared=new Set<string>();
   const latest=annualChartData(data.rows).at(-1)?.period;
   for(const change of data.changes){
-    if(!amountFields.includes(change.metric)||compared.has(change.metric)||change.current_period!==latest||!/^\d{4}$/.test(change.prior_period)||Number(change.prior_period)!==Number(change.current_period)-1)throw new Error('Invalid comparison period');
+    if(!(['revenue','net_profit'] as string[]).includes(change.metric)||compared.has(change.metric)||change.current_period!==latest||!/^\d{4}$/.test(change.prior_period)||Number(change.prior_period)!==Number(change.current_period)-1)throw new Error('Invalid comparison period');
     compared.add(change.metric);
     for(const field of ['current','previous','absolute_change','growth_yoy'] as const)if(change[field]!==null&&(typeof change[field]!=='number'||!Number.isFinite(change[field])))throw new Error('Invalid financial comparison');
     if(change.current!==data.rows.find(row=>row.period===change.current_period)?.[change.metric])throw new Error('Comparison does not match reported value');

@@ -1,0 +1,118 @@
+"""Financial source packets and calculated API contracts; no database models."""
+from datetime import datetime
+from typing import Literal
+from pydantic import Field
+from src.schemas.data import DataModel
+
+Frequency = Literal['annual', 'quarterly', 'ttm']
+StatementKind = Literal['income', 'balance', 'cash']
+
+
+class FinancialLine(DataModel):
+    code: str
+    name_en: str
+    name_vi: str
+    parent: str | None = None
+    unit: Literal['VND', 'VND/share', 'source_units'] = 'VND'
+    value: float | None = None
+    raw_value: float | None = None
+    semantic_status: Literal['reported', 'conflicted'] = 'reported'
+    source_labels: list[dict[str, str | None]] = Field(default_factory=list)
+
+
+class StatementObservation(DataModel):
+    ticker: str
+    source: str
+    currency: Literal['VND'] = 'VND'
+    statement: StatementKind
+    period: str = Field(pattern=r'^\d{4}(?:-Q[1-4])?$')
+    frequency: Literal['annual', 'quarterly']
+    basis: Literal['annual', 'standalone', 'ytd', 'point_in_time', 'unknown']
+    consolidation: str | None = None
+    source_dates: dict[str, str | None] = Field(default_factory=dict)
+    fields: dict[str, float | None]
+    field_codes: dict[str, str]
+    items: list[FinancialLine]
+    diagnostics: list[str] = Field(default_factory=list)
+
+
+class StatementReceipt(DataModel):
+    statement: StatementKind
+    status: Literal['healthy', 'unavailable', 'error']
+    observations: list[StatementObservation] = Field(default_factory=list)
+    observed_at: datetime
+    content_sha256: str | None = None
+    source_url: str
+    error_type: str | None = None
+
+
+class FinancialPacket(DataModel):
+    ticker: str
+    source: str
+    source_version: str
+    company_type: Literal['CT', 'NH', 'CK', 'BH', 'UNKNOWN'] = 'UNKNOWN'
+    profile: Literal['non_financial', 'bank', 'financial_other', 'unknown']
+    metadata_sha256: str
+    reports: dict[StatementKind, StatementReceipt]
+    is_fixture: bool = False
+
+
+class CalculationEvidence(DataModel):
+    formula: str
+    inputs: list[dict] = Field(default_factory=list)
+    reason: str | None = None
+
+
+class FinancialStatementResponse(DataModel):
+    ticker: str
+    source: str
+    currency: Literal['VND'] = 'VND'
+    statement: StatementKind
+    frequency: Literal['annual', 'quarterly']
+    rows: list[StatementObservation]
+    receipt: StatementReceipt
+    metadata_sha256: str
+    source_version: str
+    is_fixture: bool
+
+
+class FinancialPeriod(DataModel):
+    ticker: str
+    source: str
+    currency: Literal['VND'] = 'VND'
+    period: str = Field(pattern=r'^\d{4}(?:-Q[1-4])?$')
+    frequency: Frequency
+    values: dict[str, float | None]
+    calculations: dict[str, CalculationEvidence]
+    statement_periods: dict[str, str]
+    publication_date: str | None = None
+    consolidation: str | None = None
+    is_fixture: bool = False
+
+
+class FinancialEngineResponse(DataModel):
+    data_engine: Literal['financial-engine-v1'] = 'financial-engine-v1'
+    ticker: str
+    source: str
+    currency: Literal['VND'] = 'VND'
+    period_type: Frequency
+    profile: str
+    rows: list[dict]
+    chart_rows: list[dict]
+    changes: list[dict]
+    statements: dict[str, dict]
+    available_period_types: list[Frequency]
+    available_statements: list[str]
+    source_receipts: list[dict]
+    source_version: str
+    metadata_sha256: str
+    financial_identity_guard: bool
+    read_at: datetime
+    read_kind: Literal['provider_or_process_cache'] = 'provider_or_process_cache'
+    publication_date: str | None = None
+    consolidation: str | None = None
+    sector: str | None = None
+    industry: str | None = None
+    is_fixture: bool = False
+    limitations: list[str]
+    reconciliations: list[dict] = Field(default_factory=list)

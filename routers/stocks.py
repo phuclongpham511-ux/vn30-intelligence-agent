@@ -12,6 +12,7 @@ from src.services.stocks import find_stock, get_market_provider, list_stocks, va
 from src.services import data
 from src.services.universe import browse_universe
 from src.services.live_market import get_live_market
+from src.schemas.financials import FinancialEngineResponse, FinancialStatementResponse
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
@@ -201,6 +202,63 @@ def stock_financial_research(symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
         limit=limit, sector=stock.sector if stock else None, industry=stock.industry if stock else None,
         names=(security.company_name if security else None, security.display_name_en if security else None,
                stock.company_name if stock else None, stock.display_name_en if stock else None))
+
+
+def financial_packet_for_stock(symbol, session, provider):
+    """Cached identity only; all financial endpoints share the same provider packet."""
+    from src.providers.base import ProviderError
+    ticker = SymbolRequest(symbol=symbol).symbol
+    security = session.get(Security, ticker)
+    stock = find_stock(session, ticker)
+    if (security and not security.is_active) or not (security or stock and stock.is_active):
+        raise HTTPException(status_code=404, detail='Listed stock identity unavailable')
+    if not hasattr(provider, 'get_reports'):
+        raise HTTPException(status_code=503, detail='Structured financial reports unavailable')
+    try:
+        packet = provider.get_reports(ticker)
+        if packet.ticker != ticker or packet.source != provider.source:
+            raise ValueError('Wrong financial packet owner')
+        if set(packet.reports) != {'income', 'balance', 'cash'}:
+            raise ValueError('Invalid financial packet sections')
+        for kind, receipt in packet.reports.items():
+            if receipt.statement != kind or any(row.ticker != ticker or row.source != packet.source
+                or row.currency != 'VND' or row.statement != kind for row in receipt.observations):
+                raise ValueError('Wrong financial statement owner')
+        if all(receipt.status == 'error' for receipt in packet.reports.values()):
+            raise ProviderError('Financial reports unavailable')
+        return packet, stock
+    except (ValueError, ProviderError):
+        raise HTTPException(status_code=502, detail='Financial source is unavailable or invalid') from None
+
+
+@router.get('/{symbol}/financials', response_model=FinancialEngineResponse)
+def stock_financials(symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
+                     frequency: Literal['annual', 'quarterly', 'ttm'] = 'annual',
+                     limit: int = Query(default=8, ge=1, le=20),
+                     session: Session = Depends(get_session),
+                     provider=Depends(data.get_fundamental_provider)):
+    from src.analytics.financial_engine import financial_engine
+    packet, stock = financial_packet_for_stock(symbol, session, provider)
+    try:
+        return financial_engine(packet, frequency=frequency, limit=limit,
+            sector=stock.sector if stock else None, industry=stock.industry if stock else None)
+    except ValueError:
+        raise HTTPException(status_code=502, detail='Financial source is unavailable or invalid') from None
+
+
+@router.get('/{symbol}/financials/statements/{statement}', response_model=FinancialStatementResponse)
+def stock_financial_statement(statement: Literal['income', 'balance', 'cash'],
+                     symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
+                     frequency: Literal['annual', 'quarterly'] = 'annual',
+                     limit: int = Query(default=8, ge=1, le=20),
+                     session: Session = Depends(get_session),
+                     provider=Depends(data.get_fundamental_provider)):
+    packet, _ = financial_packet_for_stock(symbol, session, provider)
+    receipt = packet.reports[statement]
+    rows = [row for row in receipt.observations if row.frequency == frequency][-limit:]
+    return FinancialStatementResponse(ticker=packet.ticker, source=packet.source, statement=statement,
+        frequency=frequency, rows=rows, receipt=receipt.model_copy(update={'observations':[]}),
+        metadata_sha256=packet.metadata_sha256, source_version=packet.source_version, is_fixture=packet.is_fixture)
 
 
 @router.get("/{symbol}/news", response_model=list[NewsItem])
