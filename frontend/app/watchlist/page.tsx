@@ -14,7 +14,7 @@ import type {CommunityItem} from '@/lib/community';
 import {collectionLabels} from '@/lib/collectionStatus';
 import {emptyWatchlist,readWatchlist,followStock,unfollowStock,watchlistStorageKey,loadIntelligence,isUnread,reviewUpdates,baselineLegacyReviews,uniqueUpdates,technicalCountKnown,type WatchlistState,type Intelligence,type AttentionUpdate,type UpdatePage} from '@/lib/watchlist';
 
-export function UpdateSection({label,page,symbol,state,disabled,sourceNames={}}: {label:string;page:UpdatePage;symbol:string;state:WatchlistState;disabled:boolean;sourceNames?:Record<string,string>}) {
+function UpdateSection({label,page,symbol,state,disabled,sourceNames={}}: {label:string;page:UpdatePage;symbol:string;state:WatchlistState;disabled:boolean;sourceNames?:Record<string,string>}) {
   const {t,date}=useLocale();
   const [expanded,setExpanded]=useState(false);
   const rows=uniqueUpdates(page.items);
@@ -42,7 +42,7 @@ export function UpdateSection({label,page,symbol,state,disabled,sourceNames={}}:
   </section>;
 }
 
-export function ReviewEvidence({items,symbol,state,disabled,review}: {items:AttentionUpdate[];symbol:string;state:WatchlistState;disabled:boolean;review:(items:AttentionUpdate[])=>void}){
+function ReviewEvidence({items,symbol,state,disabled,review}: {items:AttentionUpdate[];symbol:string;state:WatchlistState;disabled:boolean;review:(items:AttentionUpdate[])=>void}){
   const {t}=useLocale();
   return <ul className="mt-3 divide-y">{uniqueUpdates(items).map(item=><li key={item.id} className="py-3" data-review-update={item.id}>
     <div className="flex items-start justify-between gap-4"><div className="min-w-0"><p className="text-[11px] text-muted-foreground">{t(item.kind==='news'?'News':item.kind==='community'?'Community':'Technical updates')}</p><p className="mt-1 text-xs">{item.title}</p></div>

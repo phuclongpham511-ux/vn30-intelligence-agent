@@ -1,6 +1,7 @@
 """vnstock 4.0.2 adapter. External DataFrames never cross this boundary."""
 from datetime import date, timedelta
 from functools import lru_cache
+from collections import OrderedDict
 import logging
 import math
 import os
@@ -127,16 +128,34 @@ class VnstockFundamentalDataProvider:
 
     def __init__(self):
         self._report_lock = RLock()
+        self._report_cache_lock = RLock()
+        self._report_cache = OrderedDict()
 
-    @lru_cache(maxsize=128)
     def _reports(self, symbol: str, bucket: int):
         from src.providers.vnstock.financial_packet import fetch_packet
         return guarded(symbol, 'financial_packet', lambda: fetch_packet(symbol, sdk))
 
     def get_reports(self, symbol: str):
-        # Serialize concurrent cache misses to avoid duplicate report acquisitions.
-        with self._report_lock:
-            return self._reports(symbol, int(time.time() // 3600)).model_copy(deep=True)
+        key = (symbol, int(time.time() // 3600))
+        with self._report_cache_lock:
+            cached = self._report_cache.get(key)
+            if cached is not None:
+                self._report_cache.move_to_end(key)
+        if cached is None:
+            # Keep the original single upstream acquisition budget, but do not
+            # hold warm readers behind another issuer's network wait.
+            with self._report_lock:
+                with self._report_cache_lock:
+                    cached = self._report_cache.get(key)
+                    if cached is not None:
+                        self._report_cache.move_to_end(key)
+                if cached is None:
+                    cached = self._reports(symbol, key[1])
+                    with self._report_cache_lock:
+                        self._report_cache[key] = cached
+                        while len(self._report_cache) > 128:
+                            self._report_cache.popitem(last=False)
+        return cached.model_copy(deep=True)
 
     @lru_cache(maxsize=128)
     def _financials(self, symbol: str, bucket: int) -> tuple[FundamentalRecord, ...]:

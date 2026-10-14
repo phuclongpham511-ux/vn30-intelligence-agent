@@ -34,6 +34,16 @@ test('quarterly/TTM presentation accepts qualified periods without frontend fina
  assert.match(render({data:quarter,frequency:'quarterly'}),/not annualized/);
  assert.match(render({data:{...quarter,period_type:'ttm'},frequency:'ttm'}),/four contiguous qualified quarters/);
 });
+
+test('display projection accepts historical facts without duplicated calculation graphs and retains latest evidence',()=>{
+ const prior={...row('2024')};delete prior.calculations;
+ const latest=row('2025');
+ const projected={...data,rows:[prior,latest],chart_rows:[prior,{...latest,calculations:undefined}]};
+ assert.equal(financialEngineData(projected,'ABC','annual').rows.at(-1).calculations.roe.inputs[0].code,'isa20');
+ const html=render({data:projected});
+ assert.match(html,/Calculation evidence/);assert.match(html,/total profit \/ average total equity/);
+ assert.match(html,/isa20/);assert.match(html,/2024/);
+});
 test('existing four sections, frequency and units remain visible; source fixtures and missing values are honest',()=>{
  const html=render();
  for(const label of ['Financial overview','Business performance','Financial statements','Financial ratios','Annual','Quarterly','TTM','VND bn','Fixture data'])assert.match(html,new RegExp(label));

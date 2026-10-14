@@ -235,13 +235,18 @@ def financial_packet_for_stock(symbol, session, provider):
 def stock_financials(symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
                      frequency: Literal['annual', 'quarterly', 'ttm'] = 'annual',
                      limit: int = Query(default=8, ge=1, le=20),
+                     projection: Literal['full', 'display'] = 'full',
                      session: Session = Depends(get_session),
                      provider=Depends(data.get_fundamental_provider)):
     from src.analytics.financial_engine import financial_engine
     packet, stock = financial_packet_for_stock(symbol, session, provider)
     try:
-        return financial_engine(packet, frequency=frequency, limit=limit,
+        result = financial_engine(packet, frequency=frequency, limit=limit,
             sector=stock.sector if stock else None, industry=stock.industry if stock else None)
+        if projection == 'display':
+            from src.services.financial_presentation import display_financial_response
+            return display_financial_response(result)
+        return result
     except ValueError:
         raise HTTPException(status_code=502, detail='Financial source is unavailable or invalid') from None
 

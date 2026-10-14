@@ -36,9 +36,9 @@ function ChangeSummary({data,unit}:{data:FundamentalResearch;unit:AmountUnit}){
 export default function FundamentalTrends({ticker,visible=true}:{ticker:string;visible?:boolean}){
   const [data,setData]=useState<FundamentalResearch|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(false),[attempt,setAttempt]=useState(0),[frequency,setFrequency]=useState<FinancialFrequency>('annual');
   useEffect(()=>{
-    const controller=new AbortController();let disposed=false;const timeout=setTimeout(()=>controller.abort(),20000);
+    const controller=new AbortController();let disposed=false;const timeout=setTimeout(()=>controller.abort(),60000);
     setLoading(true);setError(false);setData(null);
-    stockRead<FundamentalResearch>(`/api/stocks/${encodeURIComponent(ticker)}/financials?frequency=${frequency}&limit=8`,controller.signal)
+    stockRead<FundamentalResearch>(`/api/stocks/${encodeURIComponent(ticker)}/financials?frequency=${frequency}&limit=8&projection=display`,controller.signal)
       .then(value=>{const result=financialEngineData(value,ticker,frequency);if(!disposed)setData(result);})
       .catch(()=>{if(!disposed)setError(true);}).finally(()=>{clearTimeout(timeout);if(!disposed)setLoading(false);});
     return()=>{disposed=true;clearTimeout(timeout);controller.abort();};

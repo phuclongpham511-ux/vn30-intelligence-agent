@@ -70,10 +70,20 @@ def test_cli_import_appends_late_context_through_persisted_service(session, tmp_
     from src.corporate_actions.curated import CuratedDataset
     from src.corporate_actions.history import TechnicalContextHistory
     from tests.test_corporate_action_context import notice
+    # Windows wall-clock resolution can give two CLI invocations the same time.
+    # Keep this synthetic receipt/update sequence explicit and strictly ordered.
+    clock = [datetime(2026, 1, 1, tzinfo=timezone.utc)]
+    class FixtureClock(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            clock[0] += timedelta(seconds=1)
+            return clock[0]
+    monkeypatch.setattr(command, 'datetime', FixtureClock)
+    monkeypatch.setattr('src.corporate_actions.repository.datetime', FixtureClock)
     repo = CorporateActionRepository(session)
     history = TechnicalContextHistory(repo)
     result = detect_and_score_market_events(*price_pair(), {'abnormal_price_move':ScoringContext(own_history_abnormality=.99)})[0]
-    original = history.record('live-event',result,generated_at=datetime.now(timezone.utc)-timedelta(seconds=10))
+    original = history.record('live-event',result,generated_at=clock[0]-timedelta(seconds=10))
     dataset = CuratedDataset(dataset_version='cli-test',source_kind='curated_verified',limitations=('synthetic notice',),
         notices=(notice(is_fixture=True),))
     path = tmp_path/'notices.json'
@@ -83,7 +93,7 @@ def test_cli_import_appends_late_context_through_persisted_service(session, tmp_
     command.main()
     output = json.loads(capsys.readouterr().out)
     assert output['inserted'] == output['context_updates_appended'] == 1
-    stored = history.get('live-event',as_of=datetime.now(timezone.utc))
+    stored = history.get('live-event',as_of=clock[0])
     assert stored.result == original.result
     assert stored.result.corporate_action_context.status == 'UNKNOWN'
     assert stored.updates[0].context.status == 'KNOWN_MATCH'
