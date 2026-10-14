@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory)][ValidateSet('Backend','Frontend','Collector')][string]$Role,
     [Parameter(Mandatory)][string]$RuntimeRoot,
-    [Parameter(Mandatory)][string]$RunDirectory
+    [Parameter(Mandatory)][string]$RunDirectory,
+    [switch]$BoundedLog
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path -LiteralPath $RuntimeRoot).Path
@@ -17,7 +18,7 @@ $config=Get-Content -LiteralPath (Join-Path $root 'config\runtime.json') -Raw|Co
 $started=[datetime]::UtcNow
 $record=[ordered]@{role=$Role;observer_pid=$PID;started_at_utc=$started.ToString('o');
     sha=$config.canonical_sha;source=$config.source_checkout;database=$config.product_database;
-    job_membership='UNKNOWN';console_present=$null;credentials_copied=$false}
+    job_membership='UNKNOWN';console_present=$null;credentials_copied=$false;bounded_log=[bool]$BoundedLog}
 if($IsWindows){
     Add-Type -TypeDefinition @'
 using System;
@@ -39,7 +40,18 @@ $code=1;$errorType=$null
 try{
     # Unchanged canonical launcher still owns credentials, pin/gate and port checks;
     # unchanged collector obtains its database-scoped OS mutex.
-    & (Join-Path $root 'launch\Invoke-Woofi.ps1') -Role $Role
+    if($BoundedLog){
+        $log=Join-Path $run 'role.log'
+        $encoding=[Text.UTF8Encoding]::new($false)
+        & (Join-Path $root 'launch\Invoke-Woofi.ps1') -Role $Role 2>&1 | ForEach-Object {
+            $line=$_.ToString();if($line.Length -gt 32768){$line=$line.Substring(0,32768)+' [truncated]'}
+            $line+=[Environment]::NewLine
+            if((Test-Path -LiteralPath $log) -and ((Get-Item -LiteralPath $log).Length+$encoding.GetByteCount($line) -gt 262144)){
+                Move-Item -LiteralPath $log -Destination (Join-Path $run 'role.previous.log') -Force
+            }
+            [IO.File]::AppendAllText($log,$line,$encoding)
+        }
+    }else{& (Join-Path $root 'launch\Invoke-Woofi.ps1') -Role $Role}
     $code=if($null -ne $LASTEXITCODE){[int]$LASTEXITCODE}else{0}
 }catch{
     $errorType=$_.Exception.GetType().Name

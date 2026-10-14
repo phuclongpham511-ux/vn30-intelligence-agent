@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory)][ValidateSet('Backend','Frontend','Collector')][string]$Role,
-    [Parameter(Mandatory)][string]$RuntimeRoot
+    [Parameter(Mandatory)][string]$RuntimeRoot,
+    [switch]$Supervised
 )
 $ErrorActionPreference='Stop'
 if(-not $IsWindows){throw 'This manual launcher requires Windows'}
@@ -27,6 +28,7 @@ $null=New-Item -ItemType Directory -Path $run
 $observer=Join-Path $PSScriptRoot 'Invoke-WoofiObservedRole.ps1'
 # No scheduler, watchdog, elevation, job breakaway or automatic restart.
 $arguments='-NoProfile -File "'+$observer+'" -Role '+$Role+' -RuntimeRoot "'+$root+'" -RunDirectory "'+$run+'"'
+if($Supervised){$arguments+=' -BoundedLog'}
 $process=Start-Process -FilePath (Get-Command pwsh.exe).Source -ArgumentList $arguments -WindowStyle Hidden -PassThru `
     -RedirectStandardOutput (Join-Path $run 'stdout.log') -RedirectStandardError (Join-Path $run 'stderr.log')
 [ordered]@{role=$Role;observer_pid=$process.Id;run_directory=$run}|ConvertTo-Json -Compress
