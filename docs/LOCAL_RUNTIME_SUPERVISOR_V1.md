@@ -1,5 +1,13 @@
 # Local Runtime Supervisor V1
 
+2026-10-15 Backend shutdown investigation: production's recorded peer-reset
+exception interrupts CPython Proactor socket detach, leaving Uvicorn blocked at
+`Server.wait_closed` before lifespan cleanup. The source-only narrow Backend
+correction and native/fault-injection evidence are documented in
+[WINDOWS_BACKEND_SHUTDOWN_FIX.md](WINDOWS_BACKEND_SHUTDOWN_FIX.md).
+No controller/signal/collector policy changes. Existing production orphans remain
+untouched and launch-blocked; this source work does not authorize activation.
+
 2026-10-14. Local implementation checkpoint only. **Not installed or activated.**
 Base/app release: `a0c96abdfb8672efd08b1051bd4b2af49e50546e`.
 Branch: `codex/woofi-local-runtime-supervisor-v1` in the existing checkout.

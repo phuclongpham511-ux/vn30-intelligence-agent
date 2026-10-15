@@ -6,6 +6,10 @@ from src.providers.base import ProviderError
 from contextlib import asynccontextmanager
 from src.config.settings import get_settings
 from src.db.session import create_tables
+from src.services.windows_socket_cleanup import install_windows_socket_cleanup
+
+
+install_windows_socket_cleanup()
 
 
 @asynccontextmanager
