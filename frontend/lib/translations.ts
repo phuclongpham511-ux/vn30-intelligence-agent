@@ -1,4 +1,6 @@
 export const vietnamese = {
+  'Evidence read eligible from':'Có thể kiểm tra bằng chứng từ',
+  'Missing requirements':'Yêu cầu còn thiếu',
   'nonfinite_result':'Kết quả ngoài phạm vi số hợp lệ',
   'Comparable period changes':'Thay đổi giữa các kỳ có thể so sánh',
   'invalid_input_sign':'Dấu đầu vào không hợp lệ',

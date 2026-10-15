@@ -18,6 +18,30 @@ DISCOVERY_CADENCE=timedelta(hours=1)
 MAX_FAILURES=3
 
 
+def run_configured_technical_eod_cycle(engine, *, source_factory=None, clock=None, acquire=None):
+    """Opt-in canonical worker seam; use its database, scope and acquisition owner.
+
+    Configuration is the existing durable pilot row, never the isolated pilot
+    database or a ticker inferred from browser demand. No bootstrap or resume.
+    """
+    from pathlib import Path
+    from .ingestion_owner import collector_owner
+    with collector_owner(engine) as owned:
+        if not owned:
+            return {'status': 'collector_busy'}
+        with Session(engine) as session:
+            row = session.get(TechnicalEODSupervision, 'pilot')
+            if row is None:
+                return {'status': 'UNCONFIGURED'}
+            if row.halted:
+                return {'status': 'HALTED'}
+        if source_factory is None:
+            from .hose_eod_discovery import OfficialHoseSource, publication_anchor
+            source_factory = lambda: OfficialHoseSource(
+                publication_anchor(Path(__file__).resolve().parents[2] / 'docs'))
+        return supervised_eod_cycle(engine, source_factory(), clock=clock, acquire=acquire)
+
+
 def supervision_status(session,now):
     """Read-only operational metadata, never bars or authentication values."""
     now=aware(now)

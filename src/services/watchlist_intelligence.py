@@ -140,7 +140,9 @@ def technical_updates(session, symbol, now):
     job = session.exec(select(TechnicalEODJob).where(TechnicalEODJob.ticker == symbol)
         .order_by((TechnicalEODJob.version > 0).desc(), TechnicalEODJob.trading_session.desc())
         .limit(1)).first()
-    scheduled = bool(result['kind']=='diagnostic' and job and job.status=='WAITING_FOR_TIME')
+    scheduled = bool(result['kind']=='diagnostic' and job and job.status=='WAITING_FOR_TIME'
+        and result.get('operational_state') in (
+            'WAITING_PUBLICATION_GATE', 'WAITING_SECOND_READ', 'PENDING_EVIDENCE'))
     waiting = bool(scheduled and utc(job.next_due_at)>now)
     return dict(items=items, data=result, has_more=False, truncated=False,
         waiting_for_gate=waiting, awaiting_source_check=scheduled and not waiting,

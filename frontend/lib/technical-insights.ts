@@ -16,6 +16,9 @@ export type OperationalPacket = {
 export type TechnicalDiagnostic = {
   kind: "diagnostic"; ticker: string; requested_session: string | null;
   readiness_status: string; reason_codes: string[]; safe_to_display_as_verified: false;
+  missing_evidence?: string[];
+  operational_state?: string;
+  next_eligible_read_at?: string | null;
 };
 export type TechnicalResponse = OperationalPacket | TechnicalDiagnostic;
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
@@ -28,7 +31,10 @@ export function parseTechnicalResponse(value: unknown, ticker: string): Technica
   if (!record(value) || value.safe_to_display_as_verified !== false) return invalid();
   if (value.kind === "diagnostic") {
     if (value.ticker !== ticker || !(value.requested_session === null || session(value.requested_session))
-      || typeof value.readiness_status !== "string" || !strings(value.reason_codes)) return invalid();
+      || typeof value.readiness_status !== "string" || !strings(value.reason_codes)
+      || (value.missing_evidence !== undefined && !strings(value.missing_evidence))
+      || (value.operational_state !== undefined && typeof value.operational_state !== "string")
+      || (value.next_eligible_read_at !== undefined && value.next_eligible_read_at !== null && !timestamp(value.next_eligible_read_at))) return invalid();
     return value as TechnicalDiagnostic;
   }
   const p = value.packet;

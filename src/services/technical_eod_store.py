@@ -5,7 +5,7 @@ import json
 from typing import Literal
 from uuid import uuid4
 
-from pydantic import model_validator
+from pydantic import computed_field, model_validator
 from sqlalchemy import or_, update
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
@@ -32,6 +32,53 @@ MAX_JOBS = 128
 class TechnicalOperationalLatestDiagnostic(TechnicalAPIDiagnostic):
     """Latest lookup may have no known session; never manufacture a date."""
     requested_session: date | None = None
+    operational_state: Literal['PENDING_EVIDENCE', 'WAITING_PUBLICATION_GATE',
+        'WAITING_SECOND_READ', 'INCOMPLETE', 'RETRACTED', 'SOURCE_UNAVAILABLE'] = 'INCOMPLETE'
+    next_eligible_read_at: datetime | None = None
+
+
+def _operational_diagnostic(job, cutoff):
+    """Presentation projection of persisted domain evidence, never a new job state."""
+    reasons = tuple(job.reason_codes or ['provisional_evidence_not_yet_accepted'])
+    state = 'INCOMPLETE'
+    missing = ['accepted_operational_snapshot']
+    due = None
+    try:
+        if _hash(job.definition) != job.definition_hash:
+            raise ValueError('Definition checksum mismatch')
+        definition = ProvisionalEODDefinition.model_validate(job.definition)
+        first = AuthenticatedSsiReadReceipt.model_validate(job.first_receipt) if job.first_receipt else None
+        if not definition.calendar:
+            missing.append('calendar_session_evidence')
+        if not definition.publication:
+            missing.append('qualified_official_publication')
+        if first is None:
+            missing.append('first_authenticated_ssi_read')
+        missing.append('matching_second_authenticated_ssi_read')
+        if definition.calendar and definition.publication and not job.reason_codes:
+            assessment = assess_provisional_eod(job.ticker, job.trading_session,
+                history_start=definition.history_start, calendar=definition.calendar,
+                publication=definition.publication, first=first, second=None,
+                evaluation_as_of=cutoff)
+            if assessment.reason_codes == ('authenticated_fresh_read_unavailable',):
+                publication_gate = definition.publication.published_at + timedelta(hours=24)
+                due = max(publication_gate, first.received_at + timedelta(hours=6)) if first else None
+                state = ('WAITING_PUBLICATION_GATE' if first and cutoff < publication_gate else
+                    'WAITING_SECOND_READ' if due and cutoff < due else 'PENDING_EVIDENCE')
+            else:
+                reasons = assessment.reason_codes
+    except (ValueError, TypeError):
+        reasons = ('invalid_evidence_definition',)
+    if job.version > 0 and any('revis' in r or 'retract' in r or 'supersed' in r or
+            'definition_changed' in r for r in reasons):
+        state = 'RETRACTED'
+    elif job.status == 'STOPPED':
+        state = 'SOURCE_UNAVAILABLE'
+    return TechnicalOperationalLatestDiagnostic(ticker=job.ticker,
+        requested_session=job.trading_session, evaluation_as_of=cutoff,
+        readiness_status='SOURCE_UNAVAILABLE' if state == 'SOURCE_UNAVAILABLE' else 'INCOMPLETE_EVIDENCE',
+        reason_codes=reasons, missing_evidence=tuple(missing), operational_state=state,
+        next_eligible_read_at=due)
 
 
 def read_latest_operational_packet(session, ticker, cutoff):
@@ -50,6 +97,8 @@ def read_latest_operational_packet(session, ticker, cutoff):
     from src.evaluation.benchmark.inputs import ZONE
     if job.trading_session >= cutoff.astimezone(ZONE).date():
         return diagnostic(symbol,job.trading_session,cutoff,'session_not_completed_or_invalid_generation_time')
+    if not job.active_snapshot_id:
+        return _operational_diagnostic(job, cutoff)
     return read_operational_packet(session,symbol,job.trading_session,cutoff)
 
 
@@ -75,6 +124,13 @@ class TechnicalOperationalAPIPacket(EODModel):
     next_check_due_at: datetime
     freshness: Literal['FRESH', 'STALE']
     packet: TechnicalDailySignalPacket
+
+    @computed_field
+    @property
+    def operational_state(self) -> Literal['PROVISIONAL_ACCEPTED', 'NO_MEANINGFUL_TECHNICAL_CHANGE', 'INCOMPLETE']:
+        return {'HAS_INSIGHTS': 'PROVISIONAL_ACCEPTED',
+            'NO_MEANINGFUL_TECHNICAL_CHANGE': 'NO_MEANINGFUL_TECHNICAL_CHANGE',
+            'TECHNICAL_DATA_UNAVAILABLE_OR_INCOMPLETE': 'INCOMPLETE'}[self.packet.packet_state]
 
     @model_validator(mode='after')
     def require_provisional(self):

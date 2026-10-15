@@ -16,7 +16,7 @@ from src.schemas.stocks import SymbolRequest
 from src.services.hose_eod_discovery import seed_calendar,publication_anchor,OfficialHoseSource
 from src.services.provisional_eod import capture_fresh_ssi_read,HosePublicationEvidence
 from src.services.technical_eod_supervision import (initialize_supervision,resume_supervision,
-    discovery_plan,supervised_eod_cycle,supervision_status)
+    discovery_plan,supervised_eod_cycle,supervision_status,run_configured_technical_eod_cycle)
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -56,14 +56,22 @@ def main(argv=None):
     actions.add_argument('--run-once',action='store_true')
     actions.add_argument('--watch',action='store_true')
     parser.add_argument('--credentials-file',help='Existing authorized environment file; values are never copied or logged')
+    parser.add_argument('--application-database',
+        help='Explicit existing SQLite application file for metadata-only initialize/status; live cycles belong to scripts.ingest_data --technical-pilot')
     parser.add_argument('--resume',action='store_true',help='Explicitly resume a halted configured pilot')
     args=parser.parse_args(argv)
     try:
         if args.resume and not (args.run_once or args.watch):
             raise ValueError('Resume requires an explicit live cycle')
+        if args.application_database and (not (args.initialize or args.status) or args.resume):
+            raise ValueError('Application database supports metadata-only initialize/status')
         config,paths=configuration(args.config)
         now=datetime.now(timezone.utc)
         database=paths['database_file']
+        if args.application_database:
+            database=Path(args.application_database).resolve()
+            if not database.is_file() or database.suffix not in ('.db','.sqlite','.sqlite3'):
+                raise ValueError('Existing explicit application SQLite database required')
         if args.status:
             if not database.exists():raise ValueError('Pilot database unavailable')
             engine=create_engine('sqlite:///file:'+database.as_posix()+'?mode=ro&uri=true')
@@ -124,7 +132,7 @@ def main(argv=None):
             previous=signal.signal(signal.SIGTERM,lambda *_:stop.set())
             try:
                 while not stop.is_set():
-                    result=supervised_eod_cycle(engine,source,acquire=acquire)
+                    result=run_configured_technical_eod_cycle(engine,source_factory=lambda:source,acquire=acquire)
                     print(json.dumps(result,sort_keys=True),flush=True)
                     if not args.watch or result['status']=='HALTED':
                         return int(result['status'] in ('HALTED','INCOMPLETE_EVIDENCE','UNCONFIGURED','LEASE_LOST'))

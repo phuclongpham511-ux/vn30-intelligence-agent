@@ -13,7 +13,24 @@ new Function('require','exports',transformSync(readFileSync(new URL('../app/comp
 const event=(id)=>({event_id:id,event_type:'unusual_volume',ticker:'XYZ',trading_session:'2026-10-08',eligible:true,is_fixture:false,direction:'up',evidence:[{metric:'volume',value:12345,unit:'shares'}],evidence_refs:['source:receipt']});
 export const packet={kind:'provisional_packet',assurance:'PROVISIONAL',safe_to_display_as_verified:false,snapshot_id:'snapshot-1',snapshot_version:1,persisted_at:'2026-10-10T06:30:00Z',last_checked_at:'2026-10-10T06:30:00Z',next_check_due_at:'2026-10-11T06:30:00Z',freshness:'FRESH',packet:{ticker:'XYZ',trading_session:'2026-10-08',packet_id:'packet-1',generated_at:'2026-10-10T06:30:00Z',packet_state:'NO_MEANINGFUL_TECHNICAL_CHANGE',top_insights:[],family_checks:[],limitations:[],data_provenance:{completion_assurance:'PROVISIONAL',source:'SSI:FastConnect'}}};
 const diagnostic={kind:'diagnostic',ticker:'XYZ',requested_session:null,readiness_status:'INCOMPLETE_EVIDENCE',reason_codes:['missing_persisted_eod_snapshot'],safe_to_display_as_verified:false};
+test('optional real persisted API replay renders unchanged Stock Detail evidence', {skip:!process.env.WOOFI_ACCEPTANCE_PACKET},()=>{
+ const data=JSON.parse(readFileSync(process.env.WOOFI_ACCEPTANCE_PACKET,'utf8'));
+ const ticker=data.packet.ticker;
+ const parsed=parseTechnicalResponse(data,ticker);
+ const html=renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:{...localeTools('en'),setLanguage(){}}},React.createElement(exports.TechnicalInsightsView,{ticker,data:parsed,loading:false,error:false,retry(){}})));
+ assert.match(html,/PROVISIONAL/);assert.match(html,/Evaluated session/);
+ assert.equal((html.match(/data-insight=/g)||[]).length,Math.min(3,data.packet.top_insights.length));
+ assert.match(html,new RegExp(data.packet.trading_session));
+ if(data.freshness==='STALE')assert.match(html,/Source check overdue/);
+ for(const insight of data.packet.top_insights.slice(0,3))assert.ok(html.includes(insight.event_id));
+});
 const render=(data=packet,other={},language='en')=>renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:{...localeTools(language),setLanguage(){}}},React.createElement(exports.TechnicalInsightsView,{ticker:'XYZ',data:parseTechnicalResponse(data,'XYZ'),loading:false,error:false,retry(){},...other})));
+test('persisted missing requirements and timing are inspectable in both languages',()=>{
+ const data={...diagnostic,operational_state:'WAITING_SECOND_READ',missing_evidence:['matching_second_authenticated_ssi_read'],next_eligible_read_at:'2026-10-10T14:04:58Z'};
+ assert.match(render(data),/Missing requirements/);assert.match(render(data),/matching_second_authenticated_ssi_read/);
+ assert.match(render(data),/Evidence read eligible from/);assert.match(render(data,{},'vi'),/Yêu cầu còn thiếu/);
+ assert.throws(()=>parseTechnicalResponse({...data,missing_evidence:[123]},'XYZ'));
+});
 test('accepted earlier session is explicit, provisional and honestly empty',()=>{
  const html=render();assert.match(html,/PROVISIONAL/);assert.match(html,/8 Oct 2026/);assert.match(html,/No meaningful technical change/);assert.match(html,/Delayed session review/);assert.doesNotMatch(html,/VERIFIED|same-day coverage/);
 });

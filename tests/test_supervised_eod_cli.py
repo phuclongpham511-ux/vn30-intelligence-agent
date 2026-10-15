@@ -42,3 +42,28 @@ def test_resume_cannot_mutate_dry_run_or_bootstrap(monkeypatch,capsys):
     monkeypatch.setattr(cli,'configuration',lambda *a:pytest.fail('resume before validation'))
     assert cli.main(['--resume','--dry-run'])==1
     assert json.loads(capsys.readouterr().out)['status']=='BLOCKED'
+
+
+@pytest.mark.parametrize('action', ['--run-once', '--watch', '--dry-run'])
+def test_application_database_cannot_start_competing_supervisor(action, monkeypatch, capsys):
+    monkeypatch.setattr(cli, 'configuration', lambda *a: pytest.fail('before evidence preflight'))
+    assert cli.main([action, '--application-database', 'unused.db']) == 1
+    assert json.loads(capsys.readouterr().out)['status'] == 'BLOCKED'
+
+
+def test_application_bootstrap_is_metadata_only_and_restart_safe(tmp_path, monkeypatch, capsys):
+    from sqlmodel import create_engine, Session, select
+    from src.db.session import create_tables
+    from src.models.technical_eod import TechnicalEODSupervision, TechnicalEODJob, TechnicalEODSnapshot
+    database=tmp_path/'application.db'
+    engine=create_engine('sqlite:///'+database.as_posix());create_tables(engine)
+    monkeypatch.setattr(cli, 'Settings', lambda **kw: pytest.fail('bootstrap credentials'))
+    monkeypatch.setattr(cli, 'OfficialHoseSource', lambda *a: object())
+    assert cli.main(['--initialize','--application-database',str(database)]) == 0
+    assert cli.main(['--initialize','--application-database',str(database)]) == 0
+    with Session(engine) as session:
+        assert session.get(TechnicalEODSupervision, 'pilot').ticker == 'FPT'
+        assert session.exec(select(TechnicalEODJob)).all() == []
+        assert session.exec(select(TechnicalEODSnapshot)).all() == []
+    assert cli.main(['--status','--application-database',str(database)]) == 0
+    engine.dispose()

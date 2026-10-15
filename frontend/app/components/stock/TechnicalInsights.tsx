@@ -38,6 +38,8 @@ export function TechnicalInsightsView({ticker, data, loading, error, retry, sect
         </details>
       </> : <div className="mt-3 text-sm text-muted-foreground"><p>{t(retracted ? "The provisional result was withdrawn. Insights remain unavailable until corrected evidence is accepted." : "Technical evidence is not yet accepted for this ticker.")}</p>
         {diagnostic?.requested_session && <p className="mt-1 text-xs">{t("Evaluated session")}: {date(diagnostic.requested_session)}</p>}
+        {diagnostic?.next_eligible_read_at && <p className="mt-1 text-xs">{t("Evidence read eligible from")}: {date(diagnostic.next_eligible_read_at,true)} · {t("Vietnam time")}</p>}
+        {!!diagnostic?.missing_evidence?.length && <p className="mt-1 break-words text-xs">{t("Missing requirements")}: {diagnostic.missing_evidence.join(" · ")}</p>}
         {diagnostic && <details className="mt-2 text-xs"><summary className="cursor-pointer">{t("Evidence diagnostics")}</summary><p className="mt-2 break-words">{diagnostic.readiness_status} · {diagnostic.reason_codes.join(" · ")}</p></details>}</div>}
   </section>;
 }

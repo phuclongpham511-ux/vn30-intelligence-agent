@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+### Phase 3 Technical operational integration — 2026-10-16
+
+The existing canonical collector can opt into the durable single-ticker HOSE
+coordinator with `--technical-pilot` or explicit `TECHNICAL_EOD_PILOT=true`
+configuration (default off). Metadata-only initialize/status may target an
+explicit existing application database; live work remains inside the canonical
+owner. No legacy automation, second worker, schema or D1/D4/D5 policy change.
+Persisted pending states recheck qualification before advertising read eligibility;
+invalid evidence stays incomplete on Stock Detail and Watchlist. Incomplete packets
+cannot claim accepted operational state. PROVISIONAL remains separate from VERIFIED
+and historical PIT Materiality certification. Source integration and operational
+acceptance are distinct: docs/PHASE_3_TECHNICAL_OPERATIONAL.md.
+
 ### Phase 2 performance and source reliability — 2026-10-15
 
 Financial packet reads preserve independent mutable graphs through validated

@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     market_data_provider: str = "ssi"
     ssi_api_key: SecretStr = SecretStr("")
     ssi_api_secret: SecretStr = SecretStr("")
+    # Explicit local opt-in; one configured DB ticker, never browser demand.
+    technical_eod_pilot: bool = False
 
 
 @lru_cache
