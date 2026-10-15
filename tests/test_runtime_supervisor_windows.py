@@ -141,7 +141,11 @@ def test_control_intent_start_stop_resume_and_single_bootstrap(tmp_path,monkeypa
     def observed(root):
         return {'supervisor_alive':state['alive'] and s.Store(root).desired(),'role_alive':{},'member_alive':False}
     monkeypatch.setattr(s,'status',observed)
-    def launch(*args):state.update(alive=True,launches=state['launches']+1);return {'launch_pid':123}
+    def launch(*args):
+        saved=s.Store(tmp_path).load();saved.pop('pending_launch',None)
+        s.atomic(s.Store(tmp_path).path/'status.json',saved)
+        state.update(alive=True,launches=state['launches']+1)
+        return {'launch_pid':123}
     monkeypatch.setattr(s,'independent',launch)
     assert s.control('start',tmp_path,'pwsh')['supervisor_alive']
     assert s.control('start',tmp_path,'pwsh')['supervisor_alive']
@@ -184,7 +188,11 @@ def test_optional_resume_preserves_exhausted_budget_until_explicit_start(tmp_pat
     monkeypatch.setattr(s.Windows,'vacant',lambda *a:None)
     state={'alive':False}
     monkeypatch.setattr(s,'status',lambda root:{'supervisor_alive':state['alive'],'role_alive':{},'member_alive':False})
-    def launch(*args):state['alive']=True;return {'launch_pid':123}
+    def launch(*args):
+        saved=store.load();saved.pop('pending_launch',None)
+        s.atomic(store.path/'status.json',saved)
+        state['alive']=True
+        return {'launch_pid':123}
     monkeypatch.setattr(s,'independent',launch)
     s.control('resume',tmp_path,'pwsh')
     restored=store.load()['resume_roles']['Backend']
@@ -209,7 +217,18 @@ exit 7
     fixture_code='''class FixtureWindows(s.Windows):
     def validate(self):return s.read(self.root/'config/runtime.json')
     def vacant(self,*args):pass
-    def launch(self,role,now):return super().launch('Backend',now)
+    def launch(self,role,now):
+        # The real adapter's journal uses actual service-role names. This
+        # fixture maps every process to a finite Backend console, so journal
+        # its logical role separately rather than overwrite Backend three times.
+        epoch=self.epoch;self.epoch=None
+        try:record=super().launch('Backend',now)
+        finally:self.epoch=epoch
+        store=s.Store(self.root);state=store.load()
+        state.setdefault('roles',{})[role]={'record':record,'members':[record['identity']],
+                                          'launches':self.roles[role].launches}
+        store.publish(state)
+        return record
     def inspect(self,role,record):
         if not self.verify(record):return {'running':False,'ready':False,'members':record.get('members',[])}
         root=s.psutil.Process(record['identity']['pid'])

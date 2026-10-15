@@ -162,7 +162,7 @@ class Recovery:
                 state.phase = 'backoff'
                 self.emit('backoff', role=name, seconds=BACKOFF[state.launches-1])
             if now >= state.due:
-                # Caller holds the command lock and rereads durable intent before tick.
+                # The Windows driver serializes process birth with durable intent.
                 state.launches += 1
                 self.emit('launch_attempt', role=name, number=state.launches)
                 state.record = self.driver.launch(name, now)
@@ -231,6 +231,8 @@ def lock_owners(path):
 class Windows:
     def __init__(self, runtime, pwsh, binding, emit):
         self.root, self.pwsh, self.binding, self.emit = runtime, pwsh, binding, emit
+        self.epoch = None  # Set only for generation-managed operations.
+        self.roles = None
 
     def validate(self):
         cfg = read(self.root/'config/runtime.json')
@@ -291,16 +293,31 @@ class Windows:
         command = '& '+literal(script)+' -Role '+role+' -Supervised -RuntimeRoot '+literal(self.root)
         store = Store(self.root)
         with file_lock(store.path/'command.lock', wait=30):
+            if self.epoch is not None:
+                state = store.require_epoch(self.epoch)
             if not store.desired():
                 raise IntentStopped()
+            if self.epoch is not None:
+                row = state.setdefault('roles', {}).setdefault(role, {})
+                row['launches'] = (self.roles[role].launches if self.roles is not None
+                                   else row.get('launches', 0) + 1)
+                state['pending_launch'] = role
+                atomic(store.path/'status.json', state)
             result = ps(self.pwsh, command, 25,
                         output_file=store.path/('launch-'+uuid.uuid4().hex+'.json'))
             item = identity(result['observer_pid'])
             record = {'identity':item,'role':role,'run_directory':result['run_directory'], 'launched':now}
+            if self.epoch is not None:
+                row = state.setdefault('roles', {}).setdefault(role, {})
+                row.update(record=record, members=[item], phase='starting')
+                state.pop('pending_launch', None)
+                atomic(store.path/'status.json', state)
         self.verify(record)
         return record
 
     def verify(self, record):
+        if self.epoch is not None:
+            Store(self.root).require_epoch(self.epoch)
         if not alive(record['identity']):
             return False
         args = psutil.Process(record['identity']['pid']).cmdline()
@@ -388,7 +405,7 @@ class Windows:
         # to a short-lived helper, never the daemon or its calling terminal.
         if not record.get('stop_requested'):
             request=Path(record['run_directory'])/('stop-'+uuid.uuid4().hex+'.json')
-            atomic(request,{'record':record,'binding':self.binding})
+            atomic(request,{'record':record,'binding':self.binding,'epoch':self.epoch})
             info=subprocess.STARTUPINFO();info.dwFlags|=subprocess.STARTF_USESHOWWINDOW;info.wShowWindow=0
             signal=subprocess.run([sys.executable,'-B',str(Path(__file__).resolve()),'signal',
                 '--runtime',str(self.root),'--pwsh',self.pwsh,'--request',str(request)],
@@ -452,6 +469,31 @@ class Store:
     def desired(self):
         return read(self.path/'intent.json', {}).get('running', False)
 
+    def require_epoch(self, epoch):
+        state = self.load()
+        if state.get('epoch') != epoch:
+            raise Conflict('STALE_START_EPOCH')
+        return state
+
+    def publish(self, state):
+        """Fenced read-modify-write; callers never hold command.lock here."""
+        with file_lock(self.path/'command.lock', wait=30):
+            current = self.require_epoch(state.get('epoch'))
+            # A failed launch may have saved its root before returning to the
+            # policy machine. Never discard that still-live ownership on error.
+            for role, row in current.get('roles', {}).items():
+                record = row.get('record')
+                replacement = state.get('roles', {}).get(role, {}).get('record')
+                if record and (not replacement or replacement['identity'] != record['identity']):
+                    if alive(record['identity']) or any(alive(m) for m in row.get('members', [])):
+                        raise Conflict('LIVE_OWNERSHIP_REPLACEMENT')
+            for key in ('pending_launch', 'control_phase'):
+                if key in current:
+                    state[key] = current[key]
+                else:
+                    state.pop(key, None)
+            atomic(self.path/'status.json', state)
+
     def event(self, event, **detail):
         path = self.path/'events.jsonl'
         item = {'utc':datetime.now(timezone.utc).isoformat(),'event':event,**detail}
@@ -497,6 +539,16 @@ def independent(pwsh, argv, directory, request_file):
 
 def control(action, runtime, pwsh):
     if action == 'status':
+        return _control(action, runtime, pwsh)
+    store = Store(runtime); store.path.mkdir(parents=True, exist_ok=True)
+    # External operations serialize through completion, including orphan Stop.
+    # The daemon never takes this lock; it must still publish/acknowledge/exit.
+    with file_lock(store.path/'control.lock', wait=30):
+        return _control(action, runtime, pwsh)
+
+
+def _control(action, runtime, pwsh):
+    if action == 'status':
         result = status(runtime)
         cfg = read(runtime/'config/runtime.json')
         driver = Windows(runtime,pwsh,bind(cfg),lambda *a,**k:None)
@@ -508,10 +560,19 @@ def control(action, runtime, pwsh):
         existing = status(runtime)
         if action == 'stop':
             atomic(store.path/'intent.json', {'running':False})
+            state = store.load()
+            stop_epoch = state.get('epoch')
+            state['control_phase'] = 'stopping'
+            atomic(store.path/'status.json', state)
             store.event('stop_requested', expected=True)
         else:
             if action == 'resume' and not store.desired():
                 return {'result':'STOP_INTENT_RETAINED'}
+            state = store.load()
+            if state.get('control_phase') == 'stopping':
+                raise Conflict('STOP_IN_PROGRESS')
+            if state.get('pending_launch'):
+                raise Conflict('LAUNCH_OUTCOME_UNKNOWN')
             if existing['supervisor_alive']:
                 if not store.desired():
                     raise Conflict('STOP_IN_PROGRESS')
@@ -524,7 +585,6 @@ def control(action, runtime, pwsh):
             # Never adopt existing canonical/unknown processes during activation.
             for role in ROLES:
                 driver.vacant(role,cfg)
-            atomic(store.path/'intent.json', {'running':True})
             epoch = uuid.uuid4().hex
             resume_roles = None
             if action == 'resume':
@@ -535,56 +595,80 @@ def control(action, runtime, pwsh):
                     due=time.monotonic()+BACKOFF[min(max(row.get('launches',0)-1,0),len(BACKOFF)-1)],
                     phase='blocked' if row.get('launches',0)>len(BACKOFF) else 'waiting'))
                     for name,row in previous.get('roles',{}).items()}
-            atomic(store.path/'status.json', {'epoch':epoch,'binding':bind(cfg),'roles':{},'resume_roles':resume_roles})
+            atomic(store.path/'status.json', {'epoch':epoch,'binding':bind(cfg),'roles':{},
+                'resume_roles':resume_roles, 'pending_launch':'supervisor', 'control_phase':'starting'})
+            atomic(store.path/'intent.json', {'running':True})
             launched = independent(pwsh,[sys.executable,'-B',str(Path(__file__).resolve()),'run',
                                         '--runtime',str(runtime),'--pwsh',pwsh,'--epoch',epoch],
                                    runtime,store.path/'launch.json')
             store.event('supervisor_launch', **launched)
-            deadline = time.monotonic()+15
-            while time.monotonic() < deadline:
-                current = status(runtime)
-                if current['supervisor_alive']:
-                    return current
-                time.sleep(.1)
+    if action != 'stop':
+        # Release the short state lock for daemon acknowledgement. control.lock
+        # still excludes another external Start/Stop, including caller failures.
+        deadline = time.monotonic()+15
+        while time.monotonic() < deadline:
+            current = status(runtime)
+            if current['supervisor_alive']:
+                return current
+            time.sleep(.1)
+        with file_lock(store.path/'command.lock', wait=30):
+            store.require_epoch(epoch)
             atomic(store.path/'intent.json', {'running':False})
-            raise Conflict('SUPERVISOR_START_NOT_CONFIRMED')
+        raise Conflict('SUPERVISOR_START_NOT_CONFIRMED')
     # A stopped intent is durable before waiting or attempting any shutdown.
     deadline = time.monotonic()+150
     while status(runtime)['supervisor_alive'] and time.monotonic() < deadline:
         time.sleep(.2)
     current = status(runtime)
+    store.require_epoch(stop_epoch)
     if not current['supervisor_alive'] and (any(current['role_alive'].values()) or current['member_alive']):
         # Supervisor died; recorded roots still need the same verified graceful stop.
         driver = Windows(runtime,pwsh,current['recorded']['binding'],store.event)
+        driver.epoch = stop_epoch
         for role in ('Collector','Backend','Frontend'):
             row = current['recorded'].get('roles',{}).get(role,{})
             if row.get('record'):
                 driver.stop(role,row['record'],row.get('members',[]))
                 row.update(record=None,members=[],phase='stopped')
+                store.publish(current['recorded'])
                 store.event('role_stopped',role=role,expected=True,recovery='supervisor_absent')
-        atomic(store.path/'status.json',current['recorded'])
         current = status(runtime)
     if current['supervisor_alive'] or any(current['role_alive'].values()) or current['member_alive']:
         raise Conflict('STOP_NOT_CONFIRMED')
-    return current
+    with file_lock(store.path/'command.lock', wait=30):
+        state = store.require_epoch(stop_epoch)
+        if state.get('pending_launch'):
+            raise Conflict('LAUNCH_OUTCOME_UNKNOWN')
+        state['control_phase'] = 'stopped'
+        atomic(store.path/'status.json', state)
+    return status(runtime)
 
 
 def run(runtime, pwsh, epoch):
     store = Store(runtime)
     with file_lock(store.path/'supervisor.lock'):
-        state = store.load()
-        if state.get('epoch') != epoch:
-            raise Conflict('STALE_START_EPOCH')
+        with file_lock(store.path/'command.lock', wait=30):
+            state = store.require_epoch(epoch)
+            if (alive(state.get('supervisor')) or state.get('pending_launch') not in (None, 'supervisor')
+                    or any(alive(row.get('record', {}).get('identity') if row.get('record') else None)
+                           or any(alive(m) for m in row.get('members', []))
+                           for row in state.get('roles', {}).values())):
+                raise Conflict('ORPHANED_ROLES_REQUIRE_STOP')
+            state['supervisor'] = identity(os.getpid())
+            state['phase'] = 'starting'
+            if state.get('pending_launch') == 'supervisor':
+                state.pop('pending_launch')
+            atomic(store.path/'status.json', state)
         driver = Windows(runtime,pwsh,state['binding'],store.event)
+        driver.epoch = epoch
         restored = state.get('resume_roles')
         recovery = Recovery(driver,store.event,
             roles={name:Role(**restored.get(name,{})) for name in ROLES} if restored is not None else None)
-        state['supervisor'] = identity(os.getpid())
-        state['phase'] = 'starting'
-        atomic(store.path/'status.json',state)
+        driver.roles = recovery.roles
         store.event('supervisor_started', pid=os.getpid())
         try:
             while True:
+                store.require_epoch(epoch)
                 try:
                     keep = recovery.tick(time.monotonic(), store.desired())
                 except IntentStopped:
@@ -592,7 +676,7 @@ def run(runtime, pwsh, epoch):
                 state.update(phase='running' if keep else 'stopped',
                              heartbeat_utc=datetime.now(timezone.utc).isoformat(),
                              roles={name:vars(row) for name,row in recovery.roles.items()})
-                atomic(store.path/'status.json',state)
+                store.publish(state)
                 if not keep:
                     break
                 time.sleep(TICK)
@@ -601,7 +685,12 @@ def run(runtime, pwsh, epoch):
             # records for a manual Stop. Failures contain types/codes, never secrets.
             state.update(phase='blocked',reason=str(exc) if isinstance(exc,Conflict) else type(exc).__name__,
                          roles={name:vars(row) for name,row in recovery.roles.items()})
-            atomic(store.path/'status.json',state)
+            try:
+                store.publish(state)
+            except Conflict:
+                # Keep the newer/uncertain ownership journal intact, even on
+                # the exception path; a stale daemon must not publish anything.
+                store.event('manifest_publish_refused', epoch=epoch)
             store.event('supervisor_stopped', reason=state['reason'])
             raise
         finally:
@@ -625,7 +714,12 @@ def main():
         elif args.action == 'signal':
             request=read(args.request)
             driver=Windows(runtime,args.pwsh,request['binding'],lambda *a,**k:None)
-            driver.signal(request['record'])
+            driver.epoch = request.get('epoch')
+            if driver.epoch is None:
+                driver.signal(request['record'])
+            else:
+                with file_lock(Store(runtime).path/'command.lock', wait=30):
+                    driver.signal(request['record'])
         else:
             print(json.dumps(control(args.action,runtime,args.pwsh)))
     except Exception as exc:

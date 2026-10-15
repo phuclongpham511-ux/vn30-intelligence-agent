@@ -200,3 +200,79 @@ full Codex close/logoff/reboot survival and real sleep are NOT_VERIFIED.
 The two unrelated untracked frontend instruction files, Downloads WIP and the
 unmerged Technical checkpoint 30fdff2 are preserved. No Git push, runtime cutover,
 cloud work, Technical/FPT activation or unrelated application changes.
+
+## Start/Stop race correction — 2026-10-15
+
+The final review of source checkpoint `68df395` reproduced a safety-critical
+supervisor-absent Stop race: once the last old role exited, concurrent Start could
+publish a new generation, then Stop overwrote it with its old cleanup snapshot.
+The reproduction used simulated identities and launches only. Integration was
+blocked; the canonical runtime was not changed.
+
+The correction adds a Windows file-backed `control.lock` held for each entire
+external Start/Stop/Resume operation, including daemon acknowledgement and
+supervisor-absent cleanup. Commands wait at most 30 seconds for it, then fail
+closed with SUPERVISOR_BUSY. Status stays read-only and takes no locks. The daemon
+never obtains control.lock, so it can acknowledge startup, publish and exit while
+a controller waits. The existing shorter `command.lock` coordinates durable
+intent, ownership read-modify-write and process birth. The lifetime
+`supervisor.lock` still excludes a second daemon. None is the collector mutex.
+
+Ownership publication checks the exact generation while holding command.lock.
+Stale daemon startup, recovery launches, stop signals, cleanup and exception-path
+writes cannot act on a newer epoch. Cleanup also refuses to replace a still-live
+record or its known members. Stop signals retain the existing PID/creation-time,
+executable, observer/receipt and exact console-membership validation; the short
+signal helper now verifies the generation under command.lock too.
+
+Stop persists stopped intent and a stopping marker before waiting or signalling.
+An interrupted Stop therefore blocks Start until a subsequent Stop confirms
+cleanup. Successfully stopped roles are journaled individually so another Stop
+can continue without forgetting remaining ownership. Resume retains stopped
+intent. Old cleanup snapshots cannot erase newer generations.
+
+Supervisor and role births journal a pending-launch marker before creation.
+Role attempt counts are persisted before birth; known roots are saved before
+post-launch verification and the normal daemon tick. An acknowledged daemon may
+continue after its caller exits, and a delayed bootstrap respects stopped intent.
+If creation was interrupted before identity acknowledgement, Start and Stop
+report LAUNCH_OUTCOME_UNKNOWN rather than claim success or clear the evidence.
+This ambiguity requires operator ownership reconciliation; the marker must not
+be blindly removed. No automatic acquisition or restart retry is added.
+
+Deterministic temporary-file fixtures exercise the original race in both serial
+orders, duplicate Start, supervisor/controller failures, interrupted Start/Stop,
+durable intent, stale normal/exception writes, new-generation ownership,
+uncertain birth, attempt-budget retention and collector/identity conflicts.
+These are simulated lifecycle results, not production activation evidence.
+Native Windows fixtures additionally test file-lock exclusion from a separate
+process and the existing WMI/console lifecycle using finite fake roles. The
+three-role fixture preserves distinct logical ownership names while mapping its
+processes to finite Backend consoles; it never starts a real collector/server.
+
+The change is confined to supervisor coordination, focused fixtures and this
+report. Canonical services/configuration/product DB, credentials, collector
+implementation, Technical policy and paused FPT remain untouched. Production
+activation, real sleep/resume and Codex-close/logoff/reboot acceptance are still
+NOT_VERIFIED and require separately authorized work.
+
+Validation: the original saved fixture reproduced the lost-manifest race on
+`68df395`; the deterministic concurrent regression failed before correction and
+passed afterward. **18 new control regressions** pass (17 simulated lifecycle
+cases and one native cross-process lock check). The final focused run reported
+**45 passed in 53.78 seconds**, covering those new cases, existing supervisor
+policy/native fixtures and the ingestion ownership cycle. The earlier combined
+run also passed the other ownership/legacy-observer cases; its finite-role
+journal mapping failure was corrected, and its first cold-start ownership
+barrier timeout passed on the bounded focused rerun. No production timeout or
+ownership assertion was relaxed. The entire application suite was not repeated.
+Final JUnit evidence: `C:\Users\PC\.codex\tmp\woofi-supervisor-review-20261015\race-fix-focused.xml`.
+
+Bounded critical-section review: external lock order is control.lock then
+command.lock; the daemon takes supervisor.lock then only brief command.lock
+sections. Controller acknowledgement/shutdown waits hold no command.lock, and
+the signal helper never takes control.lock. Cleanup and exception publications
+are fenced. Pending births and incomplete Stop retain their safety markers.
+No unrelated termination, forced retry, mutex manipulation or application/data
+policy change was introduced. This correction is ready for separate integration;
+installation/activation remains unauthorized in this task.
