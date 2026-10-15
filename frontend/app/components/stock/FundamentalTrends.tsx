@@ -1,5 +1,5 @@
 "use client";
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {useLocale} from '@/lib/i18n';
 import type {FundamentalResearch,FundamentalPeriod,FinancialFrequency} from '@/lib/types';
 import {FINANCIAL_LABELS,type FinancialKey} from '@/lib/fundamental-data';
@@ -35,15 +35,29 @@ function ChangeSummary({data,unit}:{data:FundamentalResearch;unit:AmountUnit}){
 
 export default function FundamentalTrends({ticker,visible=true}:{ticker:string;visible?:boolean}){
   const [data,setData]=useState<FundamentalResearch|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(false),[attempt,setAttempt]=useState(0),[frequency,setFrequency]=useState<FinancialFrequency>('annual');
+  const recent=useRef(new Map<string,{data:FundamentalResearch;at:number}>());
   useEffect(()=>{
+    const key=`${ticker}:${frequency}`,cached=recent.current.get(key);
+    const age=cached?Date.now()-cached.at:Infinity;
+    // Reuse only successful, validated reads during a brief frequency round-trip.
+    // Original read/source times remain intact; this never promotes freshness.
+    if(cached&&age>=0&&age<60000){
+      recent.current.delete(key);recent.current.set(key,cached);
+      setData(cached.data);setError(false);setLoading(false);return;
+    }
+    recent.current.delete(key);
     const controller=new AbortController();let disposed=false;const timeout=setTimeout(()=>controller.abort(),60000);
     setLoading(true);setError(false);setData(null);
     stockRead<FundamentalResearch>(`/api/stocks/${encodeURIComponent(ticker)}/financials?frequency=${frequency}&limit=8&projection=display`,controller.signal)
-      .then(value=>{const result=financialEngineData(value,ticker,frequency);if(!disposed)setData(result);})
+      .then(value=>{const result=financialEngineData(value,ticker,frequency);if(!disposed){
+        recent.current.set(key,{data:result,at:Date.now()});
+        while(recent.current.size>3)recent.current.delete(recent.current.keys().next().value!);
+        setData(result);
+      }})
       .catch(()=>{if(!disposed)setError(true);}).finally(()=>{clearTimeout(timeout);if(!disposed)setLoading(false);});
     return()=>{disposed=true;clearTimeout(timeout);controller.abort();};
   },[ticker,attempt,frequency]);
-  return <FundamentalTrendsView data={data} loading={loading} error={error} retry={()=>setAttempt(value=>value+1)} visible={visible} frequency={frequency} onFrequency={setFrequency}/>;
+  return <FundamentalTrendsView data={data} loading={loading} error={error} retry={()=>{recent.current.delete(`${ticker}:${frequency}`);setAttempt(value=>value+1);}} visible={visible} frequency={frequency} onFrequency={setFrequency}/>;
 }
 
 export function FundamentalTrendsView({data,loading,error,retry,visible=true,frequency='annual',onFrequency=()=>{}}:{data:FundamentalResearch|null;loading:boolean;error:boolean;retry:()=>void;visible?:boolean;frequency?:FinancialFrequency;onFrequency?:(value:FinancialFrequency)=>void}){

@@ -155,7 +155,11 @@ class VnstockFundamentalDataProvider:
                         self._report_cache[key] = cached
                         while len(self._report_cache) > 128:
                             self._report_cache.popitem(last=False)
-        return cached.model_copy(deep=True)
+        # Rust-backed model traversal/validation is much cheaper than recursively
+        # deepcopying thousands of Pydantic financial lines. Python mode preserves
+        # numeric/date semantics; unlike a JSON roundtrip, invalid nonfinite inputs
+        # cannot silently turn into null. Each reader still owns all mutable data.
+        return type(cached).model_validate(cached.model_dump(mode='python', round_trip=True))
 
     @lru_cache(maxsize=128)
     def _financials(self, symbol: str, bucket: int) -> tuple[FundamentalRecord, ...]:

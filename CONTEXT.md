@@ -1,5 +1,17 @@
 # Woofi — Domain Context
 
+### Phase 2 performance and source reliability — 2026-10-15
+
+Financial packet reads preserve independent mutable graphs through validated
+Python-mode model copying; formulas, source versions and acquisition budgets are
+unchanged. A mounted Fundamentals view may reuse three successful frequency reads
+for 60 seconds, retaining original read/source timestamps; retry bypasses that
+entry and navigation still aborts obsolete work. Community distinguishes a valid
+quiet sitemap from malformed/recent unparseable evidence and exposes sanitized
+source diagnostics plus next due time on the existing cadence. No migration,
+Supervisor, Technical policy or singleton change. Validation/evidence boundaries:
+docs/PHASE_2_PERFORMANCE_SOURCE_RELIABILITY.md.
+
 ### Fundamental Data Engine V1 — 2026-10-13 (local development checkpoint)
 
 The existing vnstock/VCI provider now exposes metadata-qualified income, balance

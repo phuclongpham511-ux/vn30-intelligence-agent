@@ -87,3 +87,28 @@ def test_total_provider_failure_is_not_cached_as_success(monkeypatch):
         with pytest.raises(ProviderError):
             provider.get_reports('ABC')
     assert calls == ['ABC', 'ABC']
+
+
+def test_fast_copy_preserves_complete_packet_and_detaches_every_mutable_graph(monkeypatch):
+    saved = packet()
+    monkeypatch.setattr('src.providers.vnstock.financial_packet.fetch_packet', lambda *_:saved)
+    provider = VnstockFundamentalDataProvider()
+    first = provider.get_reports('ABC')
+    assert first == saved and first is not saved
+    observation = first.reports['income'].observations[0]
+    observation.fields['revenue'] = None
+    observation.items[0].source_labels.append({'name':'changed'})
+    first.reports['balance'].observations.clear()
+    second = provider.get_reports('ABC')
+    assert second == saved
+    assert second.reports['income'].observations[0].fields['revenue'] is not None
+    assert second.reports['income'].observations[0].items[0].source_labels != observation.items[0].source_labels
+
+
+def test_invalid_nonfinite_cached_input_cannot_be_normalized_into_missing_success(monkeypatch):
+    saved = packet()
+    saved.reports['income'].observations[0].fields['revenue'] = float('inf')
+    monkeypatch.setattr('src.providers.vnstock.financial_packet.fetch_packet', lambda *_:saved)
+    provider = VnstockFundamentalDataProvider()
+    with pytest.raises(ValueError):
+        provider.get_reports('ABC')

@@ -21,6 +21,7 @@ class CommunitySourceResponse(BaseModel):
     poll_interval_minutes: int
     last_attempt_at: datetime | None
     last_success_at: datetime | None
+    next_due_at: datetime | None = None
     last_error: str | None
     threads_received: int | None
     items_received: int | None

@@ -8,7 +8,7 @@ from hashlib import sha256
 import json
 from collections import Counter
 from src.community.models import CommunityEvidenceItem, CommunityEvidenceRevision, CommunitySourceState, CommunityThread, CommunityThreadObservation
-from src.community.acquisition import SOURCES, acquire
+from src.community.acquisition import SOURCES, acquire, PublicSourceError
 from src.community.service import community_tags
 from src.models import Stock
 from src.services.universe import discovery_metadata
@@ -88,7 +88,7 @@ def ingest_source(session, source, *, fetch=acquire, now=None):
     except Exception as exc:
         session.rollback()
         state = session.get(CommunitySourceState, source.id) or CommunitySourceState(source_id=source.id)
-        state.last_attempt_at, state.last_error = now, type(exc).__name__
+        state.last_attempt_at, state.last_error = now, exc.code if isinstance(exc, PublicSourceError) else type(exc).__name__
         session.add(state); session.commit()
         return {'status': 'error', 'error': state.last_error}
 
@@ -118,6 +118,7 @@ def source_statuses(session, *, now=None):
             status=status, poll_interval_minutes=source.interval,
             last_attempt_at=utc(state.last_attempt_at) if state and state.last_attempt_at else None,
             last_success_at=utc(state.last_success_at) if state and state.last_success_at else None,
+            next_due_at=utc(state.last_attempt_at)+timedelta(minutes=source.interval) if source.enabled and state and state.last_attempt_at else None,
             last_error=state.last_error if state else None, items_received=state.items_received if state else None,
             threads_received=state.threads_received if state else None))
     return output
