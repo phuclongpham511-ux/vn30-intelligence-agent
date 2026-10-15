@@ -29,6 +29,10 @@ BACKOFF = (15, 60, 180)  # Three recoveries per role per explicit Start, never r
 TICK = 5
 INVENTORY_CALLS = 4  # Includes the zero-capacity sizing call.
 INVENTORY_LIMIT = 4096  # Bound native allocation, never truncate the owner list.
+INVENTORY_MUTEX = r'Global\Woofi.RestartManager.Inventory.V1'
+INVENTORY_WAIT_MS = 5000
+STATE_IO_MUTEX = r'Global\Woofi.Supervisor.JsonIO.V1'
+STATE_IO_WAIT_MS = 5000
 
 
 class Conflict(RuntimeError):
@@ -80,17 +84,40 @@ def _verify_lock_owner(owner):
         kernel.CloseHandle(handle)
 
 
+@contextmanager
+def state_io():
+    """Only physical JSON I/O; never a control transaction or process operation.
+
+    Windows readers can deny atomic replacement while their handle is open.
+    Serialize cooperating readers/writers, retaining atomic rename and the
+    separate generation/control locks that protect logical read-modify-write.
+    """
+    if os.name != 'nt':
+        yield
+        return
+    def error(stage,code):
+        return Conflict(f'STATE_IO_UNVERIFIED {stage} code={code}')
+    with _named_mutex(STATE_IO_MUTEX,error,STATE_IO_WAIT_MS):
+        yield
+
+
 def read(path, default=None):
-    return json.loads(path.read_text(encoding='utf-8-sig')) if path.exists() else default
+    with state_io():
+        try:
+            raw = path.read_text(encoding='utf-8-sig')
+        except FileNotFoundError:
+            return default
+    return json.loads(raw)
 
 
 def atomic(path, value):
-    temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
-    try:
-        temporary.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8')
-        os.replace(temporary, path)
-    finally:
-        temporary.unlink(missing_ok=True)
+    with state_io():
+        temporary = path.with_name(path.name + '.' + uuid.uuid4().hex + '.tmp')
+        try:
+            temporary.write_text(json.dumps(value, indent=2) + '\n', encoding='utf-8')
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
 
 
 @contextmanager
@@ -255,7 +282,59 @@ def literal(text):
     return "'" + str(text).replace("'", "''") + "'"
 
 
+@contextmanager
+def _named_mutex(name,error,wait_ms):
+    """One bounded Windows wait. Abandonment/uncertainty never means success."""
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.CreateMutexW.argtypes = [w.LPVOID,w.BOOL,w.LPCWSTR]
+    kernel.CreateMutexW.restype = w.HANDLE
+    kernel.WaitForSingleObject.argtypes = [w.HANDLE,w.DWORD]
+    kernel.WaitForSingleObject.restype = w.DWORD
+    kernel.ReleaseMutex.argtypes = [w.HANDLE]
+    kernel.ReleaseMutex.restype = w.BOOL
+    kernel.CloseHandle.argtypes = [w.HANDLE]
+    kernel.CloseHandle.restype = w.BOOL
+    handle = kernel.CreateMutexW(None,False,name)
+    if not handle:
+        raise error('open',ctypes.get_last_error())
+    owned = False
+    try:
+        result = kernel.WaitForSingleObject(handle,wait_ms)
+        owned = result in (0,0x80)  # WAIT_OBJECT_0 / WAIT_ABANDONED both grant ownership.
+        if result != 0:
+            # Abandonment cannot prove the previous critical section ended
+            # cleanly. Release ownership, but fail this operation closed.
+            code = ctypes.get_last_error() if result == 0xffffffff else result
+            raise error('wait',code)
+        yield
+    finally:
+        primary = sys.exc_info()[0] is not None
+        release_error = ctypes.get_last_error() if owned and not kernel.ReleaseMutex(handle) else None
+        close_error = ctypes.get_last_error() if not kernel.CloseHandle(handle) else None
+        if not primary and (release_error is not None or close_error is not None):
+            raise error('cleanup',release_error if release_error is not None else close_error)
+
+
+@contextmanager
+def inventory_lock():
+    """Serialize complete RM sessions; never filter an apparent owner PID.
+
+    Concurrent native queries can observe another querying process as a file
+    user. This independent mutex excludes our own overlapping observations,
+    without obtaining the collector mutex or changing owner/identity checks.
+    """
+    with _named_mutex(INVENTORY_MUTEX,lambda stage,code:inventory_error('serialization_'+stage,code),INVENTORY_WAIT_MS):
+        yield
+
+
 def lock_owners(path):
+    # Lock before even probing the file and hold through RmEndSession. A thread
+    # lock or atomic JSON replacement cannot coordinate independent observers.
+    with inventory_lock():
+        return _lock_owners(path)
+
+
+def _lock_owners(path):
     """Bounded read-only RM snapshot, not a claim to the acquisition mutex.
 
     RmGetList can return ERROR_MORE_DATA again after sizing. Reallocate only

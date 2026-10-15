@@ -544,3 +544,130 @@ remains the stopped a0c96ab release; installed package, product DB/data/cooldown
 credentials, FPT PAUSED state, Technical policy/checkpoint 30fdff2, startup tasks,
 Downloads WIP and unrelated instruction files are unchanged. Controlled activation
 requires a separate fresh ownership/data-safety handoff; it was not performed.
+
+## Autonomous local stability Phase 1 — execution plan, 2026-10-15
+
+Scope: restore safe daily Windows operation using the integrated supervisor and
+existing canonical launch/data paths. User authorization permits one controlled
+activation, not autostart or repeated production retries. This section is the
+living plan/progress record, extending this existing implementation document.
+
+Evidence directory: `C:\Users\PC\WoofiRuntime\state\local-stability-phase1-20261015`.
+Starting source main: df05ccd4dc29bc33b6b717126185a482bdf92c3d.
+Starting runtime: a0c96abdfb8672efd08b1051bd4b2af49e50546e, all roles stopped.
+
+| Milestone | Dependency and acceptance | Execution status |
+| --- | --- | --- |
+| M0 — establish safe baseline | Fresh source/pin, clean release, native ownership/ports/locks, credential reference, SQLite integrity/FK/provenance and verified online backup; no unknown owner | PASS — 09:34–09:35 UTC: no live roles/owners, 29-table integrity/FK PASS, online backup verified; all identities/static provenance preserved |
+| M1 — prepare approved release | M0; independent release directory, unchanged dependency contracts, production build, hashes and actual detached canonical three-role preflight; retain old release/config | PASS — clean df05ccd, unchanged app/dependency/schema contracts, build 2Ar6rJtxBmDOjBqYYnsxA, package hashes and both real WMI/preflights qualified |
+| M2 — single controlled activation | M1; install matching package/pin, actual Start/readiness, explicit Stop with durable intent and no restart, Start again; exactly one supervisor/API/frontend/collector root | PASS — Start/readiness, graceful Stop, >60 seconds stopped with Resume retaining intent, then explicit second Start/readiness; one verified native collector owner; no activation failure/retry |
+| M3 — product/data/stability | M2; real Home/Explore/Detail/Fundamentals/News/Community/Watchlist, correct serving artifact and labels, 15-minute bounded ownership/HTTP/lifecycle observation, final integrity/provenance/identities preserved | FAIL — daemon exited 09:54:03 UTC with COMPETING_COLLECTOR after 366.97 seconds; product/serving checks passed before failure; data preserved; cleanup blocked on remaining Backend members |
+| M4 — independent operation/handoff | M3; detached native job evidence, simple Start/Stop/Status and rollback instructions; actual user Codex-close acceptance | NOT_READY / MANUAL_TEST_PENDING — activation failed; never close Codex or force Windows sleep/logoff/reboot |
+
+Priority/risk decisions: reuse the corrected architecture and today's 149 passing
+isolated tests where source is unchanged. The historical unknown outage cause is
+not invented or expanded into unrelated investigation. Actual role disappearance,
+unknown ownership, duplicate acquisition, data/provenance loss or a critical API
+regression fails activation. Persisted/provider/fixture evidence must remain distinct;
+ordinary collection follows existing due times and cooldowns, without force flags.
+
+Failure procedure: stop further attempts, preserve failure state/events and any
+post-update writes; stop only freshly verified owned collector then web/API roles
+through the documented controller. Create a new consistent backup, retain the same
+newest live DB, and restore compatible old source/config/gate only after ownership
+release. Unknown ownership fails closed. No retry of production activation after
+failure without separate user authorization; a scoped source diagnosis/fix may follow.
+
+Phase status remains PARTIAL until every mandatory acceptance gate is proven.
+Codex closure is a human gate; native job independence is supporting evidence,
+not a substitute. Real sleep/resume remains NOT_VERIFIED unless the user performs it.
+
+
+### Phase 1 activation result and bounded source correction
+
+The single production activation attempt failed at 2026-10-15 09:54:03 UTC
+(16:54:03 ICT). Initial Start/Stop/Start and product smoke passed, but the second
+supervisor exited with COMPETING_COLLECTOR. Three observation samples passed;
+the 15-minute stability gate failed after 366.97 seconds. Never report the
+pre-failure Home screenshot/product checks as current runtime availability.
+
+A simultaneous read-only inventory saw the supervisor PID itself, then reported
+owner_exited as that process ended. This is not proof of a duplicate collector.
+A finite isolated native reproduction used two temporary file-mutex holders and
+four independent Restart Manager readers. Before the correction, 40 of 48
+queries included another reader PID or its exit; the complete stdout was observed
+in the task transcript. No canonical service/database was involved.
+
+Correction: a separate Windows named mutex serializes complete Restart Manager
+sessions, including the initial path probe and RmEndSession, across cooperating
+processes/Windows sessions. It does not obtain the ingestion mutex. One bounded
+5-second native wait; no spin/retry loop. Missing access, timeout, abandonment,
+wait or cleanup failure remain InventoryUnverified. WAIT_ABANDONED releases the
+ownership Windows grants but fails the current observation. No PID is filtered
+out; foreign holders, incomplete inventories, PID reuse and persistent failures
+still fail closed. Lock order remains control/command -> inventory; inventory
+never acquires control/command locks. Other tools/older versions that do not use
+this protocol can still cause unverified inventories, never permission to launch.
+
+The same 48-query isolated probe returned zero anomalies after the correction.
+New regressions cover native cross-process exclusion/release, abandoned-owner
+crash release, all wait outcomes, access/open failure, error cleanup and retained
+primary errors, plus concurrent native file-owner reads. Existing process, Stop
+intent, generation, collector and inventory tests remain mandatory. This is source
+validation only: the correction is NOT installed in the canonical package and no
+production activation retry is authorized after the failed attempt.
+
+Failure handling: stopped intent persisted. Collector exited gracefully, no
+worker/mutex holder remains; Frontend was then independently verified and stopped
+using the same driver, under the control lock with generation-fenced publishing.
+Backend Stop timed out at 45 seconds. Its observer remains plus recorded uvicorn
+redirector/native members whose credential-helper parent exited; subsequent
+inspection reports ORPHANED_ROLE_MEMBERS. Both ports are vacant, but the native
+Backend still holds the DB. Ownership records are retained; no force kill, old DB
+restore, pin rollback or new Start was performed. Current pin stays df05ccd until
+remaining ownership can be safely reconciled. The backend hang root cause is not
+established by available stack evidence; do not invent one or weaken the guard.
+
+Latest verified backup after collector shutdown:
+`C:\Users\PC\WoofiRuntime\backups\product\20261015T095655634196Z\woofi.db`,
+SHA256 c7a0e8a098ca929611626e3d77287d62baf8dd7bc3daf47f89b0ac2462e66763.
+Live full integrity/FK, schema, all original identities and static provenance PASS.
+Articles 4535, stories 4244, text receipts 2933; Community evidence 1933, revisions
+1976. Dividend records/documents remain 30/25. Preserve this newest live database.
+
+Phase 1 remains BLOCKED for production acceptance/reconciliation. Source correction
+may be checkpointed after focused validation, but integration/activation readiness
+must not be inferred. A separate user authorization is needed for another live
+activation; safe resolution of remaining Backend ownership comes first. Actual
+Codex closure/sleep acceptance cannot run against the stopped/blocked application.
+
+
+### Source validation after activation failure
+
+The 165-case focused run exposed a separate real Windows file-sharing failure:
+Status could hold a normal JSON reader while a controller atomically replaced
+status.json (WinError 5). A held-reader fixture reproduced it without timers.
+A share-delete-only experiment still failed and was discarded. The correction
+uses a second independent named mutex for physical JSON read/write only, retaining
+atomic replacement and the existing control/command generation transactions.
+No lock is held across a process operation by the physical-I/O helper. Missing
+files keep their documented default; invalid JSON/access/coordination failure
+remain errors. It never opens the product DB or modifies app API/data logic.
+
+Final focused run: 165 PASS / 3 FAIL, all three from an existing console fake
+missing the new CreateMutexW ABI, before its existing identity assertions could
+run. The fixture now delegates only CreateMutexW/WaitForSingleObject/ReleaseMutex/
+CloseHandle to the real kernel, leaving console attach/control fake and every
+assertion unchanged. The entire affected exit-race file plus both new test files
+then passed: 48 PASS / 0 FAIL. Combined with the unchanged 165 passing results,
+all 168 unique relevant cases have passing current evidence; this is explicitly
+split-run validation, not a claimed single 168-test run. XML/logs and calculated
+coverage are in the Phase 1 evidence directory. No failed case was skipped,
+assertion weakened or timeout extended; no further unchanged broad suite repeated.
+
+The two source corrections were reviewed for lock order, error/abandonment release,
+unknown-owner fail-closed behavior, manifest preservation and bounded waits. They
+are eligible for a normal source checkpoint/integration only, not proof that live
+activation/cleanup has passed. Runtime package remains df05ccd, launch gate disabled,
+Backend records retained. No new production activation or force cleanup is permitted
+by this failed attempt. Product availability and manual acceptance remain BLOCKED.

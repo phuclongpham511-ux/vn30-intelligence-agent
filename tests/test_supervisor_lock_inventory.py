@@ -323,6 +323,20 @@ def test_native_single_owner_and_kernel_mutex_are_preserved(native_holder):
     assert s.lock_owners(path)==[pid]
 
 
+def test_native_concurrent_readers_never_appear_as_file_owners(native_holder):
+    from concurrent.futures import ThreadPoolExecutor
+    path,pid=native_holder
+    code=('import json,sys\nfrom scripts.windows import runtime_supervisor as s\n'
+          'print(json.dumps([s.lock_owners(sys.argv[1]) for _ in range(8)]))\n')
+    def observe(_):
+        result=subprocess.run([sys.executable,'-B','-c',code,str(path)],capture_output=True,
+                              text=True,timeout=30,cwd=str(s.Path(s.__file__).resolve().parents[2]))
+        assert result.returncode==0,result.stderr
+        assert json.loads(result.stdout)==[[pid]]*8
+    with ThreadPoolExecutor(max_workers=4) as pool:list(pool.map(observe,range(4)))
+    assert s.lock_owners(path)==[pid]
+
+
 def test_native_foreign_mutex_owner_blocks_even_without_worker_command_match(native_holder,tmp_path,monkeypatch):
     path,pid=native_holder
     driver=s.Windows(tmp_path,'pwsh',{},lambda *a,**k:None)

@@ -256,7 +256,14 @@ def test_stale_generation_cannot_census_or_signal_new_owned_processes(census):
 @pytest.mark.parametrize('change',['root_reused','child_exited','foreign_console'])
 def test_signal_rechecks_identity_after_console_attach_before_any_control_event(census,monkeypatch,change):
     driver,record,rows,_,calls,_=census
+    real_kernel=s.ctypes.WinDLL('kernel32',use_last_error=True)
     class Kernel:
+        def __getattr__(self,name):
+            # Mock console signalling only. State reads now use the real native
+            # JSON-I/O mutex; do not replace that unrelated ABI with a stub.
+            if name not in ('CreateMutexW','WaitForSingleObject','ReleaseMutex','CloseHandle'):
+                raise AttributeError(name)
+            return getattr(real_kernel,name)
         def FreeConsole(self):calls.append('free');return 1
         def AttachConsole(self,pid):calls.append('attach');return 1
         def GetConsoleProcessList(self,clients,capacity):
