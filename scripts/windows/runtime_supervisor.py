@@ -14,6 +14,7 @@ from datetime import datetime, timezone
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import time
@@ -515,13 +516,27 @@ def status(runtime):
             'member_alive':any(alive(m) for row in result.get('roles',{}).values() for m in row.get('members',[]))}
 
 
-def independent(pwsh, argv, directory, request_file):
+def bootstrap_environment():
     # WMI provider environment is not the interactive shell's environment. Carry
     # executable lookup/Windows paths only, never credentials or pilot flags.
-    keys=('PATH','SystemRoot','WINDIR','TEMP','TMP','USERPROFILE','LOCALAPPDATA','APPDATA')
+    pathext = os.environ.get('PATHEXT')
+    if not pathext:
+        raise Conflict('WINDOWS_PATHEXT_MISSING: check PATHEXT in the parent Windows environment before Start')
+    extensions = pathext.split(';')
+    if (any(not re.fullmatch(r'\.[A-Za-z0-9]+', item) for item in extensions)
+            or not {'.EXE', '.CMD'}.issubset({item.upper() for item in extensions})):
+        raise Conflict('WINDOWS_PATHEXT_INVALID: expected extension list including .EXE and .CMD; check parent Windows environment')
+    # Preserve the approved parent's exact order/value; no default extensions,
+    # PATH replacement, extra executable search paths or shell policy override.
+    keys=('PATH','PATHEXT','SystemRoot','WINDIR','TEMP','TMP','USERPROFILE','LOCALAPPDATA','APPDATA')
     environment=[key+'='+os.environ[key] for key in keys if key in os.environ]
     environment.append('PYTHONUTF8=1')
     environment.append('PYTHONPATH='+str(Path(psutil.__file__).resolve().parents[1]))
+    return environment
+
+
+def independent(pwsh, argv, directory, request_file):
+    environment = bootstrap_environment()
     # Windows venv redirectors create a kill-on-close child job. Bootstrap the
     # matching base interpreter directly, with only the approved dependency path;
     # -S excludes unrelated global/user site startup hooks. No packages installed.
@@ -579,6 +594,9 @@ def _control(action, runtime, pwsh):
                 return existing  # Idempotent Start; cannot replenish retry budget.
             if any(existing['role_alive'].values()) or existing['member_alive']:
                 raise Conflict('ORPHANED_ROLES_REQUIRE_STOP')
+            # Diagnose known environment failure before git preflight or a
+            # durable pending-birth journal; no launch has happened yet.
+            bootstrap_environment()
             cfg = read(runtime/'config/runtime.json')
             driver = Windows(runtime,pwsh,bind(cfg),store.event)
             driver.validate()

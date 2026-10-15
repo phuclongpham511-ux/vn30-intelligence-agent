@@ -177,13 +177,14 @@ def test_no_production_concurrency_or_data_policy_is_modified():
 
 def test_wmi_bootstrap_carries_only_windows_paths_not_credentials_or_pilot_flags(tmp_path,monkeypatch):
     from types import SimpleNamespace
+    monkeypatch.setenv('PATHEXT','.COM;.EXE;.BAT;.CMD')
     monkeypatch.setenv('SSI_API_KEY','synthetic-secret-do-not-copy')
     monkeypatch.setenv('TECHNICAL_EOD_PILOT','synthetic-pilot-do-not-copy')
     monkeypatch.setattr(s.subprocess,'run',lambda *a,**k:SimpleNamespace(returncode=0,stdout='{"launch_pid":123}'))
     assert s.independent('pwsh',['python','fixture.py'],tmp_path,tmp_path/'request.json')['launch_pid']==123
     value=(tmp_path/'request.json').read_text()
     assert 'synthetic-secret' not in value and 'synthetic-pilot' not in value
-    allowed={'PATH','SystemRoot','WINDIR','TEMP','TMP','USERPROFILE','LOCALAPPDATA','APPDATA','PYTHONUTF8','PYTHONPATH'}
+    allowed={'PATH','PATHEXT','SystemRoot','WINDIR','TEMP','TMP','USERPROFILE','LOCALAPPDATA','APPDATA','PYTHONUTF8','PYTHONPATH'}
     assert all(line.split('=',1)[0] in allowed for line in s.read(tmp_path/'request.json')['environment'])
 
 

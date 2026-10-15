@@ -276,3 +276,60 @@ are fenced. Pending births and incomplete Stop retain their safety markers.
 No unrelated termination, forced retry, mutex manipulation or application/data
 policy change was introduced. This correction is ready for separate integration;
 installation/activation remains unauthorized in this task.
+
+## PATHEXT bootstrap correction — 2026-10-15
+
+The first approved controlled activation of `4a5f519` failed before creating any
+service role. The daemon reported WINDOWS_PROBE_FAILED in Backend preflight.
+Its sanitized WMI environment omitted PATHEXT, so the canonical PowerShell
+launcher could not resolve `git`. Read-only comparison demonstrated that adding
+only the parent PATHEXT made the gate pass. Activation was stopped and runtime
+source/config restored to a0c96ab without replacing the database. Failure evidence:
+`C:\Users\PC\WoofiRuntime\state\supervisor-v1-activation-20261015T011203Z\FINAL_REPORT.md`.
+The installed operational package remains stopped; it is not updated by this fix.
+
+`bootstrap_environment()` now includes the approved parent's PATHEXT in the
+existing whitelist. PATH and PATHEXT retain their exact values/order/case. There
+are no machine-specific search paths, default extension substitutes, execution
+policy changes, credential keys or pilot flags added. The existing canonical
+credential helper/reference is unchanged. This single environment bootstraps the
+daemon and is inherited by the Backend, Frontend and Collector PowerShell
+launchers; no separate per-role workaround is needed.
+
+Missing/empty PATHEXT reports WINDOWS_PATHEXT_MISSING. Malformed lists report
+WINDOWS_PATHEXT_INVALID: entries must be simple dot-prefixed alphanumeric
+extensions and include .EXE and .CMD, compared case-insensitively. Empty entries,
+paths, whitespace and control characters are rejected. Diagnostics direct the
+operator to the parent Windows environment and never echo the rejected value.
+Validation occurs before request creation/process birth and, for a new Start,
+before git preflight or pending-launch journaling. Stop, read-only Status and
+stopped-intent Resume retain their existing behavior.
+
+The new native regression calls the actual `independent()` WMI bootstrap. It
+compares child Git/npm resolution to the approved parent executables, preserves
+PATH/PATHEXT, runs npm --version, and validates a temporary Git checkout through
+the actual Windows.validate seam. It uses an unchanged canonical Invoke-Woofi.ps1
+fixture (SHA256 CE419D770661BF7046DF7B04F1E37220D38AEA8E3721D48EFE77766F42B24AD9)
+and invokes -CheckOnly for all three roles. Its credential reference/helper are
+explicit synthetic fixtures. Its dummy database-existence file is never opened
+or modified, no application is imported, and no service/collector/provider is
+started. This qualifies command resolution and the gate contract, not production
+credential recognition or service health.
+
+Both retention and detached-WMI regressions failed against the previous source
+and passed after correction. Thirteen new checks cover exact environment
+retention, secret/pilot exclusion, approved command resolution, isolated canonical
+preflight and missing/malformed diagnostics before launch or intent changes.
+Existing lifecycle/native, Start/Stop generation and collector-ownership checks
+are the focused regression scope; no full application suite is required.
+Final focused validation: **58 passed in 45.94 seconds**, including all 13 new
+checks. Logs and JUnit evidence:
+`C:\Users\PC\.codex\tmp\woofi-pathext-fix-20261015\focused.log` and `focused.xml`.
+
+Focused review: the only new forwarded key is PATHEXT; PATH, dependency bootstrap,
+WMI flags, control lock order, generation writes, identity checks, collector mutex,
+retry limits/cooldowns and Technical policy remain unchanged. Runtime configuration,
+services, product SQLite, credential references, FPT PAUSED state and unrelated
+instruction files/WIP are preserved. After integration, a separately authorized
+release must install the corrected package and repeat actual service/lifecycle
+and bounded stability acceptance. Codex-close and real sleep remain unverified.
