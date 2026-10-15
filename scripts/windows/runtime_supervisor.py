@@ -141,6 +141,11 @@ class Role:
     phase: str = 'waiting'
     members: list = field(default_factory=list)
 
+    def remember_members(self):
+        for member in (self.record or {}).get('members', []):
+            if member not in self.members:
+                self.members.append(member)
+
 
 class Recovery:
     """Deterministic policy seam; driver performs verified Windows operations."""
@@ -148,6 +153,12 @@ class Recovery:
         self.driver, self.emit = driver, emit
         self.roles = roles or {name:Role() for name in ROLES}
         self.last_tick = None
+
+    def stop_role(self, name, state):
+        try:
+            self.driver.stop(name, state.record, state.members)
+        finally:
+            state.remember_members()
 
     def tick(self, now, desired):
         if self.last_tick is not None and now - self.last_tick > 60:
@@ -160,7 +171,7 @@ class Recovery:
             for name in ('Collector', 'Backend', 'Frontend'):
                 state = self.roles[name]
                 if state.record:
-                    self.driver.stop(name, state.record, state.members)
+                    self.stop_role(name, state)
                     self.emit('role_stopped', role=name, expected=True)
                     state.record = None
                 state.phase = 'stopped'
@@ -169,7 +180,12 @@ class Recovery:
             if state.phase == 'blocked':
                 continue
             if state.record:
-                observation = self.driver.inspect(name, state.record)
+                try:
+                    observation = self.driver.inspect(name, state.record)
+                finally:
+                    # A partial census may discover live descendants before an
+                    # ownership error. Keep those identities on the error path.
+                    state.remember_members()
                 if observation['running']:
                     state.members = observation['members']
                 if observation['running']:
@@ -183,7 +199,7 @@ class Recovery:
                         state.phase = 'degraded'
                     elif now - state.record['launched'] > 45:
                         self.emit('startup_timeout', role=name)
-                        self.driver.stop(name, state.record, state.members)
+                        self.stop_role(name, state)
                         state.record = None
                     else:
                         continue
@@ -292,7 +308,7 @@ def lock_owners(path):
                 capacity = needed.value
                 time.sleep(.05 * 2**(attempt-1))  # Total retry delay <= 350 ms.
                 continue
-            if count.value > capacity or needed.value > capacity:
+            if count.value > capacity or needed.value > capacity or needed.value > count.value:
                 raise inventory_error('invalid_success',code,**detail)
             owners = [entries[i].process for i in range(count.value)]
             pids = [owner.pid for owner in owners]
@@ -395,12 +411,34 @@ class Windows:
         self.verify(record)
         return record
 
+    def root_process(self, record):
+        """None means confirmed absence, never access denial or PID reuse."""
+        item = record['identity']
+        try:
+            process = psutil.Process(item['pid'])
+            if (process.create_time() != item['created']
+                    or not os.path.samefile(process.exe(),item['exe'])):
+                raise Conflict('ROLE_IDENTITY_MISMATCH')
+            return process
+        except psutil.NoSuchProcess:
+            return None
+        except (psutil.AccessDenied,OSError):
+            raise Conflict('PROCESS_IDENTITY_UNVERIFIABLE') from None
+
     def verify(self, record):
         if self.epoch is not None:
             Store(self.root).require_epoch(self.epoch)
-        if not alive(record['identity']):
+        root = self.root_process(record)
+        if root is None:
             return False
-        args = psutil.Process(record['identity']['pid']).cmdline()
+        try:
+            args = root.cmdline()
+        except psutil.NoSuchProcess:
+            if self.root_process(record) is None:
+                return False
+            raise Conflict('PROCESS_CENSUS_UNVERIFIABLE') from None
+        except psutil.AccessDenied:
+            raise Conflict('PROCESS_IDENTITY_UNVERIFIABLE') from None
         script = str(Path(__file__).with_name('Invoke-WoofiObservedRole.ps1'))
         # The observed launcher resolves its sibling observer path.
         if (script.casefold() not in [a.casefold() for a in args]
@@ -414,14 +452,75 @@ class Windows:
                         or started['source'] != self.binding['source'] or started['observer_pid'] != record['identity']['pid']
                         or started['role'] != record['role']):
             raise Conflict('ROLE_RECEIPT_MISMATCH')
-        return True
+        return self.root_process(record) is not None
+
+    def observe_members(self, record):
+        """Qualified tree census shared by readiness and console signalling.
+
+        Process enumeration is not atomic. Remember every qualified identity;
+        only confirmed exited children may disappear. Never adopt a reused PID
+        or forget a live child when its parent exits or detaches.
+        """
+        known = record.setdefault('members', [])
+        if record['identity'] not in known:
+            known.append(record['identity'])
+        def exited():
+            return {'running':False,'members':list(known)}
+        for attempt in range(3):
+            if not self.verify(record):
+                return exited()
+            root = self.root_process(record)
+            if root is None:
+                return exited()
+            try:
+                processes = [root,*root.children(recursive=True)]
+            except psutil.NoSuchProcess:
+                if self.root_process(record) is None:
+                    return exited()
+                if attempt == 2:
+                    raise Conflict('PROCESS_CENSUS_UNVERIFIABLE') from None
+                time.sleep(.05 * (attempt+1))
+                continue
+            except psutil.AccessDenied:
+                raise Conflict('PROCESS_IDENTITY_UNVERIFIABLE') from None
+            current = []
+            for process in processes:
+                try:
+                    created = process.create_time()
+                    if process.name().lower() == 'conhost.exe':
+                        continue
+                    item = identity(process.pid)
+                    if item['created'] != created:
+                        raise Conflict('PROCESS_CHANGED_DURING_INSPECTION')
+                    if not alive(item):
+                        # PID exists but no longer has the captured identity.
+                        if psutil.pid_exists(process.pid):
+                            raise Conflict('PROCESS_CHANGED_DURING_INSPECTION')
+                        continue
+                except psutil.NoSuchProcess:
+                    if psutil.pid_exists(process.pid):
+                        raise Conflict('PROCESS_CHANGED_DURING_INSPECTION') from None
+                    continue
+                except (psutil.AccessDenied,OSError):
+                    raise Conflict('PROCESS_IDENTITY_UNVERIFIABLE') from None
+                if item not in known:
+                    known.append(item)
+                current.append(item)
+            if not self.verify(record):
+                return exited()
+            if any(item not in current and alive(item) for item in known):
+                raise Conflict('ORPHANED_ROLE_MEMBERS')
+            # Only confirmed departed identities can be pruned. Failed partial
+            # censuses above retain every identity discovered so far.
+            record['members'] = current
+            return {'running':True,'members':current}
+        raise Conflict('PROCESS_CENSUS_UNVERIFIABLE')
 
     def inspect(self, role, record):
-        if not self.verify(record):
-            return {'running':False,'ready':False,'members':record.get('members',[])}
-        root = psutil.Process(record['identity']['pid'])
-        members = [identity(p.pid) for p in [root,*root.children(recursive=True)] if p.name().lower() != 'conhost.exe']
-        record['members'] = members
+        observation = self.observe_members(record)
+        if not observation['running']:
+            return {**observation,'ready':False}
+        members = observation['members']
         cfg = read(self.root/'config/runtime.json')
         pids = {m['pid'] for m in members}
         if bind(cfg) != self.binding:
@@ -440,8 +539,26 @@ class Windows:
                 raise Conflict('COMPETING_COLLECTOR')
             ready = len(roots) == 1 and len(owners) == 1 and owners[0] in pids
             if ready:
-                worker=psutil.Process(owners[0]);args=worker.cmdline()
-                if (Path(worker.cwd()).resolve() != Path(cfg['source_checkout']).resolve()
+                item = next(m for m in members if m['pid']==owners[0])
+                try:
+                    if not alive(item):
+                        if psutil.pid_exists(item['pid']):
+                            raise Conflict('COLLECTOR_IDENTITY_MISMATCH')
+                        return {**observation,'ready':False}
+                    worker=psutil.Process(owners[0]);args=worker.cmdline()
+                    cwd=worker.cwd();created=worker.create_time()
+                    if not alive(item):
+                        if psutil.pid_exists(item['pid']):
+                            raise Conflict('COLLECTOR_IDENTITY_MISMATCH')
+                        return {**observation,'ready':False}
+                except psutil.NoSuchProcess:
+                    if psutil.pid_exists(item['pid']):
+                        raise Conflict('COLLECTOR_IDENTITY_MISMATCH') from None
+                    return {**observation,'ready':False}
+                except psutil.AccessDenied:
+                    raise Conflict('PROCESS_IDENTITY_UNVERIFIABLE') from None
+                if (created != item['created']
+                        or Path(cwd).resolve() != Path(cfg['source_checkout']).resolve()
                         or '-m' not in args or args[args.index('-m')+1] != 'scripts.ingest_data' or '--watch' not in args):
                     raise Conflict('COLLECTOR_IDENTITY_MISMATCH')
         else:
@@ -472,12 +589,17 @@ class Windows:
 
     def stop(self, role, record, members):
         # No TerminateProcess/port-based kills. Never signal an unrelated console.
-        if not self.verify(record):
-            if any(alive(m) for m in members):
+        for member in members:
+            if member not in record.setdefault('members', []):
+                record['members'].append(member)
+        observation = self.inspect(role, record)
+        if not observation['running']:
+            if any(alive(m) for m in observation['members']):
                 raise Conflict('ORPHANED_ROLE_MEMBERS')
             return
-        observation = self.inspect(role, record)
-        current = observation['members']; ids = {m['pid'] for m in current}
+        current = observation['members']
+        if not any(alive(m) for m in current):
+            return  # The entire verified tree finished naturally before signal.
         for m in current:
             if not alive(m):
                 raise Conflict('PROCESS_CHANGED_DURING_STOP')
@@ -487,10 +609,23 @@ class Windows:
             request=Path(record['run_directory'])/('stop-'+uuid.uuid4().hex+'.json')
             atomic(request,{'record':record,'binding':self.binding,'epoch':self.epoch})
             info=subprocess.STARTUPINFO();info.dwFlags|=subprocess.STARTF_USESHOWWINDOW;info.wShowWindow=0
-            signal=subprocess.run([sys.executable,'-B',str(Path(__file__).resolve()),'signal',
-                '--runtime',str(self.root),'--pwsh',self.pwsh,'--request',str(request)],
-                stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=15,
-                creationflags=subprocess.CREATE_NEW_CONSOLE,startupinfo=info)
+            try:
+                signal=subprocess.run([sys.executable,'-B',str(Path(__file__).resolve()),'signal',
+                    '--runtime',str(self.root),'--pwsh',self.pwsh,'--request',str(request)],
+                    stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=15,
+                    creationflags=subprocess.CREATE_NEW_CONSOLE,startupinfo=info)
+            finally:
+                proof=read(request)
+                if (proof.get('binding') != self.binding or proof.get('epoch') != self.epoch
+                        or proof.get('record',{}).get('identity') != record['identity']):
+                    raise Conflict('SIGNAL_RECEIPT_MISMATCH')
+                # The helper can see a new child after the parent's snapshot.
+                # Keep and wait for every identity, even if signalling fails.
+                for member in proof['record'].get('members', []):
+                    if member not in record['members']:
+                        record['members'].append(member)
+                    if member not in current:
+                        current.append(member)
             if signal.returncode:
                 if any(alive(m) for m in current):
                     raise Conflict('GRACEFUL_SIGNAL_REFUSED')
@@ -503,11 +638,14 @@ class Windows:
         if any(alive(m) for m in current):
             raise Conflict('GRACEFUL_STOP_TIMEOUT')
 
-    def signal(self, record):
-        if not self.verify(record):
+    def signal(self, record, before_signal=lambda:None):
+        observation = self.observe_members(record)
+        current = observation['members']
+        before_signal()  # Persist qualified members before any native signal.
+        if not observation['running']:
+            if any(alive(m) for m in current):
+                raise Conflict('ORPHANED_ROLE_MEMBERS')
             return
-        root=psutil.Process(record['identity']['pid'])
-        current=[identity(p.pid) for p in [root,*root.children(recursive=True)] if p.name().lower()!='conhost.exe']
         ids={m['pid'] for m in current}
         if not all(alive(m) for m in current):
             raise Conflict('PROCESS_CHANGED_DURING_STOP')
@@ -519,6 +657,8 @@ class Windows:
             clients = (w.DWORD*256)(); count = kernel.GetConsoleProcessList(clients,256)
             if not count or count > 256 or set(clients[:count]) != ids | {os.getpid()}:
                 raise Conflict('UNRELATED_CONSOLE_MEMBER')
+            if not all(alive(m) for m in current):
+                raise Conflict('PROCESS_CHANGED_DURING_STOP')
             if not kernel.SetConsoleCtrlHandler(None,True) or not kernel.GenerateConsoleCtrlEvent(0,0):
                 raise Conflict('GRACEFUL_STOP_FAILED')
         finally:
@@ -725,7 +865,14 @@ def _control(action, runtime, pwsh):
         for role in ('Collector','Backend','Frontend'):
             row = current['recorded'].get('roles',{}).get(role,{})
             if row.get('record'):
-                driver.stop(role,row['record'],row.get('members',[]))
+                try:
+                    driver.stop(role,row['record'],row.get('members',[]))
+                except Exception:
+                    for member in row['record'].get('members', []):
+                        if member not in row.setdefault('members', []):
+                            row['members'].append(member)
+                    store.publish(current['recorded'])  # Generation-fenced error journal.
+                    raise
                 row.update(record=None,members=[],phase='stopped')
                 store.publish(current['recorded'])
                 store.event('role_stopped',role=role,expected=True,recovery='supervisor_absent')
@@ -812,11 +959,15 @@ def main():
             request=read(args.request)
             driver=Windows(runtime,args.pwsh,request['binding'],lambda *a,**k:None)
             driver.epoch = request.get('epoch')
-            if driver.epoch is None:
-                driver.signal(request['record'])
-            else:
-                with file_lock(Store(runtime).path/'command.lock', wait=30):
-                    driver.signal(request['record'])
+            persist=lambda:atomic(args.request,request)
+            try:
+                if driver.epoch is None:
+                    driver.signal(request['record'],persist)
+                else:
+                    with file_lock(Store(runtime).path/'command.lock', wait=30):
+                        driver.signal(request['record'],persist)
+            finally:
+                persist()  # Also retain a partial census on refusal/error.
         else:
             print(json.dumps(control(args.action,runtime,args.pwsh)))
     except Exception as exc:

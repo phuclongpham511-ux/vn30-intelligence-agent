@@ -440,3 +440,107 @@ cooldowns, Technical policy, FPT PAUSED state, startup tasks or Downloads WIP we
 modified. Both unrelated untracked frontend instruction files retain their hashes.
 Next action is separate integration review, then separately authorized activation;
 this checkpoint does not authorize either.
+
+## Production process-exit correction — 2026-10-15
+
+This correction continues `cc1efe3e9d9650f202472bcec3aaa6dae1c38758` and retains
+the PATHEXT and bounded Restart Manager fixes. The separately authorized final
+review found a production blocker, not merely a flaky finite-role fixture. See
+`C:\Users\PC\.codex\tmp\woofi-lock-inventory-final-20261015\FINAL_REPORT.md`.
+
+### Root cause and scope
+
+The failed legacy assertion expected Backend launch count >= 2 but observed 1.
+Its Backend observer exit receipt preceded the daemon's NoSuchProcess event by
+about 113 ms. A synchronized native fixture then proved the production path:
+actual PID/time/executable/script/receipt verification succeeds, the finite
+observer exits naturally, and `psutil.Process()` in `Windows.inspect()` raises
+before Recovery can record the exit and apply backoff. The daemon's error boundary
+therefore exits while other services may remain alive. Simply passing an unchanged
+rerun did not qualify integration.
+
+The same non-atomic census pattern appeared in verification, descendant reads
+and console signalling. Stop also needed to retain identities newly discovered
+during a failed partial census or by its separate signal helper. The change is
+confined to those existing Windows lifecycle seams, tests and this report; no
+new supervisor layer, application feature, worker policy or database change.
+
+### Corrected behavior and ownership protection
+
+- Root lookup distinguishes absence from PID/creation-time/executable mismatch
+  and inaccessible metadata. Command-line verification handles confirmed natural
+  exit and rechecks identity after reading the existing role receipt.
+- `observe_members()` is the shared production census for readiness and signal
+  validation. It qualifies each child's creation identity, tolerates only
+  confirmed departed processes, and retries transient enumeration churn at most
+  three times with 50/100 ms delays. PID reuse, access denial and persistent
+  uncertainty remain conflicts. No blanket NoSuchProcess suppression.
+- Newly qualified members are remembered before a later read can fail. Live
+  known members missing from the current tree remain orphan conflicts. Only
+  confirmed departed identities are pruned after successful reconciliation, so
+  history does not grow without bound. Confirmed root exit with all known members
+  gone reaches the existing exit receipt/backoff/attempt-budget policy.
+- Recovery copies discovered members into its Role state on both inspection and
+  Stop error paths. Supervisor-absent Stop publishes partial discoveries through
+  the existing generation fence before returning an error. Durable stopped intent
+  and incomplete-Stop markers stay intact; unknown ownership never authorizes Start.
+- The existing signal request also carries the helper's latest qualified members.
+  The helper persists them before native control and on failure; the parent checks
+  binding/epoch/root identity and waits for the union of those members, including
+  on helper refusal or timeout. A new surviving child cannot produce successful Stop.
+- Exact console membership and process identities are rechecked after AttachConsole
+  and before control. A reused/departed identity or foreign console member refuses
+  signalling. Stop on an already-finished complete tree requires no signal;
+  surviving or unknown children still block cleanup.
+- A collector exiting after the mutex snapshot is unready, not fabricated ready.
+  Reuse/access failure remains a conflict; process identity is checked again after
+  command/CWD reads. The real acquisition mutex, one-root/one-native-worker rule,
+  canonical CWD/command checks and existing Start/Stop locks are unchanged.
+- Restart Manager success with fewer filled entries than its stated requirement
+  is now rejected as invalid, including a contradictory nonzero requirement with
+  zero returned owners. The earlier bounded retries/limits and native diagnostics
+  are preserved; inventory failures never become empty success.
+
+### Regression and bounded safety review
+
+The original native gate failed again before this correction and passed afterward.
+`tests/test_runtime_supervisor_exit_races.py` adds 30 cases: native verified-root
+exit, exits during command/tree reads, child exit, bounded census churn, PID reuse,
+access denial, detached/surviving children, partial discoveries, worker projection
+exit/reuse, already-exited Stop/signal, stale generations, post-attach validation,
+signal-helper fresh members/refusal/timeout and durable incomplete Stop journaling.
+Native cases use temporary fake roles; deterministic process maps cover adversarial
+interleavings. None starts a production service/collector or opens the product DB.
+
+The existing finite WMI adapter now reuses production `observe_members()` instead
+of duplicating the unsafe census. Only its fake readiness remains simulated.
+Launch-count, exit/backoff, Stop, Resume and ownership assertions/timeouts are
+unchanged. Inventory process fakes now provide real creation/executable identity
+fields; their unreadable-PID case asserts a qualified fail-closed Conflict instead
+of accepting an unhandled NoSuchProcess. No assertion or timeout was weakened.
+
+Final single focused regression: **149 passed, zero failures/skips, 78.37 seconds**.
+It includes all 50 inventory cases, 30 exit-race cases, supervisor policy/control,
+real isolated WMI/observer/bootstrap checks, and ingestion ownership/cooldown tests.
+One existing Starlette/httpx deprecation warning remains. Development red/green
+evidence and the earlier diagnostic-assertion correction are preserved. No full
+application/frontend suite or unchanged-test retry loop was run.
+
+Evidence: `C:\Users\PC\.codex\tmp\woofi-supervisor-exit-fix-20261015\`
+contains red.log, green-original.log, focused-development.log/xml,
+native-development.log/xml, stop-development.log/xml and final.log/xml.
+The final handoff report records the checkpoint, integration result and exact SHA.
+
+Own safety review covered normal and exception journals, helper handoff, native
+identity checks, lock order and stale generations. No blocking finding remains
+in this scope. Windows snapshots still cannot be atomic with future process
+changes; uncertain ownership continues to fail closed and may require manual
+reconciliation. Persistent inventory failure may still stop the daemon while
+preserving managed processes. Production activation/stability, actual Codex
+closure and sleep/resume are not certified by isolated fixtures.
+
+This task authorizes source integration after validation only. Canonical runtime
+remains the stopped a0c96ab release; installed package, product DB/data/cooldowns,
+credentials, FPT PAUSED state, Technical policy/checkpoint 30fdff2, startup tasks,
+Downloads WIP and unrelated instruction files are unchanged. Controlled activation
+requires a separate fresh ownership/data-safety handoff; it was not performed.

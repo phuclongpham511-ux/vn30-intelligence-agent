@@ -167,7 +167,7 @@ def test_slow_graceful_stop_never_sends_a_second_control_signal(tmp_path,monkeyp
     driver=s.Windows(tmp_path,'pwsh',{},lambda *a,**k:None)
     record={'identity':{'pid':123},'run_directory':str(tmp_path)}
     monkeypatch.setattr(driver,'verify',lambda row:True)
-    monkeypatch.setattr(driver,'inspect',lambda *a:{'members':[{'pid':123}]})
+    monkeypatch.setattr(driver,'inspect',lambda *a:{'running':True,'members':[{'pid':123}]})
     monkeypatch.setattr(s,'alive',lambda row:True)
     counter=iter(range(0,10000,100))
     monkeypatch.setattr(s.time,'monotonic',lambda:next(counter))
@@ -230,11 +230,10 @@ exit 7
         store.publish(state)
         return record
     def inspect(self,role,record):
-        if not self.verify(record):return {'running':False,'ready':False,'members':record.get('members',[])}
-        root=s.psutil.Process(record['identity']['pid'])
-        members=[s.identity(p.pid) for p in [root,*root.children(recursive=True)] if p.name().lower()!='conhost.exe']
-        record['members']=members
-        return {'running':True,'ready':True,'members':members}
+        # Only readiness is simulated. Use the production process census so
+        # natural fixture exits exercise the real reconciliation/backoff path.
+        observed=self.observe_members(record)
+        return {**observed,'ready':observed['running']}
 '''
     namespace={'s':s};exec(fixture_code,namespace)
     monkeypatch.setattr(s,'Windows',namespace['FixtureWindows'])

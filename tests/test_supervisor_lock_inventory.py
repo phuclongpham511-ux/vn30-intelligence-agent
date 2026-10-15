@@ -134,6 +134,7 @@ def test_cleanup_failure_is_not_success_and_does_not_mask_original_error(tmp_pat
     ([{'code':0,'needed':1,'count':0}], 'invalid_success'),
     ([{'code':234,'needed':1},{'code':0,'needed':1,'count':2}], 'invalid_success'),
     ([{'code':234,'needed':1},{'code':0,'needed':2,'count':1,'pids':[101]}], 'invalid_success'),
+    ([{'code':234,'needed':1},{'code':0,'needed':1,'count':0}], 'invalid_success'),
     ([{'code':234,'needed':1},{'code':0,'needed':1,'count':1,'pids':[0]}], 'invalid_owner'),
     ([{'code':234,'needed':2},{'code':0,'needed':2,'count':2,'pids':[101,101]}], 'invalid_owner'),
 ])
@@ -212,19 +213,22 @@ def collector(tmp_path,monkeypatch):
     cfg={'canonical_sha':'fixture','source_checkout':str(tmp_path),'product_database':str(tmp_path/'fixture.db'),
          'backend_port':18000,'frontend_port':13000}
     (tmp_path/'config').mkdir();s.atomic(tmp_path/'config/runtime.json',cfg)
+    executable=tmp_path/'fixture-python.exe';executable.write_bytes(b'identity fixture, never executed')
     class Process:
         def __init__(self,pid):self.pid=pid
+        def create_time(self):return 123
+        def exe(self):return str(executable)
         def children(self,recursive):return [Process(102)]
         def name(self):return 'python.exe'
         def cwd(self):return str(tmp_path)
         def cmdline(self):return ['python','-m','scripts.ingest_data','--watch']
     monkeypatch.setattr(s.psutil,'Process',Process)
-    monkeypatch.setattr(s,'identity',lambda pid:{'pid':pid,'created':123,'exe':'fixture'})
+    monkeypatch.setattr(s,'identity',lambda pid:{'pid':pid,'created':123,'exe':str(executable)})
     driver=s.Windows(tmp_path,'pwsh',s.bind(cfg),lambda *a,**k:None)
     monkeypatch.setattr(driver,'verify',lambda *a:True)
     workers=[{'ProcessId':102,'ParentProcessId':101,'ExecutablePath':'native-python.exe'}]
     monkeypatch.setattr(driver,'workers',lambda:workers)
-    return driver,workers,{'identity':{'pid':101},'launched':0}
+    return driver,workers,{'identity':s.identity(101),'launched':0}
 
 
 def test_mutex_changes_to_foreign_owner_are_rejected(tmp_path,monkeypatch):
@@ -269,7 +273,11 @@ def test_collector_census_mutex_and_identity_still_enforce_single_worker(tmp_pat
             if pid==102:raise s.psutil.NoSuchProcess(pid)
             return Process(pid)
         monkeypatch.setattr(s.psutil,'Process',exiting)
-        with pytest.raises(s.psutil.NoSuchProcess):driver.inspect('Collector',record)
+        # The fixture's PID still exists but its metadata is unreadable: this
+        # is unverified ownership, not permission to omit the worker or restart.
+        monkeypatch.setattr(s.psutil,'pid_exists',lambda pid:True)
+        with pytest.raises(s.Conflict,match='PROCESS_CHANGED_DURING_INSPECTION'):
+            driver.inspect('Collector',record)
         return
     with pytest.raises(s.Conflict,match='COMPETING_COLLECTOR'):driver.inspect('Collector',record)
 
