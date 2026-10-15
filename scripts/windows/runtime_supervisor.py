@@ -27,6 +27,8 @@ import psutil
 ROLES = ('Backend', 'Frontend', 'Collector')
 BACKOFF = (15, 60, 180)  # Three recoveries per role per explicit Start, never reset by uptime.
 TICK = 5
+INVENTORY_CALLS = 4  # Includes the zero-capacity sizing call.
+INVENTORY_LIMIT = 4096  # Bound native allocation, never truncate the owner list.
 
 
 class Conflict(RuntimeError):
@@ -35,6 +37,47 @@ class Conflict(RuntimeError):
 
 class IntentStopped(RuntimeError):
     """Stop linearizes before the next process birth, including slow preflight."""
+
+
+class InventoryUnverified(Conflict):
+    """No qualified owner snapshot; never permission to launch or signal."""
+
+
+def inventory_error(stage, code, **detail):
+    # No path, command line or environment values in lifecycle diagnostics.
+    return InventoryUnverified('LOCK_INVENTORY_UNVERIFIED '+json.dumps({
+        'stage':stage, 'code':code, 'utc':datetime.now(timezone.utc).isoformat(), **detail},
+        separators=(',', ':')))
+
+
+def _verify_lock_owner(owner):
+    """Fence PID reuse using Restart Manager's native creation FILETIME."""
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.OpenProcess.argtypes = [w.DWORD,w.BOOL,w.DWORD]
+    kernel.OpenProcess.restype = w.HANDLE
+    kernel.GetProcessTimes.argtypes = [w.HANDLE,*([ctypes.POINTER(w.FILETIME)]*4)]
+    kernel.GetProcessTimes.restype = w.BOOL
+    kernel.GetExitCodeProcess.argtypes = [w.HANDLE,ctypes.POINTER(w.DWORD)]
+    kernel.GetExitCodeProcess.restype = w.BOOL
+    kernel.CloseHandle.argtypes = [w.HANDLE]
+    kernel.CloseHandle.restype = w.BOOL
+    handle = kernel.OpenProcess(0x1000,False,owner.pid)  # QUERY_LIMITED_INFORMATION only.
+    if not handle:
+        raise inventory_error('owner_open',ctypes.get_last_error(),pid=owner.pid)
+    try:
+        created, exited, system, user = (w.FILETIME() for _ in range(4))
+        if not kernel.GetProcessTimes(handle,ctypes.byref(created),ctypes.byref(exited),
+                                      ctypes.byref(system),ctypes.byref(user)):
+            raise inventory_error('owner_times',ctypes.get_last_error(),pid=owner.pid)
+        if (created.dwLowDateTime,created.dwHighDateTime) != (owner.started.dwLowDateTime,owner.started.dwHighDateTime):
+            raise inventory_error('owner_identity_changed',0,pid=owner.pid)
+        exit_code = w.DWORD()
+        if not kernel.GetExitCodeProcess(handle,ctypes.byref(exit_code)):
+            raise inventory_error('owner_exit_query',ctypes.get_last_error(),pid=owner.pid)
+        if exit_code.value != 259:  # STILL_ACTIVE
+            raise inventory_error('owner_exited',exit_code.value,pid=owner.pid)
+    finally:
+        kernel.CloseHandle(handle)
 
 
 def read(path, default=None):
@@ -197,7 +240,11 @@ def literal(text):
 
 
 def lock_owners(path):
-    """Read-only Restart Manager inventory; never obtains collector ownership."""
+    """Bounded read-only RM snapshot, not a claim to the acquisition mutex.
+
+    RmGetList can return ERROR_MORE_DATA again after sizing. Reallocate only
+    within explicit count/call limits; incomplete/failed responses are not empty.
+    """
     if not Path(path).exists():
         return []
     class Process(ctypes.Structure):
@@ -209,24 +256,56 @@ def lock_owners(path):
     rm.RmStartSession.argtypes = [ctypes.POINTER(w.DWORD),w.DWORD,w.LPWSTR]
     rm.RmRegisterResources.argtypes = [w.DWORD,ctypes.c_uint,ctypes.POINTER(w.LPCWSTR),ctypes.c_uint,ctypes.POINTER(Process),ctypes.c_uint,ctypes.POINTER(w.LPCWSTR)]
     rm.RmGetList.argtypes = [w.DWORD,ctypes.POINTER(ctypes.c_uint),ctypes.POINTER(ctypes.c_uint),ctypes.POINTER(Info),ctypes.POINTER(w.DWORD)]
+    rm.RmEndSession.argtypes = [w.DWORD]
+    for name in ('RmStartSession','RmRegisterResources','RmGetList','RmEndSession'):
+        getattr(rm,name).restype = w.DWORD
     session = w.DWORD(); key = ctypes.create_unicode_buffer(33)
-    if rm.RmStartSession(ctypes.byref(session), 0, key):
-        raise Conflict('LOCK_INVENTORY_FAILED')
+    code = rm.RmStartSession(ctypes.byref(session), 0, key)
+    if code:
+        raise inventory_error('start',code)
     try:
-        if rm.RmRegisterResources(session,1,(w.LPCWSTR*1)(str(path)),0,None,0,None):
-            raise Conflict('LOCK_INVENTORY_FAILED')
-        needed, count, reason = ctypes.c_uint(), ctypes.c_uint(), w.DWORD()
-        code = rm.RmGetList(session,ctypes.byref(needed),ctypes.byref(count),None,ctypes.byref(reason))
-        if code == 0:
-            return []
-        if code != 234:
-            raise Conflict('LOCK_INVENTORY_FAILED')
-        count.value = needed.value; entries = (Info*count.value)()
-        if rm.RmGetList(session,ctypes.byref(needed),ctypes.byref(count),entries,ctypes.byref(reason)):
-            raise Conflict('LOCK_INVENTORY_CHANGED')
-        return [entries[i].process.pid for i in range(count.value)]
+        code = rm.RmRegisterResources(session,1,(w.LPCWSTR*1)(str(path)),0,None,0,None)
+        if code:
+            raise inventory_error('register',code)
+        capacity = 0
+        responses = []
+        for attempt in range(1,INVENTORY_CALLS+1):
+            needed, count, reason = ctypes.c_uint(), ctypes.c_uint(capacity), w.DWORD()
+            try:
+                entries = (Info*capacity)() if capacity else None
+            except (MemoryError,OverflowError):
+                raise inventory_error('allocation',14,capacity=capacity) from None
+            code = rm.RmGetList(session,ctypes.byref(needed),ctypes.byref(count),entries,ctypes.byref(reason))
+            responses.append(dict(attempt=attempt,code=code,capacity=capacity,needed=needed.value,
+                                  returned=count.value,reboot_reasons=reason.value,
+                                  utc=datetime.now(timezone.utc).isoformat()))
+            detail = dict(responses=responses)
+            if code not in (0,234):
+                raise inventory_error('get_list',code,**detail)
+            if needed.value > INVENTORY_LIMIT:
+                raise inventory_error('allocation_limit',code,**detail)
+            if code == 234:
+                if needed.value <= capacity:
+                    raise inventory_error('invalid_size',code,**detail)
+                if attempt == INVENTORY_CALLS:
+                    raise inventory_error('retry_exhausted',code,**detail)
+                capacity = needed.value
+                time.sleep(.05 * 2**(attempt-1))  # Total retry delay <= 350 ms.
+                continue
+            if count.value > capacity or needed.value > capacity:
+                raise inventory_error('invalid_success',code,**detail)
+            owners = [entries[i].process for i in range(count.value)]
+            pids = [owner.pid for owner in owners]
+            if (len(set(pids)) != len(pids) or any(not owner.pid or
+                    not (owner.started.dwLowDateTime or owner.started.dwHighDateTime) for owner in owners)):
+                raise inventory_error('invalid_owner',code,**detail)
+            for owner in owners:
+                _verify_lock_owner(owner)
+            return pids
     finally:
-        rm.RmEndSession(session)
+        code = rm.RmEndSession(session)
+        if code and sys.exc_info()[0] is None:
+            raise inventory_error('end',code)
 
 
 class Windows:

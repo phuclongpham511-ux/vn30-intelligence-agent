@@ -333,3 +333,110 @@ services, product SQLite, credential references, FPT PAUSED state and unrelated
 instruction files/WIP are preserved. After integration, a separately authorized
 release must install the corrected package and repeat actual service/lifecycle
 and bounded stability acceptance. Codex-close and real sleep remain unverified.
+
+## Restart Manager inventory correction — 2026-10-15
+
+Base: `100f79f123f242e3ae69e1b5878691115519c421`.
+Local branch: `codex/woofi-supervisor-lock-inventory-fix`. This source correction
+is not installed, pushed or activated.
+
+### Incident and qualified cause
+
+The second controlled activation passed actual PATHEXT preflight and
+Start/Stop/Start acceptance. At 04:52:29.560667 UTC / 11:52:29 ICT the daemon
+recorded `supervisor_stopped: LOCK_INVENTORY_CHANGED` and exited unexpectedly.
+Its live roles and ownership records remained available. The authorized recovery
+stopped those verified roles and restored source/config to a0c96ab, retaining
+the newest product database, writes and receipts. Full incident report:
+`C:\Users\PC\WoofiRuntime\state\supervisor-v1-retry-20261015T043849Z\FINAL_REPORT.md`.
+
+The old second RmGetList call mapped **every nonzero result** to the same error;
+its return code, needed/returned counts and capacity were discarded. The saved
+incident cannot establish a duplicate collector, ERROR_MORE_DATA specifically,
+or another Windows error. That uncertainty is retained.
+
+Microsoft's [RmGetList contract](https://learn.microsoft.com/en-us/windows/win32/api/restartmanager/nf-restartmanager-rmgetlist)
+documents ERROR_MORE_DATA (234) for an undersized process array. The list can
+outgrow the sizing result before the next call. An isolated mocked response
+sequence (234 needing one slot, 234 needing two, then success) reproduced the
+exact old LOCK_INVENTORY_CHANGED exception before correction. This proves the
+implementation failed to handle a supported condition; it does not recover the
+missing native code from the production incident. The native structures' sizes
+and field layout are unchanged; explicit DWORD return types and EndSession
+signature are now specified.
+
+### Minimal inventory correction
+
+Only `lock_owners()` and its direct diagnostic/identity helpers change. All three
+callers retain their existing behavior: Collector vacancy before launch,
+Collector readiness/Stop inspection, and read-only Status. No application,
+collector, launcher, lifecycle policy or manifest-lock architecture change.
+
+- At most **four RmGetList calls**, including zero-capacity sizing. Retry only
+  ERROR_MORE_DATA with an increasing required capacity. Delays are 50, 100 and
+  200 ms, at most 350 ms total; no tight loop or background retry service.
+- Allocate at most 4,096 entries; refuse larger requirements instead of truncating.
+  Allocation failure, impossible success counts, inconsistent size responses,
+  invalid/duplicate PIDs and zero creation timestamps fail closed.
+- Read only the filled count on success, including legitimate shrink-to-empty.
+  Never read partial failed buffers or convert an API failure to an empty list.
+- Every returned PID is checked against the exact native creation FILETIME via
+  query-only OpenProcess/GetProcessTimes; reused, inaccessible or exited owners
+  remain unverified. Query handles are closed. No acquisition byte-lock is taken.
+- Diagnostics include stage, native code, UTC time and up to four call results
+  with capacity/needed/returned/reboot-reason fields. No resource paths, commands,
+  environment or credential values are added. Sessions end on all started paths;
+  a cleanup failure cannot return a successful inventory or mask an earlier error.
+
+Transient size changes that stabilize recover within the original inspection:
+healthy verified processes are neither signalled nor relaunched. Exhausted or
+otherwise unqualified inventory raises InventoryUnverified (a Conflict), so it
+cannot authorize a birth, successful ownership verification or Stop signal.
+The existing fail-closed daemon error boundary preserves role identities and the
+generation manifest, leaves live processes untouched and requires operator
+reconciliation/Stop. Persistent failure can still stop the daemon; this fix adds
+no automatic resurrection or indefinite retries. Durable Stop intent and
+incomplete-Stop guards, control/command/lifetime locks, generation fencing,
+console identity validation and the collector's kernel mutex are unchanged.
+
+### Validation and review
+
+`tests/test_supervisor_lock_inventory.py` adds **49 passing cases** covering empty,
+single, increasing/decreasing and transient inventories, exhausted retry budgets,
+native failures, setup/cleanup errors, invalid sizes/owners, PID reuse, unknown
+owners, collector exit/ownership changes, duplicate/branching worker rejection,
+control refusal, generation preservation and in-place healthy recovery.
+Four are native Windows fixtures on temporary file resources: empty inventory,
+real single holder plus kernel-lock exclusion, foreign-holder launch refusal,
+and exact native creation-time/missing-identity qualification. These are not
+canonical collector or production stability acceptance.
+
+One combined focused run covered inventory, supervisor policy, concurrent
+Start/Stop, WMI bootstrap/lifecycle, role observer and ingestion ownership:
+**117 passed, 1 failed in 98.51 s**. The unchanged finite WMI end-to-end fixture
+logged NoSuchProcess during its short-lived process census, before its expected
+second launch. Its fixture adapter bypasses Restart Manager. A single bounded
+rerun of that exact unchanged test **passed in 9.10 s**. Both outcomes are retained;
+the combined run is not represented as an all-green first run. No production
+assertion, timeout or existing test was weakened, and no broad suite was repeated.
+The original red regression and its subsequent green result are saved too.
+
+Evidence: `C:\Users\PC\.codex\tmp\woofi-lock-inventory-fix-20261015\`
+contains red.log, green-original.log, new-regressions.log, focused.log/xml,
+finite-wmi-failure-events/status, finite-wmi-rerun.log/xml and scope-preservation.json.
+The final checkpoint SHA is recorded in the handoff report and local Git history.
+
+Bounded safety review found no blocker in the correction. RM describes registered
+resource users, not exclusive byte-range lock ownership; its list is not an atomic
+snapshot with process census, identity checks or later launch/signal. Native API
+duration also depends on Windows; only call count, allocation and added retry
+delay are bounded here. Existing process/console fences and the actual ingestion
+mutex remain necessary. The finite-fixture NoSuchProcess timing limitation and
+actual production/Codex-close/sleep acceptance remain explicit risks.
+
+Canonical config/source remains a0c96ab and stopped; installed operational code
+is still the previous approved 100f79f bytes. No product DB, credentials, source
+cooldowns, Technical policy, FPT PAUSED state, startup tasks or Downloads WIP were
+modified. Both unrelated untracked frontend instruction files retain their hashes.
+Next action is separate integration review, then separately authorized activation;
+this checkpoint does not authorize either.
