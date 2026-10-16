@@ -81,3 +81,39 @@ Live acceptance cannot bypass time: a new first receipt requires a matching fres
 read at least six hours later, and at least 24 hours after qualified publication.
 Deployment with an honestly pending pilot is PARTIAL live acceptance. Certification
 stays BLOCKED and the separate legacy FPT automation stays PAUSED.
+
+## Continuation after Supervisor recovery — 2026-10-16
+
+Ordinary runtime is now healthy at `d2c44fb`, including 907.34 seconds of awake
+stability and the user's subsequently completed Codex closure test. The old
+STOPPED description in the original Phase 3 failure report is historical.
+
+The continuation audited the actual canonical October 9 snapshot and both
+receipts on a fresh isolated SQLite online backup. Exact D1/D4/D5 replay,
+persisted API and Watchlist agreement passed with zero Technical SSI calls.
+Actual production Stock Detail displays the delayed October 9 PROVISIONAL
+insight, its October 16 11:01 ICT source check and inspectable metric evidence;
+the separate price chart correctly covers October 15. This completes the
+previously missing persisted accepted-view smoke, not a new live generation.
+
+One bounded public HOSE qualification obtained the October 12 bulletin and
+stored its original public responses outside product data. Canonical calendar
+coverage remains October 10; an isolated October 11/12 extension is not imported.
+October 12 has no first/matching second SSI receipt. The original October 9
+snapshot passes the unchanged stored policy model, but the earlier interruption's
+independent chronology acceptance remains NOT_VERIFIED. Kernel RTC correction
+fields corroborate suspend/resume; they neither prove a gate bypass nor supply
+a separate receipt-bound elapsed-time observation. No new mandatory receipt
+field or qualification policy was introduced.
+
+Pilot activation is withheld under the user's explicit preactivation evidence
+gate. Existing daily recheck is due October 17 04:01:18.209758 UTC; it was not
+forced early. A new comparison pair requires at least six real hours, plus the
+independently qualified publication gate. Tests cannot satisfy that live wait.
+No missing application capability or code defect was established in this run;
+no speculative clock/scheduler/collector changes or runtime cutover were made.
+
+See [continuation acceptance](PHASE_3_RESUME_ACCEPTANCE_2026-10-16.md) and
+`C:\Users\PC\WoofiRuntime\state\phase3-resume-20261016\FINAL_REPORT.md`.
+Phase 3 remains PARTIAL/BLOCKED for complete live operational acceptance;
+Technical Pilot remains OFF and the legacy FPT automation PAUSED.
