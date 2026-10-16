@@ -151,6 +151,7 @@ def test_critical_probe_timeout_keeps_manifest_and_intent(monkeypatch, tmp_path,
                 return native.ports({'backend_port': 18000, 'frontend_port': 13000})
             return s.ps('fixture-pwsh', 'private-command', probe='listeners')
     native = s.Windows(tmp_path, 'fixture-pwsh', {}, lambda *a, **k: None)
+    native.ports = s.native_listeners
     def unavailable(**kwargs): raise OSError('synthetic-private-detail')
     monkeypatch.setattr(s.psutil, 'net_connections', unavailable)
     monkeypatch.setattr(s, 'Windows', Driver)

@@ -14,7 +14,10 @@ CFG = {'backend_port': 18000, 'frontend_port': 13000}
 
 
 def driver():
-    return s.Windows(Path('.'), 'fixture-pwsh', {}, lambda *a, **k: None)
+    # Unit-test the snapshot contract independently from its bounded transport.
+    win = s.Windows(Path('.'), 'fixture-pwsh', {}, lambda *a, **k: None)
+    win.ports = s.native_listeners
+    return win
 
 
 def listener(port=18000, pid=123, status=s.psutil.CONN_LISTEN):
@@ -33,12 +36,13 @@ def test_native_snapshot_filters_tcp_listeners_and_deduplicates_dual_stack(monke
     calls = []
     def inventory(**kw):
         calls.append(kw)
-        return [listener(), listener(), listener(13000, 456), listener(12000),
+        return [listener(), listener(), listener(18000, 999), listener(13000, 456), listener(12000),
                 listener(status=s.psutil.CONN_ESTABLISHED)]
     monkeypatch.setattr(s.psutil, 'net_connections', inventory)
     assert driver().ports(CFG) == [
         {'LocalPort': 13000, 'OwningProcess': 456},
         {'LocalPort': 18000, 'OwningProcess': 123},
+        {'LocalPort': 18000, 'OwningProcess': 999},
     ]
     assert calls == [{'kind': 'tcp'}]
 
