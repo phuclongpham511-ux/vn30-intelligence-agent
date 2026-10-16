@@ -217,7 +217,8 @@ def test_partial_failed_census_preserves_newly_discovered_live_member(census):
 @pytest.mark.parametrize('change',['exited','reused','denied'])
 def test_collector_exit_or_identity_change_after_mutex_snapshot_cannot_certify_readiness(census,monkeypatch,change):
     driver,record,rows,hooks,_,_=census
-    monkeypatch.setattr(driver,'workers',lambda:[{'ProcessId':2,'ParentProcessId':1,'ExecutablePath':'native-python.exe'}])
+    monkeypatch.setattr(driver,'workers',lambda:[{'ProcessId':2,'ParentProcessId':1,
+        'ExecutablePath':s.identity(2)['exe'],'CreationTime':s.identity(2)['created']}])
     monkeypatch.setattr(s,'lock_owners',lambda path:[2])
     def change_worker(pid):
         if pid!=2:return

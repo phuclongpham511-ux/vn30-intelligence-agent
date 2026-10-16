@@ -738,3 +738,14 @@ Technical D1/D4/D5/EOD and paused FPT supervision are unchanged. Validation uses
 isolated archived SQLite copy plus labeled feed/SSI replay. Canonical runtime is
 not updated by this development checkpoint. See docs/WOOFI_NEWS_RELEVANCE_V2_SPEC.md
 and docs/WOOFI_NEWS_RELEVANCE_V2_ACCEPTANCE.md for scope and acceptance evidence.
+
+### Collector census incident checkpoint — 2026-10-16
+
+The local Supervisor correction replaces recurring Collector PowerShell/CIM
+enumeration with a deadline-bound native helper. Qualified PID/creation/executable
+metadata must agree with role ownership; incomplete/denied snapshots fail closed.
+Toolhelp supplies otherwise-empty native process names with creation-time fencing.
+Collector mutex, generation/pending-launch journals and durable intent are unchanged.
+This is source-only: runtime stays844df8e, PilotOFF, FPTPAUSED. The incident report
+separates post-resume Supervisor timeout from later OS shutdown evidence; see
+docs/RUNTIME_INCIDENT_20261016.md. No controlled recovery was performed.

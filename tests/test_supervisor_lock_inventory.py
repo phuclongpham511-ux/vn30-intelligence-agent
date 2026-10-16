@@ -226,7 +226,7 @@ def collector(tmp_path,monkeypatch):
     monkeypatch.setattr(s,'identity',lambda pid:{'pid':pid,'created':123,'exe':str(executable)})
     driver=s.Windows(tmp_path,'pwsh',s.bind(cfg),lambda *a,**k:None)
     monkeypatch.setattr(driver,'verify',lambda *a:True)
-    workers=[{'ProcessId':102,'ParentProcessId':101,'ExecutablePath':'native-python.exe'}]
+    workers=[{'ProcessId':102,'ParentProcessId':101,'ExecutablePath':str(executable),'CreationTime':123}]
     monkeypatch.setattr(driver,'workers',lambda:workers)
     return driver,workers,{'identity':s.identity(101),'launched':0}
 
@@ -237,6 +237,15 @@ def test_mutex_changes_to_foreign_owner_are_rejected(tmp_path,monkeypatch):
     monkeypatch.setattr(s,'lock_owners',lambda path:next(owners))
     assert driver.inspect('Collector',record)['ready']
     with pytest.raises(s.Conflict,match='COMPETING_COLLECTOR'):driver.inspect('Collector',record)
+
+
+@pytest.mark.parametrize('field,value',[('CreationTime',999),('ExecutablePath','foreign-python.exe')])
+def test_native_census_must_match_manifest_identity_before_mutex_read(tmp_path,monkeypatch,field,value):
+    driver,workers,record=collector(tmp_path,monkeypatch)
+    workers[0][field]=value
+    monkeypatch.setattr(s,'lock_owners',lambda *a:pytest.fail('Unqualified identity must abort first'))
+    with pytest.raises(s.Conflict,match='COLLECTOR_IDENTITY_MISMATCH'):
+        driver.inspect('Collector',record)
 
 
 def test_transient_growth_recovers_in_place_without_startup_timeout_or_new_birth(tmp_path,monkeypatch):
@@ -266,7 +275,7 @@ def test_collector_census_mutex_and_identity_still_enforce_single_worker(tmp_pat
     if kind=='foreign':monkeypatch.setattr(s,'lock_owners',lambda path:[999])
     elif kind in ('duplicate','branching'):
         workers.append({'ProcessId':101,'ParentProcessId':999 if kind=='duplicate' else 101,
-                        'ExecutablePath':'native-python.exe'})
+                        'ExecutablePath':workers[0]['ExecutablePath'],'CreationTime':123})
     else:
         Process=s.psutil.Process
         def exiting(pid):

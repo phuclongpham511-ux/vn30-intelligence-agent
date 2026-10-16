@@ -12,6 +12,7 @@ from ctypes import wintypes as w
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -317,6 +318,98 @@ def native_listeners(cfg):
     return [{'LocalPort': port, 'OwningProcess': pid} for port, pid in sorted(owners)]
 
 
+def native_process_names():
+    """Toolhelp names for Windows processes whose psutil executable is empty.
+
+    In particular, Secure System has no user-mode executable path. This is a
+    qualified native name, never a PID-specific exclusion or permission bypass.
+    """
+    class Entry(ctypes.Structure):
+        _fields_=[('size',w.DWORD),('usage',w.DWORD),('pid',w.DWORD),
+            ('heap',ctypes.c_size_t),('module',w.DWORD),('threads',w.DWORD),
+            ('parent',w.DWORD),('priority',w.LONG),('flags',w.DWORD),('name',w.WCHAR*260)]
+    kernel=ctypes.WinDLL('kernel32',use_last_error=True)
+    kernel.CreateToolhelp32Snapshot.argtypes=[w.DWORD,w.DWORD]
+    kernel.CreateToolhelp32Snapshot.restype=w.HANDLE
+    kernel.Process32FirstW.argtypes=[w.HANDLE,ctypes.POINTER(Entry)]
+    kernel.Process32FirstW.restype=w.BOOL
+    kernel.Process32NextW.argtypes=[w.HANDLE,ctypes.POINTER(Entry)]
+    kernel.Process32NextW.restype=w.BOOL
+    kernel.CloseHandle.argtypes=[w.HANDLE];kernel.CloseHandle.restype=w.BOOL
+    handle=kernel.CreateToolhelp32Snapshot(2,0)  # TH32CS_SNAPPROCESS only.
+    if handle in (None,ctypes.c_void_p(-1).value):
+        raise Conflict('COLLECTOR_INVENTORY_UNVERIFIABLE')
+    try:
+        names={};entry=Entry();entry.size=ctypes.sizeof(Entry)
+        if not kernel.Process32FirstW(handle,ctypes.byref(entry)):
+            raise Conflict('COLLECTOR_INVENTORY_UNVERIFIABLE')
+        while True:
+            if not entry.name or entry.pid in names or len(names)>=131072:
+                raise Conflict('COLLECTOR_INVENTORY_UNVERIFIABLE')
+            names[entry.pid]=entry.name
+            if not kernel.Process32NextW(handle,ctypes.byref(entry)):
+                if ctypes.get_last_error()!=18:  # ERROR_NO_MORE_FILES only.
+                    raise Conflict('COLLECTOR_INVENTORY_UNVERIFIABLE')
+                return names
+    finally:
+        primary=sys.exc_info()[0] is not None
+        if not kernel.CloseHandle(handle) and not primary:
+            raise Conflict('COLLECTOR_INVENTORY_UNVERIFIABLE')
+
+
+def native_workers():
+    """Qualified point-in-time census; run only in a disposable native helper.
+
+    No process_iter cache, WMI, credentials, DB or mutex acquisition. A denied
+    name could conceal a Python worker, so partial reads never become empty.
+    The ingestion mutex and role/generation checks remain separate authorities.
+    """
+    rows, names = [], None
+    try:
+        pids = psutil.pids()
+        if (not isinstance(pids, list) or not pids or len(pids)>131072
+                or len(set(pids)) != len(pids)
+                or any(type(pid) is not int or pid<0 for pid in pids)):
+            raise ValueError('Invalid census')
+        for pid in pids:
+            try:
+                process = psutil.Process(pid)  # Fresh instance, never cached iteration.
+                created = process.create_time()
+                name = process.name()
+                if name == '':
+                    if names is None: names = native_process_names()
+                    name = names.get(pid)
+                    if psutil.Process(pid).create_time()!=created:
+                        raise ValueError('Identity changed')
+                if not isinstance(name,str) or not name:
+                    raise ValueError('Missing process name')
+                if name.casefold() not in ('python.exe','pythonw.exe'):
+                    continue
+                args = process.cmdline()
+                if not isinstance(args, list) or not args or any(not isinstance(arg,str) for arg in args):
+                    raise ValueError('Invalid command metadata')
+                if not any(args[i]=='-m' and args[i+1].casefold() in
+                           ('scripts.ingest_data','scripts.ingest_news') for i in range(len(args)-1)):
+                    continue
+                executable, parent = process.exe(), process.ppid()
+                # Fresh creation time/executable read fences reuse during metadata reads.
+                observed = identity(pid)
+                if observed['created'] != created or observed['exe'] != executable:
+                    raise ValueError('Identity changed')
+                rows.append({'ProcessId':pid,'ParentProcessId':parent,
+                             'ExecutablePath':executable,'CreationTime':created})
+                if len(rows)>4096:
+                    raise ValueError('Census limit')
+            except psutil.NoSuchProcess:
+                if psutil.pid_exists(pid):
+                    raise ValueError('Identity changed') from None
+                # Only a confirmed departure may be omitted, not an unreadable PID.
+                continue
+    except (psutil.Error, OSError, ValueError, TypeError, AttributeError):
+        raise Conflict('COLLECTOR_INVENTORY_UNVERIFIABLE') from None
+    return rows
+
+
 @contextmanager
 def _named_mutex(name,error,wait_ms):
     """One bounded Windows wait. Abandonment/uncertainty never means success."""
@@ -463,9 +556,31 @@ class Windows:
         return cfg
 
     def workers(self):
-        rows = ps(self.pwsh, "@(Get-CimInstance Win32_Process | Where-Object {$_.Name -in @('python.exe','pythonw.exe') -and $_.CommandLine -match '\\s-m\\s+scripts\\.ingest_(data|news)(?:\\s|$)'} | Select-Object ProcessId,ParentProcessId,ExecutablePath) | ConvertTo-Json -Compress",
-                  probe='collector_inventory')
-        return rows if isinstance(rows,list) else [rows]
+        # Same bounded, sanitized base-Python bootstrap as listener inspection.
+        # A stalled native API cannot hang the daemon; failure is never [].
+        argv = [sys._base_executable, '-S', str(Path(__file__).resolve()), 'workers',
+                '--runtime', str(self.root.resolve()), '--pwsh', self.pwsh]
+        environment = dict(item.split('=',1) for item in bootstrap_environment())
+        try:
+            result = subprocess.run(argv, capture_output=True, text=True, timeout=5,
+                                    env=environment, creationflags=subprocess.CREATE_NO_WINDOW)
+            if result.returncode or len(result.stdout)>65536:
+                raise ValueError('Failed native census')
+            rows = json.loads(result.stdout)
+            if (not isinstance(rows,list) or len(rows)>4096
+                    or any(not isinstance(row,dict) or set(row)!={'ProcessId','ParentProcessId','ExecutablePath','CreationTime'}
+                        or type(row['ProcessId']) is not int or row['ProcessId']<=0
+                        or type(row['ParentProcessId']) is not int or row['ParentProcessId']<0
+                        or not isinstance(row['ExecutablePath'],str) or not row['ExecutablePath']
+                        or type(row['CreationTime']) not in (int,float)
+                        or not math.isfinite(row['CreationTime']) or row['CreationTime']<=0 for row in rows)
+                    or len({row['ProcessId'] for row in rows}) != len(rows)):
+                raise ValueError('Invalid native census')
+        except subprocess.TimeoutExpired:
+            raise Conflict('WINDOWS_PROBE_TIMEOUT probe=native_collectors timeout_seconds=5') from None
+        except (OSError, ValueError, TypeError, AttributeError):
+            raise Conflict('COLLECTOR_INVENTORY_UNVERIFIABLE') from None
+        return rows
 
     def ports(self, cfg):
         ports = listener_ports(cfg)
@@ -665,6 +780,11 @@ class Windows:
             workers = self.workers()
             if any(row['ProcessId'] not in pids for row in workers):
                 raise Conflict('COMPETING_COLLECTOR')
+            for worker in workers:
+                member = next(m for m in members if m['pid']==worker['ProcessId'])
+                if (worker['CreationTime'] != member['created']
+                        or worker['ExecutablePath'].casefold() != member['exe'].casefold()):
+                    raise Conflict('COLLECTOR_IDENTITY_MISMATCH')
             # A venv redirector and its one child are ONE execution root.
             ids = {row['ProcessId'] for row in workers}
             roots = [row for row in workers if row['ParentProcessId'] not in ids]
@@ -1080,7 +1200,7 @@ def run(runtime, pwsh, epoch):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=('start','stop','status','resume','run','signal','listeners'))
+    parser.add_argument('action',choices=('start','stop','status','resume','run','signal','listeners','workers'))
     parser.add_argument('--runtime',type=Path,required=True)
     parser.add_argument('--pwsh',required=True)
     parser.add_argument('--epoch')
@@ -1095,6 +1215,8 @@ def main():
             if args.ports is None:
                 raise Conflict('INVALID_RUNTIME_PORT')
             print(json.dumps(native_listeners(dict(zip(('backend_port','frontend_port'),args.ports)))))
+        elif args.action == 'workers':
+            print(json.dumps(native_workers()))
         elif args.action == 'run':
             run(runtime,args.pwsh,args.epoch)
         elif args.action == 'signal':

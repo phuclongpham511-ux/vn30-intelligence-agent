@@ -82,7 +82,7 @@ def test_critical_timeout_is_identified_and_never_an_empty_inventory(monkeypatch
 def test_actual_collector_ownership_adapter_propagates_timeout(monkeypatch):
     monkeypatch.setattr(s.subprocess, 'run', timeout_probe)
     driver = s.Windows(Path('.'), 'fixture-pwsh', {}, lambda *a, **k: None)
-    with pytest.raises(s.Conflict, match='probe=collector_inventory'):
+    with pytest.raises(s.Conflict, match='probe=native_collectors'):
         driver.workers()
 
 
@@ -95,9 +95,9 @@ def test_collector_inventory_timeout_refuses_process_birth(monkeypatch, tmp_path
         return timeout_probe(*args, **kwargs)
     monkeypatch.setattr(s.subprocess, 'run', delayed)
     monkeypatch.setattr(s, 'lock_owners', lambda *a: pytest.fail('Unverified inventory must abort first'))
-    with pytest.raises(s.Conflict, match='probe=collector_inventory'):
+    with pytest.raises(s.Conflict, match='probe=native_collectors'):
         driver.launch('Collector', 0)
-    assert len(calls) == 1 and 'Get-CimInstance' in calls[0][-1]
+    assert len(calls) == 1 and calls[0][3] == 'workers'
     assert not list(tmp_path.iterdir())  # No birth journal, service, DB or lock.
 
 
