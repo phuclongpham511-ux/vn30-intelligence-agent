@@ -1,18 +1,25 @@
 # Woofi — Domain Context
 
-### Scoped price map V1 — 2026-10-16
+### Market board correction — local source checkpoint, 2026-10-16
 
-Explore can switch between its default list and equal-sized quote tiles over the
-same loaded page; search, exchange/index filters and pagination retain their
-existing scope. Watchlist exposes the same presentation in a secondary closed
-disclosure over followed symbols, without changing Read first or review receipts.
-Both consume the existing page LivePrices context and source-computed price
-changes. There are no new leases, requests, providers, financial calculations,
-APIs, schema or acquisition changes. Stale/missing backgrounds are neutral and
-each valid tile retains its own timestamp, session and source disclosure. Tile
-area is not capitalization, money flow, strength or market-wide breadth.
-Research/methodology/feasibility: docs/DEEP_INTERACTIVE_PRODUCT_RESEARCH_V1.md.
-Automated rendering and actual production acceptance are recorded separately.
+The earlier ten-record oversized Price map failed the market-comparison task.
+Its replacement defaults Explore to cached SSI VN30 membership, one bounded
+30-symbol page in the existing LivePrices lease (existing provider max50), compact
+three-column quote tables and a separate equal-area heatmap. All equities remain
+available through search/filters and bounded pagination. Sorting uses existing
+source price/percentage fields, never a new return, sector, strength or flow metric.
+Pending requests are loading, not confirmed missing observations. Per-symbol time
+controls expose original issuer identity/source/date/session/reference evidence.
+Watchlist reuses the compact heatmap with its existing symbols and review state.
+No provider, API, acquisition loop, numerical formula, DB or Supervisor changes.
+
+Actual current-source evidence: all30 cached VN30 symbols had SSI closing-minute
+observations at14:45 ICT onOct16; no qualified session-volume/sector fields exist
+in this contract. Market-wide/index/sector performance is not inferred. New-code
+browser acceptance and deployment remain BLOCKED because automatic policy denied
+preview execution; no alternate launcher/port or canonical cutover is permitted
+as a workaround. Canonical1d7706a remains unchanged. See
+`docs/MARKET_BOARD_CORRECTION_V1.md` for evidence and remaining acceptance gates.
 
 ### Daily use V1 — local implementation checkpoint, 2026-10-16
 

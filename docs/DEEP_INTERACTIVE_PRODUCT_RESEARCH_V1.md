@@ -147,3 +147,19 @@ and frontend/CLAUDE.md remain preserved untracked instruction artifacts. Runtime
 844df8e was independently healthy at17:57 ICT with one qualified Collector,
 SQLite integrity/FK PASS, Technical PilotOFF and FPTPAUSED. Production release and
 actual-browser evidence will be recorded separately in the runtime release report.
+
+
+## Product correction after direct user rejection — October16, late evening
+
+The previous selected slice and its passing tests did not establish a useful
+market-comparison experience. The user rejected tall cards over10 alphabetically
+paged metadata rows. That judgment supersedes the prior design-selection result;
+it does not invalidate its recorded automated or operational evidence.
+
+SStock was opened again interactively at1440x900: Nhóm ngành, Bản đồ nhiệt,
+group selector All→Group1;390x844 mobile captured. Woofi actual1d7706a was compared
+at the same desktop size. Current-source VN30 ordinary browsing yielded30/30
+qualified closing observations. Correction source and limitations are recorded in
+`MARKET_BOARD_CORRECTION_V1.md`. New interface browser acceptance is NOT_VERIFIED:
+preview execution was denied by automatic approval policy and was not retried.
+No new source was integrated or deployed in this correction task.

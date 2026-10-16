@@ -58,24 +58,24 @@ const data={items:{AAA:quote(),ZERO:quote({ticker:'ZERO',change:0,change_percent
 const render=(language='en',props={})=>renderToStaticMarkup(React.createElement(LanguageContext.Provider,
   {value:localeTools(language)},React.createElement(exports.QuoteMapView,{stocks,data,scope:'page',now,...props})));
 
-test('rendered map keeps all scoped identities, one research link each, missing distinct from zero and original source evidence',()=>{
+test('rendered board retains all identities, exact prices/times and keyboard source controls',()=>{
   const html=render();
-  assert.equal((html.match(/data-quote-tile=/g)||[]).length,4);
+  assert.equal((html.match(/data-quote-row=/g)||[]).length,4);
   assert.equal((html.match(/href="\/stocks\//g)||[]).length,4);
-  assert.match(html,/data-quote-tile="ZERO" data-tone="unchanged" data-status="fresh"/);
-  assert.match(html,/data-quote-tile="OLD" data-tone="neutral" data-status="stale"/);
-  assert.match(html,/data-quote-tile="MISSING" data-tone="neutral" data-status="unavailable"/);
-  assert.match(html,/SSI:fixture/);assert.match(html,/datetime="2026-10-16T06:59:59Z"/i);
-  assert.match(html,/Reference price/);assert.match(html,/10,000 VND/);assert.match(html,/\+200 VND/);
-  assert.match(html,/Only the equities on this loaded page/);assert.match(html,/not market value, money flow or strength/);
+  assert.match(html,/data-quote-row="ZERO" data-tone="unchanged" data-status="fresh"/);
+  assert.match(html,/data-quote-row="OLD" data-tone="neutral" data-status="stale"/);
+  assert.match(html,/data-quote-row="MISSING" data-tone="neutral" data-status="unavailable"/);
+  assert.match(html,/datetime="2026-10-16T06:59:59Z"/i);
+  assert.match(html,/10,200/);assert.match(html,/\+2%/);
+  assert.equal((html.match(/aria-label="Quote source for /g)||[]).length,4);
+  assert.match(html,/3\/4 quotes/);assert.match(html,/not synchronized market-wide coverage/);
   assert.doesNotMatch(html,/\bNaN\b|\bInfinity\b|Mark.*reviewed|review update/i);
 });
 test('VI and EN translate map scope, freshness and session while preserving exact source identity',()=>{
   const vi=render('vi'),en=render();
-  assert.match(vi,/Bản đồ giá · trang hiện tại/);assert.match(vi,/Dữ liệu thị trường quá hạn/);
-  assert.match(vi,/Đang trong phiên giao dịch|Phiên giao dịch đang diễn ra/);
+  assert.match(vi,/Bảng giá/);assert.match(vi,/Dữ liệu thị trường quá hạn/);
   assert.match(vi,/Tên nguồn AAA/);assert.match(en,/Source name AAA/);
-  assert.match(vi,/SSI:fixture/);assert.match(vi,/10\.200/);
+  assert.match(vi,/10\.200/);
   const watched=render('en',{scope:'watchlist'});
   assert.match(watched,/Only your followed stocks/);assert.doesNotMatch(watched,/Only the equities on this loaded page/);
 });
@@ -84,4 +84,19 @@ test('unavailable batch keeps the scoped stocks navigable without filling price,
   assert.equal((html.match(/data-status="unavailable"/g)||[]).length,4);
   assert.equal((html.match(/href="\/stocks\//g)||[]).length,4);
   assert.doesNotMatch(html,/0%|SSI:fixture|<time/);
+});
+
+
+test('heatmap and table keep the same source identities, prices and freshness without a new request',()=>{
+  const html=render('en',{mode:'heatmap'});
+  assert.equal((html.match(/data-quote-tile=/g)||[]).length,4);
+  assert.equal((html.match(/href="\/stocks\//g)||[]).length,4);
+  assert.match(html,/10,200/);assert.match(html,/data-quote-tile="OLD" data-tone="neutral" data-status="stale"/);
+  assert.match(html,/no capitalization weighting/);
+});
+test('pending quote request is loading, while a completed empty response is genuinely missing',()=>{
+  const pending=render('en',{data:null});
+  assert.match(pending,/Loading observed quotes/);assert.doesNotMatch(pending,/No observed quotes for this selection/);
+  const empty=render('en',{data:{items:{},session:'unknown',as_of:now.toISOString()}});
+  assert.match(empty,/0\/4 quotes/);assert.match(empty,/No observed quotes for this selection/);
 });

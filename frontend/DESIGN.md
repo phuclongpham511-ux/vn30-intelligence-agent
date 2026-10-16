@@ -289,10 +289,27 @@ not an importance score. Show followed-stock context, source/time and limitation
 keep full stock rows, quiet stocks and Technical assurance below. Only an explicit
 review acknowledges the displayed ticker-item revisions; navigation never does.
 
-A Price map is a scoped alternative to reading the same quote list, not a market
-dashboard. Equal tile area has no financial weighting. Keep the loaded-page or
-followed-stock boundary explicit, original source values and times inspectable,
-and stale/missing backgrounds neutral. Direction remains labelled in text and
-symbols independently of freshness; zero and missing are distinct. The default
-Explore list and Watchlist attention hierarchy stay intact. Reuse the page quote
-context; presentation switches must not create another data lease or refresh.
+### Market board correction (source checkpoint; browser gate pending)
+
+Supersedes the failed tall-card Price map contract. Explore defaults to the
+qualified VN30 membership and one bounded30-symbol page; All equities, search,
+exchange/index filters and pagination remain explicit. Use compact financial rows
+in contiguous desktop columns, right-aligned source price/change, neutral source
+time controls, and a separate compact equal-area heatmap. Layout switches, sorting
+and evidence disclosures share the existing page quote context and never acquire
+again. Watchlist keeps its current followed-symbol lease and review hierarchy.
+
+Source-backed scopes are index memberships, not fabricated issuer sectors.
+Counts describe current observations in this loaded selection only, not exchange
+breadth. No capitalization sizing, strength, flow, sentiment or aggregate return.
+Missing prices never become zero. Pending requests must say loading; confirmed
+missing/stale observations remain neutral. Original date/session/source/reference
+must remain inspectable with keyboard and touch. Do not promote minute-bar volume
+to session volume. Keep methodology in one disclosure instead of repeated cards.
+Preserve VI/EN, both themes, research links, review semantics and unknown states.
+
+Source tests/build are not visual acceptance. Production release requires actual
+new-code desktop/mobile browser inspection, numerical comparison, no overlap,
+useful default coverage and bounded30-symbol cold/read lifecycle qualification.
+Preview execution was denied by automatic policy in this task; no alternative
+preview launcher or canonical deployment can substitute for that missing gate.
