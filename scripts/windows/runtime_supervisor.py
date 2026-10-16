@@ -441,9 +441,29 @@ class Windows:
     def ports(self, cfg):
         if any(type(cfg[key]) is not int or not 1<=cfg[key]<=65535 for key in ('backend_port','frontend_port')):
             raise Conflict('INVALID_RUNTIME_PORT')
-        rows = ps(self.pwsh, '@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object {$_.LocalPort -in '+str(cfg['backend_port'])+','+str(cfg['frontend_port'])+'} | Select-Object LocalPort,OwningProcess) | ConvertTo-Json -Compress',
-                  probe='listeners')
-        return rows if isinstance(rows,list) else [rows]
+        # Read the Windows TCP owner table through the existing native dependency,
+        # avoiding a PowerShell/CIM startup on each health tick. This snapshot is
+        # still ownership evidence, never an optional diagnostic or empty fallback.
+        ports = {cfg['backend_port'], cfg['frontend_port']}
+        owners = set()
+        try:
+            rows = psutil.net_connections(kind='tcp')
+            if not isinstance(rows, list):
+                raise ValueError('Invalid native inventory')
+            for row in rows:
+                if row.status != psutil.CONN_LISTEN:
+                    continue
+                port = row.laddr.port
+                if type(port) is not int or not 1<=port<=65535:
+                    raise ValueError('Invalid native port')
+                if port not in ports:
+                    continue
+                if type(row.pid) is not int or row.pid <= 0:
+                    raise ValueError('Unknown listener owner')
+                owners.add((port, row.pid))
+        except (psutil.Error, OSError, ValueError, TypeError, AttributeError):
+            raise Conflict('LISTENER_INVENTORY_UNVERIFIABLE') from None
+        return [{'LocalPort': port, 'OwningProcess': pid} for port, pid in sorted(owners)]
 
     def vacant(self, role, cfg):
         if role == 'Collector':

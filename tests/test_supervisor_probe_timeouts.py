@@ -79,15 +79,11 @@ def test_critical_timeout_is_identified_and_never_an_empty_inventory(monkeypatch
     assert 'synthetic-private' not in str(failure.value)
 
 
-@pytest.mark.parametrize('operation,probe', [('ports', 'listeners'), ('workers', 'collector_inventory')])
-def test_actual_ownership_adapters_propagate_timeout(monkeypatch, operation, probe):
+def test_actual_collector_ownership_adapter_propagates_timeout(monkeypatch):
     monkeypatch.setattr(s.subprocess, 'run', timeout_probe)
     driver = s.Windows(Path('.'), 'fixture-pwsh', {}, lambda *a, **k: None)
-    with pytest.raises(s.Conflict, match=f'probe={probe}'):
-        if operation == 'ports':
-            driver.ports({'backend_port': 18000, 'frontend_port': 13000})
-        else:
-            driver.workers()
+    with pytest.raises(s.Conflict, match='probe=collector_inventory'):
+        driver.workers()
 
 
 def test_collector_inventory_timeout_refuses_process_birth(monkeypatch, tmp_path):
@@ -139,7 +135,8 @@ def test_unknown_ownership_is_not_swallowed_after_optional_timeout(monkeypatch):
 
 
 @pytest.mark.skipif(os.name != 'nt', reason='Windows journal/control locks')
-def test_critical_probe_timeout_keeps_manifest_and_intent(monkeypatch, tmp_path):
+@pytest.mark.parametrize('fault', ['powershell_timeout', 'native_listener_failure'])
+def test_critical_probe_timeout_keeps_manifest_and_intent(monkeypatch, tmp_path, fault):
     store = s.Store(tmp_path); store.path.mkdir(parents=True)
     rows = {name: {'record': {'identity': {'pid': i}, 'role': name},
                    'members': [{'pid': i}], 'phase': 'running', 'launches': 1}
@@ -150,12 +147,18 @@ def test_critical_probe_timeout_keeps_manifest_and_intent(monkeypatch, tmp_path)
     class Driver(Fake):
         def __init__(self, *args): super().__init__()
         def inspect(self, *args):
+            if fault == 'native_listener_failure':
+                return native.ports({'backend_port': 18000, 'frontend_port': 13000})
             return s.ps('fixture-pwsh', 'private-command', probe='listeners')
+    native = s.Windows(tmp_path, 'fixture-pwsh', {}, lambda *a, **k: None)
+    def unavailable(**kwargs): raise OSError('synthetic-private-detail')
+    monkeypatch.setattr(s.psutil, 'net_connections', unavailable)
     monkeypatch.setattr(s, 'Windows', Driver)
     monkeypatch.setattr(s, 'alive', lambda *a: False)
     monkeypatch.setattr(s, 'identity', lambda *a: {'pid': 99})
     monkeypatch.setattr(s.subprocess, 'run', timeout_probe)
-    with pytest.raises(s.Conflict, match='probe=listeners'):
+    reason = 'probe=listeners' if fault == 'powershell_timeout' else 'LISTENER_INVENTORY_UNVERIFIABLE'
+    with pytest.raises(s.Conflict, match=reason):
         s.run(tmp_path, 'fixture-pwsh', 'fixture')
     result = store.load()
     assert result['phase'] == 'blocked' and store.desired() is True
