@@ -52,3 +52,19 @@ AI summary, speculative importance score, automated review or acquisition worker
 
 Research informs a hypothesis of lower scanning effort; actual time saved is not
 claimed as measured. Quiet/no-new-evidence and incomplete coverage are first-class.
+
+## Resumed after runtime recovery, 2026-10-16
+
+Reuse the six direct public-interface observations above; do not repeat the
+completed research or turn documentation into authenticated-testing claims.
+Official TradingView News Flow filters and FireAnt Watchlist help were rechecked
+when resuming: both explicitly connect reporting to the followed instrument set.
+This confirms the chosen context, not that unread/correction logic was tested.
+No additional competitor or premium account is needed for V1.
+
+Hierarchy and entry navigation were directly observable; source labels/times were
+visible on public feeds; personalization beyond public entry controls is
+documentation-only or unverified. Internal dedup/novelty/retraction logic and
+mobile interaction remain unverified. There is no evidence for asserting a
+competitor-wide trust defect. Woofi retains inspectable sources and explicit
+revision receipts.

@@ -281,3 +281,10 @@ evidence, archive and coverage detail in secondary disclosures. Reviewing one
 source never reviews another, and no navigation or expansion changes review state.
 All new product chrome supports VI/EN and both themes. Financial movement colors
 remain independent of freshness and never imply news causation.
+
+Watchlist may lead with a compact Read first queue of at most three distinct
+unreviewed News/Community identities from its loaded page, ordered by original
+publication (or explicitly labelled first observation). This is a reading order,
+not an importance score. Show followed-stock context, source/time and limitations;
+keep full stock rows, quiet stocks and Technical assurance below. Only an explicit
+review acknowledges the displayed ticker-item revisions; navigation never does.

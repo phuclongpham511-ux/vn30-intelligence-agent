@@ -10,8 +10,9 @@ coverage remain explicit. Review acknowledges only displayed ticker-item revisio
 and preserves concurrent receipts. Existing full stock rows and Technical assurance
 remain separate. No API, ingestion, database or Technical policy changes. Research
 and scope: docs/WOOFI_DAILY_ATTENTION_COMPETITIVE_RESEARCH_V1.md and
-docs/WOOFI_DAILY_USE_V1_PLAN.md. This checkpoint is not deployed; production/browser
-acceptance remains separate from automated rendering and persisted API replay.
+docs/WOOFI_DAILY_USE_V1_PLAN.md. This describes the source capability; canonical
+release reports record production/browser acceptance separately from automated
+rendering and persisted API replay.
 
 ### Phase 3 Technical operational integration — 2026-10-16
 

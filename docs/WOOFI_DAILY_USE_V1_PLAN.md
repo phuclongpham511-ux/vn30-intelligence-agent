@@ -126,3 +126,40 @@ ownership, credentials or database changes were made. No cutover attempted; no
 deployment backup/rollback action needed. Preserve the running services and use a
 separately scoped operational assessment before release. Source checkpoint is
 resumable; do not infer deployment success from its build/test results.
+
+## Resume checkpoint — recovery gate resolved
+
+The preceding blocked-state evidence is historical. Supervisor listener recovery
+and the user's manual Codex closure test passed on
+`43698c5b041ce14ca874de3bbe0d806d04629017`; no new Supervisor work is part of
+this product milestone. The existing `91da78d` feature checkpoint is merged with
+that verified main in the same checkout, preserving histories and unrelated
+untracked instruction files. Only Daily Use UI/tests/docs may differ from main.
+
+Research, gap selection, implementation and existing fixture/persisted replay
+evidence are reused. Finish bounded final frontend validation, reviewed
+integration, one supported local cutover and actual product/browser acceptance.
+No policy-denied preview command or alternative preview server will be started.
+Pre-cutover fixture evidence is automated/SSR, not an interactive browser claim.
+
+After the authorized canonical cutover, use the same running application through
+`localhost:3000` for a separate browser-storage origin. This is the actual
+canonical server, not a new preview/port/launcher. It preserves the user's
+`127.0.0.1:3000` membership/reviews. Test temporary FPT/PNJ/VCB membership and
+remove only that test membership afterward. Do not insert fixture evidence into
+production, force publisher/SSI acquisition or modify product SQLite.
+Scenarios A/B/F can use persisted reports; rechecks/corrections/source failures
+remain explicitly isolated fixture results if production has none.
+
+Release gates remain exact SHA/process/database identity, complete ownership,
+integrity/FK, online backup, rollback compatibility and production build. Use the
+unchanged documented Supervisor Stop/Start once. Technical Pilot OFF, FPT PAUSED;
+Phase 3 qualification untouched. An unsafe stop, unknown owner or critical failure
+blocks further production attempts.
+
+Resumed final validation: 20 focused briefing/Watchlist cases PASS; full frontend
+156 PASS, 0 FAIL, one existing optional persisted Stock Detail replay SKIP;
+typecheck PASS. No backend/acquisition/Supervisor diff against the stable main.
+The earlier production build applies to the unchanged feature source; prepare a
+fresh exact-release production build before any canonical handoff. Browser/layout
+acceptance is still conditional until observed on the deployed canonical app.

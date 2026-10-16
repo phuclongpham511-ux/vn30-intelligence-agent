@@ -288,6 +288,35 @@ def literal(text):
     return "'" + str(text).replace("'", "''") + "'"
 
 
+def listener_ports(cfg):
+    if any(type(cfg[key]) is not int or not 1<=cfg[key]<=65535 for key in ('backend_port','frontend_port')):
+        raise Conflict('INVALID_RUNTIME_PORT')
+    return {cfg['backend_port'], cfg['frontend_port']}
+
+
+def native_listeners(cfg):
+    """Read-only native snapshot, invoked in a disposable deadline-bound helper."""
+    ports, owners = listener_ports(cfg), set()
+    try:
+        rows = psutil.net_connections(kind='tcp')
+        if not isinstance(rows, list):
+            raise ValueError('Invalid native inventory')
+        for row in rows:
+            if row.status != psutil.CONN_LISTEN:
+                continue
+            port = row.laddr.port
+            if type(port) is not int or not 1<=port<=65535:
+                raise ValueError('Invalid native port')
+            if port not in ports:
+                continue
+            if type(row.pid) is not int or row.pid <= 0:
+                raise ValueError('Unknown listener owner')
+            owners.add((port, row.pid))
+    except (psutil.Error, OSError, ValueError, TypeError, AttributeError):
+        raise Conflict('LISTENER_INVENTORY_UNVERIFIABLE') from None
+    return [{'LocalPort': port, 'OwningProcess': pid} for port, pid in sorted(owners)]
+
+
 @contextmanager
 def _named_mutex(name,error,wait_ms):
     """One bounded Windows wait. Abandonment/uncertainty never means success."""
@@ -439,11 +468,30 @@ class Windows:
         return rows if isinstance(rows,list) else [rows]
 
     def ports(self, cfg):
-        if any(type(cfg[key]) is not int or not 1<=cfg[key]<=65535 for key in ('backend_port','frontend_port')):
-            raise Conflict('INVALID_RUNTIME_PORT')
-        rows = ps(self.pwsh, '@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object {$_.LocalPort -in '+str(cfg['backend_port'])+','+str(cfg['frontend_port'])+'} | Select-Object LocalPort,OwningProcess) | ConvertTo-Json -Compress',
-                  probe='listeners')
-        return rows if isinstance(rows,list) else [rows]
+        ports = listener_ports(cfg)
+        # No native call in the daemon: an OS stall must not hang its control path.
+        # Use the base interpreter (no venv redirector/descendants), existing approved
+        # dependency directory and sanitized Windows environment, never SSI secrets.
+        argv = [sys._base_executable, '-S', str(Path(__file__).resolve()), 'listeners',
+                '--runtime', str(self.root.resolve()), '--pwsh', self.pwsh,
+                '--ports', str(cfg['backend_port']), str(cfg['frontend_port'])]
+        environment = dict(item.split('=', 1) for item in bootstrap_environment())
+        try:
+            result = subprocess.run(argv, capture_output=True, text=True, timeout=5,
+                                    env=environment, creationflags=subprocess.CREATE_NO_WINDOW)
+            if result.returncode or len(result.stdout)>65536:
+                raise ValueError('Failed native reader')
+            rows = json.loads(result.stdout)
+            if not isinstance(rows, list) or any(
+                    not isinstance(row, dict) or set(row)!={'LocalPort','OwningProcess'}
+                    or type(row['LocalPort']) is not int or row['LocalPort'] not in ports
+                    or type(row['OwningProcess']) is not int or row['OwningProcess']<=0 for row in rows):
+                raise ValueError('Invalid native inventory')
+        except subprocess.TimeoutExpired:
+            raise Conflict('WINDOWS_PROBE_TIMEOUT probe=native_listeners timeout_seconds=5') from None
+        except (OSError, ValueError, TypeError, AttributeError):
+            raise Conflict('LISTENER_INVENTORY_UNVERIFIABLE') from None
+        return rows
 
     def vacant(self, role, cfg):
         if role == 'Collector':
@@ -1032,17 +1080,22 @@ def run(runtime, pwsh, epoch):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=('start','stop','status','resume','run','signal'))
+    parser.add_argument('action',choices=('start','stop','status','resume','run','signal','listeners'))
     parser.add_argument('--runtime',type=Path,required=True)
     parser.add_argument('--pwsh',required=True)
     parser.add_argument('--epoch')
     parser.add_argument('--request',type=Path)
+    parser.add_argument('--ports',type=int,nargs=2)
     args = parser.parse_args()
     if os.name != 'nt':
         parser.error('Windows is required')
     runtime = args.runtime.resolve()
     try:
-        if args.action == 'run':
+        if args.action == 'listeners':
+            if args.ports is None:
+                raise Conflict('INVALID_RUNTIME_PORT')
+            print(json.dumps(native_listeners(dict(zip(('backend_port','frontend_port'),args.ports)))))
+        elif args.action == 'run':
             run(runtime,args.pwsh,args.epoch)
         elif args.action == 'signal':
             request=read(args.request)
