@@ -715,7 +715,17 @@ export const vietnamese = {
   "Source archive": "Kho nguồn tin",
   "Issuer context": "Ngữ cảnh doanh nghiệp",
   "Unverified": "Chưa xác minh",
-  "Stored tag; issuer association unverified.": "Nhãn đã lưu; chưa xác minh liên kết doanh nghiệp."
+  "Stored tag; issuer association unverified.": "Nhãn đã lưu; chưa xác minh liên kết doanh nghiệp.",
+  "Stock presentation": "Cách xem cổ phiếu",
+  "List view": "Danh sách",
+  "Price map": "Bản đồ giá",
+  "Price change": "Biến động giá",
+  "Price map · this page": "Bản đồ giá · trang hiện tại",
+  "Price map · followed stocks": "Bản đồ giá · mã đang theo dõi",
+  "Only the equities on this loaded page. Filters and pagination still apply.": "Chỉ gồm các mã trên trang đã tải. Bộ lọc và phân trang vẫn được giữ nguyên.",
+  "Only your followed stocks. This is not a market-wide view.": "Chỉ gồm các mã bạn theo dõi, không đại diện toàn thị trường.",
+  "Equal-sized tiles. Color shows observed price direction, not market value, money flow or strength.": "Các ô có kích thước bằng nhau. Màu thể hiện chiều biến động giá, không phải vốn hóa, dòng tiền hay sức mạnh.",
+  "Changes use each source reference price. Stale or missing quotes have a neutral background; inspect each timestamp and session.": "Biến động so với giá tham chiếu của từng nguồn. Giá quá hạn hoặc chưa có dùng nền trung tính; xem thời điểm và phiên của từng mã."
 } as const;
 export type TranslationKey = keyof typeof vietnamese;
 export type Language = "en" | "vi";

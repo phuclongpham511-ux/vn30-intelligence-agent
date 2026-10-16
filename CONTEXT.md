@@ -1,5 +1,19 @@
 # Woofi — Domain Context
 
+### Scoped price map V1 — 2026-10-16
+
+Explore can switch between its default list and equal-sized quote tiles over the
+same loaded page; search, exchange/index filters and pagination retain their
+existing scope. Watchlist exposes the same presentation in a secondary closed
+disclosure over followed symbols, without changing Read first or review receipts.
+Both consume the existing page LivePrices context and source-computed price
+changes. There are no new leases, requests, providers, financial calculations,
+APIs, schema or acquisition changes. Stale/missing backgrounds are neutral and
+each valid tile retains its own timestamp, session and source disclosure. Tile
+area is not capitalization, money flow, strength or market-wide breadth.
+Research/methodology/feasibility: docs/DEEP_INTERACTIVE_PRODUCT_RESEARCH_V1.md.
+Automated rendering and actual production acceptance are recorded separately.
+
 ### Daily use V1 — local implementation checkpoint, 2026-10-16
 
 Watchlist adds a bounded Read first queue over its already-loaded News/Community

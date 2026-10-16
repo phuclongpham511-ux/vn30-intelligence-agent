@@ -9,6 +9,7 @@ import {LivePrices,LivePrice} from '../components/stock/LivePrice';
 import {TechnicalInsightsView} from '../components/stock/TechnicalInsights';
 import ArticleRow from '../components/news/ArticleRow';
 import WatchlistBriefing from '../components/WatchlistBriefing';
+import QuoteMap from '../components/stock/QuoteMap';
 import {reviewBriefingItem} from '@/lib/dailyBriefing';
 import {safeExternalUrl} from '@/lib/presentation';
 import {emptyNewsFilters,newsViewQuery,type NewsArticle} from '@/lib/news';
@@ -126,6 +127,9 @@ export default function WatchlistPage() {
           </details>
         </>}
         {!loading&&!error&&data&&<WatchlistBriefing data={data} state={state} storageError={storageError} review={entry=>persist(current=>reviewBriefingItem(current,state,entry))}/>}
+        <details className="panel p-4"><summary className="cursor-pointer text-sm font-medium">{t('Price map · followed stocks')}</summary>
+          <div className="mt-3"><QuoteMap scope="watchlist" stocks={state.symbols.map(symbol=>{const row=data?.stocks.find(stock=>stock.symbol===symbol);return {symbol,company_name:row?.company_name,display_name_en:row?.display_name_en,exchange:row?.exchange};})}/></div>
+        </details>
         <section id="watched-stocks" className="panel divide-y scroll-mt-20" aria-label={t('Watched stocks')}>{orderedSymbols.map(symbol=>{
           const row=data?.stocks.find(stock=>stock.symbol===symbol);
           const news=row?.news,community=row?.community,technical=row?.technical;

@@ -6,6 +6,8 @@ import {useLocale} from '@/lib/i18n';
 import {quoteStatus} from '@/lib/newsPresentation';
 
 const Context=createContext<{data:LiveBatch|null;failed:boolean}>({data:null,failed:false});
+// Consumers share the existing page lease and lifecycle; reading never requests data.
+export function useLivePrices(){return useContext(Context);}
 export function LivePrices({symbols,interval,children}:{symbols:string[];interval:number;children:ReactNode}) {
   const value=useLiveMarket(symbols,interval);
   const [,setClock]=useState(0);

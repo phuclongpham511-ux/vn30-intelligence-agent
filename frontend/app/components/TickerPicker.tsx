@@ -10,6 +10,7 @@ import {englishCompanyName} from '@/lib/presentation';
 import StockSearch from './stock/StockSearch';
 import {useRecentSearches} from './stock/useRecentSearches';
 import {LivePrices,LivePrice} from './stock/LivePrice';
+import QuoteMap from './stock/QuoteMap';
 import {Button} from './ui/button';
 
 export default function TickerPicker() {
@@ -20,6 +21,7 @@ export default function TickerPicker() {
   const [exchange,setExchange]=useState('');
   const [group,setGroup]=useState('');
   const [page,setPage]=useState(0);
+  const [view,setView]=useState<'list'|'map'>('list');
   const {data,loading,error,refresh}=useEquityPage({query,exchange,group,page,size:10},true,query?200:0);
   const [metadata,setMetadata]=useState<{count?:number;groups?:IndexGroups}|null>(null);
   useEffect(()=>{
@@ -42,9 +44,13 @@ export default function TickerPicker() {
         <label className="flex-1 text-xs sm:flex-none">{t('Index group')}<select aria-label={t('Index group')} className="mt-1 block h-10 w-full rounded border bg-background px-3 text-sm" value={group} onChange={event=>{setGroup(event.target.value);setPage(0);}}><option value="">{t('All equities')}</option>{['VN30','VN100','HNX30'].map(code=><option key={code} value={code} disabled={!groups?.groups[code]?.length}>{code}{!groups?.groups[code]?.length?' '+t('(unavailable)'):''}</option>)}</select></label>
       </div>
       {group&&<p className="mb-3 text-xs text-muted-foreground">{group} {t('membership')} · {groups?.source}{groups?.last_synced_at?' · '+t('Synced {date}',{date:date(groups.last_synced_at,true)}):''}{groups?.status!=='healthy'?' · '+t('cached / incomplete coverage'):''}</p>}
+      <div role="group" aria-label={t('Stock presentation')} className="mb-3 flex gap-2">
+        <Button variant={view==='list'?'secondary':'outline'} aria-pressed={view==='list'} onClick={()=>setView('list')}>{t('List view')}</Button>
+        <Button variant={view==='map'?'secondary':'outline'} aria-pressed={view==='map'} onClick={()=>setView('map')}>{t('Price map')}</Button>
+      </div>
       {loading?<div role="status" className="rounded border p-4"><p className="text-sm text-muted-foreground">{t('Loading equities…')}</p><div aria-hidden="true" className="mt-3 space-y-3">{Array.from({length:5},(_,n)=><div key={n} className="h-10 rounded bg-muted motion-safe:animate-pulse"/>)}</div></div>:error?<p role="alert" className="rounded border p-4 text-sm">{t('Equity metadata could not be loaded.')} <button onClick={refresh} className="text-primary underline">{t('Retry')}</button></p>:data&&<>
         {data.status!=='healthy'&&<p role="status" className="mb-3 text-xs text-muted-foreground">{t(data.total_universe?'Showing cached metadata; the latest refresh is unavailable or stale.':'Equity metadata has not been acquired yet.')}</p>}
-        {!data.items.length?<p role="status" className="rounded border p-5 text-sm text-muted-foreground">{t('No matching equities in the cached universe.')}</p>:<div className="panel divide-y">{data.items.map(stock=><Link key={stock.symbol} onClick={()=>remember(stock.symbol)} href={'/stocks/'+encodeURIComponent(stock.symbol)} className="grid min-h-[88px] grid-cols-[minmax(0,1fr)_auto_14px] items-center gap-x-3 px-3 py-3 transition-colors hover:bg-muted focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4" aria-label={t('Research {ticker}',{ticker:stock.symbol})}>
+        {!data.items.length?<p role="status" className="rounded border p-5 text-sm text-muted-foreground">{t('No matching equities in the cached universe.')}</p>:view==='map'?<QuoteMap stocks={data.items} scope="page" onSelect={remember}/>:<div className="panel divide-y">{data.items.map(stock=><Link key={stock.symbol} onClick={()=>remember(stock.symbol)} href={'/stocks/'+encodeURIComponent(stock.symbol)} className="grid min-h-[88px] grid-cols-[minmax(0,1fr)_auto_14px] items-center gap-x-3 px-3 py-3 transition-colors hover:bg-muted focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:px-4" aria-label={t('Research {ticker}',{ticker:stock.symbol})}>
           <div className="min-w-0"><div className="flex min-w-0 items-baseline gap-2"><strong className="shrink-0 text-sm font-semibold">{stock.symbol}</strong><span className="truncate text-[10px] text-muted-foreground">{(language==='vi'?stock.company_name:null)||englishCompanyName(stock)||stock.symbol}</span></div><p className="mt-1 text-[10px] leading-4 text-muted-foreground">{stock.exchange}</p></div>
           <div className="min-w-0"><LivePrice symbol={stock.symbol} compact/></div>
           <ArrowUpRight size={14} aria-hidden="true" className="text-muted-foreground"/>

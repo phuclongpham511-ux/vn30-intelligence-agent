@@ -288,3 +288,11 @@ publication (or explicitly labelled first observation). This is a reading order,
 not an importance score. Show followed-stock context, source/time and limitations;
 keep full stock rows, quiet stocks and Technical assurance below. Only an explicit
 review acknowledges the displayed ticker-item revisions; navigation never does.
+
+A Price map is a scoped alternative to reading the same quote list, not a market
+dashboard. Equal tile area has no financial weighting. Keep the loaded-page or
+followed-stock boundary explicit, original source values and times inspectable,
+and stale/missing backgrounds neutral. Direction remains labelled in text and
+symbols independently of freshness; zero and missing are distinct. The default
+Explore list and Watchlist attention hierarchy stay intact. Reuse the page quote
+context; presentation switches must not create another data lease or refresh.
