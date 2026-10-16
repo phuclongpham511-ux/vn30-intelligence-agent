@@ -260,18 +260,24 @@ class Recovery:
         return True
 
 
-def ps(pwsh, code, timeout=15, output_file=None):
+def ps(pwsh, code, timeout=15, output_file=None, *, probe='powershell'):
     # A long-lived Start-Process child can inherit a captured pipe handle. A
     # regular receipt file lets us wait for the starter only, never the service.
-    if output_file:
-        with output_file.open('x',encoding='utf-8') as output:
-            result = subprocess.run([pwsh,'-NoProfile','-Command',code],stdout=output,
-                                    stderr=subprocess.DEVNULL,timeout=timeout)
-        text = output_file.read_text(encoding='utf-8-sig')
-    else:
-        result = subprocess.run([pwsh, '-NoProfile', '-Command', code], capture_output=True,
-                                text=True, timeout=timeout)
-        text = result.stdout
+    try:
+        if output_file:
+            with output_file.open('x',encoding='utf-8') as output:
+                result = subprocess.run([pwsh,'-NoProfile','-Command',code],stdout=output,
+                                        stderr=subprocess.DEVNULL,timeout=timeout)
+            text = output_file.read_text(encoding='utf-8-sig')
+        else:
+            result = subprocess.run([pwsh, '-NoProfile', '-Command', code], capture_output=True,
+                                    text=True, timeout=timeout)
+            text = result.stdout
+    except subprocess.TimeoutExpired:
+        # Fixed caller labels identify the failed probe without persisting command
+        # text, output or environment. Critical callers still fail closed; only
+        # optional power diagnostics may downgrade this Conflict to NOT_VERIFIED.
+        raise Conflict(f'WINDOWS_PROBE_TIMEOUT probe={probe} timeout_seconds={timeout}') from None
     if result.returncode:
         # Do not echo subprocess text (launcher could contain private diagnostics).
         raise Conflict('WINDOWS_PROBE_FAILED')
@@ -421,19 +427,22 @@ class Windows:
                                capture_output=True,timeout=5)
         if clean.returncode:
             raise Conflict('SOURCE_TRACKED_CHANGES')
-        gate = ps(self.pwsh, '& '+literal(self.root/'launch/Invoke-Woofi.ps1')+' -CheckOnly', 20)
+        gate = ps(self.pwsh, '& '+literal(self.root/'launch/Invoke-Woofi.ps1')+' -CheckOnly', 20,
+                  probe='canonical_preflight')
         if not gate.get('Ready'):
             raise Conflict('CANONICAL_GATE_FAILED')
         return cfg
 
     def workers(self):
-        rows = ps(self.pwsh, "@(Get-CimInstance Win32_Process | Where-Object {$_.Name -in @('python.exe','pythonw.exe') -and $_.CommandLine -match '\\s-m\\s+scripts\\.ingest_(data|news)(?:\\s|$)'} | Select-Object ProcessId,ParentProcessId,ExecutablePath) | ConvertTo-Json -Compress")
+        rows = ps(self.pwsh, "@(Get-CimInstance Win32_Process | Where-Object {$_.Name -in @('python.exe','pythonw.exe') -and $_.CommandLine -match '\\s-m\\s+scripts\\.ingest_(data|news)(?:\\s|$)'} | Select-Object ProcessId,ParentProcessId,ExecutablePath) | ConvertTo-Json -Compress",
+                  probe='collector_inventory')
         return rows if isinstance(rows,list) else [rows]
 
     def ports(self, cfg):
         if any(type(cfg[key]) is not int or not 1<=cfg[key]<=65535 for key in ('backend_port','frontend_port')):
             raise Conflict('INVALID_RUNTIME_PORT')
-        rows = ps(self.pwsh, '@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object {$_.LocalPort -in '+str(cfg['backend_port'])+','+str(cfg['frontend_port'])+'} | Select-Object LocalPort,OwningProcess) | ConvertTo-Json -Compress')
+        rows = ps(self.pwsh, '@(Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue | Where-Object {$_.LocalPort -in '+str(cfg['backend_port'])+','+str(cfg['frontend_port'])+'} | Select-Object LocalPort,OwningProcess) | ConvertTo-Json -Compress',
+                  probe='listeners')
         return rows if isinstance(rows,list) else [rows]
 
     def vacant(self, role, cfg):
@@ -479,7 +488,7 @@ class Windows:
                 state['pending_launch'] = role
                 atomic(store.path/'status.json', state)
             result = ps(self.pwsh, command, 25,
-                        output_file=store.path/('launch-'+uuid.uuid4().hex+'.json'))
+                        output_file=store.path/('launch-'+uuid.uuid4().hex+'.json'), probe='role_launch')
             item = identity(result['observer_pid'])
             record = {'identity':item,'role':role,'run_directory':result['run_directory'], 'launched':now}
             if self.epoch is not None:
@@ -745,10 +754,11 @@ class Windows:
 
     def power_evidence(self):
         try:
-            events = ps(self.pwsh, "@(Get-WinEvent -FilterHashtable @{LogName='System';Id=1,42;StartTime=(Get-Date).AddMinutes(-30)} -MaxEvents 8 -ErrorAction SilentlyContinue | Where-Object {$_.ProviderName -in @('Microsoft-Windows-Kernel-Power','Microsoft-Windows-Power-Troubleshooter')} | Select-Object Id,ProviderName,TimeCreated) | ConvertTo-Json -Compress")
+            events = ps(self.pwsh, "@(Get-WinEvent -FilterHashtable @{LogName='System';Id=1,42;StartTime=(Get-Date).AddMinutes(-30)} -MaxEvents 8 -ErrorAction SilentlyContinue | Where-Object {$_.ProviderName -in @('Microsoft-Windows-Kernel-Power','Microsoft-Windows-Power-Troubleshooter')} | Select-Object Id,ProviderName,TimeCreated) | ConvertTo-Json -Compress",
+                        probe='power_evidence')
             self.emit('power_evidence', events=events)
-        except Conflict:
-            self.emit('power_evidence', result='NOT_VERIFIED')
+        except Conflict as exc:
+            self.emit('power_evidence', result='NOT_VERIFIED', reason=str(exc))
 
 
 def bind(cfg):
