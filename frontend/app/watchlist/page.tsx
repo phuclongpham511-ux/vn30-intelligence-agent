@@ -8,6 +8,8 @@ import StockSearch from '../components/stock/StockSearch';
 import {LivePrices,LivePrice} from '../components/stock/LivePrice';
 import {TechnicalInsightsView} from '../components/stock/TechnicalInsights';
 import ArticleRow from '../components/news/ArticleRow';
+import WatchlistBriefing from '../components/WatchlistBriefing';
+import {reviewBriefingItem} from '@/lib/dailyBriefing';
 import {safeExternalUrl} from '@/lib/presentation';
 import {emptyNewsFilters,newsViewQuery,type NewsArticle} from '@/lib/news';
 import type {CommunityItem} from '@/lib/community';
@@ -123,7 +125,8 @@ export default function WatchlistPage() {
             <ul className="mt-2 space-y-1">{[...data.news_sources,...data.community_sources].map(source=><li key={source.source_id}>{source.name} · {ui(collectionLabels[source.status])} · {t('Source checked')}: {date(source.last_success_at,true)}</li>)}</ul>
           </details>
         </>}
-        <section className="panel divide-y" aria-label={t('Watched stocks')}>{orderedSymbols.map(symbol=>{
+        {!loading&&!error&&data&&<WatchlistBriefing data={data} state={state} storageError={storageError} review={entry=>persist(current=>reviewBriefingItem(current,state,entry))}/>}
+        <section id="watched-stocks" className="panel divide-y scroll-mt-20" aria-label={t('Watched stocks')}>{orderedSymbols.map(symbol=>{
           const row=data?.stocks.find(stock=>stock.symbol===symbol);
           const news=row?.news,community=row?.community,technical=row?.technical;
           const newItems=[...(news?.items||[]),...(community?.items||[]),...(technical?.items||[])].filter(item=>isUnread(state,symbol,item));
@@ -139,7 +142,7 @@ export default function WatchlistPage() {
                 {news&&<UpdateSection key={'news-'+offset} label={t('News')} page={news} symbol={symbol} state={state} disabled={storageError}/>}
                 {community&&<UpdateSection key={'community-'+offset} label={t('Community')} page={community} symbol={symbol} state={state} disabled={storageError} sourceNames={Object.fromEntries(data?.community_sources.map(source=>[source.source_id,source.name])||[])}/>}
                 {technical?.items.length? <UpdateSection label={t('Technical updates')} page={technical} symbol={symbol} state={state} disabled={storageError}/>:null}
-                <details className="border-t pt-2 text-xs"><summary className="cursor-pointer text-primary">{t('Review & evidence')}</summary>
+                <details id={'watchlist-evidence-'+encodeURIComponent(symbol)} className="border-t pt-2 text-xs scroll-mt-20"><summary className="cursor-pointer text-primary">{t('Review & evidence')}</summary>
                   <p className="mt-2 text-muted-foreground">{t('Saved in this browser only. Reviews are explicit; opening content never marks it reviewed.')}</p>
                   <ReviewEvidence items={[...(news?.items||[]),...(community?.items||[]),...(technical?.items||[])]} symbol={symbol} state={state} disabled={storageError} review={review}/>
                   {!newItems.length&&<button disabled={storageError} className="mt-2 text-primary underline disabled:opacity-50" onClick={()=>review([])}>{t('Mark this check reviewed')}</button>}

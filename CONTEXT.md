@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+### Daily use V1 — local implementation checkpoint, 2026-10-16
+
+Watchlist adds a bounded Read first queue over its already-loaded News/Community
+projection. Shared identities appear once across followed stocks; at most three
+unreviewed items sort by original publication/labelled first-observed time, not an
+importance score. Source age, unverified discussion, corrections and incomplete
+coverage remain explicit. Review acknowledges only displayed ticker-item revisions
+and preserves concurrent receipts. Existing full stock rows and Technical assurance
+remain separate. No API, ingestion, database or Technical policy changes. Research
+and scope: docs/WOOFI_DAILY_ATTENTION_COMPETITIVE_RESEARCH_V1.md and
+docs/WOOFI_DAILY_USE_V1_PLAN.md. This checkpoint is not deployed; production/browser
+acceptance remains separate from automated rendering and persisted API replay.
+
 ### Phase 3 Technical operational integration — 2026-10-16
 
 The existing canonical collector can opt into the durable single-ticker HOSE

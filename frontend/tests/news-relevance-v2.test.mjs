@@ -14,7 +14,7 @@ function load(file,overrides={}){
  // Route files may only export Next.js page fields. Inspect private helpers in
  // this SSR harness without introducing invalid production page exports.
  const helpers=file.endsWith('/watchlist/page.tsx')?'\nexports.UpdateSection=UpdateSection;exports.ReviewEvidence=ReviewEvidence;':'';
- const exports={};new Function('require','exports',code+helpers)(name=>overrides[name]||require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);return exports;
+ const exports={};new Function('require','exports',code+helpers)(name=>overrides[name]||(name==='../components/WatchlistBriefing'?()=>null:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name)),exports);return exports;
 }
 const article={id:'a',title:'Original issuer headline',url:'https://publisher.example/a',source_name:'Publisher',published_at:'2026-10-11T07:00:00Z',first_seen_at:'2026-10-11T07:05:00Z',tickers:['MCH'],topics:[],sectors:[]};
 const proof={symbol:'MCH',article_id:'a',article_title:article.title,article_url:article.url,kind:'explicit_stock',matched_text:'mch',policy:'issuer-context-v2',evidence_origin:'publisher_text',evidence_excerpt:'Cổ phiếu MCH bị bán ròng.',text_receipt_id:'receipt',text_hash:'hash',text_observed_at:'2026-10-11T07:05:00Z'};
