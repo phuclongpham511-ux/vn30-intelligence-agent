@@ -100,3 +100,24 @@ test('pending quote request is loading, while a completed empty response is genu
   const empty=render('en',{data:{items:{},session:'unknown',as_of:now.toISOString()}});
   assert.match(empty,/0\/4 quotes/);assert.match(empty,/No observed quotes for this selection/);
 });
+
+test('failed initial quote request leaves coverage unknown rather than certifying missing quotes',()=>{
+  for(const language of ['en','vi']){
+    const html=render(language,{data:null,failed:true});
+    assert.match(html,language==='en'?/Quote coverage unavailable/:/Chưa xác định được độ phủ báo giá/);
+    assert.doesNotMatch(html,/0\/4 quotes|4 missing|No observed quotes for this selection|4 chưa có/);
+    assert.doesNotMatch(html,/Loading observed quotes|0%/);
+    assert.equal((html.match(/href="\/stocks\//g)||[]).length,4);
+  }
+});
+
+test('controlled movement view partitions the filtered sample and leaves unavailable request counts unknown',()=>{
+  const html=render('en',{organization:'movement',sorting:'ticker'});
+  assert.match(html,/Advancing/);assert.match(html,/Declining/);assert.match(html,/Stale \/ Missing/);
+  assert.equal((html.match(/data-quote-row=/g)||[]).length,4);
+  const filtered=render('en',{organization:'movement',stocks:stocks.slice(0,1)});
+  assert.equal((filtered.match(/data-quote-row=/g)||[]).length,1);
+  assert.match(filtered,/1<!-- --> stocks|1 stocks/);
+  const failed=render('en',{organization:'movement',data:null,failed:true});
+  assert.match(failed,/Quote coverage unavailable/);assert.doesNotMatch(failed,/0\/4 quotes|4 missing/);
+});

@@ -1,5 +1,28 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Approved Unified V2.1 market workspace
+
+The user-approved Unified V2.1 package supersedes earlier Explore composition and
+market-route sidebar requirements: compact logo/search/locale/theme header,
+Overview / Board / Heatmap navigation and existing Stock Research. News and
+Watchlist retain their existing navigation/functionality. Market routes use the
+approved restrained slate/teal theme tokens; financial movement colors retain
+their independent meanings in both themes.
+
+Default Board is an ordinary sortable three-panel comparison. Optional Advancing,
+Declining, Unchanged and Stale / Missing organization uses the loaded filtered
+sample only. Counts stay unknown on failed initial transport. Stock maps use five
+source-percentage bins with boundaries -1, 0 and +1 percent, neutral stale/missing
+states and equal-area cells; no sector taxonomy or capitalization is implied.
+Source-time buttons open keyboard/touch accessible original evidence. Preserve
+all existing research tabs, qualified charts, financials and original News links;
+missing history has an explicit compact state rather than an invented path.
+
+Prototype values/arrays/articles are never product data. Future capabilities remain
+inactive behind a compact qualification disclosure. The visual baseline is the
+local `unified-v2-1` package; controlled application screenshots are separate from
+live-data qualification and from the user's final release authorization.
+
 This file is the visual and interaction contract for the production frontend.
 
 It is inspired by strong patterns from professional financial research products and OpenDesign references, but it is **not** a clone of Stripe, Binance, Kraken, Bloomberg, or any other product.

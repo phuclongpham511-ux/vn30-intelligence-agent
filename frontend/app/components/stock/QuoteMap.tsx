@@ -1,114 +1,63 @@
 "use client";
-import {useId,useState} from 'react';
+import {useRef,useState,type ReactNode} from 'react';
 import Link from 'next/link';
-import {ArrowUpRight,X} from 'lucide-react';
+import {Dialog} from 'radix-ui';
+import {X} from 'lucide-react';
 import {useLocale} from '@/lib/i18n';
-import {movement,type LiveBatch} from '@/lib/live-market';
-import {boardRows,boardColumns,type BoardIdentity,type BoardSort} from '@/lib/quoteMap';
+import type {LiveBatch} from '@/lib/live-market';
+import {boardRows,boardColumns,movementGroups,heatmapBin,type BoardRow,type BoardIdentity,type BoardSort,type MovementGroup} from '@/lib/quoteMap';
 import {useLivePrices} from './LivePrice';
 
-const backgrounds={up:'border-emerald-600/30 bg-emerald-500/15 hover:bg-emerald-500/25',
-  down:'border-red-600/30 bg-red-500/15 hover:bg-red-500/25',
-  unchanged:'border-yellow-600/30 bg-yellow-500/15 hover:bg-yellow-500/25',
-  neutral:'border-border bg-muted/25 hover:bg-muted/50'};
-type Props={stocks:BoardIdentity[];scope:'page'|'watchlist';scopeLabel?:string;onSelect?:(symbol:string)=>void;mode?:'board'|'heatmap'};
-
-export function QuoteMapView({stocks,data,failed=false,now=new Date(),scope,scopeLabel,mode='board',onSelect}:Props&{
-  data:LiveBatch|null;failed?:boolean;now?:Date
-}) {
+type Props={stocks:BoardIdentity[];scope:'page'|'watchlist';scopeLabel?:string;onSelect?:(symbol:string)=>void;mode?:'board'|'heatmap';controls?:ReactNode;sorting?:BoardSort;onSortingChange?:(sort:BoardSort)=>void;organization?:'ordinary'|'movement';onOrganizationChange?:(value:'ordinary'|'movement')=>void};
+const groupLabels={advancing:'Advancing',declining:'Declining',unchanged:'Unchanged',unqualified:'Stale / Missing'} as const;
+export function QuoteMapView({stocks,data,failed=false,now=new Date(),scope,scopeLabel,mode='board',onSelect,controls,sorting,onSortingChange,organization:controlledOrganization,onOrganizationChange}:Props&{data:LiveBatch|null;failed?:boolean;now?:Date}) {
   const {t,ui,number,date,language,locale}=useLocale();
-  const id=useId();
-  const [sort,setSort]=useState<BoardSort>('change');
+  const sourceFocus=useRef<HTMLButtonElement|null>(null);
+  const [localSort,setLocalSort]=useState<BoardSort>('change');
+  const [localOrganization,setLocalOrganization]=useState<'ordinary'|'movement'>('ordinary');
+  const sort=sorting??localSort,setSort=onSortingChange??setLocalSort;
+  const organization=controlledOrganization??localOrganization,setOrganization=onOrganizationChange??setLocalOrganization;
   const [selected,setSelected]=useState<string|null>(null);
-  const rows=boardRows(stocks,data,failed,now,sort),columns=boardColumns(rows);
-  const loading=!data&&!failed;
+  const rows=boardRows(stocks,data,failed,now,sort),groups=movementGroups(rows);
+  const entry=rows.find(row=>row.stock.symbol===selected);
+  const loading=!data&&!failed,unknownCoverage=!data&&failed;
   const fresh=rows.filter(r=>r.status==='fresh').length,stale=rows.filter(r=>r.status==='stale').length;
   const missing=rows.filter(r=>r.status==='unavailable').length;
   const label=scopeLabel||t(scope==='watchlist'?'Followed stocks':'Loaded results');
-  const signed=(value:number|null|undefined)=>value!=null&&Number.isFinite(value)?(value>0?'+':'')+number(value):'—';
-  const clock=(value:string)=>Number.isFinite(Date.parse(value))?new Intl.DateTimeFormat(locale,{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(value)):'—';
+  const signed=(v:number|null|undefined)=>typeof v==='number'&&Number.isFinite(v)?(v>0?'+':'')+number(v):'—';
+  const percentage=(r:BoardRow)=>signed(r.row?.change_percent)+(typeof r.row?.change_percent==='number'&&Number.isFinite(r.row.change_percent)?'%':'');
+  const clock=(v:string)=>Number.isFinite(Date.parse(v))?new Intl.DateTimeFormat(locale,{timeZone:'Asia/Ho_Chi_Minh',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(new Date(v)):'—';
+  const sourceDay=(v:string)=>Number.isFinite(Date.parse(v))?new Intl.DateTimeFormat(locale,{timeZone:'Asia/Ho_Chi_Minh',day:'2-digit',month:'2-digit'}).format(new Date(v)):'—';
   const statusText=(status:string)=>t(status==='fresh'?'Current source observation':status==='stale'?'Stale market data':'Market data unavailable');
   const sessionText=(session:string)=>ui(session==='active'?'Active trading session':session==='break'?'Midday break':session==='closed'?'Market closed':'Session unconfirmed');
-  const counts=['up','down','unchanged'].map(tone=>rows.filter(r=>r.tone===tone).length);
-  const sourceControl=(entry:typeof rows[number])=><button type="button" aria-label={t('Quote source for {ticker}',{ticker:entry.stock.symbol})}
-    aria-expanded={selected===entry.stock.symbol} aria-controls={selected===entry.stock.symbol?id+'-'+entry.stock.symbol:undefined}
-    title={statusText(entry.status)+(entry.row?' · '+date(entry.row.updated_at,true):'')}
-    onClick={()=>setSelected(selected===entry.stock.symbol?null:entry.stock.symbol)}
-    className="flex min-h-9 min-w-11 items-center justify-end gap-1 rounded px-1 text-[10px] tabular-nums text-muted-foreground hover:bg-background/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
-      <span aria-hidden="true" className={`h-1.5 w-1.5 shrink-0 rounded-full ${entry.status==='fresh'?'bg-foreground/45':entry.status==='stale'?'bg-amber-500':'bg-muted-foreground/35'}`}/>
-      {entry.row?<time dateTime={entry.row.updated_at}>{clock(entry.row.updated_at)}</time>:loading?'…':'—'}
+  const color=(r:BoardRow)=>r.status!=='fresh'?'text-muted-foreground':r.tone==='up'?'positive':r.tone==='down'?'negative':r.tone==='unchanged'?'unchanged':'text-muted-foreground';
+  const count=(key:MovementGroup)=>loading||unknownCoverage?'—':groups[key].length;
+  const sourceControl=(row:BoardRow)=><button type="button" className={`quote-source ${row.status==='stale'?'quote-stale':''}`} aria-label={t('Quote source for {ticker}',{ticker:row.stock.symbol})} aria-haspopup="dialog" title={statusText(row.status)+(row.row?' · '+date(row.row.updated_at,true):'')} onClick={event=>{sourceFocus.current=event.currentTarget;setSelected(row.stock.symbol);}}>
+    {row.row?<><span className="sr-only">{statusText(row.status)} · </span>{row.status==='stale'?<><time className="sr-only" dateTime={row.row.updated_at}>{date(row.row.updated_at,true)}</time><span>{t('Stale')} · {sourceDay(row.row.updated_at)}</span></>:<time dateTime={row.row.updated_at}>{clock(row.row.updated_at)}</time>}</>:loading?'…':unknownCoverage?t('Unknown'):t('Missing')}
   </button>;
-  const sourceDetail=(entry:typeof rows[number])=>selected===entry.stock.symbol?<div id={id+'-'+entry.stock.symbol} className="col-span-full my-1 min-w-0 rounded border bg-background/90 p-3 text-xs">
-      <div className="flex items-center justify-between gap-2"><strong>{entry.stock.symbol} · {(language==='vi'?entry.stock.company_name:entry.stock.display_name_en)||entry.stock.company_name||entry.stock.symbol}</strong>
-        <button type="button" aria-label={t('Close quote source')} onClick={()=>setSelected(null)} className="rounded p-2 hover:bg-muted"><X size={14}/></button></div>
-      <p className="mt-1 text-muted-foreground">{statusText(entry.status)}{entry.row?' · '+date(entry.row.updated_at,true):''} · {entry.stock.exchange}</p>
-      {entry.row&&<div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-muted-foreground">
-        <span className="break-all">{entry.row.source}</span><span>{sessionText(entry.row.session)}</span>
-        <span>{t('Trading date ·')} {date(entry.row.trading_date)}</span>
-        <span>{t('Reference price')} {number(entry.row.reference_price)} VND</span>
-        <span>{t('Price change')} {signed(entry.row.change)} VND</span>
-      </div>}
-    </div>:null;
-  return <section aria-label={t(scope==='watchlist'?'Market board · followed stocks':'Market board')}>
-    <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-y py-3">
-      <div className="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1">
-        <h3 className="text-sm font-semibold">{label}</h3>
-        <span role="status" className="text-xs text-muted-foreground">{loading?t('Loading observed quotes…'):t('{available}/{total} quotes',{available:fresh+stale,total:rows.length})}</span>
-        {!loading&&<span className="text-[10px] text-muted-foreground">{t('{fresh} current · {stale} stale · {missing} missing',{fresh,stale,missing})}</span>}
-      </div>
-      <label className="flex items-center gap-2 text-xs text-muted-foreground">{t('Sort')}
-        <select aria-label={t('Quote sorting')} className="h-8 rounded border bg-background px-2 text-xs text-foreground" value={sort} onChange={e=>setSort(e.target.value as BoardSort)}>
-          <option value="change">{t('Change % ↓')}</option><option value="fallers">{t('Change % ↑')}</option>
-          <option value="price">{t('Price ↓')}</option><option value="ticker">{t('Ticker A–Z')}</option>
-        </select>
-      </label>
+  const table=(entries:BoardRow[])=><table className="quote-table"><thead><tr><th scope="col">{t('Ticker')}</th><th scope="col">{t('Price')} · VND</th><th scope="col">Δ %</th><th scope="col">{t('Time')} · ICT</th></tr></thead><tbody>{entries.map(row=><tr key={row.stock.symbol} data-quote-row={row.stock.symbol} data-tone={row.tone} data-status={row.status}>
+    <th scope="row"><Link href={'/stocks/'+encodeURIComponent(row.stock.symbol)} onClick={()=>onSelect?.(row.stock.symbol)} aria-label={t('Research {ticker}',{ticker:row.stock.symbol})} title={(language==='vi'?row.stock.company_name:row.stock.display_name_en)||row.stock.company_name||row.stock.symbol}>{row.stock.symbol}<span aria-hidden="true"> ↗</span></Link></th>
+    <td className={color(row)}>{row.row?number(row.row.last_price):'—'}</td><td className={color(row)}>{percentage(row)}</td><td>{sourceControl(row)}</td>
+  </tr>)}</tbody></table>;
+  const tiles=(entries:BoardRow[])=><div className="quote-map-grid">{entries.map(row=><article key={row.stock.symbol} data-quote-tile={row.stock.symbol} data-tone={row.tone} data-status={row.status} className={`quote-tile bin-${heatmapBin(row)}`}>
+    <Link href={'/stocks/'+encodeURIComponent(row.stock.symbol)} onClick={()=>onSelect?.(row.stock.symbol)} aria-label={t('Research {ticker}',{ticker:row.stock.symbol})}><strong>{row.stock.symbol} ↗</strong><b>{percentage(row)}</b><span>{row.row?number(row.row.last_price)+' VND':'—'}</span></Link>{sourceControl(row)}
+  </article>)}</div>;
+  const groupSection=(key:MovementGroup)=><section className="quote-panel" key={key}><div className="quote-group-heading"><h3 className={key==='advancing'?'positive':key==='declining'?'negative':key==='unchanged'?'unchanged':''}>{t(groupLabels[key])}</h3><span>{count(key)} {t('stocks')}</span></div>{groups[key].length?(mode==='board'?table(groups[key]):tiles(groups[key])):<p className="quote-empty">{loading?t('Loading observed quotes…'):unknownCoverage?t('Quote coverage unavailable'):t('No stocks in this category')}</p>}</section>;
+  return <section className="quote-workspace" aria-label={t(scope==='watchlist'?'Market board · followed stocks':'Market board')}>
+    <div className="quote-toolbar">{controls}<label>{t('Sort')}<select aria-label={t('Quote sorting')} value={sort} onChange={e=>setSort(e.target.value as BoardSort)}><option value="change">{t('Change % ↓')}</option><option value="fallers">{t('Change % ↑')}</option><option value="price">{t('Price ↓')}</option><option value="ticker">{t('Ticker A–Z')}</option></select></label><label>{t('Organization')}<select aria-label={t('Organization')} value={organization} onChange={e=>setOrganization(e.target.value as typeof organization)}><option value="ordinary">{t(mode==='board'?'Sortable table':'Sorted grid')}</option><option value="movement">{t('Movement groups')}</option></select></label>
+      <span className="quote-coverage" role="status">{label} · {loading?t('Loading observed quotes…'):unknownCoverage?t('Quote coverage unavailable'):t('{available}/{total} quotes',{available:fresh+stale,total:rows.length})}{!loading&&!unknownCoverage&&<> · {t('{fresh} current · {stale} stale · {missing} missing',{fresh,stale,missing})}</>}</span>
     </div>
-    <div className="mb-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] tabular-nums text-muted-foreground">
-      <span className="positive">↑ {t('Up')} {loading?'—':counts[0]}</span><span className="negative">↓ {t('Down')} {loading?'—':counts[1]}</span>
-      <span className="unchanged">= {t('Unchanged')} {loading?'—':counts[2]}</span>
-      <span>{t('Current observations in this selection only')}</span>{data&&<span>{sessionText(data.session)}</span>}<span className="ml-auto">VND · ICT (UTC+7)</span>
-    </div>
-    {!loading&&fresh+stale===0&&<p role="status" className="mb-3 rounded border border-amber-500/40 p-3 text-xs">{t('No observed quotes for this selection. Metadata is available; prices have not been observed.')}</p>}
-    {failed&&<p role="alert" className="mb-3 text-xs text-amber-700 dark:text-amber-400">{t('Quote request failed. Previous observations are not current.')}</p>}
-    {mode==='heatmap'?<div className="grid grid-cols-3 gap-1 sm:grid-cols-5 lg:grid-cols-6">
-      {rows.map(entry=><article key={entry.stock.symbol} data-quote-tile={entry.stock.symbol} data-tone={entry.tone} data-status={entry.status}
-        className={`relative min-w-0 rounded border px-2 pt-2 ${selected===entry.stock.symbol?'col-span-full':''} ${backgrounds[entry.tone]}`}>
-        <Link href={'/stocks/'+encodeURIComponent(entry.stock.symbol)} onClick={()=>onSelect?.(entry.stock.symbol)} aria-label={t('Research {ticker}',{ticker:entry.stock.symbol})}
-          className="block rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
-          <span className="block text-xs font-semibold">{entry.stock.symbol}</span>
-          <span className="financial mt-1 block text-right text-sm font-semibold tabular-nums">{entry.row?number(entry.row.last_price):'—'}</span>
-          <span className={`block text-right text-xs tabular-nums ${movement(entry.row?.change).color}`}>{signed(entry.row?.change_percent)}{entry.row?.change_percent!=null&&Number.isFinite(entry.row.change_percent)?'%':''}</span>
-        </Link>{sourceControl(entry)}{sourceDetail(entry)}
-      </article>)}
-    </div>:<div className="grid grid-cols-1 items-start gap-3 md:grid-cols-2 xl:grid-cols-3">
-      {columns.map((column,index)=><div key={index} className="min-w-0 overflow-hidden rounded-md border">
-        <div className="flex items-center justify-between border-b bg-muted/45 px-3 py-2 text-xs font-semibold"><span>{label}</span><span className="text-[10px] font-normal text-muted-foreground">{t('Part {part} of {total}',{part:index+1,total:columns.length})}</span></div>
-        <div className="grid grid-cols-[minmax(0,1fr)_48px] gap-1 px-2 py-1.5 text-[10px] text-muted-foreground">
-          <div className="grid grid-cols-[minmax(46px,1fr)_minmax(66px,1fr)_62px] gap-1"><span>{t('Ticker')}</span><span className="text-right">{t('Price')}</span><span className="text-right">{t('Change %')}</span></div><span className="text-right">{t('Source time')}</span>
-        </div>
-        <div className="space-y-0.5 px-1 pb-1">{column.map(entry=><article key={entry.stock.symbol} data-quote-row={entry.stock.symbol} data-tone={entry.tone} data-status={entry.status}
-          className={`grid grid-cols-[minmax(0,1fr)_48px] items-center gap-1 rounded border border-transparent px-1 ${backgrounds[entry.tone]}`}>
-          <Link href={'/stocks/'+encodeURIComponent(entry.stock.symbol)} onClick={()=>onSelect?.(entry.stock.symbol)}
-            title={(language==='vi'?entry.stock.company_name:entry.stock.display_name_en)||entry.stock.company_name||entry.stock.symbol}
-            aria-label={t('Research {ticker}',{ticker:entry.stock.symbol})}
-            className="grid min-h-9 grid-cols-[minmax(46px,1fr)_minmax(66px,1fr)_62px] items-center gap-1 rounded text-xs tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring">
-            <strong className="flex items-center gap-1">{entry.stock.symbol}<ArrowUpRight size={10} aria-hidden="true" className="shrink-0 text-muted-foreground"/></strong>
-            <span className="financial text-right font-semibold">{entry.row?number(entry.row.last_price):'—'}</span>
-            <span className={`text-right font-medium ${movement(entry.row?.change).color}`}>{signed(entry.row?.change_percent)}{entry.row?.change_percent!=null&&Number.isFinite(entry.row.change_percent)?'%':''}</span>
-          </Link>{sourceControl(entry)}{sourceDetail(entry)}
-        </article>)}</div>
-      </div>)}
-    </div>}
-    <details className="mt-3 text-[11px] leading-5 text-muted-foreground"><summary className="w-fit cursor-pointer">{t('Source, coverage & methodology')}</summary>
-      <p className="mt-2">{t('SSI source observations, not synchronized market-wide coverage. Time buttons open the original timestamp, session and reference price. Stale and missing quotes stay neutral.')}</p>
-      <p>{t('Current-direction counts exclude stale and missing quotes. Equal heatmap cells have no capitalization weighting. No sector return, money flow or strength is inferred.')}</p>
-      <p>{t('Session volume is unavailable in the qualified quote contract; minute-bar volume is not session volume.')}</p>
-      {scope==='watchlist'&&<p>{t('Only your followed stocks. This is not a market-wide view.')}</p>}
-    </details>
+    <div className="quote-sample-note"><span className="positive">↑ {t('Up')} {count('advancing')}</span><span className="negative">↓ {t('Down')} {count('declining')}</span><span className="unchanged">= {t('Unchanged')} {count('unchanged')}</span><span>{t('Current observations in this selection only')}</span>{data&&<span>{sessionText(data.session)}</span>}</div>
+    {!loading&&!unknownCoverage&&fresh+stale===0&&<p role="status" className="quote-warning">{t('No observed quotes for this selection. Metadata is available; prices have not been observed.')}</p>}
+    {failed&&<p role="alert" className="quote-warning">{t('Quote request failed. Previous observations are not current.')}</p>}
+    {mode==='heatmap'&&<div className="quote-legend"><b>{t('Price change')} %</b>{[['negative-strong','≤ −1%'],['negative','−1% < Δ < 0'],['zero','0%'],['positive','0 < Δ < 1%'],['positive-strong','≥ +1%']].map(([bin,text])=><span key={bin}><i className={'bin-'+bin}/>{text}</span>)}<span>▧ {t('Stale / Missing')}</span></div>}
+    {organization==='movement'?(mode==='board'?<div className="quote-columns">{groupSection('advancing')}{groupSection('declining')}<div className="quote-group-stack">{groupSection('unchanged')}{groupSection('unqualified')}</div></div>:<div className="quote-group-stack">{(Object.keys(groups) as MovementGroup[]).map(groupSection)}</div>):mode==='board'?<div className="quote-columns">{boardColumns(rows).map((column,index)=><div key={index} className="quote-panel">{table(column)}</div>)}</div>:<div className="quote-panel">{tiles(rows)}</div>}
+    <p className="quote-footnote">{t(organization==='movement'?'Movement within this selection only · not sectors.':'Read down each panel, then left → right.')} · VND · ICT (UTC+7){mode==='heatmap'&&<> · {t('Equal cell area, not capitalization.')}</>}</p>
+    <details className="quote-method"><summary>{t('Source, coverage & methodology')}</summary><p>{t('SSI source observations, not synchronized market-wide coverage. Time buttons open the original timestamp, session and reference price. Stale and missing quotes stay neutral.')}</p><p>{t('Current-direction counts exclude stale and missing quotes. Equal heatmap cells have no capitalization weighting. No sector return, money flow or strength is inferred.')}</p><p>{t('Session volume is unavailable in the qualified quote contract; minute-bar volume is not session volume.')}</p>{scope==='watchlist'&&<p>{t('Only your followed stocks. This is not a market-wide view.')}</p>}</details>
+    <Dialog.Root open={!!entry} onOpenChange={open=>{if(!open)setSelected(null);}}><Dialog.Portal><Dialog.Overlay className="fixed inset-0 z-50 bg-black/60"/><Dialog.Content className="quote-source-dialog" onCloseAutoFocus={event=>{event.preventDefault();sourceFocus.current?.focus();}}><Dialog.Title>{entry?.stock.symbol} · {t('Source & session')}</Dialog.Title><Dialog.Description>{entry&&statusText(entry.status)} · {entry?.stock.exchange} · {(language==='vi'?entry?.stock.company_name:entry?.stock.display_name_en)||entry?.stock.company_name}</Dialog.Description>
+      {entry?.row?<dl><dt>{t('Source:')}</dt><dd>{entry.row.source}</dd><dt>{t('Source time')}</dt><dd><time dateTime={entry.row.updated_at}>{date(entry.row.updated_at,true)}</time> · ICT</dd><dt>{t('Trading date ·')}</dt><dd>{date(entry.row.trading_date)} · {sessionText(entry.row.session)}</dd><dt>{t('Reference price')}</dt><dd>{number(entry.row.reference_price)} VND</dd><dt>{t('Price change')}</dt><dd>{signed(entry.row.change)} VND</dd></dl>:<p>{loading?t('Loading observed quotes…'):unknownCoverage?t('Quote coverage unavailable'):t('No observed quote or timestamp is available.')}</p>}
+      <Dialog.Close className="quote-dialog-close" aria-label={t('Close quote source')}><X size={18}/></Dialog.Close>
+    </Dialog.Content></Dialog.Portal></Dialog.Root>
   </section>;
 }
-
-export default function QuoteMap(props:Props) {
-  const {data,failed}=useLivePrices();
-  return <QuoteMapView {...props} mode={props.mode??(props.scope==='watchlist'?'heatmap':'board')} data={data} failed={failed}/>;
-}
+export default function QuoteMap(props:Props){const {data,failed}=useLivePrices();return <QuoteMapView {...props} mode={props.mode??(props.scope==='watchlist'?'heatmap':'board')} data={data} failed={failed}/>;}

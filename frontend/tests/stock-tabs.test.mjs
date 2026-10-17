@@ -22,6 +22,7 @@ new Function('require','exports',compiled)(name=>{
   if(name==='./stock/StockStates')return {StockError:marker('Identity error')};
   if(name==='./ui/skeleton')return {Skeleton:marker('Skeleton')};
   if(name==='./ui/button')return {Button:marker('Button')};
+  if(name==='./market/WorkspaceNav')return {__esModule:true,default:marker('WorkspaceNav')};
   if(name.startsWith('./stock/'))return {__esModule:true,default:marker(name.slice(8))};
   return require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name);
 },exports);

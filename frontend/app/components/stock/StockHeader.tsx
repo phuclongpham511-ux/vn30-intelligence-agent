@@ -10,7 +10,7 @@ export default function StockHeader({ stock, market, available=true }: { stock: 
   const {t,language,date:localDate}=useLocale();
   const name = (language==='vi'?stock.company_name:englishCompanyName(stock))||stock.company_name;
   return <header className="stock-header">
-    <Link href="/" className="mb-4 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft size={13}/>{t("Back to Explore")}</Link>
+    <Link href="/#market-board" className="mb-2 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"><ArrowLeft size={13}/>{t("Market board")}</Link>
     <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
       <div className="flex items-center gap-4"><span className="flex size-14 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10 text-lg font-semibold text-primary">{stock.symbol.slice(0,3)}</span>
         <div><div className="flex flex-wrap items-center gap-3"><h1 className="text-[32px] leading-none">{stock.symbol}</h1>{stock.exchange && <span className="rounded border px-2 py-1 text-[10px] text-muted-foreground">{stock.exchange}</span>}</div>

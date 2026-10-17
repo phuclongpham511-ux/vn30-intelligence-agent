@@ -42,3 +42,22 @@ export function boardColumns<T>(rows:T[]):T[][] {
   }
   return columns;
 }
+
+export type BoardRow=ReturnType<typeof boardRows>[number];
+export type MovementGroup='advancing'|'declining'|'unchanged'|'unqualified';
+/** Organization of this loaded sample only; never a sector or market-wide metric. */
+export function movementGroups(rows:BoardRow[]) {
+  const result:Record<MovementGroup,BoardRow[]>={advancing:[],declining:[],unchanged:[],unqualified:[]};
+  for(const row of rows){
+    const value=row.row?.change_percent;
+    const key=row.status!=='fresh'||typeof value!=='number'||!Number.isFinite(value)?'unqualified':value>0?'advancing':value<0?'declining':'unchanged';
+    result[key].push(row);
+  }
+  return result;
+}
+export type HeatBin='negative-strong'|'negative'|'zero'|'positive'|'positive-strong'|'neutral';
+export function heatmapBin(row:BoardRow):HeatBin {
+  const value=row.row?.change_percent;
+  if(row.status!=='fresh'||typeof value!=='number'||!Number.isFinite(value))return 'neutral';
+  return value<=-1?'negative-strong':value<0?'negative':value===0?'zero':value<1?'positive':'positive-strong';
+}

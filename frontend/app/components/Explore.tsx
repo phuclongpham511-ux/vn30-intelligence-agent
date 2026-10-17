@@ -16,6 +16,7 @@ import {useStockRead} from './stock/useStockRead';
 import {StockError} from './stock/StockStates';
 import {Skeleton} from './ui/skeleton';
 import {Button} from './ui/button';
+import WorkspaceNav from './market/WorkspaceNav';
 
 const labels={overview:'Overview',fundamentals:'Fundamental analysis',technical:'Technical analysis',actions:'Dividends & corporate actions',news:'Company news'} as const;
 
@@ -44,6 +45,7 @@ export default function Explore({ticker}:{ticker:string}) {
   const name=security&&(language==='en'?security.display_name_en||security.company_name:security.company_name);
   if(identity.error||(identity.data&&!security))return <StockError ticker={ticker} message="Stock identity unavailable. Find an available listed equity in Explore." retry={identity.retry}/>;
   return <div className="page-stack stock-detail">
+    <WorkspaceNav research/>
     <StockHeader available={!!security} stock={{symbol:ticker,company_name:security?.company_name||null,display_name_en:security?.display_name_en,exchange:security?.exchange||null}}/>
     <div className="stock-tabs" role="tablist" aria-label={t('Stock sections')}>
       {stockSections.map((section,index)=><button key={section} ref={node=>{buttons.current[section]=node;}} type="button" role="tab" id={`stock-tab-${section}`} aria-controls={section==='overview'||section==='technical'?'stock-panel-price':`stock-panel-${section}`} aria-selected={tab===section} tabIndex={tab===section?0:-1} onClick={()=>navigate(section)} onKeyDown={event=>{

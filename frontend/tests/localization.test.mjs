@@ -100,6 +100,7 @@ test('Woofi shell uses local supplied logo, compact language control and no Dail
     'next/navigation':{usePathname:()=>'/news'},'next-themes':{ThemeProvider:passthrough,useTheme:()=>({resolvedTheme:'dark',setTheme(){}})},
     '@/lib/i18n':{useLocale:()=>({...localeTools('vi'),setLanguage(){}}),LanguageProvider:passthrough},
     '../stock/TickerSearch':()=>React.createElement('input',{'aria-label':'search'}),'../stock/StockUniverse':{StockUniverse:passthrough},
+    '../market/MarketSearch':{MarketSearchProvider:passthrough,useMarketSearch:()=>({query:'',setQuery(){}})},
     '../ui/button':{Button:button},'../ui/sheet':{Sheet:passthrough,SheetTrigger:()=>null,SheetContent:()=>null,SheetTitle:passthrough,SheetDescription:passthrough}});
   const html=render(Shell,{children:'content'});
   assert.match(html,/src="\/assets\/woofi-logo.png"/);assert.match(html,/alt="Woofi"/);

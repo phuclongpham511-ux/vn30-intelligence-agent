@@ -7,6 +7,7 @@ import {Newspaper,Compass,Bookmark,PanelLeft,Moon,Sun,Info,X} from 'lucide-react
 import {Dialog} from 'radix-ui';
 import {LanguageProvider,useLocale} from '@/lib/i18n';
 import TickerSearch from '../stock/TickerSearch';
+import {MarketSearchProvider,useMarketSearch} from '../market/MarketSearch';
 import {StockUniverse} from '../stock/StockUniverse';
 import {Button} from '../ui/button';
 import {Sheet,SheetContent,SheetTrigger,SheetTitle,SheetDescription} from '../ui/sheet';
@@ -42,6 +43,8 @@ function ThemeToggle() {
 }
 function Shell({children}: {children:React.ReactNode}) {
   const [open,setOpen]=useState(false);const {t,language,setLanguage}=useLocale();
+  const path=usePathname(),market=path==='/'||path.startsWith('/stocks/');
+  const {setQuery}=useMarketSearch();
   useEffect(()=>{
     const controller=new AbortController();
     let busy=false;
@@ -50,16 +53,18 @@ function Shell({children}: {children:React.ReactNode}) {
     const timer=setInterval(()=>{void refresh();},5*60*1000);
     return ()=>{controller.abort();clearInterval(timer);};
   },[]);
-  return <div className="min-h-screen"><a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:p-3">{t('Skip to content')}</a>
-    <aside className="fixed inset-y-0 left-0 hidden w-60 border-r bg-[var(--sidebar)] lg:block"><Navigation/></aside><div className="min-w-0 lg:ml-60">
-    <header className="sticky top-0 z-30 flex min-h-[72px] flex-wrap items-center gap-2 border-b bg-background/95 px-3 py-2 backdrop-blur-sm sm:flex-nowrap sm:py-0 md:px-8">
+  return <div className={market?'market-shell min-h-screen':'min-h-screen'}><a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:p-3">{t('Skip to content')}</a>
+    {!market&&<aside className="fixed inset-y-0 left-0 hidden w-60 border-r bg-[var(--sidebar)] lg:block"><Navigation/></aside>}<div className={market?'min-w-0':'min-w-0 lg:ml-60'}>
+    {process.env.NEXT_PUBLIC_WOOFI_VALIDATION==='replay'&&<div className="market-validation">SIMULATED UI VALIDATION — NOT LIVE SSI</div>}
+    <header className={market?'market-app-header':'sticky top-0 z-30 flex min-h-[72px] flex-wrap items-center gap-2 border-b bg-background/95 px-3 py-2 backdrop-blur-sm sm:flex-nowrap sm:py-0 md:px-8'}>
       <Sheet open={open} onOpenChange={setOpen}><SheetTrigger asChild><Button variant="ghost" size="icon" className="lg:hidden" aria-label={t('Open navigation')}><PanelLeft size={19}/></Button></SheetTrigger><SheetContent side="left" className="w-72 gap-0 p-0"><SheetTitle className="sr-only">{t('Navigation')}</SheetTitle><SheetDescription className="sr-only">{t('Explore, news and watchlist workspace')}</SheetDescription><Navigation close={()=>setOpen(false)}/></SheetContent></Sheet>
-      <div className="mr-auto sm:mr-0 lg:hidden"><BrandLogo compact/></div><div className="order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1"><TickerSearch/></div>
+      <div className={market?'market-brand':'mr-auto sm:mr-0 lg:hidden'}><BrandLogo compact/></div>{market&&<span className="market-brand-caption">{t('Market workspace')}</span>}<div className={market?'market-global-search':'order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1'}><TickerSearch onQueryChange={path==='/'?setQuery:undefined}/></div>
+      {market&&<nav className="market-shell-links" aria-label={t('Main navigation')}><Link href="/news">{t('News')}</Link><Link href="/watchlist">{t('Watchlist')}</Link></nav>}
       <select aria-label={t('Language')} value={language} onChange={e=>setLanguage(e.target.value as 'en'|'vi')} className="h-9 w-14 shrink-0 rounded border bg-background px-1 text-xs"><option value="vi">VI</option><option value="en">EN</option></select>
       <ThemeToggle/>
-    </header><main id="main-content" className="mx-auto max-w-[1600px] p-4 md:p-8">{children}</main><footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>{t('Woofi · Vietnamese equities')}</span><span>{t('Daily market data · Publisher news')}</span></footer>
+    </header><main id="main-content" className={market?'market-canvas':'mx-auto max-w-[1600px] p-4 md:p-8'}>{children}</main><footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>{t('Woofi · Vietnamese equities')}</span><span>{t('Daily market data · Publisher news')}</span></footer>
     </div></div>;
 }
 export default function AppShell({children}: {children:React.ReactNode}) {
-  return <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange><LanguageProvider><StockUniverse enabled={false}><Shell>{children}</Shell></StockUniverse></LanguageProvider></ThemeProvider>;
+  return <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange><LanguageProvider><MarketSearchProvider><StockUniverse enabled={false}><Shell>{children}</Shell></StockUniverse></MarketSearchProvider></LanguageProvider></ThemeProvider>;
 }

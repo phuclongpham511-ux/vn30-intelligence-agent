@@ -1,5 +1,20 @@
 # Woofi — Domain Context
 
+### Approved Unified Market Workspace V2.1 — local development only
+
+The approved market design is implemented as Overview → ordinary Board / stock
+Heatmap → existing Stock Research. One global ticker search drives cached metadata
+discovery; the bounded loaded page shares the existing LivePrices lease across
+workspace modes. Ordinary numerical sorting remains default. Optional movement
+groups partition only that selected sample; stale/missing/unknown movements do not
+become current direction counts. Five percentage bins and equal-area stock cells
+make no sector, capitalization, breadth, sentiment or flow claim. Original source,
+time, session and reference values stay inspectable. Future-data dependencies are
+an informational disclosure only. Existing research, financial and News services
+remain in use. This is a development checkpoint, not a production release or live
+SSI qualification. See `docs/UNIFIED_MARKET_WORKSPACE_V21.md` for acceptance limits
+and the separately required integration, runtime, backup and release gates.
+
 ### Market board correction — local source checkpoint, 2026-10-16
 
 The earlier ten-record oversized Price map failed the market-comparison task.
