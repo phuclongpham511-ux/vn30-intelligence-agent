@@ -1,11 +1,12 @@
 import type {LiveItem} from './live-market.ts';
 import type {LiveBatch} from './live-market.ts';
 import {quoteStatus} from './newsPresentation.ts';
+import {activityValue} from './tradingActivity.ts';
 
 export const boardPageSize=30;
 export const boardDefaultGroup='VN30';
 export type BoardIdentity={symbol:string;company_name?:string|null;display_name_en?:string|null;exchange?:string|null};
-export type BoardSort='change'|'fallers'|'ticker'|'price';
+export type BoardSort='change'|'fallers'|'ticker'|'price'|'volume'|'value';
 
 /** Presentation only: source values stay unchanged; no breadth, weights or returns. */
 export function quoteMapCell(symbol:string,item:LiveItem|undefined,failed=false,now=new Date()) {
@@ -23,7 +24,7 @@ export function boardRows(stocks:BoardIdentity[],data:LiveBatch|null,failed=fals
   return stocks.map(stock=>({stock,...quoteMapCell(stock.symbol,data?.items[stock.symbol],failed,now)})).sort((a,b)=>{
     const identity=()=>a.stock.symbol.localeCompare(b.stock.symbol);
     if(sort==='ticker')return identity();
-    const value=(r:typeof a)=>sort==='price'?r.row?.last_price:r.row?.change_percent;
+    const value=(r:typeof a)=>sort==='volume'||sort==='value'?activityValue(r.row,sort,r.status,now):sort==='price'?r.row?.last_price:r.row?.change_percent;
     const av=value(a),bv=value(b),valid=(v:unknown):v is number=>typeof v==='number'&&Number.isFinite(v);
     const rank=(r:typeof a)=>!r.row?3:!valid(value(r))?2:r.status==='fresh'?0:1;
     if(rank(a)!==rank(b))return rank(a)-rank(b);

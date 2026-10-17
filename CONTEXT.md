@@ -1,5 +1,41 @@
 # Woofi — Domain Context
 
+### V2.2 bounded implementation — local development, 2026-10-18
+
+The existing V2.1/Overview/Heatmap/KL-GT source is extended by a shared nine-state
+price resolver and theme tokens, a pure unqualified SecuritiesSummary pair normalizer,
+and optional replay-only synthetic industry grouping using the existing Board rows.
+`/demo/market` is not available in production-bound builds. Actual SSI qualification
+gates remain unchanged; no summary acquisition path or ICB activation was added.
+See `docs/MARKET_WORKSPACE_V22_INCREMENT.md` for focused validation and limits.
+This is source implementation, not a declaration of browser/live acceptance.
+
+### Market Workspace continuation and SSI qualification — 2026-10-18
+
+Resume `codex/woofi-market-board-correction` in the existing `woofi-visual-news-v1`
+worktree. Its latest committed Market Workspace source is
+`cb5979fa5e1717d4b634a98490cc391f6da50aa5`, containing Unified V2.1 and the
+Overview/Compact-Detailed Heatmap refinement. Newer uncommitted KL/GT presentation,
+numeric sorting, source inspection, qualified-limit color guards and tests extend
+that checkpoint. Preserve them; the earlier V1/V2.1 commits are ancestors, not
+alternative starting points. Isolated browser acceptance evidence already exists;
+the older preview-denial entries below describe historical stages.
+
+The five completed SSI reads on October 17 demonstrate paired SecuritiesSummary
+`totalMatch`/`totalMatchValue`, SecuritiesInfo `icbCode`/`icbName`, and MasterData
+`ceiling`/`floor`/`refPrice`. Do not repeat these reads merely to rediscover the
+fields. Successful access does not establish units, detailed trading scope,
+redistribution rights or current-session freshness. Summary and limits have trading
+dates without source observation timestamps; retrieval time cannot substitute.
+No data family is fully qualified for additional activation. KL/GT remain unavailable
+when unqualified, industry grouping remains inactive, and actual SSI limit colors
+remain gated. See `docs/SSI_MARKET_DATA_QUALIFICATION.md` for exact sample coverage,
+saved evidence receipts and the remaining narrow integration gates.
+
+Existing simulated/replay UI validation is not live data acceptance or final user
+product approval. This continuation makes no production, Supervisor, SQLite,
+acquisition, cooldown, Technical Pilot or FPT automation change; no push/deployment.
+
 ### Targeted V2.1 Overview / Heatmap refinement — local development
 
 Overview compares only a known same-date/session cohort of fresh loaded quotes;

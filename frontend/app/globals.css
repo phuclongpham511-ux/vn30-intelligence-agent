@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./price-state.css";
 @import "./market-workspace.css";
 
 /* Stock research: one chart, compact context, progressive disclosure. */

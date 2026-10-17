@@ -43,7 +43,7 @@ function ThemeToggle() {
 }
 function Shell({children}: {children:React.ReactNode}) {
   const [open,setOpen]=useState(false);const {t,language,setLanguage}=useLocale();
-  const path=usePathname(),market=path==='/'||path.startsWith('/stocks/');
+  const path=usePathname(),market=path==='/'||path.startsWith('/stocks/')||(process.env.NEXT_PUBLIC_WOOFI_VALIDATION==='replay'&&path==='/demo/market');
   const {setQuery}=useMarketSearch();
   useEffect(()=>{
     const controller=new AbortController();

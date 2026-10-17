@@ -7,7 +7,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
 const require=createRequire(import.meta.url);
 function component(file, overrides={}) {
-  overrides={'./stock/QuoteMap':()=>null,'../stock/LivePrice':{TickerMovement:()=>null},'./LivePrice':{LivePrices:({children})=>children},'./stock/LivePrice':{LivePrices:({children})=>children,LivePrice:()=>null},
+  overrides={'./TradingActivity':{__esModule:true,default:()=>null},'./stock/QuoteMap':()=>null,'../stock/LivePrice':{TickerMovement:()=>null},'./LivePrice':{LivePrices:({children})=>children},'./stock/LivePrice':{LivePrices:({children})=>children,LivePrice:()=>null},
     '@/lib/useLiveMarket':{useLiveIndex:()=>({data:null,failed:false})},...overrides};
   const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{
     filename:file,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;

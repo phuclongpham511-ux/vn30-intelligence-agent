@@ -50,13 +50,32 @@ const file='../app/components/stock/QuoteMap.tsx';
 const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{filename:file,module:{type:'commonjs'},
   jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 const exports={};
-new Function('require','exports',code)(name=>name==='./LivePrice'?{useLivePrices:()=>({data:null,failed:false})}:
+new Function('require','exports',code)(name=>name==='./TradingActivity'?{__esModule:true,default:()=>null}:name==='./LivePrice'?{useLivePrices:()=>({data:null,failed:false})}:
   require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 const stocks=['AAA','ZERO','OLD','MISSING'].map(symbol=>({symbol,company_name:'Tên nguồn '+symbol,display_name_en:'Source name '+symbol,exchange:'HOSE'}));
 const data={items:{AAA:quote(),ZERO:quote({ticker:'ZERO',change:0,change_percent:0}),
   OLD:{...quote({ticker:'OLD'}),status:'stale'}},session:'active',as_of:now.toISOString()};
 const render=(language='en',props={})=>renderToStaticMarkup(React.createElement(LanguageContext.Provider,
   {value:localeTools(language)},React.createElement(exports.QuoteMapView,{stocks,data,scope:'page',now,...props})));
+
+test('industry uses the existing board tables only for labeled replay synthetic instruments',()=>{
+ const previous=process.env.NEXT_PUBLIC_WOOFI_VALIDATION;
+ const stocks=['DEMO01','DEMO02','DEMO03'].map(symbol=>({symbol}));
+ const demo={items:Object.fromEntries(stocks.map(s=>[s.symbol,quote({ticker:s.symbol})])),session:'active',as_of:now.toISOString()};
+ const props={stocks,data:demo,organization:'industry',industryPreview:{kind:'synthetic',label:'DEMO',categories:{DEMO01:{code:'demo',name:'DEMO Products'},DEMO02:{code:'demo',name:'DEMO Products'}}}};
+ try {
+  delete process.env.NEXT_PUBLIC_WOOFI_VALIDATION;
+  assert.doesNotMatch(render('en',props),/data-industry-demo|value="industry"/);
+  process.env.NEXT_PUBLIC_WOOFI_VALIDATION='replay';
+  const html=render('en',props);
+  assert.match(html,/DEMO Products/);assert.match(html,/Unclassified/);assert.match(html,/2 stocks · DEMO/);
+  assert.equal((html.match(/data-quote-row=/g)||[]).length,3);
+  assert.match(html,/Trading value|>Value</);assert.match(html,/value="industry"/);
+  const heatmap=render('en',{...props,mode:'heatmap'});
+  assert.doesNotMatch(heatmap,/data-industry-demo/);
+  assert.equal((heatmap.match(/data-quote-tile=/g)||[]).length,3);
+ } finally {if(previous===undefined)delete process.env.NEXT_PUBLIC_WOOFI_VALIDATION;else process.env.NEXT_PUBLIC_WOOFI_VALIDATION=previous;}
+});
 
 test('rendered board retains all identities, exact prices/times and keyboard source controls',()=>{
   const html=render();
