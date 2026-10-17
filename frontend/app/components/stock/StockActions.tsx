@@ -1,7 +1,7 @@
 "use client";
 import {useState} from 'react';
 import {useLocale} from '@/lib/i18n';
-import {actionStatus,actionUrl,trustedAction,actionDate,actionTerm,actionHistory,type ActionCategory,type ActionPage,type ActionObservation} from '@/lib/stock-detail';
+import {actionStatus,actionUrl,trustedAction,actionDetailsIncomplete,actionDate,actionTerm,actionHistory,type ActionCategory,type ActionPage,type ActionObservation} from '@/lib/stock-detail';
 import {useStockRead} from './useStockRead';
 import {Button} from '../ui/button';
 
@@ -16,8 +16,8 @@ function SourceEvidence({row}:{row:ActionObservation}) {
       {row.verification_note&&<p>{row.verification_note}</p>}
       <p>{t('Observed at')} <time dateTime={row.observed_at}>{date(row.observed_at,true)}</time> ICT · {t('Source revision')} {row.source_revision||'—'}</p>
       {row.source_updated_at&&<p>{t('Source updated at')} <time dateTime={row.source_updated_at}>{date(row.source_updated_at,true)}</time> ICT</p>}
-      <p>{t('Announcement date')} {date(row.announced_at||row.announced_on,!!row.announced_at)}</p>
-      {urls.length?urls.map((url,index)=><a key={url} className="mr-4 inline-block text-primary underline" href={url} target="_blank" rel="noopener noreferrer">{t(index?'Supporting document':'Original source document')}{index?' '+index:''} ↗</a>):<p>{t('Original document unavailable')}</p>}
+      <p>{t('Recorded announcement / publication date')} {date(row.announced_at||row.announced_on,!!row.announced_at)}</p>
+      {urls.length?urls.map((url,index)=><a key={url} className="mr-4 inline-block text-primary underline" href={url} target="_blank" rel="noopener noreferrer">{t(index?'Supporting document':'Recorded source link')}{index?' '+index:''} ↗</a>):<p>{t('Source link unavailable')}</p>}
     </div>
   </details>;
 }
@@ -39,8 +39,9 @@ export function StockActionsView({ticker,data,error=false,retry,category}:{ticke
     {error?<p role="alert">{t('Corporate-action records are temporarily unavailable.')} <Button variant="outline" onClick={retry}>{t('Retry')}</Button></p>:!data?<p role="status">{t('Loading source records…')}</p>:!matches?<p role="alert">{t('Corporate-action records are temporarily unavailable.')}</p>:!data.items.length?<div className="stock-empty"><h3>{t('No recorded corporate actions for {ticker}',{ticker})}</h3><p>{t('Coverage is incomplete. No dividend dates or ratios are inferred.')}</p></div>:<>
       <div className="action-history-toolbar"><label>{t('Recorded history')}<select aria-label={t('Action history filter')} value={selected} onChange={event=>setSelection(event.target.value as ActionCategory)}><option value="all">{t('All records')}</option><option value="distributions">{t('Dividends & bonus shares')}</option><option value="other">{t('Rights & other actions')}</option></select></label><span role="status">{t('{shown} of {total} recorded observations',{shown:rows.length,total:data.items.length})}</span></div>
       <p className="stock-note action-history-note">{t('Latest source observations first. A payment date does not confirm payment.')}</p>
+      <p className="stock-note">{t('Record-level verification does not establish original-publication verification of every fact. Source links may be secondary references.')}</p>
       {rows.length?<ol className="action-history" aria-label={t('Corporate-action dates and terms')}>{rows.map(row=><li key={row.observation_id} data-action-observation={row.observation_id}>
-        <article className="action-record"><div className="action-record-heading"><div><h3>{ui(labels[row.action_type])}</h3><p>{row.source}</p></div><div className="action-record-status"><span className="stock-badge" data-action-status={trustedAction(row)?'verified':'unqualified'}>{status(row)}</span>{row.is_fixture&&<strong className="action-demo">DEMO · {t('Synthetic source fixture')}</strong>}</div></div>
+        <article className="action-record"><div className="action-record-heading"><div><h3>{ui(labels[row.action_type])}</h3><p>{row.source}</p></div><div className="action-record-status"><span className="stock-badge" data-action-status={trustedAction(row)?'source-verified':'unqualified'}>{status(row)}</span>{trustedAction(row)&&actionDetailsIncomplete(row)&&<span className="stock-badge">{t('Incomplete event details')}</span>}{row.is_fixture&&<strong className="action-demo">DEMO · {t('Synthetic source fixture')}</strong>}</div></div>
           {terms(row)}
           {!trustedAction(row)&&<p className="action-unqualified">{t('Event dates and terms are withheld until source verification; DEMO fixtures never become confirmed records.')}</p>}
           <dl className="action-dates">{(['effective_date','record_date','payment_date'] as const).map((key,index)=><div key={key}><dt>{t(index===0?'Ex-rights date':index===1?'Record date':'Payment date')}</dt><dd>{date(actionDate(row,key))}</dd></div>)}</dl>

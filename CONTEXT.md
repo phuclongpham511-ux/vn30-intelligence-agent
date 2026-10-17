@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+### Corporate-action original-source validation — local development, 2026-10-18
+
+Six saved components across five issuers were compared field by field with
+official depository notices and an issuer-authored mirrored PDF text. Terms and
+record dates are corroborated within the documented evidence limits; ex-rights
+dates remain original-unverified, with missing component-specific payment dates.
+No observed conflict in compared facts, no complete original-source acceptance.
+Source-marked verification is now explicitly record-level; incomplete details and
+unresolved corrections cannot read as fully confirmed. Recorded links/publication
+dates are not automatically labeled original issuer documents/announcements.
+Saved records, API, acquisition and production are unchanged. See
+`docs/CORPORATE_ACTION_VALIDATION_V1.md` for the field matrix and evidence limits.
+
 ### Stock Detail company overview and distributions — local increment, 2026-10-18
 
 Existing Stock Detail now has a compact cached-identity company panel with explicit
