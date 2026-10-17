@@ -44,6 +44,19 @@ export function boardColumns<T>(rows:T[]):T[][] {
 }
 
 export type BoardRow=ReturnType<typeof boardRows>[number];
+/** Compare only a known, single trading-date/session cohort from this loaded page. */
+export function sampleObservations(stocks:BoardIdentity[],data:LiveBatch|null,failed=false,now=new Date()) {
+  const rows=boardRows(stocks,data,failed,now);
+  const candidates=rows.filter(r=>r.status==='fresh'&&typeof r.row?.change_percent==='number'&&Number.isFinite(r.row.change_percent));
+  const cohorts=new Set(candidates.map(r=>r.row!.trading_date+'|'+r.row!.session));
+  const comparable=!!data&&!failed&&data.session!=='unknown'&&candidates.length>=2&&cohorts.size===1&&candidates.every(r=>r.row!.session===data.session);
+  const groups=movementGroups(comparable?candidates:[]);
+  return {rows,comparable,groups,compared:comparable?candidates.length:0,
+    gainers:groups.advancing.slice(0,4),
+    decliners:[...groups.declining].sort((a,b)=>a.row!.change_percent!-b.row!.change_percent!||a.stock.symbol.localeCompare(b.stock.symbol)).slice(0,4),
+    available:data&&!failed?rows.filter(r=>r.row).length:null,
+    stale:rows.filter(r=>r.status==='stale').length,missing:rows.filter(r=>!r.row).length};
+}
 export type MovementGroup='advancing'|'declining'|'unchanged'|'unqualified';
 /** Organization of this loaded sample only; never a sector or market-wide metric. */
 export function movementGroups(rows:BoardRow[]) {

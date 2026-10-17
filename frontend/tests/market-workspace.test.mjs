@@ -1,11 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {boardRows,movementGroups,heatmapBin} from '../lib/quoteMap.ts';
+import {boardRows,movementGroups,heatmapBin,sampleObservations} from '../lib/quoteMap.ts';
 const now=new Date('2026-10-16T09:00:00Z');
 const item=(ticker,value,status='fresh')=>({status,snapshot:{ticker,last_price:10000,reference_price:10000,change:value===null?null:value*100,change_percent:value,source:'SIMULATED TEST — NOT SSI',trading_date:'2026-10-16',updated_at:'2026-10-16T07:45:00Z',session:'closed'}});
 const items={UP:item('UP',2),DOWN:item('DOWN',-1),ZERO:item('ZERO',0),OLD:item('OLD',9,'stale'),NOREF:item('NOREF',null)};
 const batch={items,session:'closed',as_of:now.toISOString()};
 const stocks=Object.keys(items).concat('MISSING').map(symbol=>({symbol}));
+test('overview compares one qualified date/session cohort and orders largest declines first',()=>{
+  const source={...batch,items:{...items,LOW:item('LOW',-4)}};
+  const summary=sampleObservations([...stocks,{symbol:'LOW'}],source,false,now);
+  assert.equal(summary.comparable,true);
+  assert.deepEqual(summary.decliners.map(r=>r.stock.symbol),['LOW','DOWN']);
+  assert.equal(summary.compared,4);assert.equal(summary.available,6);
+  assert.equal(summary.stale,1);assert.equal(summary.missing,1);
+  assert.equal(sampleObservations(stocks,source,true,now).available,null);
+  assert.equal(sampleObservations(stocks,source,true,now).comparable,false);
+  assert.equal(sampleObservations([{symbol:'UP'}],source,false,now).comparable,false);
+  assert.equal(sampleObservations(stocks,{...source,session:'unknown'},false,now).comparable,false);
+  const mixed=structuredClone(source);mixed.items.DOWN.snapshot.session='active';
+  assert.equal(sampleObservations(stocks,mixed,false,now).groups.declining.length,0);
+  assert.equal(sampleObservations(stocks,mixed,false,now).compared,2);
+});
 test('movement groups partition the loaded filtered sample and exclude stale/missing movements',()=>{
   const rows=boardRows(stocks,batch,false,now),groups=movementGroups(rows);
   assert.deepEqual(Object.fromEntries(Object.entries(groups).map(([k,v])=>[k,v.map(r=>r.stock.symbol)])),{advancing:['UP'],declining:['DOWN'],unchanged:['ZERO'],unqualified:['OLD','NOREF','MISSING']});

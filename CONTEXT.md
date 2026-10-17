@@ -1,5 +1,17 @@
 # Woofi — Domain Context
 
+### Targeted V2.1 Overview / Heatmap refinement — local development
+
+Overview compares only a known same-date/session cohort of fresh loaded quotes;
+largest advances/declines and sample distribution do not imply index breadth.
+Compact persisted-News context preserves original publisher/headline/time/URL and
+qualified category, without extra ticker-price acquisition or causation claims.
+Workspace Heatmap adds compact-default/detailed presentation; Watchlist retains
+its detailed default. Board layout stays unchanged, with explicit visible-sample
+coverage and unknown counts on failed transport. See
+`docs/MARKET_WORKSPACE_V21_REFINEMENT.md` for measured browser evidence and limits.
+This is neither production deployment nor final user product acceptance.
+
 ### Approved Unified Market Workspace V2.1 — local development only
 
 The approved market design is implemented as Overview → ordinary Board / stock

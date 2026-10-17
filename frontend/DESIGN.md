@@ -2,6 +2,14 @@
 
 ## Approved Unified V2.1 market workspace
 
+Targeted refinement: Overview uses compact sample/freshness context, paired
+session-comparable mover tables and content-sized persisted-News context rather
+than a sparse fixed right column. Workspace Heatmap defaults to small equal-area
+ticker/percentage cells with keyboard/touch source detail, plus optional detailed
+cells. Keep the ordinary Board architecture and Watchlist detailed default. Label
+coverage as the visible/loaded sample, never as full index breadth. See
+`docs/MARKET_WORKSPACE_V21_REFINEMENT.md`; user product acceptance remains pending.
+
 The user-approved Unified V2.1 package supersedes earlier Explore composition and
 market-route sidebar requirements: compact logo/search/locale/theme header,
 Overview / Board / Heatmap navigation and existing Stock Research. News and

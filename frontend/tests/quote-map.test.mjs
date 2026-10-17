@@ -91,8 +91,14 @@ test('heatmap and table keep the same source identities, prices and freshness wi
   const html=render('en',{mode:'heatmap'});
   assert.equal((html.match(/data-quote-tile=/g)||[]).length,4);
   assert.equal((html.match(/href="\/stocks\//g)||[]).length,4);
-  assert.match(html,/10,200/);assert.match(html,/data-quote-tile="OLD" data-tone="neutral" data-status="stale"/);
+  assert.match(html,/heatmap-compact/);assert.equal((html.match(/class="quote-compact-source"/g)||[]).length,4);
+  assert.match(html,/data-quote-tile="OLD" data-tone="neutral" data-status="stale"/);
   assert.match(html,/no capitalization weighting/);
+});
+test('Watchlist retains detailed cells without the workspace density control',()=>{
+  const html=render('en',{scope:'watchlist',mode:'heatmap'});
+  assert.match(html,/heatmap-detailed/);assert.match(html,/10,200/);
+  assert.doesNotMatch(html,/aria-label="Heatmap density"/);
 });
 test('pending quote request is loading, while a completed empty response is genuinely missing',()=>{
   const pending=render('en',{data:null});
@@ -109,6 +115,12 @@ test('failed initial quote request leaves coverage unknown rather than certifyin
     assert.doesNotMatch(html,/Loading observed quotes|0%/);
     assert.equal((html.match(/href="\/stocks\//g)||[]).length,4);
   }
+});
+test('failed refresh retains old values neutrally but coverage remains unknown for the visible sample',()=>{
+  const html=render('en',{failed:true,scopeLabel:'VN100'});
+  assert.match(html,/VN100/);assert.match(html,/Visible sample/);assert.match(html,/Quote coverage unavailable/);
+  assert.doesNotMatch(html,/3\/4 quotes/);assert.match(html,/10,200/);
+  assert.match(html,/data-quote-row="AAA" data-tone="neutral" data-status="stale"/);
 });
 
 test('controlled movement view partitions the filtered sample and leaves unavailable request counts unknown',()=>{
