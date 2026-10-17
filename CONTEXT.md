@@ -1,5 +1,19 @@
 # Woofi — Domain Context
 
+### Stock Detail company overview and distributions — local increment, 2026-10-18
+
+Existing Stock Detail now has a compact cached-identity company panel with explicit
+business-description/classification limitations, original metadata source/sync time
+and a link to its existing lazy financial analysis. Full issuer identity is preserved
+in the header. The existing corporate-action tab reuses the same stored-evidence
+read, with local category filters and one responsive source record per observation.
+Cash/share/rights terms remain type-specific; only explicitly verified, active,
+nonfixture source records may expose event dates/terms. Pending/withdrawn/DEMO,
+missing fields and incomplete coverage remain explicit. No provider or DB change.
+See `docs/STOCK_DETAIL_COMPANY_ACTIONS_V1.md`. V2.2 source is preserved; no preview
+process or permission troubleshooting is part of this increment. Browser acceptance
+remains BLOCKED and no live corporate-action acceptance is claimed.
+
 ### V2.2 bounded implementation — local development, 2026-10-18
 
 The existing V2.1/Overview/Heatmap/KL-GT source is extended by a shared nine-state

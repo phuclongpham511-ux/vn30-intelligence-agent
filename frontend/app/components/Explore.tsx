@@ -12,6 +12,7 @@ import RawDataTable from './stock/RawDataTable';
 import StockNews from './stock/StockNews';
 import StockCommunity from './stock/StockCommunity';
 import StockActions from './stock/StockActions';
+import CompanyOverview from './stock/CompanyOverview';
 import {useStockRead} from './stock/useStockRead';
 import {StockError} from './stock/StockStates';
 import {Skeleton} from './ui/skeleton';
@@ -27,7 +28,7 @@ function DailyContext({ticker}:{ticker:string}) {
 }
 
 export default function Explore({ticker}:{ticker:string}) {
-  const {t,language,date}=useLocale();
+  const {t}=useLocale();
   const identity=useStockRead<{items:Security[];last_synced_at:string|null}>(`/api/stocks/universe?symbols=${encodeURIComponent(ticker)}&limit=1`);
   let security:Security|null=null;
   try {if(identity.data)security=stockIdentity(identity.data.items,ticker);}catch{/* No unsupported identity fallback. */}
@@ -42,7 +43,6 @@ export default function Explore({ticker}:{ticker:string}) {
     return()=>{window.removeEventListener('hashchange',restore);window.removeEventListener('popstate',restore);};
   },[]);
   const navigate=(next:StockSection)=>{select(next);window.history.pushState(null,'',`#stock-${next}`);};
-  const name=security&&(language==='en'?security.display_name_en||security.company_name:security.company_name);
   if(identity.error||(identity.data&&!security))return <StockError ticker={ticker} message="Stock identity unavailable. Find an available listed equity in Explore." retry={identity.retry}/>;
   return <div className="page-stack stock-detail">
     <WorkspaceNav research/>
@@ -61,7 +61,7 @@ export default function Explore({ticker}:{ticker:string}) {
           {tab==='technical'&&<RawDataTable bars={technicalRows}/>}
         </div>
         <aside className="stock-research-sidebar" hidden={tab!=='overview'} aria-label={t('Company overview')}>
-          <section className="panel p-5"><p className="stock-eyebrow">{t('Company profile')}</p><h2 className="mt-2">{name||ticker}</h2><dl className="stock-profile"><div><dt>{t('Ticker')}</dt><dd>{ticker}</dd></div><div><dt>{t('Exchange')}</dt><dd>{security.exchange}</dd></div><div><dt>{t('Instrument')}</dt><dd>{t('Listed equity')}</dd></div></dl><p className="stock-note">{t('Metadata source')} · {security.source||t('Unavailable')} · {date(identity.data?.last_synced_at,true)}</p><p className="stock-note">{t('Business description, ownership and valuation data are not available in this dataset.')}</p></section>
+          <CompanyOverview security={security} syncedAt={identity.data?.last_synced_at??null}/>
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
       </div>
