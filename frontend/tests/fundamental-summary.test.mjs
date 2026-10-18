@@ -13,6 +13,9 @@ const code=transformSync(readFileSync(new URL('../app/components/stock/Fundament
 new Function('require','exports',code)(name=>['./FinancialStatementTable','./FinancialResearchCharts','../ui/button','../ui/skeleton'].includes(name)?{}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 
 import {fixture} from './fixtures/fundamental-summary.mjs';
+test('missing or malformed reporting frequency metadata is rejected before the view can dereference it',()=>{
+ for(const available_period_types of [undefined,null,'annual',{},['unrecognized'],[null]])assert.throws(()=>financialEngineData({...fixture(),available_period_types},'ABC','annual',true),/frequency metadata/);
+});
 function render(data=fixture(),unit='billions',language='en'){
  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:localeTools(language)},React.createElement(exports.FundamentalOverview,{data,unit})));
 }

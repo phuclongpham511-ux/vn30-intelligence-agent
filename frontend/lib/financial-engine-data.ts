@@ -5,6 +5,7 @@ import {FINANCIAL_LABELS,type FinancialKey} from './fundamental-data.ts';
 export function financialEngineData(data:FundamentalResearch,ticker:string,frequency:FinancialFrequency,requireSummary=false):FundamentalResearch{
   const pattern=frequency==='annual'?/^\d{4}$/:/^\d{4}-Q[1-4]$/;
   if(!data||data.data_engine!=='financial-engine-v1'||data.ticker!==ticker||data.currency!=='VND'||data.period_type!==frequency||!data.source||!Array.isArray(data.rows)||data.rows.length>20||!Array.isArray(data.chart_rows)||data.chart_rows.length>1204||!data.statements||!Array.isArray(data.source_receipts)||typeof data.is_fixture!=='boolean')throw new Error('Invalid financial engine contract');
+  if(!Array.isArray(data.available_period_types)||data.available_period_types.some(value=>!['annual','quarterly','ttm'].includes(value)))throw new Error('Invalid financial frequency metadata');
   const seen=new Set<string>();
   if(typeof data.financial_identity_guard!=='boolean'||!['non_financial','bank','financial_other','unknown'].includes(data.profile||'')||data.financial_identity_guard!==(data.profile!=='non_financial'))throw new Error('Invalid issuer profile');
   for(const row of data.rows){

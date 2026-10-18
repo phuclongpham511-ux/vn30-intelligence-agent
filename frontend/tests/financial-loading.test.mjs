@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {transformSync} from 'next/dist/build/swc/index.js';
+import {fixture} from './fixtures/fundamental-summary.mjs';
 const require=createRequire(import.meta.url);
 const code=transformSync(readFileSync(new URL('../app/components/stock/FundamentalTrends.tsx',import.meta.url),'utf8'),{filename:'FundamentalTrends.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 
-async function harness(run){
+async function harness(run,{validate=false}={}){
  const previous={setTimeout:globalThis.setTimeout,clearTimeout:globalThis.clearTimeout};
  const originalNow=Date.now;
  const timers=new Map(),changes=[],requests=[],values=[],refs=[];let effect,index=0,resolve,reject,cleanup,view,clock=100000;
@@ -19,7 +20,7 @@ async function harness(run){
   new Function('require','exports',code)(name=>{
    if(name==='react')return {useState:value=>{const key=index++;if(!(key in values))values[key]=value;return [values[key],next=>{values[key]=typeof next==='function'?next(values[key]):next;changes.push({key,next:values[key]});}];},useRef:value=>{const key=index++;return refs[key]??=( {current:value});},useEffect:fn=>{effect=fn;}};
    if(name==='@/lib/stock-detail')return {stockRead:(url,signal)=>{requests.push({url,signal});return new Promise((yes,no)=>{resolve=yes;reject=no;signal.addEventListener('abort',()=>no(new DOMException('Aborted','AbortError')),{once:true});});}};
-   if(name==='@/lib/financial-engine-data')return {financialEngineData:data=>data};
+   if(name==='@/lib/financial-engine-data')return validate?require('../lib/financial-engine-data.ts'):{financialEngineData:data=>data};
    if(name==='./FinancialResearchCharts'||name==='./FinancialStatementTable')return {};
    if(name==='../ui/button'||name==='../ui/skeleton')return {};
    return require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name);
@@ -43,6 +44,17 @@ test('one bounded financial request leaves slow work independent and permits the
   assert.equal(state.timers.size,0);
   state.cleanup();
  });
+});
+
+test('malformed frequency metadata becomes a financial load error instead of reaching the view',async()=>{
+ await harness(async state=>{
+  const packet=fixture();delete packet.available_period_types;
+  state.resolve(packet);await flush();
+  assert.ok(state.changes.some(change=>change.key===2&&change.next===true));
+  assert.equal(state.changes.some(change=>change.key===0&&change.next!==null),false);
+  assert.equal(state.requests.length,1);assert.equal(state.timers.size,0);
+  state.cleanup();
+ },{validate:true});
 });
 
 test('deadline exposes a real error and performs no automatic acquisition retries',async()=>{

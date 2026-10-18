@@ -6,6 +6,8 @@ import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
 import {LanguageContext,localeTools} from '../lib/i18n.ts';
+import {acceptanceDataset} from './fixtures/acceptance-replay.mjs';
+import {financialEngineData} from '../lib/financial-engine-data.ts';
 const require=createRequire(import.meta.url);
 let section='overview',statement='income';
 const react={...React,useState(initial){if(initial==='overview')return [section,()=>{}];if(initial==='income')return [statement,()=>{}];return React.useState(initial);}};
@@ -18,6 +20,15 @@ const data={available_period_types:['annual'],ticker:'ABC',source:'Reported sour
 data.is_fixture=true;
 data.fundamental_summary={contract:'fundamental-display-v1',period:'2025',frequency:'annual',consolidation:null,publication_date:null,metrics:[['revenue','Revenue'],['net_profit','Profit after tax'],['roe','ROE']].map(([key,label])=>({key,label,group:key==='roe'?'profitability':'performance',unit:key==='roe'?'fraction':'VND',status:row[key]===null?'UNAVAILABLE':'DEMO',value:row[key],formula:'reported synthetic fixture',reason:null}))};
 const render=(props={},language='en',view='overview',kind='income')=>{section=view;statement=kind;return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:{...localeTools(language),setLanguage(){}}},React.createElement(exports.FundamentalTrendsView,{data:null,loading:false,error:false,retry(){},...props})));};
+
+test('the offline replay contract renders the full financial view, not only its metric snapshot',()=>{
+ const replay=financialEngineData(acceptanceDataset().financials.ABC.annual,'ABC','annual',true);
+ for(const language of ['en','vi']){
+  const html=render({data:replay},language);
+  assert.match(html,/DEMO/);assert.match(html,/synthetic-contract-v1/);assert.match(html,/disabled=""/);
+  assert.doesNotMatch(html,/data-financial-qualification="QUALIFIED"/);
+ }
+});
 test('financial empty, loading and provider failure do not fabricate zero metrics',()=>{
   assert.match(render(),/No financial observations/);
   assert.match(render({loading:true}),/Loading financial statements/);
