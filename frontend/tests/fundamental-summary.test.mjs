@@ -12,12 +12,7 @@ const require=createRequire(import.meta.url),exports={};
 const code=transformSync(readFileSync(new URL('../app/components/stock/FundamentalTrends.tsx',import.meta.url),'utf8'),{filename:'FundamentalTrends.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 new Function('require','exports',code)(name=>['./FinancialStatementTable','./FinancialResearchCharts','../ui/button','../ui/skeleton'].includes(name)?{}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 
-// Synthetic contract fixtures only; QUALIFIED exercises the gate, not real evidence.
-const metric=(key,label,value,unit,group,status=value===null?'UNAVAILABLE':'QUALIFIED')=>({key,label,value,unit,group,status,formula:'reported source field',reason:value===null?'Required inputs are unavailable':null});
-function fixture(){
- const row={ticker:'ABC',source:'Synthetic:VCI',currency:'VND',frequency:'annual',period:'2025',is_fixture:false,...Object.fromEntries(Object.keys(FINANCIAL_LABELS).map(key=>[key,null])),revenue:1.2e9,net_profit:0,eps_reported:1500,roe:.125};
- return {ticker:'ABC',source:row.source,currency:'VND',period_type:'annual',data_engine:'financial-engine-v1',profile:'non_financial',financial_identity_guard:false,is_fixture:false,rows:[row],chart_rows:[row],statements:{},source_receipts:[],changes:[],fundamental_summary:{contract:'fundamental-display-v1',period:'2025',frequency:'annual',consolidation:'consolidated',publication_date:null,metrics:[metric('eps_reported','Reported basic EPS',1500,'VND/share','valuation'),metric('pe','P/E',null,'multiple','valuation'),metric('revenue','Revenue',1.2e9,'VND','performance'),metric('net_profit','Profit after tax',0,'VND','performance'),metric('roe','ROE',.125,'fraction','profitability'),metric('cash_operating','Operating cash flow',null,'VND','health')]}};
-}
+import {fixture} from './fixtures/fundamental-summary.mjs';
 function render(data=fixture(),unit='billions',language='en'){
  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:localeTools(language)},React.createElement(exports.FundamentalOverview,{data,unit})));
 }
