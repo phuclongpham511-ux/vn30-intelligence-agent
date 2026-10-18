@@ -1,5 +1,15 @@
 # Woofi — Domain Context
 
+### Provisional SSI engineering contract — local development, 2026-10-18
+
+Owner-approved conventions now normalize saved MasterData bands (VND/share ×1)
+and daily matched Summary pairs (shares/VND ×1) as PROVISIONAL_INTERNAL only.
+Exact identity/day/receipt/numeric/plausibility checks preserve raw evidence and
+never sum successive snapshots. A default-disabled development/replay/localhost
+route reuses the Board, with no ingestion shell, provider read or Watchlist change.
+Production/public guards remain; no SSI certification or public rights are implied.
+See `docs/SSI_PROVISIONAL_MARKET_CONTRACT_V1.md` for gates and passing validation.
+
 ### Stock Intelligence integration V1 — local development, 2026-10-18
 
 Stock Detail now connects Overview/Company News to the existing persisted Watchlist

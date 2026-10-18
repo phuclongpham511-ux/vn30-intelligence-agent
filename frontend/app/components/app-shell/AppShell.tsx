@@ -65,6 +65,14 @@ function Shell({children}: {children:React.ReactNode}) {
     </header><main id="main-content" className={market?'market-canvas':'mx-auto max-w-[1600px] p-4 md:p-8'}>{children}</main><footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>{t('Woofi · Vietnamese equities')}</span><span>{t('Daily market data · Publisher news')}</span></footer>
     </div></div>;
 }
+function InternalShell({children}: {children:React.ReactNode}) {
+  const {t,language,setLanguage}=useLocale();
+  return <div className="market-shell min-h-screen"><header className="flex flex-wrap items-center justify-between gap-2 border-b p-3"><strong>{t('Internal provisional SSI data')}</strong><div className="flex items-center gap-2"><select aria-label={t('Language')} value={language} onChange={e=>setLanguage(e.target.value as 'en'|'vi')}><option value="vi">VI</option><option value="en">EN</option></select><ThemeToggle/></div></header><main id="main-content" className="market-canvas">{children}</main></div>;
+}
 export default function AppShell({children}: {children:React.ReactNode}) {
+  const path=usePathname();
+  // The internal saved-evidence route must not mount Shell's ingestion refresh,
+  // global ticker search, universe or market acquisition consumers, even on 404.
+  if(path==='/internal/ssi-market')return <ThemeProvider storageKey="woofi.ssi-provisional.theme.v1" attribute="class" defaultTheme="dark" enableSystem={false}><LanguageProvider><InternalShell>{children}</InternalShell></LanguageProvider></ThemeProvider>;
   return <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange><LanguageProvider><MarketSearchProvider><StockUniverse enabled={false}><Shell>{children}</Shell></StockUniverse></MarketSearchProvider></LanguageProvider></ThemeProvider>;
 }

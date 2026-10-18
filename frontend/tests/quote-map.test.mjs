@@ -50,7 +50,7 @@ const file='../app/components/stock/QuoteMap.tsx';
 const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{filename:file,module:{type:'commonjs'},
   jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 const exports={};
-new Function('require','exports',code)(name=>name==='./TradingActivity'?{__esModule:true,default:()=>null}:name==='./LivePrice'?{useLivePrices:()=>({data:null,failed:false})}:
+new Function('require','exports',code)(name=>name==='./ProvisionalEvidence'?{__esModule:true,default:()=>null}:name==='./TradingActivity'?{__esModule:true,default:()=>null}:name==='./LivePrice'?{useLivePrices:()=>({data:null,failed:false})}:
   require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 const stocks=['AAA','ZERO','OLD','MISSING'].map(symbol=>({symbol,company_name:'Tên nguồn '+symbol,display_name_en:'Source name '+symbol,exchange:'HOSE'}));
 const data={items:{AAA:quote(),ZERO:quote({ticker:'ZERO',change:0,change_percent:0}),
