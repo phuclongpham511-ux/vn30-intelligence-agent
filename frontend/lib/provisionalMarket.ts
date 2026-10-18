@@ -14,8 +14,13 @@ export type ProvisionalMarket={contract:'ssi-provisional-market-v1';qualificatio
 export function provisionalSsiEnabled(env:{nodeEnv?:string;flag?:string;validation?:string}) {
   return env.nodeEnv==='development'&&env.flag==='1'&&env.validation==='replay';
 }
-export function provisionalSsiLocalHost(host:string|null,forwardedHost:string|null) {
-  return !forwardedHost&&!!host&&/^(?:127\.0\.0\.1|localhost|\[::1\])(?::\d{1,5})?$/.test(host);
+export function provisionalSsiLocalHost(host:string|null,forwardedHost:string|null,forwardedFor:string|null=null) {
+  // Next populates forwarding headers even for a direct loopback request.
+  // Admit only that single local-hop shape; never a foreign/chained proxy.
+  const match=host?.match(/^(?:127\.0\.0\.1|localhost|\[::1\])(?::(\d{1,5}))?$/);
+  return !!match&&(!match[1]||Number(match[1])>=1&&Number(match[1])<=65535)&&
+    (forwardedHost===null||forwardedHost===host)&&
+    (forwardedFor===null||['127.0.0.1','::1','::ffff:127.0.0.1'].includes(forwardedFor));
 }
 const day=(v:Date)=>new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit',day:'2-digit'}).format(v);
 const time=(v:unknown)=>typeof v==='string'&&/(?:Z|[+-]\d\d:\d\d)$/.test(v)?Date.parse(v):NaN;

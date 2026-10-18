@@ -42,6 +42,17 @@ test('saved ACB transport keeps provisional identity, dates, units and receipts 
  assert.equal(activityValue(row,'volume','fresh',now),null);
  assert.equal(resolvePriceState('ACB',row,'fresh',now),'ADVANCING');
 });
+test('local Next-generated forwarding headers admit direct loopback, but never foreign or chained forwarding',()=>{
+ assert.equal(provisionalSsiLocalHost('127.0.0.1:3410','127.0.0.1:3410','127.0.0.1'),true);
+ assert.equal(provisionalSsiLocalHost('localhost:3410','localhost:3410','::1'),true);
+ for(const [host,forwarded,peer] of [
+  ['127.0.0.1:3410','public.example','127.0.0.1'],
+  ['127.0.0.1:3410','localhost:3410','127.0.0.1'],
+  ['127.0.0.1:3410','127.0.0.1:3410','203.0.113.1'],
+  ['127.0.0.1:3410','127.0.0.1:3410','127.0.0.1, 203.0.113.1'],
+  ['localhost:99999','localhost:99999','::1'],
+ ])assert.equal(provisionalSsiLocalHost(host,forwarded,peer),false);
+});
 test('transport rejects mismatched dates, identity, units, receipts, rights promotion and malformed packets',()=>{
  for(const change of [p=>p.key.symbol='OTHER',p=>p.key.exchange='HNX',p=>p.key.trading_date='2026-02-30',p=>p.public_display_eligible=true,p=>p.qualification='QUALIFIED',p=>p.bands.floor.value=23000,p=>p.matched.volume.value=1.5,p=>p.matched.value.unit='thousand VND',p=>p.matched.volume.multiplier=100,p=>p.bands.ceiling.raw_value=true,p=>p.bands.ceiling.normalized_decimal='',p=>p.receipts.master.raw_record.board='HNX',p=>delete p.receipts.identity.raw_record.board,p=>p.receipts.summary.raw_record.tradingDate='2026/10/15',p=>p.receipts.summary.source_timestamp='2026-10-18T09:00:00Z',p=>p.receipts.summary.document_sha256='bad',p=>p.matched.fetched_at='2026-10-19T00:00:00Z']) {const p=clone();change(p);assert.equal(provisionalMarketRecord(p,stock,now),null);}
  assert.equal(provisionalMarketRecord(null,stock,now),null);
@@ -74,7 +85,7 @@ test('internal route fails closed before rendering data in production, disabled,
  const NOT_FOUND=Symbol('not-found');let host='127.0.0.1:3410',forwarded=null,forwardedFor=null;
  const page=load('app/internal/ssi-market/page.tsx',{'next/headers':{headers:async()=>({get:k=>k==='host'?host:k==='x-forwarded-host'?forwarded:forwardedFor})},'next/navigation':{notFound:()=>{throw NOT_FOUND;}},'./InternalBoard':{__esModule:true,default:()=>null},'./saved-acb.json':saved}).default;
  for(const config of [['production','1','replay'],['development',undefined,'replay']]){const restore=flags(config);try{await assert.rejects(page(),e=>e===NOT_FOUND);}finally{restore();}}
- const restore=flags();try {assert.ok((await page()).props.packet);host='public.example';await assert.rejects(page(),e=>e===NOT_FOUND);host='127.0.0.1:3410';forwarded='public.example';await assert.rejects(page(),e=>e===NOT_FOUND);forwarded=null;forwardedFor='1.2.3.4';await assert.rejects(page(),e=>e===NOT_FOUND);}finally{restore();}
+ const restore=flags();try {assert.ok((await page()).props.packet);forwarded=host;forwardedFor='127.0.0.1';assert.ok((await page()).props.packet);host='public.example';await assert.rejects(page(),e=>e===NOT_FOUND);host='127.0.0.1:3410';forwarded='public.example';await assert.rejects(page(),e=>e===NOT_FOUND);forwarded=null;forwardedFor='1.2.3.4';await assert.rejects(page(),e=>e===NOT_FOUND);}finally{restore();}
 });
 test('the internal shell never mounts ingestion refresh, universe or ticker acquisition consumers',()=>{
  let path='/internal/ssi-market';const blocked=()=>{throw Error('normal acquisition shell mounted');};

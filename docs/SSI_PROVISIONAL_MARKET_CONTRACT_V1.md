@@ -77,12 +77,20 @@ Internal route: `/internal/ssi-market`. All of the following are required:
 - `NODE_ENV=development`;
 - `NEXT_PUBLIC_WOOFI_SSI_PROVISIONAL=1` (unset by default);
 - `NEXT_PUBLIC_WOOFI_VALIDATION=replay`;
-- direct localhost/127.0.0.1/[::1] Host, without forwarded-host/forwarded-for headers.
+- direct localhost/127.0.0.1/[::1] Host. Next.js-generated forwarding headers may
+  repeat that exact Host and identify one loopback peer. Foreign hosts/peers,
+  host mismatches and forwarding chains are rejected.
 
 Use the existing development command's loopback binding and an isolated test profile.
 The Host check is defense in depth, not a substitute for loopback binding or an
 authentication service. Production builds reject the route even with opt-in set.
 No running preview was reconfigured, enabled or restarted in this task.
+
+Subsequent internal browser acceptance found that Next.js automatically supplies
+the forwarding headers above for direct requests. The initial blanket rejection
+made the route inaccessible; the bounded correction and actual acceptance evidence
+are recorded in `SSI_INTERNAL_BOARD_ACCEPTANCE_V1.md`. The development-only,
+explicit opt-in and replay gates remain mandatory.
 
 The route feeds the existing QuoteMapView via an explicitly internal prop. Its
 normal Board, Heatmap and Watchlist consumers receive no provisional records.
