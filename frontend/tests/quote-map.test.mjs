@@ -58,6 +58,18 @@ const data={items:{AAA:quote(),ZERO:quote({ticker:'ZERO',change:0,change_percent
 const render=(language='en',props={})=>renderToStaticMarkup(React.createElement(LanguageContext.Provider,
   {value:localeTools(language)},React.createElement(exports.QuoteMapView,{stocks,data,scope:'page',now,...props})));
 
+test('reading guidance follows tile order without changing panel or movement instructions in EN/VI',()=>{
+  for(const [language,grid,panel,movement] of [
+    ['en','Read left → right across each row, then top → bottom.','Read down each panel, then left → right.','Movement within this selection only · not sectors.'],
+    ['vi','Đọc từng hàng từ trái → phải, rồi trên → dưới.','Đọc từng bảng từ trên xuống, rồi trái → phải.','Chỉ biến động trong mẫu đang chọn · không phải ngành.'],
+  ]) {
+    const footnote=props=>render(language,props).match(/<p class="quote-footnote">([\s\S]*?)<\/p>/)[1];
+    assert.ok(footnote({mode:'heatmap'}).includes(grid));
+    assert.ok(footnote({mode:'board'}).includes(panel));
+    for(const mode of ['board','heatmap'])assert.ok(footnote({mode,organization:'movement'}).includes(movement));
+  }
+});
+
 test('industry uses the existing board tables only for labeled replay synthetic instruments',()=>{
  const previous=process.env.NEXT_PUBLIC_WOOFI_VALIDATION;
  const stocks=['DEMO01','DEMO02','DEMO03'].map(symbol=>({symbol}));

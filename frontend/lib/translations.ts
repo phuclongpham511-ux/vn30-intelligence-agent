@@ -921,6 +921,7 @@ export const vietnamese = {
   "No observed quote or timestamp is available.": "Chưa có giá quan sát hoặc thời điểm nguồn.",
   "Movement within this selection only · not sectors.": "Chỉ biến động trong mẫu đang chọn · không phải ngành.",
   "Read down each panel, then left → right.": "Đọc từng bảng từ trên xuống, rồi trái → phải.",
+  "Read left → right across each row, then top → bottom.": "Đọc từng hàng từ trái → phải, rồi trên → dưới.",
   "Equal cell area, not capitalization.": "Diện tích ô bằng nhau, không theo vốn hóa.",
   "Future data · not active": "Dữ liệu tương lai · chưa bật",
   "Inspect requirements": "Xem điều kiện",
