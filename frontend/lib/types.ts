@@ -14,8 +14,10 @@ export type FundamentalPeriod = {
   gross_margin_change: number | null; net_margin_change: number | null; roe_change: number | null;
 } & Partial<Record<'operating_income'|'operating_income_growth_yoy'|'profit_parent'|'total_assets'|'equity'|'total_liabilities'|'cash_operating'|'cash_investing'|'cash_financing'|'free_cash_flow'|'eps_reported'|'roa'|'debt_equity'|'liabilities_assets'|'current_ratio'|'quick_ratio'|'cash_conversion',number|null>> & {calculations?:Record<string,{formula:string;inputs:Record<string,unknown>[];reason:string|null}>;is_fixture?:boolean;frequency?:FinancialFrequency};
 export type FinancialFrequency='annual'|'quarterly'|'ttm';
-export type FinancialChange = {metric:'revenue'|'net_profit'|'operating_income';current_period:string;prior_period:string;current:number;previous:number|null;absolute_change:number|null;growth_yoy:number|null};
-export type FinancialStatementLine={code:string;name_en:string;name_vi:string;parent:string|null;unit:'VND'|'VND/share'|'source_units';value:number|null;raw_value:number|null;semantic_status:'reported'|'conflicted';source_labels?:Record<string,string|null>[]};
+export type FinancialChange = {metric:'revenue'|'net_profit'|'operating_income';current_period:string;prior_period:string;current:number|null;previous:number|null;absolute_change:number|null;growth_yoy:number|null};
+export type FinancialStatementLine={code:string;name_en:string;name_vi:string;parent:string|null;unit:'VND'|'VND/share'|'source_units';value:number|null;raw_value:number|null;semantic_status:'reported'|'conflicted'|'unqualified';source_labels?:Record<string,string|null>[]};
+export type FundamentalMetricDisplay={key:string;group:'valuation'|'performance'|'profitability'|'health';label:string;unit:'VND'|'VND/share'|'fraction'|'multiple';status:'QUALIFIED'|'UNAVAILABLE'|'UNQUALIFIED'|'DEMO';value:number|null;formula:string;reason:string|null};
+export type FundamentalSummary={contract:'fundamental-display-v1';period:string|null;frequency:FinancialFrequency;consolidation:string|null;publication_date:string|null;metrics:FundamentalMetricDisplay[]};
 export type FinancialStatementPeriod={ticker:string;source:string;currency:'VND';period:string;basis:string;consolidation:string|null;source_dates:Record<string,string|null>;items:FinancialStatementLine[];diagnostics:string[]};
 export type FundamentalResearch = {
   ticker:string; source:string; currency:'VND'; period_type:FinancialFrequency; rows:FundamentalPeriod[]; changes:FinancialChange[];
@@ -27,4 +29,5 @@ export type FundamentalResearch = {
   source_receipts?:{statement:string;status:string;observed_at:string;source_url:string;content_sha256:string|null;error_type:string|null;periods:{period:string;basis:string;source_dates:Record<string,string|null>;diagnostics:string[]}[]}[];
   source_version?:string;metadata_sha256?:string;is_fixture?:boolean;limitations?:string[];
   reconciliations?:{statement:string;period:string;field:string;annual_reported:number;quarter_sum:number;difference:number}[];
+  fundamental_summary?:FundamentalSummary|null;
 };

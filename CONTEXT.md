@@ -1,5 +1,17 @@
 # Woofi — Domain Context
 
+### Fundamental Analysis V1 qualification increment — local development, 2026-10-18
+
+The existing Financial Analysis overview now groups valuation, business performance,
+profitability and financial health, reusing its engine/charts/statements. The display
+projection adds explicit QUALIFIED/UNAVAILABLE/UNQUALIFIED/DEMO metric contracts and
+withholds unknown/conflicting reporting bases from metrics, charts and comparisons.
+Original raw evidence and full engine math remain inspectable. Valuation is not
+inferred; reported EPS remains period-specific VND/share. Nine saved VCI responses
+have unknown consolidation and do not pass the live display gate. No new source
+read, provider change, worker or production mutation. Browser status PENDING.
+See `docs/FUNDAMENTAL_ANALYSIS_V1_INCREMENT.md` for the metric contract and limits.
+
 ### Corporate-action original-source validation — local development, 2026-10-18
 
 Six saved components across five issuers were compared field by field with

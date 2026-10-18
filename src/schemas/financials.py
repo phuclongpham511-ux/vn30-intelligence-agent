@@ -16,7 +16,7 @@ class FinancialLine(DataModel):
     unit: Literal['VND', 'VND/share', 'source_units'] = 'VND'
     value: float | None = None
     raw_value: float | None = None
-    semantic_status: Literal['reported', 'conflicted'] = 'reported'
+    semantic_status: Literal['reported', 'conflicted', 'unqualified'] = 'reported'
     source_labels: list[dict[str, str | None]] = Field(default_factory=list)
 
 
@@ -90,6 +90,26 @@ class FinancialPeriod(DataModel):
     is_fixture: bool = False
 
 
+class FundamentalMetricDisplay(DataModel):
+    key: str
+    group: Literal['valuation', 'performance', 'profitability', 'health']
+    label: str
+    unit: Literal['VND', 'VND/share', 'fraction', 'multiple']
+    status: Literal['QUALIFIED', 'UNAVAILABLE', 'UNQUALIFIED', 'DEMO']
+    value: float | None = None
+    formula: str
+    reason: str | None = None
+
+
+class FundamentalSummary(DataModel):
+    contract: Literal['fundamental-display-v1'] = 'fundamental-display-v1'
+    period: str | None
+    frequency: Frequency
+    consolidation: str | None
+    publication_date: str | None
+    metrics: list[FundamentalMetricDisplay]
+
+
 class FinancialEngineResponse(DataModel):
     data_engine: Literal['financial-engine-v1'] = 'financial-engine-v1'
     ticker: str
@@ -116,3 +136,4 @@ class FinancialEngineResponse(DataModel):
     is_fixture: bool = False
     limitations: list[str]
     reconciliations: list[dict] = Field(default_factory=list)
+    fundamental_summary: FundamentalSummary | None = None

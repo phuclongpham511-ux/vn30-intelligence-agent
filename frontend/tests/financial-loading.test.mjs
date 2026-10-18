@@ -28,7 +28,7 @@ async function harness(run){
   render();
   await run({timers,changes,requests,cleanup:()=>cleanup?.(),resolve:value=>resolve(value),reject:error=>reject(error),
     frequency:value=>{view.props.onFrequency(value);render();},retry:()=>{view.props.retry();render();},
-    render,advance:ms=>{clock+=ms;}});
+    render,view:()=>view,advance:ms=>{clock+=ms;}});
  }finally{Date.now=originalNow;Object.assign(globalThis,previous);}
 }
 
@@ -96,5 +96,16 @@ test('failed requests and obsolete responses are not cached as successful freque
   const obsolete=state.resolve;
   state.cleanup();obsolete({ticker:'ABC'});await flush();
   state.render();assert.equal(state.requests.length,4);state.cleanup();
+ });
+});
+
+test('ticker and frequency transitions hide the prior financial period before the effect runs',async()=>{
+ await harness(async state=>{
+  state.resolve({ticker:'ABC',period_type:'annual'});await flush();state.render();
+  assert.equal(state.view().props.data.period_type,'annual');
+  state.frequency('quarterly');
+  assert.equal(state.view().props.data,null);assert.equal(state.view().props.loading,true);
+  state.resolve({ticker:'ABC',period_type:'quarterly'});await flush();
+  state.render('OTHER');assert.equal(state.view().props.data,null);state.cleanup();
  });
 });
