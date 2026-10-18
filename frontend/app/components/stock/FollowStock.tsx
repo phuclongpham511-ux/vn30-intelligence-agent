@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState} from 'react';
 import {Check,Plus} from 'lucide-react';
-import {readWatchlist,followStock,unfollowStock,watchlistStorageKey,type WatchlistState} from '@/lib/watchlist';
+import {readWatchlist,followStock,unfollowStock,watchlistStorageKey,watchlistChangedEvent,type WatchlistState} from '@/lib/watchlist';
 import {useLocale} from '@/lib/i18n';
 import {Button} from '../ui/button';
 
@@ -11,8 +11,8 @@ export default function FollowStock({ticker,available}:{ticker:string;available:
   const [failed,setFailed]=useState(false);
   useEffect(()=>{
     const restore=()=>{try {setState(readWatchlist(localStorage.getItem(watchlistStorageKey)));setFailed(false);}catch{setState(null);setFailed(true);}};
-    restore();window.addEventListener('storage',restore);window.addEventListener('focus',restore);
-    return()=>{window.removeEventListener('storage',restore);window.removeEventListener('focus',restore);};
+    restore();window.addEventListener('storage',restore);window.addEventListener('focus',restore);window.addEventListener(watchlistChangedEvent,restore);
+    return()=>{window.removeEventListener('storage',restore);window.removeEventListener('focus',restore);window.removeEventListener(watchlistChangedEvent,restore);};
   },[ticker]);
   const following=state?.symbols.includes(ticker)===true;
   const full=!!state&&!following&&state.symbols.length>=50;
@@ -20,7 +20,7 @@ export default function FollowStock({ticker,available}:{ticker:string;available:
     try {
       const current=readWatchlist(localStorage.getItem(watchlistStorageKey));
       const next=current.symbols.includes(ticker)?unfollowStock(current,ticker):followStock(current,ticker);
-      localStorage.setItem(watchlistStorageKey,JSON.stringify(next));setState(next);setFailed(false);
+      localStorage.setItem(watchlistStorageKey,JSON.stringify(next));setState(next);setFailed(false);window.dispatchEvent(new Event(watchlistChangedEvent));
     }catch{setFailed(true);setState(null);}
   };
   return <div className="stock-follow">

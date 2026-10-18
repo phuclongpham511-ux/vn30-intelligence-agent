@@ -47,7 +47,7 @@ export async function loadCommunityUpdates(symbols: string[], signal?: AbortSign
 export type CommunityItem = {
   id: string; revision_id: string; source_id: string; source_item_id: string; item_type: string;
   title: string | null; excerpt: string; url: string; author: string | null;
-  published_at: string; last_seen_at: string; tickers: string[];
+  published_at: string; first_seen_at?:string; last_seen_at: string; tickers: string[];
   replies: number | null; views: number | null; is_fixture: boolean;
 };
 export type CommunityPulseData = {

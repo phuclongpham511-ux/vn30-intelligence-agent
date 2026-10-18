@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+### Stock Intelligence integration V1 — local development, 2026-10-18
+
+Stock Detail now connects Overview/Company News to the existing persisted Watchlist
+intelligence read, original company stories, source-qualified ticker proofs and
+unverified community evidence. News retains the canonical 72-hour acquisition
+window; community explicitly uses its existing 24-hour publication window. One
+retained panel, no added polling/quotes/acquisition. Pulse copy grouping is optional
+display metadata; default Watchlist behavior and native review IDs remain intact.
+Reviews are explicit and browser-local, merge current state, preserve concurrent
+reviews and never auto-review opened content. Unknown source/review state remains
+unknown. Financial/corporate-action gates and all Market Workspace work are retained.
+Browser acceptance PENDING. See `docs/STOCK_INTELLIGENCE_INTEGRATION_V1.md`.
+
 ### Fundamental Analysis V1 qualification increment — local development, 2026-10-18
 
 The existing Financial Analysis overview now groups valuation, business performance,

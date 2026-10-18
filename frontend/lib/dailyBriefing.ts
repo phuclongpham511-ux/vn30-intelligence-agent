@@ -63,7 +63,7 @@ export function dailyBriefing(data: Intelligence, state: WatchlistState) {
 
 // Acknowledge exactly the displayed revisions, never hidden items or a removed
 // stock. A concurrent explicit review in another tab takes precedence.
-export function reviewBriefingItem(current:WatchlistState, rendered:WatchlistState, entry:BriefingItem, at?:string) {
+export function reviewBriefingItem(current:WatchlistState, rendered:WatchlistState, entry:Pick<BriefingItem,'references'>, at?:string) {
   let next = current;
   for (const {symbol,item} of entry.references) {
     if (!current.symbols.includes(symbol) ||

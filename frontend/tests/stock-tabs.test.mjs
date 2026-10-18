@@ -49,3 +49,11 @@ test('a wrong ticker identity cannot render research for the prior company',()=>
   const html=render('overview',['overview'],'OTHER');
   assert.match(html,/Identity error/);assert.doesNotMatch(html,/Original company name|TechnicalChart/);
 });
+test('one research integration replaces separate news/community loaders without changing primary tabs',()=>{
+ for(const section of ['overview','news']){
+  const html=render(section);
+  assert.equal((html.match(/data-component="StockIntelligence"/g)||[]).length,1);
+  assert.doesNotMatch(html,/data-component="StockNews|data-component="StockCommunity/);
+  assert.match(html,/id="stock-tab-fundamentals"/);assert.match(html,/id="stock-tab-actions"/);
+ }
+});

@@ -9,8 +9,7 @@ import MarketSnapshot from './stock/MarketSnapshot';
 import FundamentalTrends from './stock/FundamentalTrends';
 import TechnicalInsights from './stock/TechnicalInsights';
 import RawDataTable from './stock/RawDataTable';
-import StockNews from './stock/StockNews';
-import StockCommunity from './stock/StockCommunity';
+import StockIntelligence from './stock/StockIntelligence';
 import StockActions from './stock/StockActions';
 import CompanyOverview from './stock/CompanyOverview';
 import {useStockRead} from './stock/useStockRead';
@@ -67,8 +66,7 @@ export default function Explore({ticker}:{ticker:string}) {
       </div>
       <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} visible={tab==='fundamentals'}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker}/>}</div>
-      <div role="tabpanel" id="stock-panel-news" aria-labelledby="stock-tab-news" tabIndex={0} hidden={tab!=='news'}>{tab==='news'&&<div className="page-stack"><StockNews ticker={ticker}/><StockCommunity ticker={ticker}/></div>}</div>
-      {tab==='overview'&&<StockNews ticker={ticker} preview/>}
+      <div role={tab==='news'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'?'stock-tab-news':undefined} tabIndex={tab==='news'?0:undefined} hidden={tab!=='news'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab!=='news'}/>}</div>
     </>}
   </div>;
 }

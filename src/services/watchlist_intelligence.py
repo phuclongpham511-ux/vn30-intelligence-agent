@@ -97,7 +97,8 @@ def news_page(session, symbol, identity, now, offset, size, source_ids, body_evi
                 truncated=truncated, window_start=now-timedelta(hours=72))
 
 
-def community_page(session, symbol, now, offset, size, source_ids):
+def community_page(session, symbol, now, offset, size, source_ids, *, group_copies=False):
+    from src.community.themes import deduplicate
     rows = session.exec(select(CommunityEvidenceItem).where(
         CommunityEvidenceItem.published_at >= now-timedelta(hours=24),
         CommunityEvidenceItem.published_at <= now,
@@ -119,7 +120,10 @@ def community_page(session, symbol, now, offset, size, source_ids):
                 'published_at':utc(row.published_at).isoformat(),
                 'first_seen_at':utc(row.first_seen_at).isoformat(),
                 'last_seen_at':utc(row.last_seen_at).isoformat()}))
-    return dict(items=items, has_more=len(rows)>size, truncated=False,
+    # Reuse Pulse copy grouping only as display metadata. Native item IDs,
+    # revisions, pagination and Watchlist unread semantics remain unchanged.
+    grouped = dict(display_groups=[[row['id'] for row in group] for group in deduplicate([item['evidence'] for item in items])]) if group_copies else {}
+    return dict(items=items, **grouped, has_more=len(rows)>size, truncated=False,
                 window_start=now-timedelta(hours=24))
 
 
@@ -150,7 +154,7 @@ def technical_updates(session, symbol, now):
         last_checked_at=utc(job.last_checked_at) if job and job.last_checked_at else None)
 
 
-def intelligence(session, symbols, *, now=None, offset=0, size=12):
+def intelligence(session, symbols, *, now=None, offset=0, size=12, community_groups=False):
     now = utc(now or datetime.now(timezone.utc))
     if not symbols:
         return dict(as_of=now, offset=offset, page_size=size, stocks=[], news_sources=[], community_sources=[])
@@ -186,7 +190,7 @@ def intelligence(session, symbols, *, now=None, offset=0, size=12):
             display_name_en=identity.display_name_en if identity else None,
             exchange=identity.exchange if identity else None)
         row['news'] = news_page(session,symbol,identity,now,offset,size,news_ids,body_evidence[symbol]) if identity else None
-        row['community'] = community_page(session,symbol,now,offset,size,community_ids) if identity else None
+        row['community'] = community_page(session,symbol,now,offset,size,community_ids,group_copies=community_groups) if identity else None
         row['technical'] = technical_updates(session,symbol,now) if identity else None
         output.append(row)
     return dict(as_of=now, offset=offset, page_size=size, stocks=output,
