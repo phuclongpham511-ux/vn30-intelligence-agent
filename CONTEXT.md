@@ -1,5 +1,17 @@
 # Woofi — Domain Context
 
+## SSI market integration V2 — offline evidence tools, 2026-10-19
+
+Market checked at 15:58:57 ICT, outside HOSE continuous trading; zero new SSI/auth
+requests. Reuse existing saved evidence and owner-reported SSI use/storage/
+redistribution/commercial authorization; new-family scope applicability remains
+separate. Pure helpers in market_summary compare canonical provisional snapshots
+without summation (decreases/source regressions retained for review) and audit raw
+ICB pairs/duplicates/conflicts with provenance. Saved coverage remains VN30 30/30,
+VN100 100/100, HOSE ordinary stocks 406/406; no HNX/UPCOM extrapolation or taxonomy
+inference. No new public activation, provider/cache/DB/UI wiring or production
+change. See docs/SSI_MARKET_INTEGRATION_V2.md for the field matrix and narrow gates.
+
 ## Owner correction — full-row market fills (19 October 2026)
 
 Latest owner preference supersedes the muted pastel experiment: restore the original mint green/red/gold/purple/cyan row hues with dark semibold numeric text in both themes; compact 28px desktop rows, 36px mobile. Qualified advancing/declining rows use a continuous percentage shading scale, capped at 7 percentage points for presentation only (not an inferred exchange limit). The corrected ramp starts near-neutral, reaches the approved original hue at 3%, then deepens to the 7% visual cap. 1% and 2% must have at least a 30-channel RGB separation in the presentation regression; the earlier narrow ramp was too subtle. Missing/inconsistent percentages use the light base; stale/missing/unknown/error remain neutral. Explicit hover retains the row fill. Ceiling/floor/reference retain the original purple/cyan/gold hues. Heatmap, data qualification and trading semantics remain unchanged.

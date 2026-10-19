@@ -1,4 +1,4 @@
-"""Pure SecuritiesSummary evidence normalization; no acquisition or qualification grant.
+"""Pure SSI market evidence normalization; no acquisition or qualification grant.
 
 Date-only totals are NOT tick activity. This contract deliberately cannot satisfy
 the existing UI's verified same-observation shares/VND contract by itself.
@@ -184,3 +184,130 @@ def normalize_provisional_market(master: dict, summary: dict, *, security: dict,
                        'source_time_unavailable' if source_time is None else 'source_time_age'),
         validation=dict(identity='PASS', date_alignment='PASS', bands='PASS', totals='PASS', plausibility='PASS'),
         receipts=receipts)
+
+
+def compare_provisional_snapshots(previous: dict, current: dict, *, now: str) -> dict:
+    """Offline comparison, not a cache writer or a public qualification grant.
+
+    Revalidate the original receipts, never trust a caller's edited normalized
+    values/flags. A decrease is retained for review, never clamped or summed.
+    """
+    def validate(packet, clock):
+        if not isinstance(packet, dict) or packet.get('contract') != PROVISIONAL_CONTRACT:
+            raise ValueError('Not a provisional source packet')
+        try:
+            receipts = packet['receipts']
+            return normalize_provisional_market(receipts['master']['raw_record'], receipts['summary']['raw_record'],
+                security=receipts['identity']['raw_record'], master_receipt=receipts['master'],
+                summary_receipt=receipts['summary'], identity_receipt=receipts['identity'], now=clock)
+        except (KeyError, TypeError):
+            raise ValueError('Incomplete original provisional receipts') from None
+
+    for packet in (previous, current):
+        try:
+            canonical = validate(packet, packet['freshness']['evaluated_at'])
+        except (KeyError, TypeError):
+            raise ValueError('Missing provisional evaluation time') from None
+        if packet != canonical:
+            raise ValueError('Normalized packet differs from original source receipts')
+    before, latest = validate(previous, now), validate(current, now)
+    if before['key'] != latest['key']:
+        raise ValueError('Cross-instrument, venue or trading-day comparison')
+    before_fetch, latest_fetch = (_receipt_time(p['matched']['fetched_at']) for p in (before, latest))
+    if latest_fetch <= before_fetch:
+        raise ValueError('Snapshot receipts are not strictly time ordered')
+    changes = {}
+    flags = []
+    for metric in ('volume', 'value'):
+        left, right = (Decimal(p['matched'][metric]['normalized_decimal']) for p in (before, latest))
+        # Fraction arithmetic remains exact even under an altered Decimal context.
+        difference = Fraction(right) - Fraction(left)
+        changes[metric] = dict(numerator=difference.numerator, denominator=difference.denominator,
+                               status='decreased' if difference < 0 else 'increased' if difference > 0 else 'unchanged')
+        if difference < 0:
+            flags.append(metric + '_decreased_possible_correction')
+    prior_time, current_time = (p['matched']['source_timestamp'] for p in (before, latest))
+    if prior_time is None or current_time is None:
+        flags.append('source_time_missing_not_live_freshness')
+    elif _receipt_time(current_time) < _receipt_time(prior_time):
+        flags.append('source_time_regressed')
+    if before['receipts']['master']['record_sha256'] != latest['receipts']['master']['record_sha256']:
+        flags.append('price_band_source_revised')
+    quantity = Fraction(Decimal(latest['matched']['volume']['normalized_decimal']))
+    value = Fraction(Decimal(latest['matched']['value']['normalized_decimal']))
+    average = value / quantity if quantity else None
+    return dict(contract='ssi-provisional-comparison-v1', key=latest['key'],
+        qualification='PROVISIONAL_INTERNAL', public_display_eligible=False,
+        aggregation='replace_snapshot_never_sum', latest=latest, changes=changes,
+        implied_average_vnd_per_share=None if average is None else dict(
+            numerator=average.numerator, denominator=average.denominator,
+            authority='owner_engineering_convention_not_last_trade'),
+        flags=flags, review_required=any('decreased' in f or 'regressed' in f or 'revised' in f for f in flags),
+        source_freshness=latest['freshness'],
+        live_two_round_acceptance=False, certification='NOT_SSI_CERTIFIED')
+
+
+def audit_icb_metadata(records: list, *, receipt: dict) -> dict:
+    """Read-only projection of raw SecuritiesInfo, without taxonomy inference.
+
+    Exact original codes/names and source receipt are retained. Listing dates
+    never become classification-effective dates; duplicates do not inflate coverage.
+    No Security model, database, provider, public DTO or UI is changed.
+    """
+    if not isinstance(records, list) or len(records) > 5000 or not isinstance(receipt, dict):
+        raise ValueError('Invalid or unbounded ICB evidence')
+    _receipt_time(receipt.get('fetched_at'))
+    if not re.fullmatch(r'[a-f0-9]{64}', str(receipt.get('document_sha256', ''))):
+        raise ValueError('Missing original ICB document hash')
+    assignments, invalid, excluded, duplicates = {}, [], 0, 0
+    for index, row in enumerate(records):
+        if not isinstance(row, dict):
+            invalid.append(dict(index=index, reason='invalid_record')); continue
+        raw = json.dumps(row, sort_keys=True, ensure_ascii=False, allow_nan=False).encode()
+        if len(raw) > 65536:
+            raise ValueError('ICB record exceeds evidence bound')
+        if row.get('stockType') != 'Stock':
+            excluded += 1; continue
+        symbol, exchange = row.get('symbol'), row.get('board')
+        if (not isinstance(symbol, str) or not re.fullmatch(r'[A-Z0-9]{1,20}', symbol)
+                or exchange not in ('HOSE', 'HNX', 'UPCOM')
+                or 'exchange' in row and row['exchange'] != exchange):
+            invalid.append(dict(index=index, reason='invalid_or_conflicting_equity_identity')); continue
+        code, name = row.get('icbCode'), row.get('icbName')
+        pair = (code, name) if all(isinstance(v, str) and v.strip() and len(v) <= 256 for v in (code, name)) else None
+        key = (symbol, exchange)
+        item = assignments.setdefault(key, dict(symbol=symbol, exchange=exchange, pairs=set(), missing=False, records=[]))
+        if row in item['records']:
+            duplicates += 1; continue
+        item['records'].append(copy.deepcopy(row))
+        if pair is None:
+            item['missing'] = True
+        else:
+            item['pairs'].add(pair)
+    code_names = {}
+    for item in assignments.values():
+        for code, name in item['pairs']:
+            code_names.setdefault(code, set()).add(name)
+    rows = []
+    for key in sorted(assignments):
+        item = assignments[key]; pairs = sorted(item['pairs'])
+        conflict = len(pairs) > 1 or any(len(code_names[code]) > 1 for code, _ in pairs)
+        status = 'CONFLICT' if conflict else 'INCOMPLETE' if item['missing'] or not pairs else 'OBSERVED_PAIR_UNQUALIFIED'
+        rows.append(dict(symbol=item['symbol'], exchange=item['exchange'], status=status,
+            icb_code=pairs[0][0] if status == 'OBSERVED_PAIR_UNQUALIFIED' else None,
+            icb_name=pairs[0][1] if status == 'OBSERVED_PAIR_UNQUALIFIED' else None,
+            observed_pairs=[dict(code=c, name=n) for c, n in pairs],
+            raw_records=item['records'], record_sha256=[hashlib.sha256(json.dumps(row,
+                sort_keys=True, ensure_ascii=False, allow_nan=False).encode()).hexdigest() for row in item['records']],
+            taxonomy_level=None, taxonomy_version=None,
+            classification_effective_at=None, public_display_eligible=False))
+    coverage = {venue:dict(sampled=sum(r['exchange'] == venue for r in rows),
+        paired=sum(r['exchange'] == venue and r['status'] == 'OBSERVED_PAIR_UNQUALIFIED' for r in rows))
+        for venue in ('HOSE', 'HNX', 'UPCOM')}
+    return dict(contract='ssi-icb-evidence-audit-v1', qualification='INTERNAL_ONLY',
+        public_display_eligible=False, source='SSI:FastConnect:v3:SecuritiesInfo',
+        receipt=copy.deepcopy(receipt), input_rows=len(records), duplicate_rows=duplicates,
+        excluded_nonordinary_rows=excluded, invalid_rows=invalid, coverage=coverage, items=rows,
+        taxonomy_level=None, taxonomy_version=None, classification_effective_at=None,
+        freshness='UNQUALIFIED_EFFECTIVE_TIME_UNKNOWN',
+        rights='owner_reported_general_Woofi_permission_new_field_scope_unresolved')
