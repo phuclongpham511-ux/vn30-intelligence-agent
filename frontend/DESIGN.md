@@ -1,5 +1,32 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Market Workspace UI refinement V2 — 2026-10-19
+
+Desktop primary navigation expands to icons + labels or collapses to labelled,
+focusable icon links with an explicit navigation toggle. Mobile always exposes
+all three destination labels, including after a desktop collapse. Keep the
+compact header, active underline and reduced-motion support; no wide sidebar.
+
+Homepage Hot Topics uses the existing same-Story thumbnail pipeline alongside
+headlines, with fixed 4:3 frames and a neutral reserved fallback. Retain 3/2 initial
+headlines, original source/links/ranking and no additional quote consumer.
+
+Board and overview mover tables fill only the movement cell, using the centralized
+qualified price state: ceiling purple, advance green, reference gold/yellow,
+decline red, floor cyan; uncertain/stale/missing/error remain neutral. Right-align
+tabular numbers; no whole-row tint or pills. Stock Detail keeps the same resolver.
+Heatmap bins, equal-area geometry, density, controls and data remain unchanged.
+
+Overview alone gives VN-Index a compact 32px desktop/28px mobile value, visible
+absolute/percentage movement and source/time/session/freshness. Reuse the approved
+mascot poses at 64px/48px: known fresh direction, loading, empty or unavailable;
+stale/unverified observations must not receive a fresh-direction expression.
+The artwork is an observation/UI cue, not a sentiment score or forecast.
+
+This supersedes the preceding V1 presentation details where they differ. Source
+validation is recorded in `docs/MARKET_WORKSPACE_UI_REFINEMENT_V2.md`; actual
+Cloud Browser acceptance remains PENDING. No local-browser fallback or deployment.
+
 ## Approved Hot Topics and primary navigation integration — 2026-10-19
 
 Public routes share visible Market / News / Watchlist links (VI: Thị trường /

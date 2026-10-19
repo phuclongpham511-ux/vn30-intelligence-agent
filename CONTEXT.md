@@ -1,5 +1,16 @@
 # Woofi — Domain Context
 
+### Market Workspace UI refinement V2 — local source, 2026-10-19
+
+Increment from 090abb0: compact desktop navigation collapse retains all links and
+accessible labels; mobile keeps visible destinations. Hot Topics restores existing
+same-Story thumbnails with fixed neutral fallback, without quote consumers or new
+acquisition. Overview emphasizes VN-Index/source freshness with approved mascot
+states; only movement cells receive resolver-qualified full backgrounds. Heatmap
+and the 72h Hot Topics / 24h Focus contracts are preserved. No backend, data, SSI
+qualification or production change. Cloud Browser unavailable; visual acceptance
+PENDING. See `docs/MARKET_WORKSPACE_UI_REFINEMENT_V2.md`.
+
 ### Hot Topics and primary navigation V1 — local source, 2026-10-19
 
 Approved restoration reuses `/api/news/hot?limit=4`, its 72-hour independent-

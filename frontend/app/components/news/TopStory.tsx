@@ -11,7 +11,7 @@ import NewsThumbnail from './NewsThumbnail';
 
 export type TopStoryData={story:{id:string;representative_title:string;source_count:number;article_count?:number};representative_article:NewsArticle;articles:NewsArticle[];thumbnail_url?:string|null;thumbnail_article_id?:string|null;research_category?:'COMPANY'|'INDUSTRY'|'MARKET_BRIEF'|null;ticker_associations?:TickerAssociation[]};
 
-export default function TopStory({item,compact=false,textOnly=false}:{item:TopStoryData;requireImage?:boolean;compact?:boolean;textOnly?:boolean}) {
+export default function TopStory({item,compact=false,textOnly=false,showThumbnail=!textOnly}:{item:TopStoryData;requireImage?:boolean;compact?:boolean;textOnly?:boolean;showThumbnail?:boolean}) {
   const {t,date}=useLocale();const article=item.representative_article;
   const url=safeExternalUrl(article.url);const published=article.published_at||article.first_seen_at;
   const symbols=relatedTickers(item);
@@ -26,7 +26,7 @@ export default function TopStory({item,compact=false,textOnly=false}:{item:TopSt
       </div>}
     </div></div>
   </article>;
-  // The compact homepage module shares the original evidence renderer, without
-  // adding image requests or another live-price consumer.
-  return textOnly?content(null):<NewsThumbnail required={false} images={storyImages(item)} compact={compact} revision={item.articles.map(a=>a.last_seen_at||'').join('|')}>{content}</NewsThumbnail>;
+  // Homepage thumbnails reuse existing same-Story metadata; text-only ticker
+  // context still avoids another live-price consumer.
+  return showThumbnail?<NewsThumbnail required={false} reserveSpace={textOnly} images={storyImages(item)} compact={compact} revision={item.articles.map(a=>a.last_seen_at||'').join('|')}>{content}</NewsThumbnail>:content(null);
 }

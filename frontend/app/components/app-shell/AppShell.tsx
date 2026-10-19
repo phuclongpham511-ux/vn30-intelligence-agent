@@ -3,7 +3,7 @@ import {useEffect,useState} from 'react';
 import {ThemeProvider,useTheme} from 'next-themes';
 import {usePathname} from 'next/navigation';
 import Link from 'next/link';
-import {Moon,Sun,Info,X} from 'lucide-react';
+import {Moon,Sun,Info,X,Compass,Newspaper,Bookmark,PanelLeftClose,PanelLeftOpen} from 'lucide-react';
 import {Dialog} from 'radix-ui';
 import {LanguageProvider,useLocale} from '@/lib/i18n';
 import TickerSearch from '../stock/TickerSearch';
@@ -29,12 +29,18 @@ export function AboutWoofi({compact=false}: {compact?:boolean}) {
 }
 export function PrimaryNavigation({path}:{path:string}) {
   const {t,language}=useLocale();
-  return <nav aria-label={t('Main navigation')} className="woofi-primary-nav">
-    {([{href:'/',label:'Market'},{href:'/news',label:'News'},{href:'/watchlist',label:language==='vi'?'Follow':'Watchlist'}] as const).map(({href,label})=>{
+  const [expanded,setExpanded]=useState(true);
+  return <div className="woofi-navigation" data-expanded={expanded}>
+    <button type="button" className="woofi-navigation-toggle" aria-label={t(expanded?'Collapse primary navigation':'Expand primary navigation')} aria-expanded={expanded} aria-controls="woofi-primary-destinations" onClick={()=>setExpanded(value=>!value)}>
+      {expanded?<PanelLeftClose size={17} aria-hidden="true"/>:<PanelLeftOpen size={17} aria-hidden="true"/>}<span>{t('Navigation')}</span>
+    </button>
+    <nav id="woofi-primary-destinations" aria-label={t('Main navigation')} className="woofi-primary-nav">
+    {([{href:'/',label:'Market',icon:Compass},{href:'/news',label:'News',icon:Newspaper},{href:'/watchlist',label:language==='vi'?'Follow':'Watchlist',icon:Bookmark}] as const).map(({href,label,icon:Icon})=>{
       const active=href==='/'?path==='/'||path.startsWith('/stocks/')||path.startsWith('/indices/'):path===href||path.startsWith(href+'/');
-      return <Link key={href} href={href} aria-current={active?'page':undefined}>{t(label)}</Link>;
+      return <Link key={href} href={href} aria-label={t(label)} title={t(label)} aria-current={active?'page':undefined}><Icon size={16} aria-hidden="true"/><span className="woofi-nav-label">{t(label)}</span></Link>;
     })}
-  </nav>;
+    </nav>
+  </div>;
 }
 function ThemeToggle() {
   const {resolvedTheme,setTheme}=useTheme();const {t}=useLocale();const [mounted,setMounted]=useState(false);useEffect(()=>setMounted(true),[]);const dark=!mounted||resolvedTheme==='dark';

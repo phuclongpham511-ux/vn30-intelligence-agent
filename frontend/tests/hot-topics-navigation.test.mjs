@@ -12,7 +12,8 @@ function load(file,overrides={}){
  const exports={};new Function('require','exports',code)(name=>overrides[name]??require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);return exports;
 }
 const render=(Component,props={},language='en')=>renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:localeTools(language)},React.createElement(Component,props)));
-const TopStory=load('../app/components/news/TopStory.tsx',{'./NewsThumbnail':()=>{throw Error('Text-only headlines must not load thumbnails');},'../stock/LivePrice':{TickerMovement:()=>{throw Error('No additional quote consumer');}}}).default;
+const Thumbnail=load('../app/components/news/NewsThumbnail.tsx').default;
+const TopStory=load('../app/components/news/TopStory.tsx',{'./NewsThumbnail':Thumbnail,'../stock/LivePrice':{TickerMovement:()=>{throw Error('No additional quote consumer');}}}).default;
 const hot=load('../app/components/news/HotTopics.tsx',{'./TopStory':TopStory});
 const item=id=>{const article={id:'article-'+id,title:'Original headline '+id+' rất dài '.repeat(12),source_name:'Original Publisher',url:'https://publisher.example/'+id,published_at:'2026-10-19T02:10:00Z',first_seen_at:'2026-10-19T02:15:00Z',tickers:[],topics:[],sectors:[]};return {story:{id,source_count:2},representative_article:article,articles:[article]};};
 const stories=['rank-1','rank-2','rank-3','rank-4'].map(item);
@@ -53,8 +54,8 @@ for(const [path,href] of [['/','/'],['/stocks/FPT','/'],['/indices/VNINDEX','/']
   const html=render(shell.PrimaryNavigation,{path},language);
   assert.equal((html.match(/<a /g)||[]).length,3);assert.equal((html.match(/aria-current="page"/g)||[]).length,1);
   const active=html.match(/<a\b[^>]*aria-current="page"[^>]*>/)?.[0];assert.ok(active);assert.ok(active.includes('href="'+href+'"'));
-  for(const label of language==='vi'?['Thị trường','Tin tức','Theo dõi']:['Market','News','Watchlist'])assert.ok(html.includes('>'+label+'</a>'));
-  assert.doesNotMatch(html,/hidden|hamburger|PanelLeft/);
+  for(const label of language==='vi'?['Thị trường','Tin tức','Theo dõi']:['Market','News','Watchlist']){assert.ok(html.includes('aria-label="'+label+'"'));assert.ok(html.includes('>'+label+'</span>'));}
+  assert.doesNotMatch(html,/class="[^"]*\bhidden\b|<aside|role="menu"/);
  }
 });
 

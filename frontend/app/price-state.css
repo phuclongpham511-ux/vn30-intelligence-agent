@@ -7,6 +7,15 @@
 .price-declining{color:var(--negative)}
 .price-floor,.floor{color:var(--price-floor)}
 .price-stale,.price-unavailable,.price-unknown,.price-error{color:var(--muted-foreground)}
+/* Whole movement cells, not pills or entire rows. Same state resolver/palette. */
+:root{--price-movement-ink:#ffffff}
+.dark{--price-movement-ink:var(--background)}
+.quote-table td.quote-movement-cell{background:var(--muted);color:var(--muted-foreground);border-radius:0;text-align:right;font-variant-numeric:tabular-nums}
+.quote-table td.quote-movement-cell.price-ceiling{background:var(--price-ceiling);color:var(--price-movement-ink)}
+.quote-table td.quote-movement-cell.price-advancing{background:var(--positive);color:var(--price-movement-ink)}
+.quote-table td.quote-movement-cell.price-reference{background:var(--unchanged);color:var(--price-movement-ink)}
+.quote-table td.quote-movement-cell.price-declining{background:var(--negative);color:var(--price-movement-ink)}
+.quote-table td.quote-movement-cell.price-floor{background:var(--price-floor);color:var(--price-movement-ink)}
 .price-demo{padding:16px 0;min-width:0}
 .price-demo h1{font-size:22px;margin:12px 0 4px}
 .price-demo-note{font-size:12px;color:var(--muted-foreground);margin:6px 0 12px;overflow-wrap:anywhere}

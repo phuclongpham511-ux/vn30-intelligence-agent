@@ -1,4 +1,6 @@
 export const vietnamese = {
+  "Collapse primary navigation":"Thu gọn điều hướng chính",
+  "Expand primary navigation":"Mở rộng điều hướng chính",
   "Publisher news context":"Bối cảnh tin tức",
   "Last 72 hours · independent publisher coverage.":"72 giờ qua · tin từ các nhà xuất bản độc lập.",
   "More headlines":"Thêm tiêu đề",

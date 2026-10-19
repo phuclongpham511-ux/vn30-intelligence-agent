@@ -18,7 +18,7 @@ export function HotTopicsView({stories,error,retry,expanded,toggle,embedded=fals
     {rows&&!rows.length&&!error&&<p role="status" className="market-news-state">{t('No stories with independent publisher coverage qualify yet.')}</p>}
     {error&&!!rows?.length&&<p className="market-news-state">{t('Previously loaded headlines are shown below.')}</p>}
     <div className="hot-topics-stories" data-expanded={expanded}>
-      {rows?.map((item,index)=><div key={item.story.id} className={index>=3?'hot-topic-extra':index===2?'hot-topic-third':undefined}><TopStory item={item} compact textOnly/></div>)}
+      {rows?.map((item,index)=><div key={item.story.id} className={index>=3?'hot-topic-extra':index===2?'hot-topic-third':undefined}><TopStory item={item} compact textOnly showThumbnail/></div>)}
     </div>
     {rows&&rows.length>2&&<button type="button" className={'hot-topics-expand'+(rows.length===3?' hot-topics-expand-mobile':'')} onClick={toggle} aria-expanded={expanded}>{t(expanded?'Show fewer headlines':'More headlines')}</button>}
     <details className="market-news-method"><summary>{t('About these headlines')}</summary><p>{t('At least two independent publisher groups within 72 hours. Existing publisher-coverage ranking; not sentiment or an investment signal.')}</p></details>
