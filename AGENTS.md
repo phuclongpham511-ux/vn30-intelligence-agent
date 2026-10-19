@@ -4,6 +4,15 @@
 
 Read `CONTEXT.md` before making product or backend changes. When touching the frontend, also read `frontend/DESIGN.md`.
 
+### Browser isolation and authorization
+
+- For all Woofi tasks, use the built-in Codex Cloud Browser for browser interaction when it is available.
+- Never autonomously open, launch, control, attach to, or interact with a browser on the user's computer, including Chrome, Edge, Firefox, other desktop browsers, local temporary profiles, existing sessions, tabs, debugging ports, or desktop computer-control tools.
+- Browser navigation, UI acceptance, screenshots, responsive checks, and interactions must happen only in the Codex Cloud Browser unless the user gives new, explicit authorization for a different browser environment for that task. Prior approvals and Full Access do not grant continuing authorization.
+- Never access personal browser history, cookies, passwords, extensions, authentication sessions, or unrelated websites.
+- If the Codex Cloud Browser is unavailable, unsupported, or cannot reach the target (including a localhost development server), stop browser work and report that limitation. Do not switch to a local browser or attempt an isolation workaround. Ask for explicit authorization before proposing another browser environment.
+- This policy remains in force until the user explicitly changes or revokes it.
+
 ### Architecture invariants
 
 - Keep exactly one root `main.py` and one `app = FastAPI()`.

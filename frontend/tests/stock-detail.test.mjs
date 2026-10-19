@@ -13,7 +13,7 @@ test('stock identity requires the selected cached equity, never another ticker',
   assert.throws(()=>stockIdentity([{symbol:'XYZ',exchange:'HNX'}],'ABC'));
 });
 test('pending, withdrawn and fixture observations cannot present trusted event terms',()=>{
-  const row={verified:true,withdrawn:false,is_fixture:false};
+  const row={verified:true,withdrawn:false,is_fixture:false,source:'Synthetic source contract test'};
   assert.equal(trustedAction(row),true);
   for(const change of [{verified:false},{withdrawn:true},{is_fixture:true}])assert.equal(trustedAction({...row,...change}),false);
   assert.equal(actionStatus({...row,verified:false}),'Pending verification');

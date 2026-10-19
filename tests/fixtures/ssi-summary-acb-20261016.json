@@ -1,0 +1,33 @@
+{
+  "evidence_kind": "SAVED_ACTUAL_PROVIDER_RESPONSE_NOT_CURRENT_SESSION",
+  "evidence_sha256": "7daa4ee90df0e8241749e3004326ccd4d6035d1df2725789d67ee6a40d62202b",
+  "request_label": "summary-acb-oct16",
+  "received_at": "2026-10-17T13:26:48.812223+00:00",
+  "record": {
+    "symbol": "ACB",
+    "tradingDate": "2026/10/16",
+    "priceChange": "0",
+    "priceChangePercentage": "0.00",
+    "open": "20700",
+    "high": "20750",
+    "low": "20550",
+    "close": "20600",
+    "average": "20636",
+    "totalMatch": "5160300",
+    "totalMatchValue": "106488260000",
+    "totalBuy": "3414",
+    "totalTradeBuy": "8504255",
+    "totalSell": "5198",
+    "totalTradeSell": "12367453",
+    "totalForeignBuy": "2194600",
+    "totalForeignBuyValue": "45304897500",
+    "totalForeignSell": "3462029",
+    "totalForeignSellValue": "71419062800",
+    "remainForeignRoom": "394704190",
+    "totalForeignRoom": "1741326587",
+    "totalDeal": null,
+    "totalDealValue": null,
+    "openInterest": null,
+    "settlementPrice": null
+  }
+}

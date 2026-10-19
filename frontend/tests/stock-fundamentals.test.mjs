@@ -6,6 +6,8 @@ import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
 import {LanguageContext,localeTools} from '../lib/i18n.ts';
+import {acceptanceDataset} from './fixtures/acceptance-replay.mjs';
+import {financialEngineData} from '../lib/financial-engine-data.ts';
 const require=createRequire(import.meta.url);
 let section='overview',statement='income';
 const react={...React,useState(initial){if(initial==='overview')return [section,()=>{}];if(initial==='income')return [statement,()=>{}];return React.useState(initial);}};
@@ -14,7 +16,19 @@ const compiled=transformSync(readFileSync(new URL('../app/components/stock/Funda
 new Function('require','exports',compiled)(name=>name==='react'?react:['./FinancialResearchCharts','./FinancialStatementTable'].includes(name)?{__esModule:true,default:()=>null}:name==='../ui/button'?{Button:({variant,...props})=>React.createElement('button',props)}:name==='../ui/skeleton'?{Skeleton:props=>React.createElement('div',props)}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 const row={ticker:'ABC',period:'2025',source:'Reported source',currency:'VND',revenue:0,net_profit:null,gross_margin:null,net_margin:null,roe:null,revenue_growth_yoy:null,net_profit_growth_yoy:null};
 const data={available_period_types:['annual'],ticker:'ABC',source:'Reported source',currency:'VND',period_type:'annual',rows:[row],changes:[],financial_identity_guard:false,sector:null,industry:null,publication_date:null,consolidation:null,read_at:'2026-10-13T13:00:00Z'};
+// Simulated display contract, never a live financial observation.
+data.is_fixture=true;
+data.fundamental_summary={contract:'fundamental-display-v1',period:'2025',frequency:'annual',consolidation:null,publication_date:null,metrics:[['revenue','Revenue'],['net_profit','Profit after tax'],['roe','ROE']].map(([key,label])=>({key,label,group:key==='roe'?'profitability':'performance',unit:key==='roe'?'fraction':'VND',status:row[key]===null?'UNAVAILABLE':'DEMO',value:row[key],formula:'reported synthetic fixture',reason:null}))};
 const render=(props={},language='en',view='overview',kind='income')=>{section=view;statement=kind;return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:{...localeTools(language),setLanguage(){}}},React.createElement(exports.FundamentalTrendsView,{data:null,loading:false,error:false,retry(){},...props})));};
+
+test('the offline replay contract renders the full financial view, not only its metric snapshot',()=>{
+ const replay=financialEngineData(acceptanceDataset().financials.ABC.annual,'ABC','annual',true);
+ for(const language of ['en','vi']){
+  const html=render({data:replay},language);
+  assert.match(html,/DEMO/);assert.match(html,/synthetic-contract-v1/);assert.match(html,/disabled=""/);
+  assert.doesNotMatch(html,/data-financial-qualification="QUALIFIED"/);
+ }
+});
 test('financial empty, loading and provider failure do not fabricate zero metrics',()=>{
   assert.match(render(),/No financial observations/);
   assert.match(render({loading:true}),/Loading financial statements/);
@@ -23,8 +37,8 @@ test('financial empty, loading and provider failure do not fabricate zero metric
 });
 test('reported real zero stays distinct from missing profit, ROE and growth',()=>{
   const html=render({data});
-  assert.match(html,/Reported source/);assert.match(html,/financial mt-2 break-words text-lg font-semibold">0</);
-  assert.match(html,/Profit after tax/);assert.match(html,/ROE/);assert.match(html,/financial mt-2 break-words text-lg font-semibold">—</);
+  assert.match(html,/Reported source/);assert.match(html,/financial mt-2 min-w-0 max-w-\[55%\] break-words text-right text-lg font-semibold">0 VND bn</);
+  assert.match(html,/Profit after tax/);assert.match(html,/ROE/);assert.match(html,/financial mt-2 min-w-0 max-w-\[55%\] break-words text-right text-lg font-semibold">—</);
   assert.doesNotMatch(html,/>0%<|>0 VND<\/td>/);
   assert.match(render({},'vi'),/Chưa có số liệu tài chính/);
 });

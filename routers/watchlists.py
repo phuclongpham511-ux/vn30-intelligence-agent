@@ -26,13 +26,15 @@ class MonitoringRequest(BaseModel):
 class IntelligenceRequest(MonitoringRequest):
     offset: int = Field(default=0, ge=0, le=996)
     page_size: int = Field(default=12, ge=1, le=12)
+    community_groups: bool = False  # Optional Stock Detail display metadata only.
 
 
 @router.post('/intelligence')
 def watchlist_intelligence(body: IntelligenceRequest, response: Response, session: Annotated[Session, Depends(get_session)]):
     from src.services.watchlist_intelligence import intelligence
     response.headers['Cache-Control'] = 'no-store'
-    return intelligence(session, body.symbols, offset=body.offset, size=body.page_size)
+    return intelligence(session, body.symbols, offset=body.offset, size=body.page_size,
+                        community_groups=body.community_groups)
 
 
 class Development(BaseModel):

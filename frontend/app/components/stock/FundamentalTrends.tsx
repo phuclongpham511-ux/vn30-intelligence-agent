@@ -3,7 +3,7 @@ import {useEffect,useRef,useState} from 'react';
 import {useLocale} from '@/lib/i18n';
 import type {FundamentalResearch,FundamentalPeriod,FinancialFrequency} from '@/lib/types';
 import {FINANCIAL_LABELS,type FinancialKey} from '@/lib/fundamental-data';
-import {amountFields,growthFields,engineAmounts,multipleFields,researchSections,unitDivisor,unitLabels,type AmountUnit,type ResearchSection} from '@/lib/fundamental-research';
+import {amountFields,growthFields,engineAmounts,multipleFields,researchSections,unitDivisor,unitLabels,consolidationLabel,type AmountUnit,type ResearchSection} from '@/lib/fundamental-research';
 import {financialEngineData} from '@/lib/financial-engine-data';
 import {direction} from '@/lib/presentation';
 import {stockRead} from '@/lib/stock-detail';
@@ -33,6 +33,26 @@ function ChangeSummary({data,unit}:{data:FundamentalResearch;unit:AmountUnit}){
   </section>;
 }
 
+export function FundamentalOverview({data,unit}:{data:FundamentalResearch;unit:AmountUnit}){
+  const {t,ui,number,percent}=useLocale();
+  const summary=data.fundamental_summary;
+  if(!summary)return <p className="stock-note">{t('Financial display qualification is unavailable.')}</p>;
+  const labels={valuation:'Valuation',performance:'Business performance',profitability:'Profitability',health:'Financial health'} as const;
+  return <section aria-label={t('Fundamental snapshot')} className="space-y-3">
+    <p className="stock-note">{t('Qualification applies to the reported period; current freshness is not certified. Inspect each metric for its definition and limitations.')}</p>
+    <div className="grid min-w-0 gap-x-6 gap-y-5 lg:grid-cols-2">{(Object.keys(labels) as (keyof typeof labels)[]).map(group=><section key={group} className="min-w-0 border-t pt-3" aria-label={ui(labels[group])}>
+      <h3 className="text-sm font-semibold">{ui(labels[group])}</h3>
+      {group==='valuation'&&<p className="mt-1 text-[11px] text-muted-foreground">{t('Reported EPS is not a valuation ratio. Compatible price and share bases are required for valuation.')}</p>}
+      <dl className="mt-2 divide-y">{summary.metrics.filter(metric=>metric.group===group).map(metric=>{
+        const allowed=metric.status==='QUALIFIED'&&data.is_fixture===false&&['consolidated','standalone'].includes(summary.consolidation||'')||metric.status==='DEMO'&&data.is_fixture===true;
+        const value=allowed?metric.value:null;
+        const formatted=value===null?'—':metric.unit==='fraction'?percent(value):metric.unit==='multiple'?number(value)+'×':metric.unit==='VND/share'?number(value)+' '+t('VND/share'):number(value/unitDivisor[unit],unit==='vnd'?0:2)+' '+ui(unitLabels[unit]);
+        return <div key={metric.key} className="flex min-w-0 items-start justify-between gap-3 py-2"><dt className="min-w-0 text-xs"><details><summary className="cursor-pointer"><span>{ui(metric.label)}</span><span className="mt-0.5 block text-[10px] text-muted-foreground" data-financial-qualification={metric.status}>{ui(metric.status)}</span></summary><div className="mt-2 space-y-1 break-words text-[11px] text-muted-foreground"><p>{summary.period} · {ui(consolidationLabel(summary.consolidation))}</p><p>{metric.formula}</p>{metric.reason&&<p>{ui(metric.reason)}</p>}</div></details></dt><dd className="financial mt-2 min-w-0 max-w-[55%] break-words text-right text-lg font-semibold">{formatted}</dd></div>;
+      })}</dl>
+    </section>)}</div>
+  </section>;
+}
+
 export default function FundamentalTrends({ticker,visible=true}:{ticker:string;visible?:boolean}){
   const [data,setData]=useState<FundamentalResearch|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState(false),[attempt,setAttempt]=useState(0),[frequency,setFrequency]=useState<FinancialFrequency>('annual');
   const recent=useRef(new Map<string,{data:FundamentalResearch;at:number}>());
@@ -49,7 +69,7 @@ export default function FundamentalTrends({ticker,visible=true}:{ticker:string;v
     const controller=new AbortController();let disposed=false;const timeout=setTimeout(()=>controller.abort(),60000);
     setLoading(true);setError(false);setData(null);
     stockRead<FundamentalResearch>(`/api/stocks/${encodeURIComponent(ticker)}/financials?frequency=${frequency}&limit=8&projection=display`,controller.signal)
-      .then(value=>{const result=financialEngineData(value,ticker,frequency);if(!disposed){
+      .then(value=>{const result=financialEngineData(value,ticker,frequency,true);if(!disposed){
         recent.current.set(key,{data:result,at:Date.now()});
         while(recent.current.size>3)recent.current.delete(recent.current.keys().next().value!);
         setData(result);
@@ -57,7 +77,8 @@ export default function FundamentalTrends({ticker,visible=true}:{ticker:string;v
       .catch(()=>{if(!disposed)setError(true);}).finally(()=>{clearTimeout(timeout);if(!disposed)setLoading(false);});
     return()=>{disposed=true;clearTimeout(timeout);controller.abort();};
   },[ticker,attempt,frequency]);
-  return <FundamentalTrendsView data={data} loading={loading} error={error} retry={()=>{recent.current.delete(`${ticker}:${frequency}`);setAttempt(value=>value+1);}} visible={visible} frequency={frequency} onFrequency={setFrequency}/>;
+  const matches=data?.ticker===ticker&&data?.period_type===frequency;
+  return <FundamentalTrendsView data={matches?data:null} loading={loading||(!matches&&!error)} error={error} retry={()=>{recent.current.delete(`${ticker}:${frequency}`);setAttempt(value=>value+1);}} visible={visible} frequency={frequency} onFrequency={setFrequency}/>;
 }
 
 export function FundamentalTrendsView({data,loading,error,retry,visible=true,frequency='annual',onFrequency=()=>{}}:{data:FundamentalResearch|null;loading:boolean;error:boolean;retry:()=>void;visible?:boolean;frequency?:FinancialFrequency;onFrequency?:(value:FinancialFrequency)=>void}){
@@ -68,7 +89,6 @@ export function FundamentalTrendsView({data,loading,error,retry,visible=true,fre
   const amounts:readonly FinancialKey[]=data?.profile==='bank'?['operating_income','net_profit']:data?.financial_identity_guard?['net_profit']:amountFields;
   const growth:readonly FinancialKey[]=data?.profile==='bank'?['operating_income_growth_yoy','net_profit_growth_yoy']:data?.financial_identity_guard?['net_profit_growth_yoy']:growthFields;
   const ratios:readonly FinancialKey[]=data?.financial_identity_guard?['roe','roa']:['gross_margin','net_margin','roe','roa'];
-  const quote=(key:FinancialKey)=>engineAmounts.includes(key as typeof engineAmounts[number])?latest?.[key]==null?'—':number(latest[key]!/unitDivisor[unit],unit==='vnd'?0:2):percent(latest?.[key]);
   const chartProps={rows,visible,unit,frequency,chartRows:data?.chart_rows?.filter(row=>row.period>=(rows[0]?.period||'')&&row.period<=(latest?.period||''))};
   const statementPeriods=data?.statements?.[statement]?.periods.filter(row=>rows.some(value=>value.period===row.period))||[];
   return <section className="min-w-0 space-y-5" aria-labelledby="fundamental-engine-title" hidden={!visible}>
@@ -82,12 +102,13 @@ export function FundamentalTrendsView({data,loading,error,retry,visible=true,fre
     {loading?<div role="status" aria-label={t('Loading financial statements')} className="space-y-4"><Skeleton className="h-24"/><Skeleton className="h-64"/></div>:error?<div role="alert" className="border-y py-8 text-center"><p className="mb-3 text-sm">{t('Financial statements are temporarily unavailable.')}</p><Button variant="outline" onClick={retry}>{t('Retry financials')}</Button></div>:!data||!rows.length?<p className="py-8 text-sm text-muted-foreground">{t('No financial observations are available for this frequency.')}</p>:<>
       <div className="flex flex-wrap justify-between gap-2 text-[11px] leading-5 text-muted-foreground"><p>{frequency==='quarterly'?t('Quarterly ROE and ROA are period returns, not annualized.'):frequency==='ttm'?t('TTM sums four contiguous qualified quarters; balance values remain period-end.'):t('Reported annual statements are kept independently of quarterly totals.')}</p><span>{rows[0]?.period}–{latest?.period} · {ui(unitLabels[unit])}</span></div>
       {data.is_fixture&&<p className="stock-note">{t('Fixture data; not live financial evidence.')}</p>}
+      <p className="text-[11px] leading-5 text-muted-foreground">{t('Report basis')}: {ui(consolidationLabel(data.fundamental_summary?.consolidation??data.consolidation))} · {t('Read at')}: {date(data.read_at,true)} ICT · {t('Provider or process cache; not a publication timestamp.')}</p>
       {data.financial_identity_guard&&<p className="rounded-md border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs leading-5">{t('Financial issuer metrics use qualified statement fields. Generic revenue and liquidity ratios are excluded.')}</p>}
-      {section==='overview'&&<><dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-y py-4 sm:grid-cols-3 xl:grid-cols-5">{[...amounts,'equity','roe','roa' as FinancialKey].map(key=><div key={key}><dt className="text-xs text-muted-foreground">{ui(FINANCIAL_LABELS[key as FinancialKey])}</dt><dd className="financial mt-2 break-words text-lg font-semibold">{quote(key as FinancialKey)}</dd></div>)}</dl><ChangeSummary data={data} unit={unit}/><div className="grid min-w-0 gap-6 xl:grid-cols-2"><FinancialResearchChart {...chartProps} fields={amounts} title="Revenue and profit trends"/><FinancialResearchChart {...chartProps} fields={growth} title="Year-over-year growth" percentage/></div></>}
+      {section==='overview'&&<><FundamentalOverview data={data} unit={unit}/><ChangeSummary data={data} unit={unit}/><div className="grid min-w-0 gap-6 xl:grid-cols-2"><FinancialResearchChart {...chartProps} fields={amounts} title="Revenue and profit trends"/><FinancialResearchChart {...chartProps} fields={growth} title="Year-over-year growth" percentage/></div></>}
       {section==='performance'&&<><div className="grid min-w-0 gap-6 xl:grid-cols-2"><FinancialResearchChart {...chartProps} fields={amounts} title="Revenue and profit trends"/><FinancialResearchChart {...chartProps} fields={growth} title="Year-over-year growth" percentage/></div><FinancialTable rows={rows} fields={[...amounts,'profit_parent',...growth]} unit={unit} label="Business performance"/></>}
       {section==='statements'&&<section aria-label={t('Financial statements')}><div className="mb-4 flex flex-wrap gap-2" role="group" aria-label={t('Statement type')}>{Object.entries(statementLabels).map(([key,label])=><Button key={key} size="sm" variant={statement===key?'secondary':'outline'} aria-pressed={statement===key} onClick={()=>setStatement(key as keyof typeof statementLabels)}>{t(label)}</Button>)}</div>{frequency==='ttm'&&<p className="mb-3 text-xs text-muted-foreground">{t('Statement tables show original quarterly reports, not synthetic TTM statements.')}</p>}{statementPeriods.length?<FinancialStatementTable periods={statementPeriods} unit={unit} label={statementLabels[statement]}/>:<p className="stock-note">{t('This statement is unavailable for the selected periods.')}</p>}</section>}
       {section==='ratios'&&<><FinancialResearchChart {...chartProps} fields={ratios} title="Profitability" percentage/><FinancialTable rows={rows} fields={[...ratios,...growth]} unit={unit} label="Financial ratios"/><div className="grid min-w-0 gap-5 border-t pt-5 xl:grid-cols-2"><FinancialTable rows={rows} fields={data.financial_identity_guard?['liabilities_assets']:['debt_equity','liabilities_assets','current_ratio','quick_ratio']} unit={unit} label="Financial position / leverage"/><FinancialTable rows={rows} fields={data.financial_identity_guard?['cash_operating']:['cash_operating','cash_investing','cash_financing','free_cash_flow','cash_conversion']} unit={unit} label="Cash flow statement"/></div><p className="stock-note">{t('Valuation, NIM, NPL and CASA require verified inputs and remain unavailable.')}</p></>}
-      <details className="border-t pt-3 text-xs text-muted-foreground"><summary className="cursor-pointer font-medium">{t('Financial source and coverage')}</summary><dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2"><div><dt>{t('Source')}</dt><dd>{data.source} · {data.source_version}</dd></div><div><dt>{t('Read at')}</dt><dd>{date(data.read_at,true)} · {t('Provider or process cache; not a publication timestamp.')}</dd></div><div><dt>{t('Report basis')}</dt><dd>{data.consolidation||t('Consolidated / standalone status is not supplied.')}</dd></div><div><dt>{t('Publication date')}</dt><dd>{t('Source dates are shown as reported, without inferred timezone.')}</dd></div></dl>
+      <details className="border-t pt-3 text-xs text-muted-foreground"><summary className="cursor-pointer font-medium">{t('Financial source and coverage')}</summary><dl className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2"><div><dt>{t('Source')}</dt><dd>{data.source} · {data.source_version}</dd></div><div><dt>{t('Read at')}</dt><dd>{date(data.read_at,true)} · {t('Provider or process cache; not a publication timestamp.')}</dd></div><div><dt>{t('Report basis')}</dt><dd>{ui(consolidationLabel(data.fundamental_summary?.consolidation??data.consolidation))}</dd></div><div><dt>{t('Publication date')}</dt><dd>{t('Source dates are shown as reported, without inferred timezone.')}</dd></div></dl>
         {data.source_receipts?.map(receipt=><details key={receipt.statement} className="mt-4 border-t pt-2"><summary className="cursor-pointer">{ui(statementLabels[receipt.statement as keyof typeof statementLabels])} · {ui(receipt.status)}</summary><p className="mt-2">{t('Observed at')}: {date(receipt.observed_at,true)}</p><p className="mt-1 break-all">{receipt.source_url}</p><p className="mt-1 break-all">SHA-256: {receipt.content_sha256||'—'}</p>{receipt.periods.filter(period=>rows.some(row=>row.period===period.period)).map(period=><p key={period.period} className="mt-2">{period.period} · {ui(period.basis)} · {t('Publication date')}: {period.source_dates.publicDate||'—'} · {period.diagnostics.join(', ')}</p>)}</details>)}
         <details className="mt-4 border-t pt-2"><summary className="cursor-pointer">{t('Calculation evidence')}</summary><p className="mt-2">{t('ROE uses total profit and average total equity, not parent-shareholder ROE.')}</p>{Object.entries(latest?.calculations||{}).map(([metric,evidence])=><details key={metric} className="mt-3"><summary className="cursor-pointer">{ui(FINANCIAL_LABELS[metric as FinancialKey]||metric)}{evidence.reason?' · '+ui(evidence.reason):''}</summary><p className="mt-1">{evidence.formula}</p><pre className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap break-all text-[10px]">{JSON.stringify(evidence.inputs,null,2)}</pre></details>)}</details>
         {!!data.reconciliations?.length&&<details className="mt-4 border-t pt-2"><summary className="cursor-pointer">{t('Annual / quarterly differences')}</summary><p className="mt-2">{t('Differences retain source versions; no cause is inferred.')}</p>{data.reconciliations.map(item=><p className="mt-2" key={`${item.statement}-${item.period}-${item.field}`}>{item.period} · {ui(FINANCIAL_LABELS[item.field as FinancialKey]||item.field)} · {t('Annual')}: {number(item.annual_reported/unitDivisor[unit])} · {t('Quarter sum')}: {number(item.quarter_sum/unitDivisor[unit])} · {t('Absolute change')}: {number(item.difference/unitDivisor[unit])} {ui(unitLabels[unit])}</p>)}</details>}

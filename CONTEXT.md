@@ -1,18 +1,172 @@
 # Woofi — Domain Context
 
-### Scoped price map V1 — 2026-10-16
+### Market Workspace UI refinement V2 — local source, 2026-10-19
 
-Explore can switch between its default list and equal-sized quote tiles over the
-same loaded page; search, exchange/index filters and pagination retain their
-existing scope. Watchlist exposes the same presentation in a secondary closed
-disclosure over followed symbols, without changing Read first or review receipts.
-Both consume the existing page LivePrices context and source-computed price
-changes. There are no new leases, requests, providers, financial calculations,
-APIs, schema or acquisition changes. Stale/missing backgrounds are neutral and
-each valid tile retains its own timestamp, session and source disclosure. Tile
-area is not capitalization, money flow, strength or market-wide breadth.
-Research/methodology/feasibility: docs/DEEP_INTERACTIVE_PRODUCT_RESEARCH_V1.md.
-Automated rendering and actual production acceptance are recorded separately.
+Increment from 090abb0: compact desktop navigation collapse retains all links and
+accessible labels; mobile keeps visible destinations. Hot Topics restores existing
+same-Story thumbnails with fixed neutral fallback, without quote consumers or new
+acquisition. Overview emphasizes VN-Index/source freshness with approved mascot
+states; only movement cells receive resolver-qualified full backgrounds. Heatmap
+and the 72h Hot Topics / 24h Focus contracts are preserved. No backend, data, SSI
+qualification or production change. Cloud Browser unavailable; visual acceptance
+PENDING. See `docs/MARKET_WORKSPACE_UI_REFINEMENT_V2.md`.
+
+### Hot Topics and primary navigation V1 — local source, 2026-10-19
+
+Approved restoration reuses `/api/news/hot?limit=4`, its 72-hour independent-
+publisher ranking and original evidence. Overview now has one Hot Topics / Market
+Focus area; Focus retains its own 24-hour qualification/window. News remains
+available when equity metadata fails, with one stable mounted context. Public
+Market / News / Watchlist destinations stay labelled on mobile without a drawer.
+No provider, backend, Watchlist storage, acquisition or production change.
+Browser acceptance unavailable (Cloud Browser not exposed); do not substitute a
+local browser. See `docs/HOT_TOPICS_NAVIGATION_V1.md` for source tests and limits.
+
+### Provisional SSI engineering contract — local development, 2026-10-18
+
+Owner-approved conventions now normalize saved MasterData bands (VND/share ×1)
+and daily matched Summary pairs (shares/VND ×1) as PROVISIONAL_INTERNAL only.
+Exact identity/day/receipt/numeric/plausibility checks preserve raw evidence and
+never sum successive snapshots. A default-disabled development/replay/localhost
+route reuses the Board, with no ingestion shell, provider read or Watchlist change.
+Production/public guards remain; no SSI certification or public rights are implied.
+See `docs/SSI_PROVISIONAL_MARKET_CONTRACT_V1.md` for gates and passing validation.
+
+### Stock Intelligence integration V1 — local development, 2026-10-18
+
+Stock Detail now connects Overview/Company News to the existing persisted Watchlist
+intelligence read, original company stories, source-qualified ticker proofs and
+unverified community evidence. News retains the canonical 72-hour acquisition
+window; community explicitly uses its existing 24-hour publication window. One
+retained panel, no added polling/quotes/acquisition. Pulse copy grouping is optional
+display metadata; default Watchlist behavior and native review IDs remain intact.
+Reviews are explicit and browser-local, merge current state, preserve concurrent
+reviews and never auto-review opened content. Unknown source/review state remains
+unknown. Financial/corporate-action gates and all Market Workspace work are retained.
+Browser acceptance PENDING. See `docs/STOCK_INTELLIGENCE_INTEGRATION_V1.md`.
+
+### Fundamental Analysis V1 qualification increment — local development, 2026-10-18
+
+The existing Financial Analysis overview now groups valuation, business performance,
+profitability and financial health, reusing its engine/charts/statements. The display
+projection adds explicit QUALIFIED/UNAVAILABLE/UNQUALIFIED/DEMO metric contracts and
+withholds unknown/conflicting reporting bases from metrics, charts and comparisons.
+Original raw evidence and full engine math remain inspectable. Valuation is not
+inferred; reported EPS remains period-specific VND/share. Nine saved VCI responses
+have unknown consolidation and do not pass the live display gate. No new source
+read, provider change, worker or production mutation. Browser status PENDING.
+See `docs/FUNDAMENTAL_ANALYSIS_V1_INCREMENT.md` for the metric contract and limits.
+
+### Corporate-action original-source validation — local development, 2026-10-18
+
+Six saved components across five issuers were compared field by field with
+official depository notices and an issuer-authored mirrored PDF text. Terms and
+record dates are corroborated within the documented evidence limits; ex-rights
+dates remain original-unverified, with missing component-specific payment dates.
+No observed conflict in compared facts, no complete original-source acceptance.
+Source-marked verification is now explicitly record-level; incomplete details and
+unresolved corrections cannot read as fully confirmed. Recorded links/publication
+dates are not automatically labeled original issuer documents/announcements.
+Saved records, API, acquisition and production are unchanged. See
+`docs/CORPORATE_ACTION_VALIDATION_V1.md` for the field matrix and evidence limits.
+
+### Stock Detail company overview and distributions — local increment, 2026-10-18
+
+Existing Stock Detail now has a compact cached-identity company panel with explicit
+business-description/classification limitations, original metadata source/sync time
+and a link to its existing lazy financial analysis. Full issuer identity is preserved
+in the header. The existing corporate-action tab reuses the same stored-evidence
+read, with local category filters and one responsive source record per observation.
+Cash/share/rights terms remain type-specific; only explicitly verified, active,
+nonfixture source records may expose event dates/terms. Pending/withdrawn/DEMO,
+missing fields and incomplete coverage remain explicit. No provider or DB change.
+See `docs/STOCK_DETAIL_COMPANY_ACTIONS_V1.md`. V2.2 source is preserved; no preview
+process or permission troubleshooting is part of this increment. Browser acceptance
+remains BLOCKED and no live corporate-action acceptance is claimed.
+
+### V2.2 bounded implementation — local development, 2026-10-18
+
+The existing V2.1/Overview/Heatmap/KL-GT source is extended by a shared nine-state
+price resolver and theme tokens, a pure unqualified SecuritiesSummary pair normalizer,
+and optional replay-only synthetic industry grouping using the existing Board rows.
+`/demo/market` is not available in production-bound builds. Actual SSI qualification
+gates remain unchanged; no summary acquisition path or ICB activation was added.
+See `docs/MARKET_WORKSPACE_V22_INCREMENT.md` for focused validation and limits.
+This is source implementation, not a declaration of browser/live acceptance.
+
+### Market Workspace continuation and SSI qualification — 2026-10-18
+
+Resume `codex/woofi-market-board-correction` in the existing `woofi-visual-news-v1`
+worktree. Its latest committed Market Workspace source is
+`cb5979fa5e1717d4b634a98490cc391f6da50aa5`, containing Unified V2.1 and the
+Overview/Compact-Detailed Heatmap refinement. Newer uncommitted KL/GT presentation,
+numeric sorting, source inspection, qualified-limit color guards and tests extend
+that checkpoint. Preserve them; the earlier V1/V2.1 commits are ancestors, not
+alternative starting points. Isolated browser acceptance evidence already exists;
+the older preview-denial entries below describe historical stages.
+
+The five completed SSI reads on October 17 demonstrate paired SecuritiesSummary
+`totalMatch`/`totalMatchValue`, SecuritiesInfo `icbCode`/`icbName`, and MasterData
+`ceiling`/`floor`/`refPrice`. Do not repeat these reads merely to rediscover the
+fields. Successful access does not establish units, detailed trading scope,
+redistribution rights or current-session freshness. Summary and limits have trading
+dates without source observation timestamps; retrieval time cannot substitute.
+No data family is fully qualified for additional activation. KL/GT remain unavailable
+when unqualified, industry grouping remains inactive, and actual SSI limit colors
+remain gated. See `docs/SSI_MARKET_DATA_QUALIFICATION.md` for exact sample coverage,
+saved evidence receipts and the remaining narrow integration gates.
+
+Existing simulated/replay UI validation is not live data acceptance or final user
+product approval. This continuation makes no production, Supervisor, SQLite,
+acquisition, cooldown, Technical Pilot or FPT automation change; no push/deployment.
+
+### Targeted V2.1 Overview / Heatmap refinement — local development
+
+Overview compares only a known same-date/session cohort of fresh loaded quotes;
+largest advances/declines and sample distribution do not imply index breadth.
+Compact persisted-News context preserves original publisher/headline/time/URL and
+qualified category, without extra ticker-price acquisition or causation claims.
+Workspace Heatmap adds compact-default/detailed presentation; Watchlist retains
+its detailed default. Board layout stays unchanged, with explicit visible-sample
+coverage and unknown counts on failed transport. See
+`docs/MARKET_WORKSPACE_V21_REFINEMENT.md` for measured browser evidence and limits.
+This is neither production deployment nor final user product acceptance.
+
+### Approved Unified Market Workspace V2.1 — local development only
+
+The approved market design is implemented as Overview → ordinary Board / stock
+Heatmap → existing Stock Research. One global ticker search drives cached metadata
+discovery; the bounded loaded page shares the existing LivePrices lease across
+workspace modes. Ordinary numerical sorting remains default. Optional movement
+groups partition only that selected sample; stale/missing/unknown movements do not
+become current direction counts. Five percentage bins and equal-area stock cells
+make no sector, capitalization, breadth, sentiment or flow claim. Original source,
+time, session and reference values stay inspectable. Future-data dependencies are
+an informational disclosure only. Existing research, financial and News services
+remain in use. This is a development checkpoint, not a production release or live
+SSI qualification. See `docs/UNIFIED_MARKET_WORKSPACE_V21.md` for acceptance limits
+and the separately required integration, runtime, backup and release gates.
+
+### Market board correction — local source checkpoint, 2026-10-16
+
+The earlier ten-record oversized Price map failed the market-comparison task.
+Its replacement defaults Explore to cached SSI VN30 membership, one bounded
+30-symbol page in the existing LivePrices lease (existing provider max50), compact
+three-column quote tables and a separate equal-area heatmap. All equities remain
+available through search/filters and bounded pagination. Sorting uses existing
+source price/percentage fields, never a new return, sector, strength or flow metric.
+Pending requests are loading, not confirmed missing observations. Per-symbol time
+controls expose original issuer identity/source/date/session/reference evidence.
+Watchlist reuses the compact heatmap with its existing symbols and review state.
+No provider, API, acquisition loop, numerical formula, DB or Supervisor changes.
+
+Actual current-source evidence: all30 cached VN30 symbols had SSI closing-minute
+observations at14:45 ICT onOct16; no qualified session-volume/sector fields exist
+in this contract. Market-wide/index/sector performance is not inferred. New-code
+browser acceptance and deployment remain BLOCKED because automatic policy denied
+preview execution; no alternate launcher/port or canonical cutover is permitted
+as a workaround. Canonical1d7706a remains unchanged. See
+`docs/MARKET_BOARD_CORRECTION_V1.md` for evidence and remaining acceptance gates.
 
 ### Daily use V1 — local implementation checkpoint, 2026-10-16
 

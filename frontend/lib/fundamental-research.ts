@@ -11,6 +11,10 @@ export type ResearchSection=typeof researchSections[number];
 export type AmountUnit='billions'|'millions'|'vnd';
 export const unitDivisor={billions:1e9,millions:1e6,vnd:1} as const;
 export const unitLabels={billions:'VND bn',millions:'VND mn',vnd:'VND'} as const;
+// Consolidation is distinct from the source's standalone-quarter flow basis.
+export function consolidationLabel(value:string|null|undefined) {
+  return value==='consolidated'?'Consolidated statements':value==='standalone'?'Separate statements':'Consolidated / standalone status is not supplied.';
+}
 
 export function financialResearchData(data:FundamentalResearch,ticker:string):FundamentalResearch {
   if(!data||data.ticker!==ticker||data.currency!=='VND'||data.period_type!=='annual'||typeof data.source!=='string'||!data.source||typeof data.financial_identity_guard!=='boolean'||!Array.isArray(data.rows)||data.rows.length>20||!Array.isArray(data.changes))throw new Error('Invalid financial ownership or contract');

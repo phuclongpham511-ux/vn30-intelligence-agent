@@ -22,6 +22,7 @@ new Function('require','exports',compiled)(name=>{
   if(name==='./stock/StockStates')return {StockError:marker('Identity error')};
   if(name==='./ui/skeleton')return {Skeleton:marker('Skeleton')};
   if(name==='./ui/button')return {Button:marker('Button')};
+  if(name==='./market/WorkspaceNav')return {__esModule:true,default:marker('WorkspaceNav')};
   if(name.startsWith('./stock/'))return {__esModule:true,default:marker(name.slice(8))};
   return require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name);
 },exports);
@@ -47,4 +48,12 @@ test('research tabs share one retained chart and defer unvisited annual financia
 test('a wrong ticker identity cannot render research for the prior company',()=>{
   const html=render('overview',['overview'],'OTHER');
   assert.match(html,/Identity error/);assert.doesNotMatch(html,/Original company name|TechnicalChart/);
+});
+test('one research integration replaces separate news/community loaders without changing primary tabs',()=>{
+ for(const section of ['overview','news']){
+  const html=render(section);
+  assert.equal((html.match(/data-component="StockIntelligence"/g)||[]).length,1);
+  assert.doesNotMatch(html,/data-component="StockNews|data-component="StockCommunity/);
+  assert.match(html,/id="stock-tab-fundamentals"/);assert.match(html,/id="stock-tab-actions"/);
+ }
 });

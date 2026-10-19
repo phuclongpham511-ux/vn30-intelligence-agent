@@ -89,7 +89,15 @@ def normalize_trade(row, reference, now):
                 open=number(row, 'o', positive=True), high=number(row, 'h', positive=True),
                 low=number(row, 'l', positive=True), total_volume=number(row, 'v', nonnegative=True),
                 total_value=None, trading_date=updated.date().isoformat(), updated_at=updated.isoformat(),
-                source='SSI:FastConnect:trade', price_unit='VND', session='unknown')
+                source='SSI:FastConnect:trade', price_unit='VND', session='unknown',
+                trading_activity=dict(symbol=ticker, trading_date=updated.date().isoformat(),
+                    observed_at=updated.isoformat(), session='trading_day',
+                    source='SSI:FastConnect:v3:trade', scope='unverified_matched', cumulative=True,
+                    includes_negotiated_trades=None,
+                    volume=dict(value=number(row, 'v', nonnegative=True), raw_value=row.get('v'),
+                                field='v', unit=None, qualification='unverified_units'),
+                    value=dict(value=None, raw_value=None, field=None, unit=None,
+                               qualification='unavailable')))
 
 
 class SsiLiveMarket:
@@ -141,6 +149,7 @@ class SsiLiveMarket:
             snapshot = normalize_trade({'s':symbol, 't':row['tradingDate'], 'p':row.get('close')},
                                       ref[1] if ref and ref[0] == day else None, now)
             snapshot['source'] = 'SSI:FastConnect:ohlc:1m'
+            snapshot.pop('trading_activity', None)  # An interval is never a session total.
             with self.lock:
                 previous = self.cache.get(symbol)
                 if previous is None or previous['updated_at'] < snapshot['updated_at']:
@@ -190,7 +199,7 @@ class SsiLiveMarket:
     def accept(self, message):
         """Raw SSI DATA boundary. Unrequested and invalid messages are discarded."""
         row = message.get('data')
-        if not isinstance(row, dict) or message.get('topic') != 'trade.' + str(row.get('s')):
+        if not isinstance(row, dict) or 'st' in row or message.get('topic') != 'trade.' + str(row.get('s')):
             return
         now = self.clock().astimezone(VN)
         with self.lock:

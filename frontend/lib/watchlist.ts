@@ -4,6 +4,7 @@ import type { NewsSource } from "./news.ts";
 import type { CommunitySource } from "./community.ts";
 
 export const watchlistStorageKey = "vn30.watchlist.v1";
+export const watchlistChangedEvent = 'woofi-watchlist-changed';
 export type ReviewReceipt = { revision: string; reviewed_at: string | null; members?:Record<string,string> };
 export type WatchlistState = { symbols: string[]; seen: Record<string, string[]>; communitySeen: Record<string, string[]>;
   receipts?: Record<string, Record<string, ReviewReceipt>>; reviewedAt?: Record<string, string> };
@@ -72,7 +73,7 @@ const validTime = (value: unknown): value is string => typeof value === 'string'
 export type UpdateKind = 'news' | 'community' | 'technical';
 export type AttentionUpdate = { id: string; entity_id: string; revision: string; kind: UpdateKind;
   title: string; occurred_at: string; url: string; source_count?: number; evidence: unknown; evidence_truncated?: boolean; revision_members?:Record<string,string>;ticker_associations?:TickerAssociation[] };
-export type UpdatePage = {items: AttentionUpdate[]; has_more: boolean; truncated: boolean; window_start?: string};
+export type UpdatePage = {items: AttentionUpdate[]; has_more: boolean; truncated: boolean; window_start?: string;display_groups?:string[][]};
 export type IntelligentStock = {symbol:string; status:'ready'|'unavailable'; company_name:string|null; display_name_en:string|null; exchange:string|null;
   news:UpdatePage|null; community:UpdatePage|null; technical:(UpdatePage & {data:TechnicalResponse;waiting_for_gate?:boolean;awaiting_source_check?:boolean;next_check_due_at?:string|null;last_checked_at?:string|null})|null};
 export type Intelligence = {as_of:string; offset:number; page_size:number; stocks:IntelligentStock[];
@@ -144,9 +145,9 @@ export function baselineLegacyReviews(state: WatchlistState, data: Intelligence)
   }
   return next;
 }
-export async function loadIntelligence(symbols:string[], offset=0, signal?:AbortSignal, request:typeof fetch=fetch):Promise<Intelligence> {
+export async function loadIntelligence(symbols:string[], offset=0, signal?:AbortSignal, request:typeof fetch=fetch,options:{community_groups?:boolean}={}):Promise<Intelligence> {
   const response = await request('/api/watchlists/intelligence', {method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({symbols,offset,page_size:12}),signal,cache:'no-store'});
+    body:JSON.stringify({symbols,offset,page_size:12,...(options.community_groups?{community_groups:true}:{})}),signal,cache:'no-store'});
   if (!response.ok) throw new Error('Watchlist updates unavailable');
   return parseIntelligence(await response.json(),symbols,offset);
 }
