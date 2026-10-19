@@ -141,3 +141,12 @@ test('reference-style row shading varies continuously, caps safely and preserves
  for(let i=1;i<=70;i++)for(const state of ['ADVANCING','DECLINING']){const fill=marketRowFill(state,(state==='ADVANCING'?1:-1)*i/10);assert.ok((lum(fill)+.05)/(lum('#102336')+.05)>=4.5);}
  const css=readFileSync(new URL('../app/price-state.css',import.meta.url),'utf8');assert.ok(css.includes('.quote-table tbody tr.quote-movement-row:hover>*{background:var(--quote-row-fill)'));
 });
+
+test('ordinary 1% and 2% moves have a perceptible ramp, reaching approved hues at 3%',()=>{
+ for(const [state,sign,hue] of [['ADVANCING',1,'#65e4b2'],['DECLINING',-1,'#ff91a0']]){
+  const one=marketRowFill(state,sign),two=marketRowFill(state,sign*2);
+  const rgb=hex=>[1,3,5].map(i=>parseInt(hex.slice(i,i+2),16));
+  assert.ok(Math.max(...rgb(one).map((v,i)=>Math.abs(v-rgb(two)[i])))>=30);
+  assert.equal(marketRowFill(state,sign*3),hue);assert.notEqual(marketRowFill(state,sign*7),hue);
+ }
+});
