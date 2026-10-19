@@ -1,5 +1,26 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Approved Hot Topics and primary navigation integration — 2026-10-19
+
+Public routes share visible Market / News / Watchlist links (VI: Thị trường /
+Tin tức / Theo dõi), inline on desktop and a labelled second header row on mobile.
+No primary destination depends on a hamburger or the old wide sidebar. Existing
+News/Watchlist content, routes and browser-local review semantics are unchanged.
+
+Overview places one compact publisher-context area immediately after its sample
+summary, before mover details. Default Hot Topics reuses the original 72-hour,
+two-independent-publisher contract and server order; Market Focus retains its
+separate qualified 24-hour Company/Market Brief contract. Inactive options stop
+their existing read-refresh subscription and retain their own results. No merged
+feed or additional quote consumer. Initial Hot Topics visibility is three desktop
+headlines/two mobile, with an explicit expansion; source text/time and original
+publisher/ticker links remain separate. Board/Heatmap keep their full canvas.
+
+This supersedes the older public-route sidebar guidance below. Internal SSI shell
+and provisional data guards remain separate. Automated validation is recorded in
+`docs/HOT_TOPICS_NAVIGATION_V1.md`; Cloud Browser acceptance is unavailable, so
+source completion does not establish visual acceptance or authorize deployment.
+
 ## Approved Unified V2.1 market workspace
 
 Targeted refinement: Overview uses compact sample/freshness context, paired

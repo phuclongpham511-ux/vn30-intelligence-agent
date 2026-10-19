@@ -1,5 +1,16 @@
 # Woofi — Domain Context
 
+### Hot Topics and primary navigation V1 — local source, 2026-10-19
+
+Approved restoration reuses `/api/news/hot?limit=4`, its 72-hour independent-
+publisher ranking and original evidence. Overview now has one Hot Topics / Market
+Focus area; Focus retains its own 24-hour qualification/window. News remains
+available when equity metadata fails, with one stable mounted context. Public
+Market / News / Watchlist destinations stay labelled on mobile without a drawer.
+No provider, backend, Watchlist storage, acquisition or production change.
+Browser acceptance unavailable (Cloud Browser not exposed); do not substitute a
+local browser. See `docs/HOT_TOPICS_NAVIGATION_V1.md` for source tests and limits.
+
 ### Provisional SSI engineering contract — local development, 2026-10-18
 
 Owner-approved conventions now normalize saved MasterData bands (VND/share ×1)

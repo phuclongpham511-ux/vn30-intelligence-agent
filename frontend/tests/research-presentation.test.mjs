@@ -94,7 +94,7 @@ test('Hot Topics selects only same-cluster images without hiding no-image storie
 test('Explore preserves its index hero and exposes the requested VN-Index detail link',()=>{
  const Market=component('../app/components/ExploreMarket.tsx',{
   './mascot/Mascot':{MascotIllustration:({size})=>React.createElement('span',{'data-mascot-size':size}),MascotState:({children})=>children},
-  './news/TopStory':()=>null,'./news/MarketFocus':()=>null});
+  './news/HotTopics':()=>null,'./news/MarketFocus':()=>null});
  const html=renderToStaticMarkup(React.createElement(Market));
  assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
  assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary/);

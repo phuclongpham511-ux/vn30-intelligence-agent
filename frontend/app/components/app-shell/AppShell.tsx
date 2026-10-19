@@ -3,14 +3,13 @@ import {useEffect,useState} from 'react';
 import {ThemeProvider,useTheme} from 'next-themes';
 import {usePathname} from 'next/navigation';
 import Link from 'next/link';
-import {Newspaper,Compass,Bookmark,PanelLeft,Moon,Sun,Info,X} from 'lucide-react';
+import {Moon,Sun,Info,X} from 'lucide-react';
 import {Dialog} from 'radix-ui';
 import {LanguageProvider,useLocale} from '@/lib/i18n';
 import TickerSearch from '../stock/TickerSearch';
 import {MarketSearchProvider,useMarketSearch} from '../market/MarketSearch';
 import {StockUniverse} from '../stock/StockUniverse';
 import {Button} from '../ui/button';
-import {Sheet,SheetContent,SheetTrigger,SheetTitle,SheetDescription} from '../ui/sheet';
 
 export function BrandLogo({compact=false}: {compact?:boolean}) {
   const {t}=useLocale();
@@ -28,21 +27,21 @@ export function AboutWoofi({compact=false}: {compact?:boolean}) {
     </Dialog.Content></Dialog.Portal>
   </Dialog.Root>;
 }
-function Navigation({close}: {close?:()=>void}) {
-  const path=usePathname();const {t}=useLocale();
-  return <div className="flex h-full flex-col"><div onClick={close} className="px-6 pb-5 pt-4"><BrandLogo/></div><div className="eyebrow px-6 pb-3">{t('Workspace')}</div>
-    <nav aria-label={t('Main navigation')} className="space-y-1 px-3">{[{href:'/',label:'Explore',icon:Compass},{href:'/news',label:'News',icon:Newspaper},{href:'/watchlist',label:'Watchlist',icon:Bookmark}].map(({href,label,icon:Icon})=>{
-      const active=href==='/'?path==='/'||path.startsWith('/stocks')||path.startsWith('/indices'):path===href;
-      return <Link key={href} onClick={close} href={href} aria-current={active?'page':undefined} className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm ${active?'bg-primary/10 font-medium text-primary':'text-muted-foreground hover:bg-muted hover:text-foreground'}`}><Icon size={17}/>{t(label as 'Explore'|'News'|'Watchlist')}{active&&<span className="ml-auto h-1.5 w-1.5 rounded-full bg-primary"/>}</Link>;
-    })}</nav><div className="mt-auto border-t p-3"><AboutWoofi/></div>
-  </div>;
+export function PrimaryNavigation({path}:{path:string}) {
+  const {t,language}=useLocale();
+  return <nav aria-label={t('Main navigation')} className="woofi-primary-nav">
+    {([{href:'/',label:'Market'},{href:'/news',label:'News'},{href:'/watchlist',label:language==='vi'?'Follow':'Watchlist'}] as const).map(({href,label})=>{
+      const active=href==='/'?path==='/'||path.startsWith('/stocks/')||path.startsWith('/indices/'):path===href||path.startsWith(href+'/');
+      return <Link key={href} href={href} aria-current={active?'page':undefined}>{t(label)}</Link>;
+    })}
+  </nav>;
 }
 function ThemeToggle() {
   const {resolvedTheme,setTheme}=useTheme();const {t}=useLocale();const [mounted,setMounted]=useState(false);useEffect(()=>setMounted(true),[]);const dark=!mounted||resolvedTheme==='dark';
   return <Button variant="ghost" size="icon" aria-label={t(dark?'Switch to light mode':'Switch to dark mode')} onClick={()=>setTheme(dark?'light':'dark')}>{dark?<Sun size={17}/>:<Moon size={17}/>}</Button>;
 }
 function Shell({children}: {children:React.ReactNode}) {
-  const [open,setOpen]=useState(false);const {t,language,setLanguage}=useLocale();
+  const {t,language,setLanguage}=useLocale();
   const path=usePathname(),market=path==='/'||path.startsWith('/stocks/')||(process.env.NEXT_PUBLIC_WOOFI_VALIDATION==='replay'&&path==='/demo/market');
   const {setQuery}=useMarketSearch();
   useEffect(()=>{
@@ -54,15 +53,13 @@ function Shell({children}: {children:React.ReactNode}) {
     return ()=>{controller.abort();clearInterval(timer);};
   },[]);
   return <div className={market?'market-shell min-h-screen':'min-h-screen'}><a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-card focus:p-3">{t('Skip to content')}</a>
-    {!market&&<aside className="fixed inset-y-0 left-0 hidden w-60 border-r bg-[var(--sidebar)] lg:block"><Navigation/></aside>}<div className={market?'min-w-0':'min-w-0 lg:ml-60'}>
+    <div className="min-w-0">
     {process.env.NEXT_PUBLIC_WOOFI_VALIDATION==='replay'&&<div className="market-validation">SIMULATED UI VALIDATION — NOT LIVE SSI</div>}
-    <header className={market?'market-app-header':'sticky top-0 z-30 flex min-h-[72px] flex-wrap items-center gap-2 border-b bg-background/95 px-3 py-2 backdrop-blur-sm sm:flex-nowrap sm:py-0 md:px-8'}>
-      <Sheet open={open} onOpenChange={setOpen}><SheetTrigger asChild><Button variant="ghost" size="icon" className="lg:hidden" aria-label={t('Open navigation')}><PanelLeft size={19}/></Button></SheetTrigger><SheetContent side="left" className="w-72 gap-0 p-0"><SheetTitle className="sr-only">{t('Navigation')}</SheetTitle><SheetDescription className="sr-only">{t('Explore, news and watchlist workspace')}</SheetDescription><Navigation close={()=>setOpen(false)}/></SheetContent></Sheet>
-      <div className={market?'market-brand':'mr-auto sm:mr-0 lg:hidden'}><BrandLogo compact/></div>{market&&<span className="market-brand-caption">{t('Market workspace')}</span>}<div className={market?'market-global-search':'order-last w-full min-w-0 sm:order-none sm:w-auto sm:flex-1'}><TickerSearch onQueryChange={path==='/'?setQuery:undefined}/></div>
-      {market&&<nav className="market-shell-links" aria-label={t('Main navigation')}><Link href="/news">{t('News')}</Link><Link href="/watchlist">{t('Watchlist')}</Link></nav>}
+    <header className="market-app-header woofi-app-header">
+      <div className="market-brand"><BrandLogo compact/></div><PrimaryNavigation path={path}/><div className="market-global-search"><TickerSearch onQueryChange={path==='/'?setQuery:undefined}/></div>
       <select aria-label={t('Language')} value={language} onChange={e=>setLanguage(e.target.value as 'en'|'vi')} className="h-9 w-14 shrink-0 rounded border bg-background px-1 text-xs"><option value="vi">VI</option><option value="en">EN</option></select>
       <ThemeToggle/>
-    </header><main id="main-content" className={market?'market-canvas':'mx-auto max-w-[1600px] p-4 md:p-8'}>{children}</main><footer className="mx-4 flex flex-wrap justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>{t('Woofi · Vietnamese equities')}</span><span>{t('Daily market data · Publisher news')}</span></footer>
+    </header><main id="main-content" className={market?'market-canvas':'mx-auto max-w-[1600px] p-4 md:p-8'}>{children}</main><footer className="mx-4 flex flex-wrap items-center justify-between gap-2 border-t py-5 text-[11px] text-muted-foreground md:mx-8"><span>{t('Woofi · Vietnamese equities')}</span><span>{t('Daily market data · Publisher news')}</span><AboutWoofi/></footer>
     </div></div>;
 }
 function InternalShell({children}: {children:React.ReactNode}) {

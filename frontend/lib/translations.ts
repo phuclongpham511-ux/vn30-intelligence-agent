@@ -1,4 +1,9 @@
 export const vietnamese = {
+  "Publisher news context":"Bối cảnh tin tức",
+  "Last 72 hours · independent publisher coverage.":"72 giờ qua · tin từ các nhà xuất bản độc lập.",
+  "More headlines":"Thêm tiêu đề",
+  "About these headlines":"Cách chọn tin",
+  "At least two independent publisher groups within 72 hours. Existing publisher-coverage ranking; not sentiment or an investment signal.":"Tối thiểu hai nhóm nhà xuất bản độc lập trong 72 giờ. Giữ xếp hạng theo độ phủ báo chí; không phải tâm lý thị trường hay tín hiệu đầu tư.",
   "Internal provisional SSI data":"Dữ liệu SSI tạm quy ước nội bộ",
   "Inspect provisional {ticker}":"Kiểm tra dữ liệu tạm quy ước {ticker}",
   "Provisional market data rejected; inspect the source contract.":"Dữ liệu thị trường tạm quy ước bị từ chối; hãy kiểm tra hợp đồng nguồn.",
