@@ -2,6 +2,8 @@
 
 ## Owner correction — full-row market fills (19 October 2026)
 
+Follow-up: use semibold numeric cells and softer dedicated row palettes in both themes. For qualified advancing/declining states only, shade by absolute percentage: below 1% light, 1% to below 3% medium, 3% or more stronger. Missing/inconsistent percentages get the light base, never an inferred magnitude. These are presentation buckets, not exchange limits, live qualification or investment strength. Trần/sàn/reference remain separate and Heatmap is unchanged.
+
 The owner's third reference screenshot supersedes the V2 movement-cell-only instruction: fill the entire stock row in the Board and Overview mover tables, with a compact gap and rounded outer corners. Reuse the centralized price-state resolver and contrast-safe theme palette. Stale/missing/unknown/error rows stay neutral. Heatmap, sorting, source dialogs and data contracts are unchanged. This source correction requires new visual acceptance; existing running preview builds do not update automatically.
 
 ## Market Workspace UI refinement V2 — 2026-10-19

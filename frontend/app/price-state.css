@@ -8,19 +8,24 @@
 .price-floor,.floor{color:var(--price-floor)}
 .price-stale,.price-unavailable,.price-unknown,.price-error{color:var(--muted-foreground)}
 /* Full stock rows, following the owner-approved reference; unknown states stay neutral. */
-:root{--price-movement-ink:#ffffff}
-.dark{--price-movement-ink:var(--background)}
+:root{--row-ink:#17352b;--row-down-ink:#55212e;--row-up-low:#e4f1e9;--row-up-medium:#c5e2d1;--row-up-high:#9dccb0;--row-down-low:#f8e7e9;--row-down-medium:#edc6cd;--row-down-high:#dfa4b0;--row-ceiling:#e5d5f1;--row-floor:#c9e7ed;--row-reference:#f1e6c3;--row-special-ink:#283343}
+.dark{--row-ink:#e0efe7;--row-down-ink:#f7e5e8;--row-up-low:#203b32;--row-up-medium:#2b4d3e;--row-up-high:#365f4a;--row-down-low:#3f2931;--row-down-medium:#55323d;--row-down-high:#6a3d49;--row-ceiling:#4c385e;--row-floor:#254c58;--row-reference:#504730;--row-special-ink:#f1edf5}
 .quote-table:has(.quote-movement-row){border-collapse:separate;border-spacing:0 3px}
 .quote-table .quote-movement-row{--quote-row-fill:var(--muted);--quote-row-ink:var(--muted-foreground)}
-.quote-table .quote-movement-row.price-ceiling{--quote-row-fill:var(--price-ceiling);--quote-row-ink:var(--price-movement-ink)}
-.quote-table .quote-movement-row.price-advancing{--quote-row-fill:var(--positive);--quote-row-ink:var(--price-movement-ink)}
-.quote-table .quote-movement-row.price-reference{--quote-row-fill:var(--unchanged);--quote-row-ink:var(--price-movement-ink)}
-.quote-table .quote-movement-row.price-declining{--quote-row-fill:var(--negative);--quote-row-ink:var(--price-movement-ink)}
-.quote-table .quote-movement-row.price-floor{--quote-row-fill:var(--price-floor);--quote-row-ink:var(--price-movement-ink)}
-.quote-table tbody .quote-movement-row>th,.quote-table tbody .quote-movement-row>td{background:var(--quote-row-fill);color:var(--quote-row-ink);border-bottom:0}
+.quote-table .quote-movement-row.price-ceiling{--quote-row-fill:var(--row-ceiling);--quote-row-ink:var(--row-special-ink)}
+.quote-table .quote-movement-row.price-advancing{--quote-row-fill:var(--row-up-low);--quote-row-ink:var(--row-ink)}
+.quote-table .quote-movement-row.price-reference{--quote-row-fill:var(--row-reference);--quote-row-ink:var(--row-special-ink)}
+.quote-table .quote-movement-row.price-declining{--quote-row-fill:var(--row-down-low);--quote-row-ink:var(--row-down-ink)}
+.quote-table .quote-movement-row.price-floor{--quote-row-fill:var(--row-floor);--quote-row-ink:var(--row-special-ink)}
+.quote-table .quote-movement-row.price-advancing[data-movement-strength=medium]{--quote-row-fill:var(--row-up-medium)}
+.quote-table .quote-movement-row.price-advancing[data-movement-strength=high]{--quote-row-fill:var(--row-up-high)}
+.quote-table .quote-movement-row.price-declining[data-movement-strength=medium]{--quote-row-fill:var(--row-down-medium)}
+.quote-table .quote-movement-row.price-declining[data-movement-strength=high]{--quote-row-fill:var(--row-down-high)}
+.quote-table tbody .quote-movement-row>th,.quote-table tbody .quote-movement-row>td{background:var(--quote-row-fill);color:var(--quote-row-ink);border-bottom:0;font-weight:600}
 .quote-table .quote-movement-row>:first-child{border-radius:4px 0 0 4px}
 .quote-table .quote-movement-row>:last-child{border-radius:0 4px 4px 0}
 .quote-table .quote-movement-row>th a,.quote-table .quote-movement-row>th button,.quote-table .quote-movement-row .quote-source,.quote-table .quote-movement-row .quote-row-detail>span{color:var(--quote-row-ink)}
+.quote-table .quote-movement-row>td time{font-weight:400}
 .quote-table td.quote-movement-cell{text-align:right;font-variant-numeric:tabular-nums}
 .price-demo{padding:16px 0;min-width:0}
 .price-demo h1{font-size:22px;margin:12px 0 4px}

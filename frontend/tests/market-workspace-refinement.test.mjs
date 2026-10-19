@@ -6,6 +6,7 @@ import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
 import {LanguageContext,localeTools} from '../lib/i18n.ts';
+import {marketRowStrength} from '../lib/marketRow.ts';
 import {indexUiState} from '../lib/marketIndex.ts';
 import {mascotAssets,mascotUiStates} from '../lib/mascot.ts';
 const require=createRequire(import.meta.url);
@@ -83,11 +84,12 @@ test('full-row fills use existing price tokens with readable contrast in both ma
  for(const dark of [false,true]){
   const vars={...variables(price,':root'),...variables(market,'.market-shell'),...(dark?{...variables(price,'.dark'),...variables(market,'.dark .market-shell')}:{})};
   const resolve=v=>v.startsWith('var(')?resolve(vars[v.slice(4,-1)]):v;
-  for(const [state,token] of [['ceiling','--price-ceiling'],['advancing','--positive'],['reference','--unchanged'],['declining','--negative'],['floor','--price-floor']]){
+  for(const [state,token,ink] of [['ceiling','--row-ceiling','--row-special-ink'],['advancing','--row-up-low','--row-ink'],['reference','--row-reference','--row-special-ink'],['declining','--row-down-low','--row-down-ink'],['floor','--row-floor','--row-special-ink']]){
    let rule;price.walkRules('.quote-table .quote-movement-row.price-'+state,r=>rule=r);assert.ok(rule);
    const declaration=key=>rule.nodes.find(n=>n.prop===key)?.value;
-   assert.equal(declaration('--quote-row-fill'),'var('+token+')');assert.equal(declaration('--quote-row-ink'),'var(--price-movement-ink)');assert.ok(contrast(resolve(declaration('--quote-row-fill')),resolve(declaration('--quote-row-ink')))>=4.5,state+' contrast '+(dark?'dark':'light'));
+   assert.equal(declaration('--quote-row-fill'),'var('+token+')');assert.equal(declaration('--quote-row-ink'),'var('+ink+')');assert.ok(contrast(resolve(declaration('--quote-row-fill')),resolve(declaration('--quote-row-ink')))>=4.5,state+' contrast '+(dark?'dark':'light'));
   }
+  for(const [direction,ink] of [['up','--row-ink'],['down','--row-down-ink']])for(const tier of ['low','medium','high'])assert.ok(contrast(resolve(vars['--row-'+direction+'-'+tier]),resolve(vars[ink]))>=4.5,direction+' '+tier+' contrast '+(dark?'dark':'light'));
   assert.ok(contrast(resolve(vars['--muted']),resolve(vars['--muted-foreground']))>=4.5);
  }
  const fills=[];price.walkRules(r=>{if(r.selector.includes('.quote-table tbody .quote-movement-row>'))fills.push(r);});
@@ -106,4 +108,24 @@ test('responsive styles retain mobile labels after desktop collapse and reserve 
  for(const selector of ['.hot-topics-stories .news-thumbnail','.market-context-prominent>.market-index-mascot'])assert.ok(rules(selector).every(r=>prop(r,'width')&&prop(r,'height')));
  const sizes=rules('.market-index-value').map(r=>prop(r,'font-size')).filter(Boolean);assert.deepEqual(sizes,['32px','28px']);
  assert.ok(rules('.market-context-prominent').every(r=>prop(r,'grid-template-columns')?.includes('minmax(0,1fr)')));
+});
+
+test('movement shading uses bounded percentage buckets only on trustworthy advancing/declining rows',()=>{
+ for(const [value,tier] of [[.01,'low'],[.99,'low'],[1,'medium'],[2.99,'medium'],[3,'high'],[100,'high']]){
+  assert.equal(marketRowStrength('ADVANCING',value),tier);assert.equal(marketRowStrength('DECLINING',-value),tier);
+ }
+ for(const state of ['CEILING','FLOOR','REFERENCE','STALE','UNAVAILABLE','UNKNOWN','ERROR'])assert.equal(marketRowStrength(state,3),undefined);
+ for(const value of [null,undefined,NaN,Infinity,0,-1,'2'])assert.equal(marketRowStrength('ADVANCING',value),undefined);
+ assert.equal(marketRowStrength('DECLINING',1),undefined);
+});
+
+test('rendered movement row exposes strength without changing data or the Heatmap',()=>{
+ for(const [change,percent,state,strength] of [[50,.5,'ADVANCING','low'],[200,2,'ADVANCING','medium'],[400,4,'ADVANCING','high'],[-50,-.5,'DECLINING','low'],[-200,-2,'DECLINING','medium'],[-400,-4,'DECLINING','high']]){
+  const row=quote({last_price:10000+change,change,change_percent:percent});const before=JSON.stringify(row);
+  const data={session:'active',as_of:now.toISOString(),items:{DEMO01:{status:'fresh',snapshot:row}}};
+  const html=render(Quote,{stocks:[{symbol:'DEMO01'}],data,now,scope:'page',mode:'board'});
+  assert.match(html,new RegExp('<tr[^>]*data-movement-state="'+state+'"[^>]*data-movement-strength="'+strength+'"'));
+  const stale=render(Quote,{stocks:[{symbol:'DEMO01'}],data:{...data,items:{DEMO01:{status:'stale',snapshot:row}}},now,scope:'page',mode:'board'});assert.doesNotMatch(stale,/data-movement-strength/);
+  const heatmap=render(Quote,{stocks:[{symbol:'DEMO01'}],data,now,scope:'page',mode:'heatmap'});assert.doesNotMatch(heatmap,/data-movement-strength/);assert.equal(JSON.stringify(row),before);
+ }
 });
