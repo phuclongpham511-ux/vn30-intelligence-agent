@@ -8,7 +8,7 @@
 .price-floor,.floor{color:var(--price-floor)}
 .price-stale,.price-unavailable,.price-unknown,.price-error{color:var(--muted-foreground)}
 /* Full stock rows, following the owner-approved reference; unknown states stay neutral. */
-:root{--row-ink:#102336;--row-down-ink:#102336;--row-up-low:#cff1d3;--row-up-medium:#92d99e;--row-up-high:#2fb64b;--row-down-low:#ffdddd;--row-down-medium:#ffa6aa;--row-down-high:#ff5c66;--row-ceiling:#a085ff;--row-floor:#92e5ef;--row-reference:#ffe6aa;--row-special-ink:#102336}
+:root{--row-ink:#102336;--row-down-ink:#102336;--row-up-low:#dcf2de;--row-up-medium:#aedfb7;--row-up-high:#70c580;--row-down-low:#fde7e7;--row-down-medium:#f7c0c4;--row-down-high:#f18f97;--row-ceiling:#b5a1f2;--row-floor:#b2e7ed;--row-reference:#f6e6bc;--row-special-ink:#102336}
 .quote-table:has(.quote-movement-row){border-collapse:separate;border-spacing:0 3px}
 .quote-table .quote-movement-row{--quote-row-fill:var(--muted);--quote-row-ink:var(--muted-foreground)}
 .quote-table .quote-movement-row.price-ceiling{--quote-row-fill:var(--row-ceiling);--quote-row-ink:var(--row-special-ink)}
