@@ -1,5 +1,18 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Financial Research experience V2 — development, 19 October 2026
+
+Financial Analysis keeps one shared period/unit toolbar with five secondary
+destinations: Business picture, Growth drivers, Valuation, Financial statements,
+Documents and sources. Prefer paired chart frames on desktop and stacked frames
+on mobile, token-based colors and separate amount/rate axes. Missing qualification
+receives an explicit chart shell and inspectable reason; never an invented line.
+Partial compositions do not imply 100% coverage or reconstructed residuals.
+Source-coded statement parents may collapse; sticky labels/periods scroll inside
+the table. Evidence/receipts remain distinct from issuer filings. Preserve the
+existing per-input basis, provenance, rights and DEMO/live guards. Implementation
+and visual acceptance limits: docs/FINANCIAL_RESEARCH_EXPERIENCE_V2.md.
+
 ## Owner correction — full-row market fills (19 October 2026)
 
 Latest owner preference supersedes the muted pastel experiment: restore the original mint green/red/gold/purple/cyan row hues with dark semibold numeric text in both themes; compact 28px desktop rows, 36px mobile. Qualified advancing/declining rows use a continuous percentage shading scale, capped at 7 percentage points for presentation only (not an inferred exchange limit). The corrected ramp starts near-neutral, reaches the approved original hue at 3%, then deepens to the 7% visual cap. 1% and 2% must have at least a 30-channel RGB separation in the presentation regression; the earlier narrow ramp was too subtle. Missing/inconsistent percentages use the light base; stale/missing/unknown/error remain neutral. Explicit hover retains the row fill. Ceiling/floor/reference retain the original purple/cyan/gold hues. Heatmap, data qualification and trading semantics remain unchanged.

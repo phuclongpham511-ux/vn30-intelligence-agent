@@ -104,11 +104,16 @@ table { width: 100%; text-align: right; border-collapse: collapse; font-variant-
 th, td { padding: 12px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
 th { font-size: 11px; color: var(--muted-foreground); font-weight: 500; position: sticky; top: 0; background: var(--card); }
 td:first-child, th:first-child { text-align: left; }
-.fundamental-table-scroll { overflow: auto; max-height: 420px; border: 1px solid var(--border); border-radius: 6px; }
+.fundamental-table-scroll { min-width: 0; max-width: 100%; overflow: auto; max-height: 420px; border: 1px solid var(--border); border-radius: 6px; }
 .fundamental-table { min-width: 560px; background: var(--card); }
 .fundamental-table th, .fundamental-table td { padding: 11px 14px; }
 .fundamental-table th:first-child { position: sticky; left: 0; min-width: 160px; max-width: 200px; white-space: normal; z-index: 2; }
 .fundamental-table tbody th { top: auto; color: var(--foreground); }
 .fundamental-table thead th { z-index: 1; }
 .fundamental-table thead th:first-child { z-index: 3; }
+.financial-statement-group > th { font-weight: 650; background: var(--muted); }
+.financial-analysis-panel { min-width: 0; border: 1px solid var(--border); border-radius: 8px; padding: 16px; background: var(--card); }
+.financial-qualification { flex-shrink: 0; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px; font-size: 10px; font-weight: 600; color: var(--muted-foreground); }
+.financial-chart-unavailable { min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-block: 1px dashed var(--border); text-align: center; font-size: 12px; line-height: 1.7; color: var(--muted-foreground); }
+.financial-chart-unavailable > span { font-size: 32px; }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

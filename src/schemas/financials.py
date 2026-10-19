@@ -159,3 +159,4 @@ class FinancialEngineResponse(DataModel):
     limitations: list[str]
     reconciliations: list[dict] = Field(default_factory=list)
     fundamental_summary: FundamentalSummary | None = None
+    research_panels: list[dict] = Field(default_factory=list)

@@ -10,7 +10,7 @@ import {FINANCIAL_LABELS} from '../lib/fundamental-data.ts';
 import {financialEngineData} from '../lib/financial-engine-data.ts';
 const require=createRequire(import.meta.url),exports={};
 const code=transformSync(readFileSync(new URL('../app/components/stock/FundamentalTrends.tsx',import.meta.url),'utf8'),{filename:'FundamentalTrends.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
-new Function('require','exports',code)(name=>['./FinancialStatementTable','./FinancialResearchCharts','../ui/button','../ui/skeleton'].includes(name)?{}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
+new Function('require','exports',code)(name=>['./FinancialStatementTable','./FinancialResearchCharts','./FinancialAnalysisPanel','../ui/button','../ui/skeleton'].includes(name)?{}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 
 import {fixture} from './fixtures/fundamental-summary.mjs';
 test('missing or malformed reporting frequency metadata is rejected before the view can dereference it',()=>{

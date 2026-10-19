@@ -13,7 +13,7 @@ let section='overview',statement='income';
 const react={...React,useState(initial){if(initial==='overview')return [section,()=>{}];if(initial==='income')return [statement,()=>{}];return React.useState(initial);}};
 const exports={};
 const compiled=transformSync(readFileSync(new URL('../app/components/stock/FundamentalTrends.tsx',import.meta.url),'utf8'),{filename:'FundamentalTrends.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
-new Function('require','exports',compiled)(name=>name==='react'?react:['./FinancialResearchCharts','./FinancialStatementTable'].includes(name)?{__esModule:true,default:()=>null}:name==='../ui/button'?{Button:({variant,...props})=>React.createElement('button',props)}:name==='../ui/skeleton'?{Skeleton:props=>React.createElement('div',props)}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
+new Function('require','exports',compiled)(name=>name==='react'?react:['./FinancialResearchCharts','./FinancialStatementTable','./FinancialAnalysisPanel'].includes(name)?{__esModule:true,default:()=>null}:name==='../ui/button'?{Button:({variant,...props})=>React.createElement('button',props)}:name==='../ui/skeleton'?{Skeleton:props=>React.createElement('div',props)}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 const row={ticker:'ABC',period:'2025',source:'Reported source',currency:'VND',revenue:0,net_profit:null,gross_margin:null,net_margin:null,roe:null,revenue_growth_yoy:null,net_profit_growth_yoy:null};
 const data={available_period_types:['annual'],ticker:'ABC',source:'Reported source',currency:'VND',period_type:'annual',rows:[row],changes:[],financial_identity_guard:false,sector:null,industry:null,publication_date:null,consolidation:null,read_at:'2026-10-13T13:00:00Z'};
 // Simulated display contract, never a live financial observation.
@@ -24,7 +24,7 @@ const render=(props={},language='en',view='overview',kind='income')=>{section=vi
 test('the offline replay contract renders the full financial view, not only its metric snapshot',()=>{
  const replay=financialEngineData(acceptanceDataset().financials.ABC.annual,'ABC','annual',true);
  for(const language of ['en','vi']){
-  const html=render({data:replay},language);
+  const html=render({data:replay},language,'sources');
   assert.match(html,/DEMO/);assert.match(html,/synthetic-contract-v1/);assert.match(html,/disabled=""/);
   assert.doesNotMatch(html,/data-financial-qualification="QUALIFIED"/);
  }
@@ -36,7 +36,7 @@ test('financial empty, loading and provider failure do not fabricate zero metric
   assert.doesNotMatch(render({error:true}),/No financial observations|0 VND/);
 });
 test('reported real zero stays distinct from missing profit, ROE and growth',()=>{
-  const html=render({data});
+  const html=render({data},'en','performance');
   assert.match(html,/Reported source/);assert.match(html,/financial mt-2 min-w-0 max-w-\[55%\] break-words text-right text-lg font-semibold">0 VND bn</);
   assert.match(html,/Profit after tax/);assert.match(html,/ROE/);assert.match(html,/financial mt-2 min-w-0 max-w-\[55%\] break-words text-right text-lg font-semibold">—</);
   assert.doesNotMatch(html,/>0%<|>0 VND<\/td>/);
@@ -44,9 +44,9 @@ test('reported real zero stays distinct from missing profit, ROE and growth',()=
 });
 test('financial institutions have limited coverage without generic revenue or margin metrics',()=>{
   const limited={...data,financial_identity_guard:true,rows:[{...row,revenue:null,net_profit:12}]};
-  const html=render({data:limited},'en','ratios');
+  const html=render({data:limited},'en','overview');
   assert.match(html,/Financial issuer metrics/);assert.doesNotMatch(html,/<th[^>]*>Revenue|<th[^>]*>Gross Margin|<th[^>]*>Net Margin/);
-  assert.match(html,/Valuation, NIM, NPL and CASA/);
+  assert.match(html,/Financial ratios/);
 });
 test('missing source statement tables remain unavailable without fabricated rows',()=>{
   for(const kind of ['income','balance','cash']){const empty=render({data},'en','statements',kind);assert.match(empty,/unavailable for the selected periods/);assert.doesNotMatch(empty,/class="fundamental-table/);}

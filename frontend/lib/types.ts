@@ -18,6 +18,7 @@ export type FinancialChange = {metric:'revenue'|'net_profit'|'operating_income';
 export type FinancialStatementLine={code:string;name_en:string;name_vi:string;parent:string|null;unit:'VND'|'VND/share'|'source_units';value:number|null;raw_value:number|null;semantic_status:'reported'|'conflicted'|'unqualified';source_labels?:Record<string,string|null>[]};
 export type FundamentalMetricDisplay={key:string;group:'valuation'|'performance'|'profitability'|'health';label:string;unit:'VND'|'VND/share'|'fraction'|'multiple';status:'QUALIFIED'|'UNAVAILABLE'|'UNQUALIFIED'|'DEMO';value:number|null;formula:string;reason:string|null;consolidation?:string|null};
 export type FundamentalSummary={contract:'fundamental-display-v1';period:string|null;frequency:FinancialFrequency;consolidation:string|null;publication_date:string|null;metrics:FundamentalMetricDisplay[]};
+export type FinancialPanel={key:'assets'|'funding'|'growth'|'quarterly'|'pe'|'pb';title:string;chart:'stacked'|'performance'|'unavailable';source:string;frequency:FinancialFrequency;status:FundamentalMetricDisplay['status'];partial:boolean;methodology:string;reasons:string[];series:{key:string;label:string;unit:'VND'|'fraction'|'multiple'}[];rows:{period:string;values:Record<string,number|null>;statuses:Record<string,FundamentalMetricDisplay['status']>;bases:Record<string,string|null>}[]};
 export type FinancialStatementPeriod={ticker:string;source:string;currency:'VND';period:string;basis:string;consolidation:string|null;source_dates:Record<string,string|null>;items:FinancialStatementLine[];diagnostics:string[]};
 export type FundamentalResearch = {
   ticker:string; source:string; currency:'VND'; period_type:FinancialFrequency; rows:FundamentalPeriod[]; changes:FinancialChange[];
@@ -30,4 +31,5 @@ export type FundamentalResearch = {
   source_version?:string;metadata_sha256?:string;is_fixture?:boolean;limitations?:string[];
   reconciliations?:{statement:string;period:string;field:string;annual_reported:number;quarter_sum:number;difference:number}[];
   fundamental_summary?:FundamentalSummary|null;
+    research_panels?:FinancialPanel[];
 };

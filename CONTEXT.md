@@ -1,5 +1,17 @@
 # Woofi — Domain Context
 
+## Financial Research experience V2 — local source, 2026-10-19
+
+Existing Financial Analysis now has Business picture, Growth drivers, Valuation,
+Statements and Documents/sources. Six guarded chart projections reuse existing
+Python outputs: partial asset/funding stacks, compatible ratio/YoY lines, quarterly
+results and explicit unavailable P/E/P/B shells. Source-parent statement collapse,
+per-period status tables and existing receipts remain inspectable. No chart may
+mix reporting bases, fill missing values or fall back to raw unqualified amounts.
+Banks retain separate supported groups. Nine saved VCI replays still enable zero
+new live metrics. No provider request/production change; actual Cloud Browser
+acceptance PENDING. See docs/FINANCIAL_RESEARCH_EXPERIENCE_V2.md.
+
 ## Financial Analysis V2 foundation — local development, 2026-10-19
 
 Existing VCI financial packets now retain per-record original unit/currency,

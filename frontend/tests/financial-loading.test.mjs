@@ -21,7 +21,7 @@ async function harness(run,{validate=false}={}){
    if(name==='react')return {useState:value=>{const key=index++;if(!(key in values))values[key]=value;return [values[key],next=>{values[key]=typeof next==='function'?next(values[key]):next;changes.push({key,next:values[key]});}];},useRef:value=>{const key=index++;return refs[key]??=( {current:value});},useEffect:fn=>{effect=fn;}};
    if(name==='@/lib/stock-detail')return {stockRead:(url,signal)=>{requests.push({url,signal});return new Promise((yes,no)=>{resolve=yes;reject=no;signal.addEventListener('abort',()=>no(new DOMException('Aborted','AbortError')),{once:true});});}};
    if(name==='@/lib/financial-engine-data')return validate?require('../lib/financial-engine-data.ts'):{financialEngineData:data=>data};
-   if(name==='./FinancialResearchCharts'||name==='./FinancialStatementTable')return {};
+   if(name==='./FinancialResearchCharts'||name==='./FinancialStatementTable'||name==='./FinancialAnalysisPanel')return {};
    if(name==='../ui/button'||name==='../ui/skeleton')return {};
    return require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name);
   },exports);

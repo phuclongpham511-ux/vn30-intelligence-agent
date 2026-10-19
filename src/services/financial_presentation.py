@@ -51,6 +51,96 @@ def metric_status(row, key, result):
     return ('DEMO', 'Synthetic financial evidence') if result.is_fixture else ('QUALIFIED', None)
 
 
+def financial_research_panels(result):
+    """Chart projections of already calculated, individually guarded values.
+
+    No arithmetic, provider calls, residual asset buckets or price joins. A stack
+    cannot combine distinct reporting bases or hide a missing point as zero.
+    """
+    bank = result.profile == 'bank'
+    ordinary = result.profile == 'non_financial'
+    performance = [('operating_income', 'Operating income', 'VND')] if bank else [
+        ('revenue', 'Revenue', 'VND')] if ordinary else []
+    performance += [('net_profit', 'Profit after tax', 'VND')]
+    growth = [('operating_income_growth_yoy', 'Operating income YoY', 'fraction')] if bank else [
+        ('revenue_growth_yoy', 'Revenue YoY', 'fraction')] if ordinary else []
+    growth += [('net_profit_growth_yoy', 'Profit after tax YoY', 'fraction')]
+    assets = [('customer_loans', 'Customer loans', 'VND')] if bank else [
+        ('cash_equivalents', 'Cash and cash equivalents', 'VND'),
+        ('inventory', 'Inventory', 'VND')] if ordinary else []
+    definitions = [
+        ('assets', 'Asset composition', 'stacked', assets, True,
+         'Partial components only; receivables, fixed assets, investments and other assets are not reconstructed.'),
+        ('funding', 'Funding composition', 'stacked', [
+            ('total_liabilities', 'Total liabilities', 'VND'), ('equity', 'Total equity', 'VND'),
+            ('liabilities_assets', 'Liabilities / assets', 'fraction')], False,
+         'Liabilities and total equity are separate components; borrowings and minority interests are not added again.'),
+        ('growth', 'Revenue and profit trends', 'performance', performance + growth, False,
+         'Reported period results and comparable YoY rates; no market-price overlay.'),
+        ('quarterly', 'Quarterly operating results', 'performance', performance + growth, False,
+         'Select Quarterly for standalone quarterly results; annual and TTM values are not relabelled as quarters.'),
+        ('pe', 'P/E history', 'unavailable', [('pe', 'P/E', 'multiple')], True,
+         'Compatible dated prices, earnings per share and display rights are not qualified.'),
+        ('pb', 'P/B history', 'unavailable', [('pb', 'P/B', 'multiple')], True,
+         'Compatible dated prices, book value per share and display rights are not qualified.'),
+    ]
+    panels = []
+    for key, title, chart, fields, partial, methodology in definitions:
+        points, reasons = [], set()
+        enabled = chart != 'unavailable' and (key != 'quarterly' or result.period_type == 'quarterly')
+        for row in result.chart_rows:
+            values, statuses, bases = {}, {}, {}
+            for field, _, _ in fields:
+                status, reason = metric_status(row, field, result) if enabled else ('UNAVAILABLE', methodology)
+                allowed = status in ('QUALIFIED', 'DEMO')
+                values[field] = row.get(field) if allowed else None
+                statuses[field] = status
+                refs = row.get('calculations', {}).get(field, {}).get('inputs', [])
+                bases[field] = refs[0].get('consolidation') if allowed and refs else None
+                if reason:
+                    reasons.add(reason)
+            if len({bases[f] for f, _, _ in fields if values[f] is not None}) > 1:
+                reasons.add('Chart series require the same reporting basis.')
+                for field, _, _ in fields:
+                    values[field], statuses[field], bases[field] = None, 'UNQUALIFIED', None
+            if chart == 'stacked':
+                amount_fields = [f for f, _, unit in fields if unit == 'VND']
+                present = [f for f in amount_fields if values[f] is not None]
+                conflict = len({bases[f] for f in present}) > 1
+                negative = any(values[f] < 0 for f in present)
+                if conflict or negative:
+                    reasons.add('Composition requires compatible nonnegative components.')
+                    for field, _, _ in fields:
+                        values[field], statuses[field], bases[field] = None, 'UNQUALIFIED', None
+                elif present:
+                    basis = bases[present[0]]
+                    for field, _, unit in fields:
+                        if unit != 'VND' and values[field] is not None and bases[field] != basis:
+                            values[field], statuses[field], bases[field] = None, 'UNQUALIFIED', None
+                            reasons.add('Composition requires compatible nonnegative components.')
+            points.append(dict(period=row['period'], values=values, statuses=statuses, bases=bases))
+        # A historical chart must not imply comparability between separate and
+        # consolidated statements. Retain only the latest usable basis; other
+        # observations stay inspectable in the original statement evidence.
+        anchors = [p for p in points if any(v is not None for v in p['values'].values())]
+        if anchors:
+            anchor = next(anchors[-1]['bases'][f] for f, v in anchors[-1]['values'].items() if v is not None)
+            for point in points:
+                for field, _, _ in fields:
+                    if point['values'][field] is not None and point['bases'][field] != anchor:
+                        point['values'][field], point['statuses'][field], point['bases'][field] = None, 'UNQUALIFIED', None
+                        reasons.add('Historical chart periods require the same reporting basis.')
+        has_value = any(value is not None for p in points for value in p['values'].values())
+        withheld = any(status == 'UNQUALIFIED' for p in points for status in p['statuses'].values())
+        panels.append(dict(key=key, title=title, chart=chart, source=result.source,
+            frequency=result.period_type,
+            status=('DEMO' if result.is_fixture else 'QUALIFIED') if has_value else 'UNQUALIFIED' if withheld else 'UNAVAILABLE',
+            partial=partial or any(value is None for p in points for value in p['values'].values()),
+            methodology=methodology, reasons=sorted(reasons),
+            series=[dict(key=f, label=label, unit=unit) for f, label, unit in fields], rows=points))
+    return panels
+
+
 def display_financial_response(result: FinancialEngineResponse) -> FinancialEngineResponse:
     """Conservative display only; full API/source evidence and math are unchanged.
 
@@ -100,4 +190,5 @@ def display_financial_response(result: FinancialEngineResponse) -> FinancialEngi
         'changes': changes, 'statements': statements,
         'fundamental_summary': FundamentalSummary(period=current.get('period'), frequency=result.period_type,
             consolidation=current.get('consolidation'), publication_date=current.get('publication_date'), metrics=metrics),
+        'research_panels': financial_research_panels(result),
     })
