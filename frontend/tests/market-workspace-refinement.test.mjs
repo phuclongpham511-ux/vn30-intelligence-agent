@@ -68,14 +68,14 @@ test('failed thumbnail candidates progress to a stable reserved fallback, never 
 
 const Quote=load('../app/components/stock/QuoteMap.tsx',{'./LivePrice':{useLivePrices:()=>({data:null,failed:false})},'./TradingActivity':{__esModule:true,default:()=>null},'./ProvisionalEvidence':()=>null}).QuoteMapView;
 const quote=(patch={})=>({ticker:'DEMO01',last_price:10700,reference_price:10000,change:700,change_percent:7,price_unit:'VND',trading_date:'2026-10-19',updated_at:now.toISOString(),session:'active',source:'SYNTHETIC TEST',price_limits:{symbol:'DEMO01',trading_date:'2026-10-19',effectiveness:'trading_day',reference_price:10000,unit:'VND',source:'SYNTHETIC TEST',qualification:'qualified',ceiling:10700,floor:9300,ceiling_field:'demo_ceiling',floor_field:'demo_floor'},...patch});
-for(const [state,row,status='fresh',failed=false] of [['CEILING',quote()],['ADVANCING',quote({price_limits:undefined})],['REFERENCE',quote({last_price:10000,change:0,change_percent:0})],['DECLINING',quote({last_price:9800,change:-200,change_percent:-2})],['FLOOR',quote({last_price:9300,change:-700,change_percent:-7})],['STALE',quote(),'stale'],['UNAVAILABLE',null,'unavailable'],['UNKNOWN',quote({change:null})],['ERROR',quote(),'fresh',true]])test('full movement cell obeys central price state: '+state,()=>{
+for(const [state,row,status='fresh',failed=false] of [['CEILING',quote()],['ADVANCING',quote({price_limits:undefined})],['REFERENCE',quote({last_price:10000,change:0,change_percent:0})],['DECLINING',quote({last_price:9800,change:-200,change_percent:-2})],['FLOOR',quote({last_price:9300,change:-700,change_percent:-7})],['STALE',quote(),'stale'],['UNAVAILABLE',null,'unavailable'],['UNKNOWN',quote({change:null})],['ERROR',quote(),'fresh',true]])test('full stock row obeys central price state: '+state,()=>{
  const before=JSON.stringify(row),data={session:'active',as_of:now.toISOString(),items:{DEMO01:{status,snapshot:row}}};
  const html=render(Quote,{stocks:[{symbol:'DEMO01'}],data,failed,now,scope:'page',mode:'board'});
- assert.match(html,new RegExp('<td[^>]*data-movement-state="'+state+'"[^>]*>'));assert.match(html,/quote-movement-cell/);assert.match(html,new RegExp('price-'+state.toLowerCase()));assert.equal(JSON.stringify(row),before);
- const heatmap=render(Quote,{stocks:[{symbol:'DEMO01'}],data,failed,now,scope:'page',mode:'heatmap'});assert.doesNotMatch(heatmap,/quote-movement-cell/);assert.match(heatmap,/Equal cell area, not capitalization/);
+ assert.match(html,new RegExp('<td[^>]*data-movement-state="'+state+'"[^>]*>'));assert.match(html,new RegExp('<tr[^>]*class="quote-movement-row [^"]*price-'+state.toLowerCase()+'[^"]*"[^>]*data-movement-state="'+state+'"'));assert.match(html,/quote-movement-cell/);assert.match(html,new RegExp('price-'+state.toLowerCase()));assert.equal(JSON.stringify(row),before);
+ const heatmap=render(Quote,{stocks:[{symbol:'DEMO01'}],data,failed,now,scope:'page',mode:'heatmap'});assert.doesNotMatch(heatmap,/quote-movement-cell|quote-movement-row/);assert.match(heatmap,/Equal cell area, not capitalization/);
 });
 
-test('full-cell fills use existing price tokens with readable contrast in both market themes',()=>{
+test('full-row fills use existing price tokens with readable contrast in both market themes',()=>{
  const postcss=require('postcss'),price=postcss.parse(readFileSync(new URL('../app/price-state.css',import.meta.url),'utf8')),market=postcss.parse(readFileSync(new URL('../app/market-workspace.css',import.meta.url),'utf8'));
  const variables=(ast,selector)=>{const result={};ast.walkRules(selector,r=>r.walkDecls(d=>{if(d.prop.startsWith('--'))result[d.prop]=d.value;}));return result;};
  const luminance=hex=>{let h=hex.replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');const [r,g,b]=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);return .2126*r+.7152*g+.0722*b;};
@@ -84,13 +84,17 @@ test('full-cell fills use existing price tokens with readable contrast in both m
   const vars={...variables(price,':root'),...variables(market,'.market-shell'),...(dark?{...variables(price,'.dark'),...variables(market,'.dark .market-shell')}:{})};
   const resolve=v=>v.startsWith('var(')?resolve(vars[v.slice(4,-1)]):v;
   for(const [state,token] of [['ceiling','--price-ceiling'],['advancing','--positive'],['reference','--unchanged'],['declining','--negative'],['floor','--price-floor']]){
-   let rule;price.walkRules('.quote-table td.quote-movement-cell.price-'+state,r=>rule=r);assert.ok(rule);
+   let rule;price.walkRules('.quote-table .quote-movement-row.price-'+state,r=>rule=r);assert.ok(rule);
    const declaration=key=>rule.nodes.find(n=>n.prop===key)?.value;
-   assert.equal(declaration('background'),'var('+token+')');assert.equal(declaration('color'),'var(--price-movement-ink)');assert.ok(contrast(resolve(declaration('background')),resolve(declaration('color')))>=4.5,state+' contrast '+(dark?'dark':'light'));
+   assert.equal(declaration('--quote-row-fill'),'var('+token+')');assert.equal(declaration('--quote-row-ink'),'var(--price-movement-ink)');assert.ok(contrast(resolve(declaration('--quote-row-fill')),resolve(declaration('--quote-row-ink')))>=4.5,state+' contrast '+(dark?'dark':'light'));
   }
   assert.ok(contrast(resolve(vars['--muted']),resolve(vars['--muted-foreground']))>=4.5);
  }
- let cell;price.walkRules('.quote-table td.quote-movement-cell',r=>cell=r);assert.equal(cell.nodes.find(n=>n.prop==='border-radius').value,'0');assert.equal(cell.nodes.find(n=>n.prop==='text-align').value,'right');
+ const fills=[];price.walkRules(r=>{if(r.selector.includes('.quote-table tbody .quote-movement-row>'))fills.push(r);});
+ assert.equal(fills.length,1);assert.ok(fills[0].selector.includes('>th'));assert.ok(fills[0].selector.includes('>td'));
+ assert.equal(fills[0].nodes.find(n=>n.prop==='background').value,'var(--quote-row-fill)');assert.equal(fills[0].nodes.find(n=>n.prop==='color').value,'var(--quote-row-ink)');
+ const neutral=[];price.walkRules('.quote-table .quote-movement-row',r=>neutral.push(r));assert.equal(neutral[0].nodes.find(n=>n.prop==='--quote-row-fill').value,'var(--muted)');
+ let cell;price.walkRules('.quote-table td.quote-movement-cell',r=>cell=r);assert.equal(cell.nodes.find(n=>n.prop==='text-align').value,'right');
 });
 
 test('responsive styles retain mobile labels after desktop collapse and reserve compact media/index space',()=>{

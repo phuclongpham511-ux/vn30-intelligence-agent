@@ -7,15 +7,21 @@
 .price-declining{color:var(--negative)}
 .price-floor,.floor{color:var(--price-floor)}
 .price-stale,.price-unavailable,.price-unknown,.price-error{color:var(--muted-foreground)}
-/* Whole movement cells, not pills or entire rows. Same state resolver/palette. */
+/* Full stock rows, following the owner-approved reference; unknown states stay neutral. */
 :root{--price-movement-ink:#ffffff}
 .dark{--price-movement-ink:var(--background)}
-.quote-table td.quote-movement-cell{background:var(--muted);color:var(--muted-foreground);border-radius:0;text-align:right;font-variant-numeric:tabular-nums}
-.quote-table td.quote-movement-cell.price-ceiling{background:var(--price-ceiling);color:var(--price-movement-ink)}
-.quote-table td.quote-movement-cell.price-advancing{background:var(--positive);color:var(--price-movement-ink)}
-.quote-table td.quote-movement-cell.price-reference{background:var(--unchanged);color:var(--price-movement-ink)}
-.quote-table td.quote-movement-cell.price-declining{background:var(--negative);color:var(--price-movement-ink)}
-.quote-table td.quote-movement-cell.price-floor{background:var(--price-floor);color:var(--price-movement-ink)}
+.quote-table:has(.quote-movement-row){border-collapse:separate;border-spacing:0 3px}
+.quote-table .quote-movement-row{--quote-row-fill:var(--muted);--quote-row-ink:var(--muted-foreground)}
+.quote-table .quote-movement-row.price-ceiling{--quote-row-fill:var(--price-ceiling);--quote-row-ink:var(--price-movement-ink)}
+.quote-table .quote-movement-row.price-advancing{--quote-row-fill:var(--positive);--quote-row-ink:var(--price-movement-ink)}
+.quote-table .quote-movement-row.price-reference{--quote-row-fill:var(--unchanged);--quote-row-ink:var(--price-movement-ink)}
+.quote-table .quote-movement-row.price-declining{--quote-row-fill:var(--negative);--quote-row-ink:var(--price-movement-ink)}
+.quote-table .quote-movement-row.price-floor{--quote-row-fill:var(--price-floor);--quote-row-ink:var(--price-movement-ink)}
+.quote-table tbody .quote-movement-row>th,.quote-table tbody .quote-movement-row>td{background:var(--quote-row-fill);color:var(--quote-row-ink);border-bottom:0}
+.quote-table .quote-movement-row>:first-child{border-radius:4px 0 0 4px}
+.quote-table .quote-movement-row>:last-child{border-radius:0 4px 4px 0}
+.quote-table .quote-movement-row>th a,.quote-table .quote-movement-row>th button,.quote-table .quote-movement-row .quote-source,.quote-table .quote-movement-row .quote-row-detail>span{color:var(--quote-row-ink)}
+.quote-table td.quote-movement-cell{text-align:right;font-variant-numeric:tabular-nums}
 .price-demo{padding:16px 0;min-width:0}
 .price-demo h1{font-size:22px;margin:12px 0 4px}
 .price-demo-note{font-size:12px;color:var(--muted-foreground);margin:6px 0 12px;overflow-wrap:anywhere}

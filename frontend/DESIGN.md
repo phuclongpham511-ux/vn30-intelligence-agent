@@ -1,5 +1,9 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Owner correction — full-row market fills (19 October 2026)
+
+The owner's third reference screenshot supersedes the V2 movement-cell-only instruction: fill the entire stock row in the Board and Overview mover tables, with a compact gap and rounded outer corners. Reuse the centralized price-state resolver and contrast-safe theme palette. Stale/missing/unknown/error rows stay neutral. Heatmap, sorting, source dialogs and data contracts are unchanged. This source correction requires new visual acceptance; existing running preview builds do not update automatically.
+
 ## Market Workspace UI refinement V2 — 2026-10-19
 
 Desktop primary navigation expands to icons + labels or collapses to labelled,
