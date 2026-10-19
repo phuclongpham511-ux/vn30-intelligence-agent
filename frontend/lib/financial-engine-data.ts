@@ -54,7 +54,8 @@ export function financialEngineData(data:FundamentalResearch,ticker:string,frequ
       const expectedUnit=['eps_reported','bvps'].includes(metric.key)?'VND/share':['debt_equity','current_ratio','quick_ratio','cash_conversion','pe','pb'].includes(metric.key)?'multiple':['roe','roa','gross_margin','net_margin','liabilities_assets'].includes(metric.key)||metric.key.includes('growth')?'fraction':'VND';
       if(!supported||metric.unit!==expectedUnit)throw new Error('Invalid financial metric unit');
       if(metric.value!==null&&(typeof metric.value!=='number'||!Number.isFinite(metric.value)))throw new Error('Invalid financial summary value');
-      if(['UNQUALIFIED','UNAVAILABLE'].includes(metric.status)&&metric.value!==null||metric.status==='QUALIFIED'&&(data.is_fixture||!['consolidated','standalone'].includes(summary.consolidation||''))||metric.status==='DEMO'&&!data.is_fixture)throw new Error('Unsafe financial qualification');
+      const basis=metric.consolidation===undefined?summary.consolidation:metric.consolidation;
+      if(['UNQUALIFIED','UNAVAILABLE'].includes(metric.status)&&metric.value!==null||metric.status==='QUALIFIED'&&(data.is_fixture||!['consolidated','standalone'].includes(basis||''))||metric.status==='DEMO'&&!data.is_fixture)throw new Error('Unsafe financial qualification');
       if(metric.key in FINANCIAL_LABELS&&metric.value!==(data.rows.at(-1)?.[metric.key as FinancialKey]??null))throw new Error('Financial summary does not match displayed facts');
       if(['market_cap','pe','pb','bvps'].includes(metric.key)&&metric.value!==null)throw new Error('Unsupported valuation inputs');
     }

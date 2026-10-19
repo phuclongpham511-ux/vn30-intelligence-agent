@@ -58,3 +58,13 @@ test('standalone consolidation is separate reporting, never a standalone-quarter
  assert.match(render(data,'billions','vi'),/Báo cáo riêng/);
  assert.doesNotMatch(render(data,'billions','vi'),/Riêng quý/);
 });
+
+test('field-owned consolidation supports independent qualified metrics without certifying mixed-basis ratios',()=>{
+ const data=fixture();data.fundamental_summary.consolidation=null;
+ for(const item of data.fundamental_summary.metrics)if(item.status==='QUALIFIED')item.consolidation='consolidated';
+ assert.doesNotThrow(()=>financialEngineData(data,'ABC','annual',true));
+ assert.match(render(data),/1,500 VND\/share/);
+ data.fundamental_summary.metrics[0].consolidation=null;
+ assert.throws(()=>financialEngineData(data,'ABC','annual',true),/qualification/);
+ assert.doesNotMatch(render(data),/1,500 VND\/share/);
+});

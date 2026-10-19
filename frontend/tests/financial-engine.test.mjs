@@ -72,3 +72,11 @@ test('bank rendering presents operating income, excludes generic revenue and liq
  assert.doesNotMatch(html,/<th[^>]*>Revenue|<th[^>]*>Current ratio|<th[^>]*>Quick ratio/);
  assert.match(html,/Valuation, NIM, NPL and CASA/);
 });
+
+test('statement provenance remains inspectable in EN/VI without promoting source metadata',()=>{
+ const evidence={...data,source_receipts:[{statement:'income',status:'healthy',observed_at:'2026-10-13T10:00:00Z',source_url:'https://example.test/source',content_sha256:'a'.repeat(64),periods:[{period:'2025',basis:'annual',source_dates:{publicDate:'2026-01-01'},diagnostics:[],source_context:{fiscal_year:2025,original_unit:null,restatement_status:'unknown',display_rights:'unreviewed',record_sha256:'b'.repeat(64)}}]}]};
+ const html=render({data:evidence});
+ assert.match(html,/Statement provenance/);assert.match(html,/not filing verification or display permission/);
+ assert.match(html,/unreviewed/);assert.match(html,/original_unit/);assert.match(html,/&quot;unknown&quot;/);
+ assert.match(render({data:evidence},'vi'),/Nguồn gốc báo cáo/);
+});

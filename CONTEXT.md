@@ -1,5 +1,17 @@
 # Woofi — Domain Context
 
+## Financial Analysis V2 foundation — local development, 2026-10-19
+
+Existing VCI financial packets now retain per-record original unit/currency,
+reported year/quarter, source hash and explicit unknown filing/audit/revision
+metadata. Display rights default unreviewed; nonfixture display requires applicable
+reviewed permission evidence, never a raw provider flag. Metrics use their actual
+input bases rather than unrelated statement coherence; mixed-basis ratios remain
+withheld. Same Stock Detail UI adds inspectable EN/VI statement provenance.
+Nine saved FPT/PNJ/VCB replays still have zero qualified metrics; real-data vertical
+slice remains PARTIAL. No provider requests or production change. See
+docs/FINANCIAL_ANALYSIS_V2_FOUNDATION.md for source matrix and narrow next gate.
+
 ## SSI market integration V2 — offline evidence tools, 2026-10-19
 
 Market checked at 15:58:57 ICT, outside HOSE continuous trading; zero new SSI/auth

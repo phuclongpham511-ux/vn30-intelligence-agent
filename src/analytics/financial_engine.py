@@ -58,7 +58,8 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         return dict(statement=obs.statement, period=obs.period, field=field,
             code=obs.field_codes.get(field), value=obs.fields.get(field), source=obs.source,
             currency=obs.currency, basis=obs.basis, consolidation=obs.consolidation,
-            content_sha256=receipt.content_sha256)
+            content_sha256=receipt.content_sha256,
+            source_context=obs.source_context.model_dump(mode='json') if obs.source_context else None)
 
     def value_at(kind, period, field):
         obs = indexed[kind].get(period)
@@ -115,7 +116,6 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
             args = [values.get(field) for field in fields]
             refs = [ref for field in fields for ref in provenance.get(field, [])]
             reason = ('not_applicable_to_issuer' if ordinary and packet.profile != 'non_financial' else
-                      'incompatible_statement_basis' if not coherent else
                       'missing_input' if any(arg is None for arg in args) else
                       'nonpositive_denominator' if any(values.get(field) is None or values[field] <= 0 for field in positive) else None)
             if extra:
@@ -240,7 +240,8 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         profile=packet.profile,rows=rows,chart_rows=chart_rows,changes=changes,statements=statements,
         available_period_types=period_types,available_statements=available,
         source_receipts=[dict(**receipt.model_dump(mode='json',exclude={'observations'}),
-            periods=[dict(period=o.period,basis=o.basis,source_dates=o.source_dates,diagnostics=o.diagnostics) for o in receipt.observations])
+            periods=[dict(period=o.period,basis=o.basis,source_dates=o.source_dates,diagnostics=o.diagnostics,
+                source_context=o.source_context.model_dump(mode='json') if o.source_context else None) for o in receipt.observations])
             for receipt in packet.reports.values()],source_version=packet.source_version,
         metadata_sha256=packet.metadata_sha256,financial_identity_guard=packet.profile!='non_financial',
         read_at=datetime.now(timezone.utc),sector=sector,industry=industry,is_fixture=packet.is_fixture,

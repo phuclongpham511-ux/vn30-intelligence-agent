@@ -956,6 +956,9 @@ export const vietnamese = {
   "See movements": "Xem biến động",
   "Open any ticker to inspect company research and original evidence.": "Mở mã để xem nghiên cứu doanh nghiệp và bằng chứng gốc.",
   "Search results": "Kết quả tìm kiếm",
+  "Statement provenance": "Nguồn gốc báo cáo",
+  "Source metadata is evidence, not filing verification or display permission.": "Metadata nguồn là bằng chứng; chưa xác minh hồ sơ công bố hoặc quyền hiển thị.",
+  "Financial source display rights are not qualified": "Quyền hiển thị dữ liệu tài chính chưa được xác nhận",
 } as const;
 export type TranslationKey = keyof typeof vietnamese;
 export type Language = "en" | "vi";

@@ -20,6 +20,26 @@ class FinancialLine(DataModel):
     source_labels: list[dict[str, str | None]] = Field(default_factory=list)
 
 
+class FinancialSourceContext(DataModel):
+    """Evidence facts, not an issuer filing certification or a rights grant."""
+    contract: Literal['financial-source-context-v2'] = 'financial-source-context-v2'
+    fiscal_year: int
+    fiscal_quarter: int | None = None
+    period_start: str | None = None
+    period_end: str | None = None
+    original_currency: str | None = None
+    original_unit: str | None = None
+    amount_multiplier: Literal[1] = 1
+    unit_evidence: Literal['audited_vci_adapter_contract'] = 'audited_vci_adapter_contract'
+    record_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+    audit_status: Literal['unknown'] = 'unknown'
+    restatement_status: Literal['unknown'] = 'unknown'
+    publication_time_qualified: Literal[False] = False
+    display_rights: Literal['unreviewed', 'permitted', 'prohibited'] = 'unreviewed'
+    display_rights_reference: str | None = None
+    original_metadata: dict = Field(default_factory=dict)
+
+
 class StatementObservation(DataModel):
     ticker: str
     source: str
@@ -34,6 +54,7 @@ class StatementObservation(DataModel):
     field_codes: dict[str, str]
     items: list[FinancialLine]
     diagnostics: list[str] = Field(default_factory=list)
+    source_context: FinancialSourceContext | None = None
 
 
 class StatementReceipt(DataModel):
@@ -99,6 +120,7 @@ class FundamentalMetricDisplay(DataModel):
     value: float | None = None
     formula: str
     reason: str | None = None
+    consolidation: str | None = None
 
 
 class FundamentalSummary(DataModel):

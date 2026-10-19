@@ -195,7 +195,9 @@ def test_unknown_flow_basis_and_incompatible_statements_fail_closed():
     reports['income']['years'][-1]['consolidation']='consolidated'
     reports['balance']['years'][-1]['consolidation']='standalone'
     changed=financial_engine(packet(meta,reports)).rows[-1]
-    assert changed['roe'] is None and changed['net_margin'] is None and changed['revenue_growth_yoy'] is None
+    assert changed['roe'] is None, 'cross-statement inputs still reject conflicting consolidation'
+    assert changed['net_margin'] == .1, 'income-only margin does not depend on balance basis'
+    assert changed['revenue_growth_yoy'] is None, 'income itself changed consolidation between years'
 
 
 def test_annual_quarter_difference_is_inspectable_without_overwriting_annual():

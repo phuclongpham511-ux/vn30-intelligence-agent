@@ -15,6 +15,11 @@ def response(*, known_basis=True, demo=False, frequency='annual', mutate=None):
     if mutate:
         mutate(reports)
     p = packet(metadata, reports).model_copy(update={'is_fixture': demo})
+    # Synthetic permission evidence for this contract test, not provider rights.
+    for receipt in p.reports.values():
+        for observation in receipt.observations:
+            observation.source_context.display_rights = 'permitted'
+            observation.source_context.display_rights_reference = 'synthetic-only://permission-test'
     return financial_engine(p, frequency=frequency)
 
 

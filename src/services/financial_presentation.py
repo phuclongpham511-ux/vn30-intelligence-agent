@@ -27,6 +27,10 @@ def inputs_reason(inputs, source, *, fixture=False):
         return 'Conflicting reporting bases'
     if not fixture and not bases <= {'consolidated', 'standalone'}:
         return 'Reporting basis is not qualified'
+    if not fixture and any(not ref.get('source_context') or
+            ref['source_context'].get('display_rights') != 'permitted' or
+            not (ref['source_context'].get('display_rights_reference') or '').strip() for ref in inputs):
+        return 'Financial source display rights are not qualified'
     return None
 
 
@@ -44,8 +48,6 @@ def metric_status(row, key, result):
     reason = inputs_reason(evidence.get('inputs', []), result.source, fixture=result.is_fixture)
     if reason:
         return 'UNQUALIFIED', reason
-    if not result.is_fixture and row.get('consolidation') not in ('consolidated', 'standalone'):
-        return 'UNQUALIFIED', 'Reporting basis is not qualified'
     return ('DEMO', 'Synthetic financial evidence') if result.is_fixture else ('QUALIFIED', None)
 
 
@@ -69,7 +71,9 @@ def display_financial_response(result: FinancialEngineResponse) -> FinancialEngi
             status, reason = metric_status(current, key, result)
             metrics.append(dict(key=key, group=group, label=label, unit=unit, status=status,
                 value=current.get(key) if status in ('QUALIFIED', 'DEMO') else None,
-                formula=current.get('calculations', {}).get(key, {}).get('formula', 'No qualified calculation inputs'), reason=reason))
+                formula=current.get('calculations', {}).get(key, {}).get('formula', 'No qualified calculation inputs'), reason=reason,
+                consolidation=next(iter({ref.get('consolidation') for ref in current.get('calculations', {}).get(key, {}).get('inputs', [])}), None)
+                    if status in ('QUALIFIED', 'DEMO') else None))
     changes = []
     for change in result.changes:
         evidence = current.get('calculations', {}).get(change['metric'] + '_growth_yoy', {})
@@ -81,7 +85,10 @@ def display_financial_response(result: FinancialEngineResponse) -> FinancialEngi
     for kind, statement in result.statements.items():
         periods = []
         for period in statement['periods']:
-            qualified = (result.is_fixture or period['consolidation'] in ('consolidated', 'standalone')) and period['basis'] in ('annual', 'standalone', 'ytd', 'point_in_time')
+            context = period.get('source_context')
+            qualified = (result.is_fixture or period['consolidation'] in ('consolidated', 'standalone') and
+                (context is not None and context.get('display_rights') == 'permitted' and
+                 bool((context.get('display_rights_reference') or '').strip()))) and period['basis'] in ('annual', 'standalone', 'ytd', 'point_in_time')
             periods.append({**period, 'items': [line if qualified and line['unit'] in ('VND', 'VND/share') or line['value'] is None else
                 {**line, 'value': None, 'semantic_status': 'unqualified'} for line in period['items']]})
         statements[kind] = {**statement, 'periods': periods}
