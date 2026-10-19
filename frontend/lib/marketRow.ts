@@ -7,3 +7,12 @@ export function marketRowStrength(state:PriceState,changePercent:unknown):'low'|
   const magnitude=Math.abs(changePercent);
   return magnitude<1?'low':magnitude<3?'medium':'high';
 }
+
+/** Continuous visual scale, capped at 7 percentage points; not a trading limit. */
+export function marketRowFill(state:PriceState,changePercent:unknown):string|undefined {
+  if(!marketRowStrength(state,changePercent))return undefined;
+  const from=state==='ADVANCING'?[207,241,211]:[255,221,221];
+  const to=state==='ADVANCING'?[47,182,75]:[255,92,102];
+  const amount=Math.min(Math.abs(changePercent as number)/7,1);
+  return '#'+from.map((value,i)=>Math.round(value+(to[i]-value)*amount).toString(16).padStart(2,'0')).join('');
+}
