@@ -49,15 +49,10 @@ export default function NewsPage() {
   }, [filters, ready, view, communityWindow]);
   const category=view==='community'?null:{company:'COMPANY',industry:'INDUSTRY',briefing:'MARKET_BRIEF'}[view];
   const {page:data,loading,error,loadMore}=useNewsArchive(ready&&category?`research_category=${category}&${newsQuery(filters)}`:null,attempt);
-  return <div className="page-stack">
-    <div className="flex items-start justify-between gap-4"><div><div className="eyebrow mb-3">{t("News")}</div><h1>{t("Market Today")}</h1><p className="mt-2 text-sm text-muted-foreground">{t("Company reporting, industry developments and market-wide attention.")}</p></div><Button variant="outline" disabled={loading && view !== "community"} onClick={() => setAttempt(value => value + 1)}>{t("Refresh")}</Button></div>
-    <SourceCoverage attempt={attempt}/>
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <nav aria-label={t("News sections")} className="flex flex-wrap gap-2">{(Object.entries(newsSectionLabels) as [NewsView, string][]).map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)} className={`rounded border px-3 py-2 text-sm ${view === key ? "border-primary text-primary" : "text-muted-foreground hover:bg-muted"}`}>{ui(label)}</button>)}</nav>
-    </div>
-    {view !== "community" && <details className="rounded border p-3" key={newsQuery(filters) ? "filtered" : "unfiltered"} open={Boolean(newsQuery(filters))}>
-    <summary className="cursor-pointer text-sm">{t("Filter news")}{newsQuery(filters) ? " · "+t("Filters active") : ""}</summary>
-    <form aria-label={t("Filter news")} onSubmit={event => { event.preventDefault(); setFilters({ ...draft }); }} className="flex flex-wrap items-end gap-3 pt-4">
+  return <div className="page-stack news-page">
+    <header className="news-page-header"><div><div className="eyebrow">{t("News")}</div><h1>{t("Market Today")}</h1><p>{t("Company reporting, industry developments and market-wide attention.")}</p></div><div className="news-header-actions"><SourceCoverage attempt={attempt}/><Button variant="outline" disabled={loading && view !== "community"} onClick={() => setAttempt(value => value + 1)}>{t("Refresh")}</Button></div></header>
+    <nav aria-label={t("News sections")} className="news-section-nav">{(Object.entries(newsSectionLabels) as [NewsView, string][]).map(([key, label]) => <button key={key} type="button" aria-pressed={view === key} onClick={() => setView(key)}>{ui(label)}</button>)}</nav>
+    {view !== "community" && <form aria-label={t("Filter news")} onSubmit={event => { event.preventDefault(); setFilters({ ...draft }); }} className="news-filter-toolbar">
       <label className="text-xs">{t("Ticker")}<input value={draft.ticker} onChange={event => setDraft({ ...draft, ticker: event.target.value })} maxLength={20} placeholder={t("Any ticker")} className="mt-1 block h-9 rounded border bg-background px-2 text-sm"/></label>
 
       <label className="text-xs">{t("Country")}<select value={draft.country} onChange={event => setDraft({ ...draft, country: event.target.value })} className="mt-1 block h-9 rounded border bg-background px-2 text-sm"><option value="">{t("All countries")}</option>{[...new Set([...sources.map(source => source.country), ...(draft.country ? [draft.country] : [])])].sort().map(country => <option key={country} value={country}>{country}</option>)}</select></label>
@@ -65,9 +60,8 @@ export default function NewsPage() {
       <label className="text-xs">{t("Topic")}<input value={draft.topic} onChange={event => setDraft({ ...draft, topic: event.target.value })} placeholder={t("Any topic")} className="mt-1 block h-9 rounded border bg-background px-2 text-sm"/></label>
       <Button type="submit" variant="outline">{t("Apply filters")}</Button>
       <button type="button" className="pb-2 text-xs text-primary underline" onClick={() => { setDraft(emptyNewsFilters); setFilters(emptyNewsFilters); }}>{t("Clear all")}</button>
-      <details className="w-full text-xs" open={Boolean(draft.sector)}><summary className="cursor-pointer text-muted-foreground">{t("Advanced: headline sector tags (partial coverage)")}</summary><label className="mt-3 block">{t("Sector")}<select value={draft.sector} onChange={event => setDraft({ ...draft, sector: event.target.value })} className="ml-3 h-9 rounded border bg-background px-2"><option value="">{t("All sector tags")}</option>{[...new Set(["Financials", "Real Estate", "Technology", "Energy", "Consumer", "Industrials", ...(draft.sector ? [draft.sector] : [])])].map(sector => <option key={sector} value={sector}>{ui(sector)}</option>)}</select></label><p className="mt-2 text-muted-foreground">{t("Headline tags only. Company sector mapping is currently incomplete; use ticker or topic for broader coverage.")}</p></details>
-    </form>
-    </details>}
+      <details className="news-advanced-filter" open={Boolean(draft.sector)}><summary>{t("Advanced: headline sector tags (partial coverage)")}</summary><label>{t("Sector")}<select value={draft.sector} onChange={event => setDraft({ ...draft, sector: event.target.value })}><option value="">{t("All sector tags")}</option>{[...new Set(["Financials", "Real Estate", "Technology", "Energy", "Consumer", "Industrials", ...(draft.sector ? [draft.sector] : [])])].map(sector => <option key={sector} value={sector}>{ui(sector)}</option>)}</select></label><p>{t("Headline tags only. Company sector mapping is currently incomplete; use ticker or topic for broader coverage.")}</p></details>
+    </form>}
     {view !== "community" && newsQuery(filters) && <p className="text-xs text-muted-foreground">{t("Publisher sections show this filtered view. These filters do not change story ranking or factual tags.")}</p>}
     {view === "community" && <CommunityPulse key={filters.ticker} ticker={filters.ticker} topic="" attempt={attempt} initialWindow={communityWindow} onWindowChange={setCommunityWindow}/>}
     {view !== "community" && error && <MascotState state="dataUnavailable" role="alert">{t("News is temporarily unavailable.")} {data && t("Previously loaded headlines are shown below.")} <button className="ml-2 text-primary underline" onClick={() => setAttempt(value => value + 1)}>{t("Retry")}</button></MascotState>}
@@ -75,7 +69,10 @@ export default function NewsPage() {
     {view !== "community" && data && <>
       <section aria-label={ui(newsSectionLabels[view])}>
         {!data.items.length && <MascotState state="noMatches">{t("No qualifying recent reporting matches this view. Coverage may be incomplete.")}</MascotState>}
-        <LivePrices symbols={newsSymbols(data.items)} interval={30000}><div className="mt-3 divide-y">{data.items.map(item => <TopStory key={item.story.id} item={item}/>)}</div></LivePrices>
+        <LivePrices symbols={newsSymbols(data.items)} interval={30000}><div className="news-results">
+          {data.items[0]&&<TopStory key={data.items[0].story.id} item={data.items[0]} featured reserveThumbnailSpace/>}
+          {data.items.length>1&&<div className="news-results-grid">{data.items.slice(1).map(item=><TopStory key={item.story.id} item={item} compact reserveThumbnailSpace/>)}</div>}
+        </div></LivePrices>
         <div className="mt-6 flex flex-col items-center gap-2">
           {data.has_more&&<Button variant="outline" disabled={loading} onClick={loadMore}>{t(loading?"Loading more…":"Show more")}</Button>}
           <details className="text-xs text-muted-foreground"><summary>{ui("About this feed")}</summary><p>{t("Qualified reporting appears with or without a source image.")}</p><p>{t("Reporting from the last 72 hours. Older items appear when you choose Show more.")}</p><details className="mt-3"><summary>{t("Source archive")}</summary><ul className="mt-2 space-y-2">{data.items.map(item=><li key={item.story.id}><a className="underline focus-visible:ring-2 focus-visible:ring-primary" href={`/news/stories/${item.story.id}`}>{item.representative_article.title}</a></li>)}</ul></details></details>

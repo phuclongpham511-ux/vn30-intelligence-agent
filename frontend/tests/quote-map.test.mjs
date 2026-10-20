@@ -58,10 +58,10 @@ const data={items:{AAA:quote(),ZERO:quote({ticker:'ZERO',change:0,change_percent
 const render=(language='en',props={})=>renderToStaticMarkup(React.createElement(LanguageContext.Provider,
   {value:localeTools(language)},React.createElement(exports.QuoteMapView,{stocks,data,scope:'page',now,...props})));
 
-test('reading guidance follows tile order without changing panel or movement instructions in EN/VI',()=>{
+test('reading guidance follows tile order and unified-board sorting in EN/VI',()=>{
   for(const [language,grid,panel,movement] of [
-    ['en','Read left → right across each row, then top → bottom.','Read down each panel, then left → right.','Movement within this selection only · not sectors.'],
-    ['vi','Đọc từng hàng từ trái → phải, rồi trên → dưới.','Đọc từng bảng từ trên xuống, rồi trái → phải.','Chỉ biến động trong mẫu đang chọn · không phải ngành.'],
+    ['en','Read left → right across each row, then top → bottom.','Sort applies to the complete table.','Movement within this selection only · not sectors.'],
+    ['vi','Đọc từng hàng từ trái → phải, rồi trên → dưới.','Sắp xếp áp dụng cho toàn bộ bảng.','Chỉ biến động trong mẫu đang chọn · không phải ngành.'],
   ]) {
     const footnote=props=>render(language,props).match(/<p class="quote-footnote">([\s\S]*?)<\/p>/)[1];
     assert.ok(footnote({mode:'heatmap'}).includes(grid));

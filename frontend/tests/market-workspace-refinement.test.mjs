@@ -59,6 +59,14 @@ test('homepage thumbnail keeps representative priority and same-story fallback w
  html=render(TopStory,{item:noImage,compact:true,textOnly:true,showThumbnail:true});assert.match(html,/data-thumbnail-status="unavailable"/);assert.doesNotMatch(html,/<img/);assert.match(html,/Original long source headline/);
 });
 
+test('News featured story uses same-story image and reserves a neutral fallback slot',()=>{
+ const article={id:'a',title:'Featured source headline',url:'https://publisher.example/a',source_name:'Publisher',published_at:now.toISOString(),first_seen_at:now.toISOString(),tickers:[],thumbnail_url:null};
+ const item={story:{id:'featured',source_count:2},representative_article:article,articles:[article]};
+ const html=render(TopStory,{item,featured:true,reserveThumbnailSpace:true});
+ assert.match(html,/news-card-featured/);assert.match(html,/news-featured-layout/);assert.match(html,/news-featured-title/);
+ assert.match(html,/data-thumbnail-status="unavailable"/);assert.match(html,/Featured source headline/);assert.doesNotMatch(html,/<img/);
+});
+
 test('failed thumbnail candidates progress to a stable reserved fallback, never hiding the story',()=>{
  let failed=[];const Thumb=load('../app/components/news/NewsThumbnail.tsx',{react:{...React,useState:()=>[failed,fn=>failed=fn(failed)],useEffect(){}}}).default;
  const props={images:['javascript:bad','https://publisher.example/one.jpg','https://publisher.example/two.jpg'],required:false,reserveSpace:true,compact:true,children:image=>image};
@@ -76,9 +84,10 @@ for(const [state,row,status='fresh',failed=false] of [['CEILING',quote()],['ADVA
  const heatmap=render(Quote,{stocks:[{symbol:'DEMO01'}],data,failed,now,scope:'page',mode:'heatmap'});assert.doesNotMatch(heatmap,/quote-movement-cell|quote-movement-row/);assert.match(heatmap,/Equal cell area, not capitalization/);
 });
 
-test('full-row fills use existing price tokens with readable contrast in both market themes',()=>{
+test('movement color is confined to the percentage cell and keeps readable theme contrast',()=>{
  const postcss=require('postcss'),price=postcss.parse(readFileSync(new URL('../app/price-state.css',import.meta.url),'utf8')),market=postcss.parse(readFileSync(new URL('../app/market-workspace.css',import.meta.url),'utf8'));
  const variables=(ast,selector)=>{const result={};ast.walkRules(selector,r=>r.walkDecls(d=>{if(d.prop.startsWith('--'))result[d.prop]=d.value;}));return result;};
+ const rulesFrom=(ast,selector)=>{let found;ast.walkRules(r=>{if(r.selector.split(',').some(part=>part.trim()===selector))found=r;});return found;};
  const luminance=hex=>{let h=hex.replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');const [r,g,b]=[0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255).map(c=>c<=.04045?c/12.92:((c+.055)/1.055)**2.4);return .2126*r+.7152*g+.0722*b;};
  const contrast=(a,b)=>{const x=luminance(a),y=luminance(b);return (Math.max(x,y)+.05)/(Math.min(x,y)+.05);};
  for(const dark of [false,true]){
@@ -92,9 +101,11 @@ test('full-row fills use existing price tokens with readable contrast in both ma
   for(const [direction,ink] of [['up','--row-ink'],['down','--row-down-ink']])for(const tier of ['low','medium','high'])assert.ok(contrast(resolve(vars['--row-'+direction+'-'+tier]),resolve(vars[ink]))>=4.5,direction+' '+tier+' contrast '+(dark?'dark':'light'));
   assert.ok(contrast(resolve(vars['--muted']),resolve(vars['--muted-foreground']))>=4.5);
  }
- const fills=[];price.walkRules(r=>{if(r.selector.includes('.quote-table tbody .quote-movement-row>')&&r.nodes.some(n=>n.prop==='background'))fills.push(r);});
- assert.equal(fills.length,1);assert.ok(fills[0].selector.includes('>th'));assert.ok(fills[0].selector.includes('>td'));
- assert.equal(fills[0].nodes.find(n=>n.prop==='background').value,'var(--quote-row-fill)');assert.equal(fills[0].nodes.find(n=>n.prop==='color').value,'var(--quote-row-ink)');
+ const rowNeutral=rulesFrom(market,'.quote-workspace .quote-table .quote-movement-row>td');
+ assert.ok(rowNeutral);assert.equal(rowNeutral.nodes.find(n=>n.prop==='background').value,'var(--card)');
+ const movementFills=rulesFrom(market,'.quote-workspace .quote-table .quote-movement-row>td.quote-movement-cell[data-movement-state=ADVANCING]');
+ assert.ok(movementFills);assert.equal(movementFills.nodes.find(n=>n.prop==='background').value,'var(--quote-row-fill)');
+ assert.equal(movementFills.nodes.find(n=>n.prop==='color').value,'var(--row-ink)');
  const neutral=[];price.walkRules('.quote-table .quote-movement-row',r=>neutral.push(r));assert.equal(neutral[0].nodes.find(n=>n.prop==='--quote-row-fill').value,'var(--muted)');
  let cell;price.walkRules('.quote-table td.quote-movement-cell',r=>cell=r);assert.equal(cell.nodes.find(n=>n.prop==='text-align').value,'right');
 });
