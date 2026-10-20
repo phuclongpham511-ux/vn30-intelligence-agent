@@ -229,6 +229,7 @@ def display_financial_response(result: FinancialEngineResponse, *, internal_auth
                 {**line, 'value': None, 'semantic_status': 'unqualified'} for line in period['items']]})
         statements[kind] = {**statement, 'periods': periods}
     latest = len(result.rows) - 1
+    from src.services.financial_verification import verification_assessment
     return result.model_copy(update={
         'rows': [row if index == latest else {k:v for k,v in row.items() if k != 'calculations'}
                  for index, row in enumerate(projected)],
@@ -237,4 +238,5 @@ def display_financial_response(result: FinancialEngineResponse, *, internal_auth
         'fundamental_summary': FundamentalSummary(period=current.get('period'), frequency=result.period_type,
             consolidation=current.get('consolidation'), publication_date=current.get('publication_date'), metrics=metrics),
         'research_panels': financial_research_panels(result),
+        'verification': verification_assessment(result, projected, audience=result.display_scope),
     })

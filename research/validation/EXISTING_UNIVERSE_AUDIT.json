@@ -1,0 +1,27 @@
+{
+  "contract": "existing-development-universe-audit-v1",
+  "observed_at": "2026-10-20T18:07:40.999969+00:00",
+  "base_url": "http://127.0.0.1:8431",
+  "mode": "read-only cached endpoints; not current-branch runtime acceptance",
+  "provider_acquisition_requested": false,
+  "application_database_writes": false,
+  "status": "PASS",
+  "cached_universe_total": 1519,
+  "universe_status": "healthy",
+  "last_synced_at": "2026-10-19T01:44:34.396987+00:00",
+  "sampled_universe_item_fields": [
+    "company_name",
+    "display_name_en",
+    "exchange",
+    "instrument_type",
+    "is_active",
+    "last_synced_at",
+    "search_text",
+    "source",
+    "symbol"
+  ],
+  "registered_stock_count": 25,
+  "legacy_sector_nonempty": 0,
+  "legacy_industry_nonempty": 0,
+  "qualified_taxonomy_fields_present": false
+}

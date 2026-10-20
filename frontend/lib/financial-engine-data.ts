@@ -1,6 +1,7 @@
 import type {FundamentalResearch,FinancialFrequency} from './types.ts';
 import {FINANCIAL_LABELS,type FinancialKey} from './fundamental-data.ts';
 import {validateFinancialPanels} from './financial-panels.ts';
+import {validateFinancialVerification} from './financial-verification.ts';
 
 /** Validate presentation ownership; all financial calculations remain in Python. */
 export function financialEngineData(data:FundamentalResearch,ticker:string,frequency:FinancialFrequency,requireSummary=false,allowInternal=false,allowPersonal=false):FundamentalResearch{
@@ -70,5 +71,6 @@ export function financialEngineData(data:FundamentalResearch,ticker:string,frequ
     }
   }
   validateFinancialPanels(data);
+  validateFinancialVerification(data);
   return data;
 }

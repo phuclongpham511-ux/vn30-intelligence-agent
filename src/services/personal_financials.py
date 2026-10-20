@@ -13,7 +13,8 @@ import math
 
 from src.analytics.financial_engine import financial_engine
 from src.providers.vnstock.financial_packet import metadata_rows, packet_from_payloads
-from src.providers.vnstock.financial_statements import MAP
+from src.providers.vnstock.financial_statements import MAP, NON_FINANCIAL_ONLY, BANK_ONLY
+from src.schemas.financials import FinancialPacket
 from src.services.financial_presentation import display_financial_response
 
 CONFIDENCES = ('OFFICIAL_VERIFIED', 'RECONCILED', 'SOURCE_REPORTED', 'UNVERIFIED', 'INVALID')
@@ -24,16 +25,28 @@ def saved_packet(directory, ticker):
     if not re.fullmatch(r'[A-Z0-9]{1,20}', ticker):
         raise ValueError('Invalid ticker')
     root = Path(directory).resolve(strict=True)
+    if (root / 'index.json').stat().st_size > 2_000_000:
+        raise ValueError('Saved capture index exceeds bound')
     index = json.loads((root / 'index.json').read_text(encoding='utf-8'))
+    if index.get('contract') != 'personal-saved-captures-v1' or not isinstance(index.get('captures'), dict):
+        raise ValueError('Invalid saved capture index')
     item = index['captures'].get(ticker)
     if not item:
         raise FileNotFoundError('Saved research coverage unavailable')
     path = (root / item['file']).resolve(strict=True)
-    if not path.is_relative_to(root) or path.suffix != '.json' or path.stat().st_size > 10_000_000:
+    canonical = item.get('format') == 'canonical-financial-packet-v1'
+    if item.get('format') not in (None, 'vci-raw-capture-v1', 'canonical-financial-packet-v1'):
+        raise ValueError('Unknown saved capture format')
+    if not path.is_relative_to(root) or path.suffix != '.json' or path.stat().st_size > (32_000_000 if canonical else 10_000_000):
         raise ValueError('Invalid capture path')
     data = path.read_bytes()
     if hashlib.sha256(data).hexdigest() != item['sha256']:
         raise ValueError('Saved capture digest mismatch')
+    if canonical:
+        packet = validated_canonical_packet(data)
+        if packet.ticker != ticker:
+            raise ValueError('Wrong canonical capture owner')
+        return packet, item['sha256']
     raw = json.loads(data)
     if raw['ticker'] != ticker or raw['source'] != 'vnstock:VCI' or raw.get('capture_kind') != 'LIVE_EXISTING_SDK_READ':
         raise ValueError('Invalid saved research identity')
@@ -45,6 +58,72 @@ def saved_packet(directory, ticker):
         observed_at={kind: datetime.fromisoformat(r['observed_at']) for kind, r in reads.items()},
         urls={kind: r['url'] + '?section=' + r['params']['section'] for kind, r in reads.items()})
     return packet, item['sha256']
+
+
+def validated_canonical_packet(data):
+    """Validate an immutable saved output of the existing VCI adapter.
+
+    This is not original-transport verification: preserve that limitation.
+    Recheck mapped fields against source lines and never accept a rights grant
+    or invented fiscal metadata from this private canonical capture format.
+    """
+    if len(data) > 32_000_000:
+        raise ValueError('Canonical packet exceeds bound')
+    packet = FinancialPacket.model_validate_json(data, strict=True)
+    if (packet.is_fixture or packet.source != 'vnstock:VCI'
+            or set(packet.reports) != set(MAP)
+            or not re.fullmatch(r'[A-Z0-9]{1,20}', packet.ticker)
+            or not re.fullmatch(r'[a-f0-9]{64}', packet.metadata_sha256)):
+        raise ValueError('Invalid canonical capture identity')
+    expected_profile = {'CT': 'non_financial', 'NH': 'bank', 'CK': 'financial_other', 'BH': 'financial_other', 'UNKNOWN': 'unknown'}
+    if packet.profile not in (expected_profile[packet.company_type], 'unknown'):
+        raise ValueError('Incompatible canonical issuer model')
+    for kind, receipt in packet.reports.items():
+        if (receipt.statement != kind or len(receipt.observations) > 320
+                or receipt.observed_at.tzinfo is None
+                or receipt.observed_at.utcoffset() is None
+                or receipt.observations and (receipt.status != 'healthy'
+                    or not re.fullmatch(r'[a-f0-9]{64}', receipt.content_sha256 or ''))
+                or not receipt.observations and receipt.status == 'healthy'):
+            raise ValueError('Invalid canonical receipt')
+        seen = set()
+        for obs in receipt.observations:
+            ctx = obs.source_context
+            quarter = int(obs.period[-1]) if '-Q' in obs.period else None
+            if (obs.ticker != packet.ticker or obs.source != packet.source or obs.statement != kind
+                    or obs.period in seen or obs.frequency != ('quarterly' if quarter else 'annual')
+                    or ctx is None or ctx.fiscal_year != int(obs.period[:4]) or ctx.fiscal_quarter != quarter
+                    or ctx.unit_evidence != 'audited_vci_adapter_contract' or ctx.amount_multiplier != 1
+                    or ctx.original_currency not in (None, 'VND') or ctx.original_unit not in (None, 'VND')
+                    or ctx.display_rights == 'permitted' or ctx.display_rights_reference
+                    or ctx.access_classification != 'PUBLIC_DISPLAY_REVIEW_REQUIRED'
+                    or ctx.data_confidence != 'SOURCE_REPORTED' or ctx.period_start or ctx.period_end
+                    or ctx.publication_time_qualified
+                    or obs.consolidation != ctx.original_metadata.get('consolidation')
+                    or any(obs.source_dates.get(key) != ctx.original_metadata.get(key)
+                        for key in ('publicDate', 'updateDate', 'createDate'))
+                    or obs.basis != ('point_in_time' if kind == 'balance' else
+                        'annual' if quarter is None else ctx.original_metadata.get('flowBasis', 'standalone'))):
+                raise ValueError('Invalid or promoted canonical provenance')
+            seen.add(obs.period)
+            if len(obs.items) > 1000 or len({line.code for line in obs.items}) != len(obs.items):
+                raise ValueError('Ambiguous canonical statement lines')
+            lines = {line.code: line for line in obs.items}
+            if set(obs.fields) != set(MAP[kind]):
+                raise ValueError('Unexpected canonical field mapping')
+            for field, (code, pattern) in MAP[kind].items():
+                value = obs.fields[field]
+                if value is None:
+                    continue
+                line = lines.get(code)
+                if (obs.field_codes.get(field) != code or line is None
+                        or line.semantic_status != 'reported' or line.value != value or line.raw_value != value
+                        or line.unit != ('VND/share' if field == 'eps_reported' else 'VND')
+                        or not re.search(pattern, line.name_en.casefold().strip())
+                        or field in NON_FINANCIAL_ONLY and packet.profile != 'non_financial'
+                        or field in BANK_ONLY and packet.profile != 'bank'):
+                    raise ValueError('Canonical amount differs from reviewed source line')
+    return packet
 
 
 def personal_projection(packet, *, frequency='annual', limit=8, authorization_reference):
@@ -161,4 +240,6 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
             panel['status'] = 'UNQUALIFIED'
             panel['reasons'].append('Conflicting reporting bases')
     out['limitations'].insert(0, 'PERSONAL RESEARCH: saved source observations, not current data or provider authorization. UNKNOWN basis does not qualify derived comparisons.')
+    from src.services.financial_verification import verification_assessment
+    out['verification'] = verification_assessment(full, out['rows'], audience='personal_research')
     return out

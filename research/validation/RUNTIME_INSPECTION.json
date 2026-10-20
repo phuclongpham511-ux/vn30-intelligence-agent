@@ -1,0 +1,40 @@
+{
+  "runtime_validation": "PENDING",
+  "denial_layer": "tool automatic approval before process creation",
+  "processes_stopped": false,
+  "new_denial_claimed": false,
+  "listeners": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8432,
+      "OwningProcess": 32180
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8431,
+      "OwningProcess": 14596
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8430,
+      "OwningProcess": 23312
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 3431,
+      "OwningProcess": 17784
+    },
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 3430,
+      "OwningProcess": 11944
+    }
+  ],
+  "contract": "financial-activation-runtime-inspection-v1",
+  "exact_policy_reason": "CreateProcess rejected: blocked by policy",
+  "mode": "read-only listener/configuration/log inspection",
+  "existing_services_replaced": false,
+  "blocked_action": "Prior isolated Next preview restart on 127.0.0.1:3547 with BACKEND_URL pointing to unused 8546",
+  "inspected_at": "2026-10-20T17:50:42.7852395+00:00",
+  "restart_attempted": false
+}

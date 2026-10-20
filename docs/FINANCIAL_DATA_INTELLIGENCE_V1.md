@@ -1,5 +1,49 @@
 # Financial Data Intelligence V1
 
+## Real-data activation continuation — 21 October 2026
+
+From 591f665, the existing saved-data reader now supports its original raw captures
+and canonical-financial-packet-v1 entries in the same hash-pinned index. Canonical
+files are bounded to 32 MB and checked for mapped source amounts, labels, units,
+ownership, original dates, flow basis, model, duplicates and prohibited provenance
+promotion. Missing statements can remain missing without erasing other evidence.
+Strict JSON validation rejects booleans and numeric strings as financial numbers.
+Original canonical transport reconstruction is not claimed.
+
+The additive financial-verification-v1 response field separates VERIFIED,
+PARTIALLY_VERIFIED and UNAVAILABLE from display/public eligibility. Its per-metric
+missing-evidence list is visible in Financial Analysis. It grants no data rights
+and does not populate withheld values. Default/public behavior is unchanged.
+
+Prepare a new private bundle without modifying the original capture directory:
+
+~~~powershell
+uv run python -m scripts.prepare_financial_activation --captures C:\private\original-captures --destination .local\activation-captures --packet .local\provider-validation\TCB-packet.json --packet .local\provider-validation\SSI-packet.json
+uv run python -m scripts.validate_financial_activation --captures .local\activation-captures --report-dir research\validation --private-responses .local\activation-api
+node frontend/scripts/validate-financial-activation.mjs .local/activation-api research/validation/REAL_DATA_FRONTEND_VALIDATION.json
+~~~
+
+The first command reuses captures already present; it does not fetch TCB or SSI.
+An existing different bundle is rejected; use a new revision folder. Existing
+normalized journal ingestion also accepts the new index through the shared reader.
+Canonical/source bytes, original timestamps and hashes are retained; private
+responses and source archives remain outside Git and static hosting.
+
+scripts.review_industry_memberships rechecks a caller-pinned SSI archive, keeps
+the full observed pair dataset privately, and emits a counts/provenance report.
+Its distinct review contract cannot be loaded as IndustryTaxonomy. No effective
+dates, classification version, hierarchy or financial model are inferred.
+
+The measured private path has 25 distinct reported fields, 24 API/frontend
+projections and 2,816 eligible observations. It has zero fully verified/public
+metrics and no activated real industry cohort. Current-branch runtime/browser
+validation remains PENDING; offline API transport is not a server restart.
+See [activation report](../research/REAL_DATA_ACTIVATION_REPORT.md),
+[dashboard/operator procedure](../research/DASHBOARD_VERIFICATION.md) and
+[remaining blockers](../research/REMAINING_BLOCKERS.md).
+
+## Original V1 implementation
+
 This isolated increment adds normalized financial facts, an explicit offline
 revision journal, compatible industry arithmetic and four additional financial
 chart projections. It reuses the existing FinancialPacket and deterministic

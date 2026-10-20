@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+## Financial real-data activation — partial, 2026-10-21
+
+The existing local research path now reads eight pinned VCI issuers, including
+canonical TCB/SSI adapter captures. Source lines, units, ownership, dates and
+flow basis are checked; no public rights or original metadata are invented.
+An additive verification disclosure distinguishes VERIFIED/PARTIALLY_VERIFIED/
+UNAVAILABLE from access/visibility. Twenty-four actual private API and frontend
+contracts pass; 2,816 single reported observations are eligible locally, zero
+fully verified/public metrics. A private review preserves 406 archived SSI HOSE
+classification pairs without promoting receipt time to effective membership.
+New-code runtime/browser acceptance stays PENDING after the prior policy denial;
+no services were restarted or bypassed. See research/REAL_DATA_ACTIVATION_REPORT.md.
+
 ## Financial Data Intelligence V1 — isolated source increment
 
 The canonical financial engine now has 60 outputs (49 existing, 11 added).

@@ -22,6 +22,7 @@ export type FundamentalSummary={contract:'fundamental-display-v1';period:string|
 export type FinancialPanel={key:'assets'|'funding'|'growth'|'quarterly'|'pe'|'pb'|'balance_history'|'cashflow'|'profitability'|'liquidity'|'bank_funding';title:string;chart:'stacked'|'performance'|'unavailable';source:string;frequency:FinancialFrequency;status:FundamentalMetricDisplay['status'];partial:boolean;methodology:string;reasons:string[];series:{key:string;label:string;unit:'VND'|'fraction'|'multiple'}[];rows:{period:string;values:Record<string,number|null>;statuses:Record<string,FundamentalMetricDisplay['status']>;bases:Record<string,string|null>}[]};
 export type FinancialStatementPeriod={ticker:string;source:string;currency:'VND';period:string;basis:string;consolidation:string|null;source_dates:Record<string,string|null>;items:FinancialStatementLine[];diagnostics:string[];data_confidence?:FinancialConfidence;access_classification?:string};
 export type FundamentalResearch = {
+  verification?:import('./financial-verification').FinancialVerification|null;
   display_scope?:'public'|'internal_research'|'personal_research';data_confidence?:FinancialConfidence;access_classification?:'PERSONAL_RESEARCH'|'PUBLIC_DISPLAY_REVIEW_REQUIRED'|'PUBLIC_DISPLAY_APPROVED';research_authorization_reference?:string;internal_authorization_reference?:string|null;
   ticker:string; source:string; currency:'VND'; period_type:FinancialFrequency; rows:FundamentalPeriod[]; changes:FinancialChange[];
   sector:string|null; industry:string|null; financial_identity_guard:boolean;

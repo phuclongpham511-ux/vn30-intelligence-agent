@@ -5,6 +5,7 @@ import {useLocale} from '@/lib/i18n';
 import type {FinancialPanel} from '@/lib/types';
 import {panelTitles} from '@/lib/financial-panels';
 import {unitDivisor,unitLabels,type AmountUnit} from '@/lib/fundamental-research';
+import {formatFinancialAmount} from '@/lib/financial-format';
 
 const colors=['var(--chart)','var(--chart-secondary)','var(--ma20)','var(--ma50)'];
 const axis={fill:'var(--muted-foreground)',fontSize:11};
@@ -17,7 +18,7 @@ export default function FinancialAnalysisPanel({panel,kind,unit,visible=true,isF
  const title=kind==='growth'&&series.some(s=>s.key==='operating_income')?'Operating income and profit trends':panelTitles[kind];
  const safeRows=panel?.rows.map(r=>({...r,values:Object.fromEntries(series.map(s=>{const value=r.values[s.key],status=r.statuses[s.key];const allowed=status==='SOURCE_REPORTED'&&personalResearch&&!isFixture&&panel?.status==='SOURCE_REPORTED'||status==='QUALIFIED'&&!isFixture&&['consolidated','standalone'].includes(r.bases[s.key]||'')||status==='DEMO'&&isFixture;return [s.key,allowed&&typeof value==='number'&&Number.isFinite(value)?value:null];}))}));
  const hasValues=safeRows?.some(r=>selected.some(s=>r.values[s.key]!==null));
- const format=(value:unknown,metricUnit:string)=>typeof value!=='number'||!Number.isFinite(value)?'—':metricUnit==='fraction'?percent(value):metricUnit==='multiple'?number(value)+'×':number(value/unitDivisor[unit],unit==='vnd'?0:2);
+ const format=(value:unknown,metricUnit:string)=>typeof value!=='number'||!Number.isFinite(value)?'—':metricUnit==='fraction'?percent(value):metricUnit==='multiple'?number(value)+'×':formatFinancialAmount(value,unitDivisor[unit],unit==='vnd'?0:2,number);
  const points=safeRows?.map(row=>({period:row.period,...row.values}));
  const status=panel?.status||'UNAVAILABLE';
  const selectedHasRatio=selected.some(s=>s.unit!=='VND');

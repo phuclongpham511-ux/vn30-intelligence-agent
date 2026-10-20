@@ -1,5 +1,36 @@
 # Woofi Financial Data Intelligence — delivery, 21 October 2026
 
+## Real-data activation continuation from 591f665
+
+**DATA_ACTIVATION_STATUS:** PARTIAL. Eight real saved issuers now pass the existing
+private API and frontend contracts across 24 annual/quarterly/TTM projections.
+The prepared bundle extends the raw-capture reader to pinned TCB/SSI canonical
+captures without acquiring or promoting provider data.
+
+**ACTIVATED_REAL_METRICS:** 25 distinct supported reported fields across the sample;
+2,816 eligible private observations. Zero fully VERIFIED or publicly activated
+real metrics. All missing scope/original metadata and comparison gates remain.
+
+**VERIFIED_TICKERS:** No fully qualified issuer history. Saved-source/contract
+validation passed for FPT, HPG, MWG, PNJ, REE, TCB, VCB and SSI.
+
+**INDUSTRY_MAPPING_STATUS:** 406 original HOSE provider pairs/61 codes reviewed as
+a private snapshot, not a dated taxonomy. Real industry aggregates remain inactive.
+
+**RUNTIME_STATUS:** PENDING. The prior “blocked by policy” startup rejection was
+not bypassed. No running service was changed; current-branch visual/mobile
+acceptance is not claimed.
+
+Current evidence and operator steps:
+[activation report](REAL_DATA_ACTIVATION_REPORT.md),
+[blockers](REMAINING_BLOCKERS.md),
+[dashboard verification](DASHBOARD_VERIFICATION.md),
+[API checks](validation/REAL_DATA_API_VALIDATION.json),
+[frontend contracts](validation/REAL_DATA_FRONTEND_VALIDATION.json).
+Current test results are recorded in validation/REAL_DATA_TEST_RESULTS.json.
+
+## Original 591f665 delivery record
+
 The feasible source implementation and bounded direct benchmark are delivered in
 an isolated branch. Real public data activation remains unqualified. Missing
 vendor definitions, source rights and financial evidence are explicit gaps; the

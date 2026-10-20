@@ -1,5 +1,6 @@
 'use client';
 import {useState} from 'react';
+import {formatFinancialAmount} from '@/lib/financial-format';
 import {useLocale} from '@/lib/i18n';
 import {industryData,industryLabels,type IndustrySnapshot} from '@/lib/industry-financials';
 import {unitDivisor,unitLabels,type AmountUnit} from '@/lib/fundamental-research';
@@ -10,7 +11,7 @@ export default function IndustryDashboard({data,allowDemo=false,initialUnit='bil
  const [unit,setUnit]=useState<AmountUnit>(initialUnit);
  const safe=industryData(data,data.industry.id,data.period,allowDemo);
  const selected=safe.metrics[metric]||Object.values(safe.metrics)[0];
- const format=(value:number|null,metricUnit:string)=>value===null?'—':metricUnit==='fraction'?percent(value):metricUnit==='multiple'?number(value)+'×':(value!==0&&Math.abs(value/unitDivisor[unit])<.01?(value>0?'<':'>−')+number(.01):number(value/unitDivisor[unit]))+' '+ui(unitLabels[unit]);
+ const format=(value:number|null,metricUnit:string)=>value===null?'—':metricUnit==='fraction'?percent(value):metricUnit==='multiple'?number(value)+'×':formatFinancialAmount(value,unitDivisor[unit],2,number)+' '+ui(unitLabels[unit]);
  return <section className="min-w-0 space-y-5" aria-label={ui('Industry comparison')}>
   {safe.is_fixture&&<p className="stock-note" role="note">{ui('DEMO · Synthetic companies and financial observations. Not market data.')}</p>}
   <header><p className="eyebrow">{ui('Industry comparison')}</p><h2 className="text-xl font-semibold">{language==='vi'?safe.industry.name_vi:safe.industry.name_en}</h2><p className="mt-1 text-xs text-muted-foreground">{safe.period} · {ui(safe.frequency==='annual'?'Annual':safe.frequency==='quarterly'?'Quarterly':'TTM')} · {ui(safe.report_scope==='consolidated'?'Consolidated statements':'Separate statements')}</p></header>

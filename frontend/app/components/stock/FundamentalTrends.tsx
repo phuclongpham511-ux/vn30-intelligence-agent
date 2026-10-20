@@ -5,6 +5,7 @@ import type {FundamentalResearch,FundamentalPeriod,FinancialFrequency,FinancialP
 import {FINANCIAL_LABELS,type FinancialKey} from '@/lib/fundamental-data';
 import {amountFields,growthFields,engineAmounts,multipleFields,researchSections,unitDivisor,unitLabels,consolidationLabel,type AmountUnit,type ResearchSection} from '@/lib/fundamental-research';
 import {financialEngineData} from '@/lib/financial-engine-data';
+import {verificationEvidence} from '@/lib/financial-verification';
 import {direction} from '@/lib/presentation';
 import {stockRead} from '@/lib/stock-detail';
 import FinancialResearchChart from './FinancialResearchCharts';
@@ -16,6 +17,17 @@ import {Skeleton} from '../ui/skeleton';
 
 const sectionLabels={overview:'Business picture',performance:'Growth drivers',valuation:'Valuation',statements:'Financial statements',sources:'Documents and sources'} as const;
 const statementLabels={income:'Income statement',balance:'Balance sheet',cash:'Cash flow statement'} as const;
+
+export function FinancialVerificationSummary({data}:{data:FundamentalResearch}){
+  const {ui}=useLocale(),v=data.verification;
+  if(!v||data.is_fixture)return null;
+  const latest=v.periods.at(-1);
+  return <details className="rounded-md border px-3 py-2 text-xs" data-financial-verification>
+    <summary className="cursor-pointer font-medium">{ui('Verification and availability')} · {latest?.period} · {ui('VERIFIED')}: {v.statuses.VERIFIED} · {ui('PARTIALLY_VERIFIED')}: {v.statuses.PARTIALLY_VERIFIED} · {ui('UNAVAILABLE')}: {v.statuses.UNAVAILABLE}</summary>
+    <p className="stock-note">{ui('Evidence grades do not grant public display rights. Partial source observations may be visible in the authorized local research view; missing metadata remains explicit.')}</p>
+    <div className="fundamental-table-scroll mt-2" role="region" tabIndex={0} aria-label={ui('Verification and availability')}><table className="fundamental-table"><thead><tr><th>{ui('Metric')}</th><th>{ui('Verification')}</th><th>{ui('Available in this view')}</th><th>{ui('Missing evidence')}</th></tr></thead><tbody>{Object.entries(latest?.metrics||{}).map(([key,m])=><tr key={key}><th scope="row">{ui(FINANCIAL_LABELS[key as FinancialKey]||key.replaceAll('_',' '))}</th><td>{ui(m.status)}</td><td>{ui(m.display_eligible?'Yes':'No')}</td><td className="whitespace-normal">{m.missing_evidence.length?m.missing_evidence.map(code=>ui(verificationEvidence[code]||code.replaceAll('_',' '))).join(' · '):'—'}</td></tr>)}</tbody></table></div>
+  </details>;
+}
 
 function FinancialTable({rows,fields,unit,label}:{rows:FundamentalPeriod[];fields:readonly FinancialKey[];unit:AmountUnit;label:string}){
   const {ui,t,number,percent}=useLocale();
@@ -118,6 +130,7 @@ export function FundamentalTrendsView({data,loading,error,retry,visible=true,fre
         <label htmlFor="financial-engine-periods">{t('Historical periods')}<select id="financial-engine-periods" value={count} onChange={e=>setCount(Number(e.target.value))} className="rounded border bg-background px-2 py-2"><option value={0}>{t('All loaded periods')}</option>{[2,4,8].map(n=><option key={n} value={n}>{t('{count} reporting periods',{count:n})}</option>)}</select></label>
       </div>
     </header>
+    {!loading&&!error&&data&&<FinancialVerificationSummary data={data}/>}
     <a className="text-xs text-primary underline" href="/industries">{ui('Industry comparison')}</a><nav aria-label={t('Financial research sections')} className="financial-research-nav">{researchSections.map(key=><button key={key} type="button" aria-pressed={section===key} onClick={()=>setSection(key)} className={`rounded-md px-3 py-2 text-xs focus-visible:outline-2 focus-visible:outline-ring ${section===key?'bg-primary/10 font-medium text-primary':'text-muted-foreground hover:bg-muted'}`}>{t(sectionLabels[key])}</button>)}</nav>
     {loading?<div role="status" aria-label={t('Loading financial statements')} className="space-y-4"><Skeleton className="h-24"/><Skeleton className="h-64"/></div>:error?<div role="alert" className="border-y py-8 text-center"><p className="mb-3 text-sm">{t('Financial statements are temporarily unavailable.')}</p><Button variant="outline" onClick={retry}>{t('Retry financials')}</Button></div>:!data?<p className="py-8 text-sm text-muted-foreground">{t('No financial observations are available for this frequency.')}</p>:<>
       {!rows.length&&<p className="stock-note">{t('No financial observations are available for this frequency.')}</p>}
