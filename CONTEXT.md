@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+## Financial Source-of-Truth V5 — independent internal evidence
+
+PNJ's official 2024 annual report supplies five fields for 2024/2023 with explicit
+consolidation, calendar year and VND units. Ten saved page-text facts normalize
+through the existing packet/engine/display pipeline; both balance identities and
+all ten saved VCI numeric comparisons pass. VCI basis/rights remain unqualified.
+The new reviewed-manifest boundary is offline, generic and limited to annual
+calendar-year monetary fields. Scoped EN/VI existing-component HTML renders show
+real values internally; ordinary public consumers reject internal payloads.
+Public rights, binary/page-image verification and browser acceptance remain open.
+No runtime provider wiring, acquisition, database, production or server changes.
+See `docs/FINANCIAL_SOURCE_OF_TRUTH_V5.md` for exact evidence and reproducibility.
+
 ## Financial Data Activation V4 — partial, development only
 
 The owner attests lawful use of the financial data; this is not a provider-issued

@@ -1,4 +1,7 @@
 export const vietnamese = {
+  "Saved filing review; not current market data.":"Đọc báo cáo gốc đã lưu; không phải dữ liệu thị trường hiện tại.",
+  "Original filing page evidence; selected fields only. PDF binary and visual verification remain unavailable.":"Bằng chứng trang báo cáo gốc; chỉ các chỉ tiêu đã chọn. Chưa xác minh tệp PDF nhị phân và hình ảnh trang.",
+  "INTERNAL RESEARCH · Original filing evidence; public display is disabled.":"NGHIÊN CỨU NỘI BỘ · Bằng chứng báo cáo gốc; chưa bật hiển thị công khai.",
   "Charts awaiting qualified inputs":"Biểu đồ đang chờ dữ liệu đủ điều kiện",
   "Unavailable values are withheld; existing qualified metrics remain visible.":"Số liệu chưa đủ điều kiện được ẩn; các chỉ tiêu đã đủ điều kiện vẫn hiển thị.",
   "Chart method & source":"Phương pháp biểu đồ và nguồn",

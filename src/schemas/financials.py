@@ -29,8 +29,8 @@ class FinancialSourceContext(DataModel):
     period_end: str | None = None
     original_currency: str | None = None
     original_unit: str | None = None
-    amount_multiplier: Literal[1] = 1
-    unit_evidence: Literal['audited_vci_adapter_contract'] = 'audited_vci_adapter_contract'
+    amount_multiplier: Literal[1, 1000, 1000000, 1000000000] = 1
+    unit_evidence: Literal['audited_vci_adapter_contract', 'original_filing'] = 'audited_vci_adapter_contract'
     record_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     audit_status: Literal['unknown'] = 'unknown'
     restatement_status: Literal['unknown'] = 'unknown'
@@ -134,6 +134,8 @@ class FundamentalSummary(DataModel):
 
 
 class FinancialEngineResponse(DataModel):
+    display_scope: Literal['public', 'internal_research'] = 'public'
+    internal_authorization_reference: str | None = None
     data_engine: Literal['financial-engine-v1'] = 'financial-engine-v1'
     ticker: str
     source: str
@@ -151,7 +153,7 @@ class FinancialEngineResponse(DataModel):
     metadata_sha256: str
     financial_identity_guard: bool
     read_at: datetime
-    read_kind: Literal['provider_or_process_cache'] = 'provider_or_process_cache'
+    read_kind: Literal['provider_or_process_cache', 'saved_filing_review'] = 'provider_or_process_cache'
     publication_date: str | None = None
     consolidation: str | None = None
     sector: str | None = None

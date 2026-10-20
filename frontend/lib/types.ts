@@ -21,9 +21,10 @@ export type FundamentalSummary={contract:'fundamental-display-v1';period:string|
 export type FinancialPanel={key:'assets'|'funding'|'growth'|'quarterly'|'pe'|'pb';title:string;chart:'stacked'|'performance'|'unavailable';source:string;frequency:FinancialFrequency;status:FundamentalMetricDisplay['status'];partial:boolean;methodology:string;reasons:string[];series:{key:string;label:string;unit:'VND'|'fraction'|'multiple'}[];rows:{period:string;values:Record<string,number|null>;statuses:Record<string,FundamentalMetricDisplay['status']>;bases:Record<string,string|null>}[]};
 export type FinancialStatementPeriod={ticker:string;source:string;currency:'VND';period:string;basis:string;consolidation:string|null;source_dates:Record<string,string|null>;items:FinancialStatementLine[];diagnostics:string[]};
 export type FundamentalResearch = {
+  display_scope?:'public'|'internal_research';internal_authorization_reference?:string|null;
   ticker:string; source:string; currency:'VND'; period_type:FinancialFrequency; rows:FundamentalPeriod[]; changes:FinancialChange[];
   sector:string|null; industry:string|null; financial_identity_guard:boolean;
-  publication_date:string|null; consolidation:string|null; read_at:string; read_kind:'provider_or_process_cache';
+  publication_date:string|null; consolidation:string|null; read_at:string; read_kind:'provider_or_process_cache'|'saved_filing_review';
   available_period_types:string[]; available_statements:string[];
   data_engine?:'financial-engine-v1';profile?:'non_financial'|'bank'|'financial_other'|'unknown';
   chart_rows?:FundamentalPeriod[];statements?:Record<string,{status:string;basis:string;periods:FinancialStatementPeriod[]}>;

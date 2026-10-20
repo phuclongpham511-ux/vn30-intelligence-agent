@@ -3,7 +3,10 @@ import {FINANCIAL_LABELS,type FinancialKey} from './fundamental-data.ts';
 import {validateFinancialPanels} from './financial-panels.ts';
 
 /** Validate presentation ownership; all financial calculations remain in Python. */
-export function financialEngineData(data:FundamentalResearch,ticker:string,frequency:FinancialFrequency,requireSummary=false):FundamentalResearch{
+export function financialEngineData(data:FundamentalResearch,ticker:string,frequency:FinancialFrequency,requireSummary=false,allowInternal=false):FundamentalResearch{
+  if(data?.display_scope!==undefined&&!['public','internal_research'].includes(data.display_scope))throw new Error('Invalid financial display scope');
+  if(data?.display_scope==='internal_research'&&(!allowInternal||data.is_fixture!==false||data.read_kind!=='saved_filing_review'||typeof data.internal_authorization_reference!=='string'||!data.internal_authorization_reference.trim()))throw new Error('Internal financial evidence is not public data');
+  if(data?.read_kind==='saved_filing_review'&&data.display_scope!=='internal_research')throw new Error('Missing internal financial scope');
   const pattern=frequency==='annual'?/^\d{4}$/:/^\d{4}-Q[1-4]$/;
   if(!data||data.data_engine!=='financial-engine-v1'||data.ticker!==ticker||data.currency!=='VND'||data.period_type!==frequency||!data.source||!Array.isArray(data.rows)||data.rows.length>20||!Array.isArray(data.chart_rows)||data.chart_rows.length>1204||!data.statements||!Array.isArray(data.source_receipts)||typeof data.is_fixture!=='boolean')throw new Error('Invalid financial engine contract');
   if(!Array.isArray(data.available_period_types)||data.available_period_types.some(value=>!['annual','quarterly','ttm'].includes(value)))throw new Error('Invalid financial frequency metadata');

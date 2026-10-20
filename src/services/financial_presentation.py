@@ -17,7 +17,17 @@ METRICS = {
 }
 
 
-def inputs_reasons(inputs, source, *, fixture=False):
+def display_allowed(context, *, internal=False):
+    if not context or context.get('display_rights') == 'prohibited':
+        return False
+    if internal:
+        return (context.get('unit_evidence') == 'original_filing'
+                and context.get('original_metadata', {}).get('extraction_verified') is True)
+    return (context.get('display_rights') == 'permitted'
+            and bool((context.get('display_rights_reference') or '').strip()))
+
+
+def inputs_reasons(inputs, source, *, fixture=False, internal=False):
     """Report independent gates together; never change the qualification decision."""
     if not inputs:
         return ['Unqualified input evidence']
@@ -31,15 +41,13 @@ def inputs_reasons(inputs, source, *, fixture=False):
         reasons.append('Conflicting reporting bases')
     if not fixture and not bases <= {'consolidated', 'standalone'}:
         reasons.append('Reporting basis is not qualified')
-    if not fixture and any(not ref.get('source_context') or
-            ref['source_context'].get('display_rights') != 'permitted' or
-            not (ref['source_context'].get('display_rights_reference') or '').strip() for ref in inputs):
+    if not fixture and any(not display_allowed(ref.get('source_context'), internal=internal) for ref in inputs):
         reasons.append('Financial source display rights are not qualified')
     return reasons
 
 
-def inputs_reason(inputs, source, *, fixture=False):
-    reasons = inputs_reasons(inputs, source, fixture=fixture)
+def inputs_reason(inputs, source, *, fixture=False, internal=False):
+    reasons = inputs_reasons(inputs, source, fixture=fixture, internal=internal)
     return reasons[0] if reasons else None
 
 
@@ -54,7 +62,7 @@ def metric_status(row, key, result):
                 reason or 'Required inputs are unavailable')
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not evidence or reason:
         return 'UNQUALIFIED', reason or 'Unqualified input evidence'
-    reason = inputs_reason(evidence.get('inputs', []), result.source, fixture=result.is_fixture)
+    reason = inputs_reason(evidence.get('inputs', []), result.source, fixture=result.is_fixture, internal=result.display_scope == 'internal_research')
     if reason:
         return 'UNQUALIFIED', reason
     return ('DEMO', 'Synthetic financial evidence') if result.is_fixture else ('QUALIFIED', None)
@@ -150,12 +158,22 @@ def financial_research_panels(result):
     return panels
 
 
-def display_financial_response(result: FinancialEngineResponse) -> FinancialEngineResponse:
+def display_financial_response(result: FinancialEngineResponse, *, internal_authorization_reference=None) -> FinancialEngineResponse:
     """Conservative display only; full API/source evidence and math are unchanged.
 
     Unknown consolidation cannot certify comparisons or live overview metrics.
     DEMO can demonstrate known source units with an explicitly unknown basis.
     """
+    # Only explicit offline callers can opt in; no HTTP parameter enables this.
+    # Internal source verification is independent of public display permission.
+    if internal_authorization_reference is not None:
+        if not isinstance(internal_authorization_reference, str) or not internal_authorization_reference.strip() or result.is_fixture:
+            raise ValueError('Invalid internal financial review authorization')
+        result = result.model_copy(update={'display_scope': 'internal_research',
+            'internal_authorization_reference': internal_authorization_reference,
+            'read_kind': 'saved_filing_review'})
+    elif result.display_scope != 'public':
+        raise ValueError('Internal financial response cannot be republished as public')
     projected = []
     for row in result.rows:
         projected.append({**row, **{key: None for key in row.get('calculations', {})
@@ -170,7 +188,7 @@ def display_financial_response(result: FinancialEngineResponse) -> FinancialEngi
             status, reason = metric_status(current, key, result)
             blockers = list(dict.fromkeys(([reason] if reason else []) + inputs_reasons(
                 current.get('calculations', {}).get(key, {}).get('inputs', []),
-                result.source, fixture=result.is_fixture))) if status in ('UNQUALIFIED', 'UNAVAILABLE') else []
+                result.source, fixture=result.is_fixture, internal=result.display_scope == 'internal_research'))) if status in ('UNQUALIFIED', 'UNAVAILABLE') else []
             metrics.append(dict(key=key, group=group, label=label, unit=unit, status=status,
                 blockers=blockers,
                 value=current.get(key) if status in ('QUALIFIED', 'DEMO') else None,
@@ -180,7 +198,7 @@ def display_financial_response(result: FinancialEngineResponse) -> FinancialEngi
     changes = []
     for change in result.changes:
         evidence = current.get('calculations', {}).get(change['metric'] + '_growth_yoy', {})
-        allowed = inputs_reason(evidence.get('inputs', []), result.source, fixture=result.is_fixture) is None
+        allowed = inputs_reason(evidence.get('inputs', []), result.source, fixture=result.is_fixture, internal=result.display_scope == 'internal_research') is None
         value = by_period[current['period']].get(change['metric'])
         changes.append({**change, 'current': value,
             **({} if allowed and value is not None else dict(previous=None, absolute_change=None, growth_yoy=None))})
@@ -190,8 +208,7 @@ def display_financial_response(result: FinancialEngineResponse) -> FinancialEngi
         for period in statement['periods']:
             context = period.get('source_context')
             qualified = (result.is_fixture or period['consolidation'] in ('consolidated', 'standalone') and
-                (context is not None and context.get('display_rights') == 'permitted' and
-                 bool((context.get('display_rights_reference') or '').strip()))) and period['basis'] in ('annual', 'standalone', 'ytd', 'point_in_time')
+                display_allowed(context, internal=result.display_scope == 'internal_research')) and period['basis'] in ('annual', 'standalone', 'ytd', 'point_in_time')
             periods.append({**period, 'items': [line if qualified and line['unit'] in ('VND', 'VND/share') or line['value'] is None else
                 {**line, 'value': None, 'semantic_status': 'unqualified'} for line in period['items']]})
         statements[kind] = {**statement, 'periods': periods}
