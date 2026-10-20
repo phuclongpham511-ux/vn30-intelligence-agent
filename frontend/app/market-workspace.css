@@ -90,27 +90,21 @@
   .news-results-grid .news-card h3{font-size:13px}
 }
 
-/* Board V3: one sortable table with movement color focused on the Δ cell. */
+/* Board V3 keeps its unified sortable table with the original full-row movement colors. */
 .quote-unified-board{overflow-x:auto}
 .quote-unified-board .quote-table{min-width:760px}
 .quote-workspace .quote-table .quote-movement-row>th,
 .quote-workspace .quote-table .quote-movement-row>td,
 .market-movers .quote-table .quote-movement-row>th,
-.market-movers .quote-table .quote-movement-row>td{background:var(--card);color:var(--foreground);font-weight:500;border-bottom:1px solid var(--border)}
+.market-movers .quote-table .quote-movement-row>td{background:var(--quote-row-fill);color:var(--quote-row-ink);font-weight:600;border-bottom:0}
 .quote-workspace .quote-table .quote-movement-row>th a,
-.market-movers .quote-table .quote-movement-row>th a{color:var(--foreground)}
-.quote-workspace .quote-table .quote-movement-row>td.price-advancing,
-.market-movers .quote-table .quote-movement-row>td.price-advancing{color:var(--positive);font-weight:650}
-.quote-workspace .quote-table .quote-movement-row>td.price-declining,
-.market-movers .quote-table .quote-movement-row>td.price-declining{color:var(--negative);font-weight:650}
-.quote-workspace .quote-table .quote-movement-row>td.price-reference,
-.market-movers .quote-table .quote-movement-row>td.price-reference{color:var(--unchanged);font-weight:650}
+.market-movers .quote-table .quote-movement-row>th a{color:var(--quote-row-ink)}
 .quote-workspace .quote-table .quote-movement-row>td.price-ceiling,
 .quote-workspace .quote-table .quote-movement-row>td.price-floor{font-weight:700}
 .quote-workspace .quote-table .quote-movement-row .quote-row-detail>span,
-.quote-workspace .quote-table .quote-movement-row .quote-source{color:var(--muted-foreground)}
+.quote-workspace .quote-table .quote-movement-row .quote-source{color:var(--quote-row-ink)}
 .quote-workspace .quote-table .quote-movement-row>td.quote-movement-cell,
-.market-movers .quote-table .quote-movement-row>td.quote-movement-cell{background:var(--muted);font-weight:700}
+.market-movers .quote-table .quote-movement-row>td.quote-movement-cell{background:var(--quote-row-fill);color:var(--quote-row-ink);font-weight:700}
 .quote-workspace .quote-table .quote-movement-row>td.quote-movement-cell[data-movement-state=ADVANCING],
 .market-movers .quote-table .quote-movement-row>td.quote-movement-cell[data-movement-state=ADVANCING]{background:var(--quote-row-fill);color:var(--row-ink)}
 .quote-workspace .quote-table .quote-movement-row>td.quote-movement-cell[data-movement-state=DECLINING],
@@ -124,7 +118,7 @@
 .quote-workspace .quote-table tbody tr.quote-movement-row:hover>th,
 .quote-workspace .quote-table tbody tr.quote-movement-row:hover>td,
 .market-movers .quote-table tbody tr.quote-movement-row:hover>th,
-.market-movers .quote-table tbody tr.quote-movement-row:hover>td{background:var(--card)}
+.market-movers .quote-table tbody tr.quote-movement-row:hover>td{background:var(--quote-row-fill);color:var(--quote-row-ink)}
 .quote-workspace .quote-table tbody tr.quote-movement-row:hover>td.quote-movement-cell[data-movement-state=ADVANCING],
 .quote-workspace .quote-table tbody tr.quote-movement-row:hover>td.quote-movement-cell[data-movement-state=DECLINING]{background:var(--quote-row-fill)}
 .quote-workspace .quote-qualification-note{margin:-4px 0 7px;font-size:11px;color:var(--muted-foreground)}

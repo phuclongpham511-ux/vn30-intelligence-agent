@@ -84,7 +84,7 @@ for(const [state,row,status='fresh',failed=false] of [['CEILING',quote()],['ADVA
  const heatmap=render(Quote,{stocks:[{symbol:'DEMO01'}],data,failed,now,scope:'page',mode:'heatmap'});assert.doesNotMatch(heatmap,/quote-movement-cell|quote-movement-row/);assert.match(heatmap,/Equal cell area, not capitalization/);
 });
 
-test('movement color is confined to the percentage cell and keeps readable theme contrast',()=>{
+test('full-row movement colors cover unified and grouped tables with readable theme contrast',()=>{
  const postcss=require('postcss'),price=postcss.parse(readFileSync(new URL('../app/price-state.css',import.meta.url),'utf8')),market=postcss.parse(readFileSync(new URL('../app/market-workspace.css',import.meta.url),'utf8'));
  const variables=(ast,selector)=>{const result={};ast.walkRules(selector,r=>r.walkDecls(d=>{if(d.prop.startsWith('--'))result[d.prop]=d.value;}));return result;};
  const rulesFrom=(ast,selector)=>{let found;ast.walkRules(r=>{if(r.selector.split(',').some(part=>part.trim()===selector))found=r;});return found;};
@@ -101,8 +101,19 @@ test('movement color is confined to the percentage cell and keeps readable theme
   for(const [direction,ink] of [['up','--row-ink'],['down','--row-down-ink']])for(const tier of ['low','medium','high'])assert.ok(contrast(resolve(vars['--row-'+direction+'-'+tier]),resolve(vars[ink]))>=4.5,direction+' '+tier+' contrast '+(dark?'dark':'light'));
   assert.ok(contrast(resolve(vars['--muted']),resolve(vars['--muted-foreground']))>=4.5);
  }
- const rowNeutral=rulesFrom(market,'.quote-workspace .quote-table .quote-movement-row>td');
- assert.ok(rowNeutral);assert.equal(rowNeutral.nodes.find(n=>n.prop==='background').value,'var(--card)');
+ for(const selector of [
+  '.quote-workspace .quote-table .quote-movement-row>td',
+  '.market-movers .quote-table .quote-movement-row>td',
+  '.quote-workspace .quote-table .quote-movement-row>th',
+  '.market-movers .quote-table .quote-movement-row>th',
+ ]){
+  const rowFill=rulesFrom(market,selector);assert.ok(rowFill,selector);
+  assert.equal(rowFill.nodes.find(n=>n.prop==='background').value,'var(--quote-row-fill)',selector);
+  assert.equal(rowFill.nodes.find(n=>n.prop==='color').value,'var(--quote-row-ink)',selector);
+ }
+ const hover=rulesFrom(market,'.quote-workspace .quote-table tbody tr.quote-movement-row:hover>td');
+ assert.ok(hover);assert.equal(hover.nodes.find(n=>n.prop==='background').value,'var(--quote-row-fill)');
+ assert.equal(hover.nodes.find(n=>n.prop==='color').value,'var(--quote-row-ink)');
  const movementFills=rulesFrom(market,'.quote-workspace .quote-table .quote-movement-row>td.quote-movement-cell[data-movement-state=ADVANCING]');
  assert.ok(movementFills);assert.equal(movementFills.nodes.find(n=>n.prop==='background').value,'var(--quote-row-fill)');
  assert.equal(movementFills.nodes.find(n=>n.prop==='color').value,'var(--row-ink)');
