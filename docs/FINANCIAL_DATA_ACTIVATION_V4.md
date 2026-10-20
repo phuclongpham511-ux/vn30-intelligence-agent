@@ -134,3 +134,26 @@ Artifacts:
 `C:/Users/PC/.codex/visualizations/2026/10/17/01a14811-87da-7ee2-8499-7835dd010da3/financial-activation-v4-20261020/`
 contains `saved-replay/` and a separate `frontend-build/`, so running build files
 are not overwritten. Browser acceptance remains PENDING; no browser was operated.
+
+
+## Bounded continuation — documented default is conditional
+
+A targeted follow-up found the archived official vnstock_data 3.2.9
+[Fundamental documentation](https://www.vnstocks.com/docs/vnstock/vnstock-data-v3/fundamental-layer-v3),
+important-notes section: consolidated reports are preferred when available;
+VND is the default unless otherwise specified. This improves provider-semantic
+confidence to PARTIAL. It is not an unconditional basis rule: the page explicitly
+scopes itself to vnstock_data 3.2.9, while the installed adapter uses vnstock 4.0.2
+and saved captures have unknown SDK version. Installed `_get_report` sends only
+`section`, with no basis selector or returned basis certification. Do not transfer
+this conditional statement into a blanket `consolidated` flag.
+
+The linked schema and advanced-contract pages returned 404 during follow-up.
+An FPT original-report URL returned 404; alternative FPT and PNJ annual-report
+PDFs exceeded the web reader's size limit. Their contents were not verified in
+this continuation, and no numeric comparison or qualification is claimed.
+No provider financial requests, extra tests, new integration or activation were
+performed. The existing code/build validation remains applicable. The narrow
+remaining evidence is a contract applicable to the installed VCI response or an
+explicit filing/version link for each reviewed observation. Owner lawful-use
+attestation remains recorded; it does not supply the missing technical basis.
