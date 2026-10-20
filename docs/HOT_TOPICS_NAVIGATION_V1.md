@@ -88,8 +88,9 @@ installed P1 Supervisor, Collector, ingestion locks, SQLite and application pin
 were not modified. Technical Pilot/FPT settings were not changed. No push, merge,
 server start/stop or deployment occurred.
 
-Before a separately authorized release, use Cloud Browser when available to check
-1440px/1024px/768px/390px/320px, VI/EN and both themes: first-screen hierarchy, all
+Before a separately authorized release, use the Codex Integrated Browser when a
+supported control tool is available; a genuine Codex Cloud Browser is also valid.
+Check 1440px/1024px/768px/390px/320px, VI/EN and both themes: first-screen hierarchy, all
 three primary labels, 3/2 headline caps/expansion, long title/source wrapping,
 keyboard focus, errors/retry, option switching, News/Watchlist navigation and
 unchanged review persistence. Then run the existing controlled release gates.

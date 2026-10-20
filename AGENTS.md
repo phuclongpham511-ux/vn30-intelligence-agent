@@ -6,11 +6,12 @@ Read `CONTEXT.md` before making product or backend changes. When touching the fr
 
 ### Browser isolation and authorization
 
-- For all Woofi tasks, use the built-in Codex Cloud Browser for browser interaction when it is available.
-- Never autonomously open, launch, control, attach to, or interact with a browser on the user's computer, including Chrome, Edge, Firefox, other desktop browsers, local temporary profiles, existing sessions, tabs, debugging ports, or desktop computer-control tools.
-- Browser navigation, UI acceptance, screenshots, responsive checks, and interactions must happen only in the Codex Cloud Browser unless the user gives new, explicit authorization for a different browser environment for that task. Prior approvals and Full Access do not grant continuing authorization.
-- Never access personal browser history, cookies, passwords, extensions, authentication sessions, or unrelated websites.
-- If the Codex Cloud Browser is unavailable, unsupported, or cannot reach the target (including a localhost development server), stop browser work and report that limitation. Do not switch to a local browser or attempt an isolation workaround. Ask for explicit authorization before proposing another browser environment.
+- Prefer the Codex Integrated Browser: the browser pane inside Codex Desktop. It may be used for Woofi development, public research, localhost access, UI inspection, screenshots, and acceptance when a browser-control tool is actually exposed and supports the requested operation.
+- Before browser work, inspect the current session's available tools and verify that the selected tool controls the Codex Integrated Browser and supports the intended action. A visible browser pane alone does not prove that an agent-control capability exists. Do not invent or assume unsupported browser tools.
+- A genuine Codex Cloud Browser may be used when it is actually available, including in another execution environment. It is not required when the Codex Integrated Browser is available and supported.
+- Never launch, control, attach to, or interact with the user's Personal External Browser, including Chrome, Edge, Firefox, existing profiles or sessions, tabs, debugging ports, or desktop computer-control tools. Do not access personal history, cookies, passwords, extensions, authentication sessions, or unrelated websites.
+- Do not launch external local browser automation frameworks or use hidden processes, alternate launchers, or other methods to bypass an integrated-browser restriction or host execution policy. A different browser environment requires explicit authorization for that task.
+- If no supported Codex browser-control capability is available, or the supported browser cannot reach the target (including localhost), stop browser work, report the precise capability or connectivity limitation, and keep visual acceptance pending. Do not substitute HTTP checks or generated HTML for visual evidence.
 - This policy remains in force until the user explicitly changes or revokes it.
 
 ### Architecture invariants
