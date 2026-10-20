@@ -7,8 +7,8 @@ acceptance PENDING. Public activation unchanged/disabled for these captures.**
 ## Usable application
 
 The local frontend is running at `http://127.0.0.1:3431/`.
-Open `/stocks/FPT#fundamentals`, `/stocks/PNJ#fundamentals` or
-`/stocks/VCB#fundamentals`; the existing Financial Analysis navigation, Annual /
+Open `/stocks/FPT#stock-fundamentals`, `/stocks/PNJ#stock-fundamentals` or
+`/stocks/VCB#stock-fundamentals`; the existing Financial Analysis navigation, Annual /
 Quarterly / TTM selector, units, historical tables and source disclosures remain.
 There is no replacement dashboard. Stock Detail's existing five financial
 destinations now read a server-authorized personal projection in this runtime.
