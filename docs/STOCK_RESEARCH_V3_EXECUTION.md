@@ -88,18 +88,70 @@ identity is explicitly unavailable. All four corporate-action reads return empty
 INCOMPLETE coverage; no history was fabricated or imported. Existing curated
 cash/share/bonus/rights cases remain covered by the permanent regression tests.
 
-## Progress
+## Phase 4 — completed validation; activation boundary remains
 
-- Current phase: 4 (regression, isolated artifact build, HTTP acceptance).
-- Completed: Phases 1, 2, 3; 82 relevant backend tests PASS, one existing
-  Starlette/httpx deprecation warning.
-- Evidence root outside Git:
-  `C:/Users/PC/.codex/visualizations/2026/10/17/01a14811-87da-7ee2-8499-7835dd010da3/stock-research-v3-20261020/`.
-- During read-only HTTP checks the initial 3431 PID was absent and connections
-  refused. No server Stop/Start was issued by this task. 3430/8430 and 8431 are
-  HTTP 200 with their original PIDs. Cause of the 3431 exit is not established.
-- Updated-build serving and visual acceptance remain unverified. Prior frontend
-  launch policy rejection is not bypassed. No runtime interruption performed.
-- Next executable step: final frontend regression, isolated webpack build and
-  saved evidence manifest, then local checkpoint and one consolidated manual
-  frontend handoff instruction if the execution boundary remains.
+- Source checkpoint: `44abf1c406e3565af60d3103a9bca17b75e42af2`.
+- Complete frontend unit/contract run: **313 PASS, 1 SKIP**, 0 failures. The skip
+  is the pre-existing optional persisted Technical API replay, not a removed test.
+  Seven new permanent interaction/navigation regressions were added. The earlier
+  49-test targeted run is separate evidence, not added to this total.
+- Relevant backend run: **82 PASS**, one existing Starlette/httpx deprecation
+  warning; in-memory test database and mocked providers, no Supervisor tests.
+- Typecheck: PASS on source and on the final staged build.
+- Supported `npm.cmd run build -- --webpack`: PASS in `frontend-build/` outside
+  the application worktree. Build ID `Z0J_nXuOT6pUsx46CV-z2`.
+- All **195 frontend source files** match the staged artifact SHA-256 manifest.
+  The running worktree's `.next` and dependencies were not rewritten.
+- **130 source renders PASS**: 100 financial views over ten saved real responses,
+  plus 30 Company/News/Community/empty-action views over bounded development
+  HTTP receipts. These are HTML source renders, not browser screenshots or new
+  live provider observations. Existing corporate-action synthetic regression
+  covers verified/pending/conflict/withdrawn/missing/DEMO states separately.
+- Actual SELECT-only HTTP payloads from backend 8431 are verified as described
+  above. No new financial/SSI request, ingestion, database import or browser
+  storage operation was made.
+- During read-only HTTP checks the initial 3431 PID 30436 was absent and
+  connections refused. No server Stop/Start was issued by this task. 3430/8430
+  and 8431 remain HTTP 200 with their original PIDs. Exit cause is not established.
+- Updated frontend routes/proxy and serving of this build: **PENDING**. The prior
+  standard frontend startup was rejected by host policy; no alternate launcher,
+  shell or process mechanism is used to retry it.
+- Visual acceptance: **PENDING**, Codex Cloud Browser unavailable; no personal or
+  local browser operation. Source rendering/build PASS is not browser PASS.
+- Accepted News V3 source and Market Board full-row color files are unchanged.
+  No production, Supervisor, Collector, lifecycle, pin, acquisition or SQLite
+  modification, push, merge or deployment.
+
+## Exact next action / pending boundary
+
+All four source-development phases have been executed. No new source/data-rights
+authorization is required for the completed work. The remaining activation
+boundary requires a host-permitted frontend launch by the user. Since 3431 is
+currently free, no process termination is necessary. If it becomes occupied,
+stop this instruction and identify that owner first.
+
+From a user-controlled PowerShell terminal, if permitted by host policy:
+
+```powershell
+Set-Location 'C:\Users\PC\.codex\visualizations\2026\10\17\01a14811-87da-7ee2-8499-7835dd010da3\stock-research-v3-20261020\frontend-build'
+if (Get-NetTCPConnection -State Listen -LocalPort 3431 -ErrorAction SilentlyContinue) { throw '3431 is occupied; do not replace its owner.' }
+$env:BACKEND_URL='http://127.0.0.1:8431'
+$env:NEXT_TELEMETRY_DISABLED='1'
+$env:NEXT_PUBLIC_WOOFI_SSI_PROVISIONAL='0'
+$env:NEXT_PUBLIC_WOOFI_VALIDATION=''
+npm.cmd run start -- --port 3431
+```
+
+Keep that terminal running. The same existing npm script starts the verified
+artifact; no backend restart, production port or acquisition change is needed.
+Then verify `/stocks/FPT#stock-fundamentals`, PNJ, VCB and `#stock-community`;
+confirm the served chunk/build belongs to this artifact before claiming updated
+frontend acceptance. Manual mobile/desktop EN/VI light/dark screenshots may supply
+visual evidence; Codex must not open a local browser to obtain them.
+
+Evidence root outside Git:
+`C:/Users/PC/.codex/visualizations/2026/10/17/01a14811-87da-7ee2-8499-7835dd010da3/stock-research-v3-20261020/`.
+`SOURCE_MANIFEST.json`, `BACKEND_READONLY_RECEIPTS.json`,
+`saved-source-renders/RESULTS.json` and `VALIDATION.json` retain the exact limits.
+This progress document's final documentation commit follows the source checkpoint;
+identify it with `git log -1 -- docs/STOCK_RESEARCH_V3_EXECUTION.md`.
