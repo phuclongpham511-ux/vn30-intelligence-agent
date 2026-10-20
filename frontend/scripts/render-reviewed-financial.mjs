@@ -14,8 +14,8 @@ const {LanguageContext,localeTools}=require(join(frontend,'lib/i18n.ts'));
 const [input,destination,compiledStyles]=process.argv.slice(2);
 if(!input||!destination||existsSync(destination))throw Error('Supply internal-display.json and a NEW output folder');
 const raw=JSON.parse(readFileSync(input,'utf8'));
-assert.equal(raw.display_scope,'internal_research');assert.equal(raw.is_fixture,false);
-const data=financialEngineData(raw,raw.ticker,raw.period_type,true,true);
+assert.ok(['internal_research','personal_research'].includes(raw.display_scope));assert.equal(raw.is_fixture,false);
+const data=financialEngineData(raw,raw.ticker,raw.period_type,true,raw.display_scope==='internal_research',raw.display_scope==='personal_research');
 const css=compiledStyles?readdirSync(compiledStyles,{recursive:true}).filter(file=>file.endsWith('.css')).map(file=>readFileSync(join(compiledStyles,file),'utf8')).join('\n'):'';
 const cache=new Map();
 function load(file){
@@ -32,7 +32,7 @@ function load(file){
   return require(id);
  },exports);return exports;
 }
-const {FundamentalOverview}=load(join(frontend,'app/components/stock/FundamentalTrends.tsx'));
+const {FundamentalTrendsView}=load(join(frontend,'app/components/stock/FundamentalTrends.tsx'));
 const Table=load(join(frontend,'app/components/stock/FinancialStatementTable.tsx')).default;
 mkdirSync(destination,{recursive:true});
 const results=[];
@@ -40,14 +40,14 @@ for(const language of ['en','vi']){
  const tools=localeTools(language),el=React.createElement;
  const html=renderToStaticMarkup(el(LanguageContext.Provider,{value:tools},el('main',{className:'stock-financial-research',style:{padding:24,maxWidth:1200,margin:'auto'}},
   el('h1',null,data.ticker+' · '+tools.t('Fundamental analysis')),
-  el('p',null,data.source+' · '+data.rows.map(r=>r.period).join(' / ')+' · VND · '+tools.ui('Consolidated statements')),
+  el('p',null,data.source+' · '+data.rows.map(r=>r.period).join(' / ')+' · VND · '+tools.ui(data.consolidation==='consolidated'?'Consolidated statements':data.consolidation==='standalone'?'Standalone statements':'Unknown basis')),
   el('p',null,language==='vi'?'Bản dựng HTML ngoại tuyến để kiểm tra số liệu; chưa phải nghiệm thu trình duyệt.':'Offline HTML evidence snapshot; browser acceptance pending.'),
-  el(FundamentalOverview,{data,unit:'billions'}),
+  el(FundamentalTrendsView,{data,loading:false,error:false,retry:()=>{},frequency:data.period_type}),
   ...Object.entries(data.statements).filter(([,s])=>s.periods.length).map(([kind,s])=>el('section',{key:kind},
    el(Table,{periods:s.periods,unit:'vnd',label:kind==='income'?'Income statement':'Balance sheet'}))),
   el('details',null,el('summary',null,tools.t('Statement provenance')),
    el('pre',{style:{whiteSpace:'pre-wrap',overflowWrap:'anywhere'}},JSON.stringify(data.source_receipts,null,2))))));
- assert.ok(html.includes('data-financial-scope="internal_research"'));
+ assert.ok(html.includes('data-financial-scope="'+raw.display_scope+'"'));
  for(const statement of Object.values(data.statements))for(const period of statement.periods)for(const line of period.items){
   if(line.value!==null)assert.ok(html.includes(tools.number(line.value,0)),`Missing rendered original field ${line.code}/${period.period}`);
  }

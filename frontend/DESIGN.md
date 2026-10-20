@@ -1,5 +1,14 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Personal Financial Research V6 — local development only
+
+Reuse the existing Financial Analysis destinations/tables/charts. The separate
+server-authorized personal scope has a visible Personal Research/SOURCE_REPORTED
+disclosure, UNKNOWN basis and inspectable unit/receipt evidence in EN/VI. Display
+the supported real source subset without filler rows; charts of reported amounts
+must not imply reconciled compositions or qualify unknown-basis ratios/growth.
+Default/public consumers reject personal payloads. No News/Board redesign.
+
 ## Financial Research experience V2 — development, 19 October 2026
 
 Financial Analysis keeps one shared period/unit toolbar with five secondary

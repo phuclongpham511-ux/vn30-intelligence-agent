@@ -6,6 +6,8 @@ from src.schemas.data import DataModel
 
 Frequency = Literal['annual', 'quarterly', 'ttm']
 StatementKind = Literal['income', 'balance', 'cash']
+FinancialConfidence = Literal['OFFICIAL_VERIFIED', 'RECONCILED', 'SOURCE_REPORTED', 'UNVERIFIED', 'INVALID']
+FinancialAccess = Literal['PERSONAL_RESEARCH', 'PUBLIC_DISPLAY_REVIEW_REQUIRED', 'PUBLIC_DISPLAY_APPROVED']
 
 
 class FinancialLine(DataModel):
@@ -23,6 +25,8 @@ class FinancialLine(DataModel):
 class FinancialSourceContext(DataModel):
     """Evidence facts, not an issuer filing certification or a rights grant."""
     contract: Literal['financial-source-context-v2'] = 'financial-source-context-v2'
+    data_confidence: FinancialConfidence = 'UNVERIFIED'
+    access_classification: FinancialAccess = 'PUBLIC_DISPLAY_REVIEW_REQUIRED'
     fiscal_year: int
     fiscal_quarter: int | None = None
     period_start: str | None = None

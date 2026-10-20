@@ -1,5 +1,17 @@
 # Woofi — Domain Context
 
+## Financial Analysis V6 — local personal research
+
+Owner-authorized personal use is separate from public redistribution permission.
+An explicit loopback-only development mode reads hash-pinned real VCI captures
+through the existing canonical financial engine. FPT/PNJ/VCB are reused; bounded
+HPG/MWG/REE reads extend the measured sample. SOURCE_REPORTED amounts populate
+annual/quarterly statements and historical amount charts; UNKNOWN reporting basis
+and absent original units stay explicit. Derived unknown-basis comparisons and
+public access remain guarded. Frontend 3431 uses core backend 8431 unchanged plus
+a read-only saved-evidence API on 8432. Existing 3430/8430 and production untouched.
+See `docs/FINANCIAL_PERSONAL_RESEARCH_V6.md` for scope, receipts and startup.
+
 ## Financial Source-of-Truth V5.1 — evidence incomplete
 
 The exact official PNJ 2024 annual-report download returned HTTP 403; document

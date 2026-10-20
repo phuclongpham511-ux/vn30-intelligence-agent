@@ -1,4 +1,11 @@
 export const vietnamese = {
+  'Personal Research':'Nghiên cứu cá nhân',
+  'SOURCE_REPORTED':'Theo báo cáo của nguồn',
+  'Source-reported financial data. Consolidation basis not independently verified.':'Dữ liệu tài chính theo nguồn cung cấp. Chưa xác minh độc lập cơ sở hợp nhất.',
+  'Public display review required.':'Chưa phê duyệt hiển thị công khai.',
+  'Saved personal research; not current data.':'Dữ liệu nghiên cứu đã lưu; không phải dữ liệu hiện tại.',
+  'Reported balance history':'Lịch sử số liệu bảng cân đối theo nguồn',
+
   "Saved filing review; not current market data.":"Đọc báo cáo gốc đã lưu; không phải dữ liệu thị trường hiện tại.",
   "Original filing page evidence; selected fields only. PDF binary and visual verification remain unavailable.":"Bằng chứng trang báo cáo gốc; chỉ các chỉ tiêu đã chọn. Chưa xác minh tệp PDF nhị phân và hình ảnh trang.",
   "INTERNAL RESEARCH · Original filing evidence; public display is disabled.":"NGHIÊN CỨU NỘI BỘ · Bằng chứng báo cáo gốc; chưa bật hiển thị công khai.",

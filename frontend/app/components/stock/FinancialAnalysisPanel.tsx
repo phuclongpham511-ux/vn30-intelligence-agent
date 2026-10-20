@@ -10,12 +10,12 @@ const colors=['var(--chart)','var(--chart-secondary)','var(--ma20)','var(--ma50)
 const axis={fill:'var(--muted-foreground)',fontSize:11};
 
 /** Only the backend-qualified projection enters a chart. Null stays a gap. */
-export default function FinancialAnalysisPanel({panel,kind,unit,visible=true,isFixture=false,onSources}:{panel?:FinancialPanel;kind:FinancialPanel['key'];unit:AmountUnit;visible?:boolean;isFixture?:boolean;onSources?:()=>void}){
+export default function FinancialAnalysisPanel({panel,kind,unit,visible=true,isFixture=false,personalResearch=false,onSources}:{panel?:FinancialPanel;kind:FinancialPanel['key'];unit:AmountUnit;visible?:boolean;isFixture?:boolean;personalResearch?:boolean;onSources?:()=>void}){
  const {t,ui,number,percent}=useLocale();
  const [hidden,setHidden]=useState<Set<string>>(()=>new Set());
  const series=panel?.series||[],selected=series.filter(s=>!hidden.has(s.key));
  const title=kind==='growth'&&series.some(s=>s.key==='operating_income')?'Operating income and profit trends':panelTitles[kind];
- const safeRows=panel?.rows.map(r=>({...r,values:Object.fromEntries(series.map(s=>{const value=r.values[s.key],status=r.statuses[s.key];const allowed=status==='QUALIFIED'&&!isFixture&&['consolidated','standalone'].includes(r.bases[s.key]||'')||status==='DEMO'&&isFixture;return [s.key,allowed&&typeof value==='number'&&Number.isFinite(value)?value:null];}))}));
+ const safeRows=panel?.rows.map(r=>({...r,values:Object.fromEntries(series.map(s=>{const value=r.values[s.key],status=r.statuses[s.key];const allowed=status==='SOURCE_REPORTED'&&personalResearch&&!isFixture&&panel?.status==='SOURCE_REPORTED'||status==='QUALIFIED'&&!isFixture&&['consolidated','standalone'].includes(r.bases[s.key]||'')||status==='DEMO'&&isFixture;return [s.key,allowed&&typeof value==='number'&&Number.isFinite(value)?value:null];}))}));
  const hasValues=safeRows?.some(r=>selected.some(s=>r.values[s.key]!==null));
  const format=(value:unknown,metricUnit:string)=>typeof value!=='number'||!Number.isFinite(value)?'—':metricUnit==='fraction'?percent(value):metricUnit==='multiple'?number(value)+'×':number(value/unitDivisor[unit],unit==='vnd'?0:2);
  const points=safeRows?.map(row=>({period:row.period,...row.values}));

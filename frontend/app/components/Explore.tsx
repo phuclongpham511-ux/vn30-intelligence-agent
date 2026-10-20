@@ -26,7 +26,7 @@ function DailyContext({ticker}:{ticker:string}) {
   return data&&data.ticker===ticker?<MarketSnapshot market={data} compact/>:<section className="panel p-5"><h2>{t('Market context')}</h2>{error?<p className="stock-note" role="alert">{t('Daily analytics unavailable. The latest quote is shown separately.')} <Button size="sm" variant="outline" onClick={retry}>{t('Retry')}</Button></p>:<Skeleton className="mt-4 h-40"/>}</section>;
 }
 
-export default function Explore({ticker}:{ticker:string}) {
+export default function Explore({ticker,personalResearch=false}:{ticker:string;personalResearch?:boolean}) {
   const {t}=useLocale();
   const identity=useStockRead<{items:Security[];last_synced_at:string|null}>(`/api/stocks/universe?symbols=${encodeURIComponent(ticker)}&limit=1`);
   let security:Security|null=null;
@@ -64,7 +64,7 @@ export default function Explore({ticker}:{ticker:string}) {
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
       </div>
-      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} visible={tab==='fundamentals'}/>}</div>
+      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} personalResearch={personalResearch} visible={tab==='fundamentals'}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker}/>}</div>
       <div role={tab==='news'||tab==='community'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'||tab==='community'?`stock-tab-${tab}`:undefined} tabIndex={tab==='news'||tab==='community'?0:undefined} hidden={tab!=='news'&&tab!=='community'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news')||visited.has('community'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab==='overview'} focus={tab==='community'?'community':'all'}/>}</div>
     </>}

@@ -139,7 +139,7 @@ def normalize_statement(ticker, source, kind, payload, metadata, profile, *, obs
             # this adapter retains its previously audited VND x1 transport contract.
             # Raw audit/restatement flags are evidence only: their provider semantics
             # and fiscal boundaries have not been qualified. Do not infer either.
-            context = FinancialSourceContext(fiscal_year=year,
+            context = FinancialSourceContext(fiscal_year=year, data_confidence='SOURCE_REPORTED',
                 fiscal_quarter=quarter if bucket == 'quarters' else None,
                 original_currency=raw.get('currency'), original_unit=raw.get('unit'),
                 record_sha256=content_hash(raw), original_metadata={key: raw[key] for key in
