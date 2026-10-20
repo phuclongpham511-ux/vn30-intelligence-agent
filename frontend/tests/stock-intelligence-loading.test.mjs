@@ -29,7 +29,7 @@ async function harness(run,{raw=JSON.stringify(saved()),broken=false}={}){
 test('one bounded persisted read survives Overview/News switching without quotes, polling or auto-review',async()=>{
  await harness(async state=>{
   assert.deepEqual(state.requests[0].symbols,['AAA']);assert.equal(state.requests[0].options.community_groups,true);assert.equal([...state.timers.values()][0].ms,20000);
-  state.requests[0].resolve(packet());await flush();state.render({preview:false});state.render({preview:true});
+  state.requests[0].resolve(packet());await flush();state.render({preview:false});state.render({focus:'community'});state.render({preview:true,focus:'all'});
   assert.equal(state.requests.length,1);assert.equal(state.writes(),0);assert.equal(state.timers.size,0);
   assert.equal(state.view().props.data.stocks[0].symbol,'AAA');
   state.view().props.review(news);state.render();assert.equal(state.writes(),1);

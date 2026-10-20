@@ -50,3 +50,13 @@ test('overview preview is bounded and both languages retain coherent research na
  for(const href of ['#stock-fundamentals','#stock-actions','#stock-news','/watchlist'])assert.ok(vi.includes(`href="${href}"`));
  assert.match(vi,/72 giờ/);assert.match(vi,/24 giờ/);
 });
+test('Community destination opens original discussion evidence and hides only the News presentation',()=>{
+ for(const language of ['en','vi']){
+  const html=render({focus:'community'},language);
+  assert.match(html,/<div hidden="" data-stock-research="news">/);
+  assert.match(html,/<details open="" data-stock-research="community"/);
+  assert.match(html,/href="#stock-community"/);
+  assert.equal((html.match(/data-stock-update="community:thread"/g)||[]).length,1);
+  assert.ok(html.includes(`href="${discussion.url}"`));
+ }
+});

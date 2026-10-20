@@ -1,6 +1,6 @@
 import type {Security} from './types.ts';
 
-export const stockSections = ['overview','fundamentals','technical','actions','news'] as const;
+export const stockSections = ['overview','fundamentals','technical','actions','news','community'] as const;
 export type StockSection = typeof stockSections[number];
 export function stockSection(hash:string):StockSection {
   const value=hash.replace(/^#stock-/, '');

@@ -13,7 +13,7 @@ const react={...React,useState(initial){
   if(value instanceof Set)return [new Set(visited),()=>{}];
   return React.useState(initial);
 }};
-const marker=name=>({visible=true})=>visible?React.createElement('div',{'data-component':name}):null;
+const marker=name=>({visible=true,focus})=>visible?React.createElement('div',{'data-component':name,'data-focus':focus}):null;
 const exports={};
 const compiled=transformSync(readFileSync(new URL('../app/components/Explore.tsx',import.meta.url),'utf8'),{filename:'Explore.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 new Function('require','exports',compiled)(name=>{
@@ -56,4 +56,12 @@ test('one research integration replaces separate news/community loaders without 
   assert.doesNotMatch(html,/data-component="StockNews|data-component="StockCommunity/);
   assert.match(html,/id="stock-tab-fundamentals"/);assert.match(html,/id="stock-tab-actions"/);
  }
+});
+test('Community is a direct research destination sharing one retained intelligence panel',()=>{
+ const html=render('community',['overview','news','community']);
+ assert.match(html,/id="stock-tab-community"[^>]*aria-controls="stock-panel-news"[^>]*aria-selected="true"/);
+ assert.match(html,/id="stock-panel-news"[^>]*aria-labelledby="stock-tab-community"[^>]*tabindex="0"/);
+ assert.equal((html.match(/data-component="StockIntelligence"/g)||[]).length,1);
+ assert.match(html,/data-focus="community"/);
+ assert.doesNotMatch(html,/data-component="FundamentalTrends"/);
 });

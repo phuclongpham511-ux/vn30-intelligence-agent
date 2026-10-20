@@ -1,4 +1,12 @@
 export const vietnamese = {
+  "Chart method & source":"Phương pháp biểu đồ và nguồn",
+  "Company data coverage":"Độ phủ dữ liệu doanh nghiệp",
+  "Operating income and profit trends":"Xu hướng thu nhập hoạt động và lợi nhuận",
+  "Inspect financial sources":"Xem nguồn tài chính",
+  "Loaded metric coverage":"Độ phủ chỉ tiêu đã tải",
+  "Statement hierarchy":"Cấp bậc báo cáo",
+  "Expand all":"Mở rộng tất cả",
+  "Collapse groups":"Thu gọn nhóm",
   "Collapse primary navigation":"Thu gọn điều hướng chính",
   "Expand primary navigation":"Mở rộng điều hướng chính",
   "Publisher news context":"Bối cảnh tin tức",

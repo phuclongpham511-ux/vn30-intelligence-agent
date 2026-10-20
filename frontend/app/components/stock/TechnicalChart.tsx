@@ -115,7 +115,7 @@ export default function TechnicalChart({ ticker, onRows, priceOnly=false }: { ti
   }, [rows, onRows]);
 
   const bar = selected ?? rows.at(-1);
-  return <section className="panel min-w-0 overflow-hidden" aria-label={t(priceOnly?'Price history':"Technical chart")}>
+  return <section className="panel min-w-0 overflow-hidden" data-price-history-status={loading?'loading':error?'error':rows.length?'available':'unavailable'} aria-label={t(priceOnly?'Price history':"Technical chart")}>
     <div className="space-y-3 border-b p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2"><h2>{t(priceOnly?'Price history':"Technical Chart")}</h2><span className="text-xs text-muted-foreground">{t("Daily OHLCV · VND")}</span></div>
       <p className="text-[11px] text-muted-foreground">{t('Latest daily observation')} · {localDate(rows.at(-1)?.date)} · {t('Completed sessions; separate from the latest quote.')}</p>

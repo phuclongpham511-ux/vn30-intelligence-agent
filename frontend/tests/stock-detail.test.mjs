@@ -6,6 +6,7 @@ import {readWatchlist,followStock} from '../lib/watchlist.ts';
 test('stock sections accept research deep links and reject unknown fragments',()=>{
   assert.equal(stockSection('#stock-actions'),'actions');
   assert.equal(stockSection('#stock-fundamentals'),'fundamentals');
+  assert.equal(stockSection('#stock-community'),'community');
   assert.equal(stockSection('#untrusted'),'overview');
 });
 test('stock identity requires the selected cached equity, never another ticker',()=>{

@@ -18,7 +18,7 @@ import {Skeleton} from './ui/skeleton';
 import {Button} from './ui/button';
 import WorkspaceNav from './market/WorkspaceNav';
 
-const labels={overview:'Overview',fundamentals:'Fundamental analysis',technical:'Technical analysis',actions:'Dividends & corporate actions',news:'Company news'} as const;
+const labels={overview:'Overview',fundamentals:'Fundamental analysis',technical:'Technical analysis',actions:'Dividends & corporate actions',news:'Company news',community:'Community context'} as const;
 
 function DailyContext({ticker}:{ticker:string}) {
   const {t}=useLocale();
@@ -47,7 +47,7 @@ export default function Explore({ticker}:{ticker:string}) {
     <WorkspaceNav research/>
     <StockHeader available={!!security} stock={{symbol:ticker,company_name:security?.company_name||null,display_name_en:security?.display_name_en,exchange:security?.exchange||null}}/>
     <div className="stock-tabs" role="tablist" aria-label={t('Stock sections')}>
-      {stockSections.map((section,index)=><button key={section} ref={node=>{buttons.current[section]=node;}} type="button" role="tab" id={`stock-tab-${section}`} aria-controls={section==='overview'||section==='technical'?'stock-panel-price':`stock-panel-${section}`} aria-selected={tab===section} tabIndex={tab===section?0:-1} onClick={()=>navigate(section)} onKeyDown={event=>{
+      {stockSections.map((section,index)=><button key={section} ref={node=>{buttons.current[section]=node;}} type="button" role="tab" id={`stock-tab-${section}`} aria-controls={section==='overview'||section==='technical'?'stock-panel-price':section==='community'?'stock-panel-news':`stock-panel-${section}`} aria-selected={tab===section} tabIndex={tab===section?0:-1} onClick={()=>navigate(section)} onKeyDown={event=>{
         const next=event.key==='ArrowRight'?stockSections[(index+1)%stockSections.length]:event.key==='ArrowLeft'?stockSections[(index+stockSections.length-1)%stockSections.length]:event.key==='Home'?stockSections[0]:event.key==='End'?stockSections.at(-1):null;
         if(next){event.preventDefault();navigate(next);buttons.current[next]?.focus();}
       }}>{t(labels[section])}</button>)}
@@ -66,7 +66,7 @@ export default function Explore({ticker}:{ticker:string}) {
       </div>
       <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} visible={tab==='fundamentals'}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker}/>}</div>
-      <div role={tab==='news'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'?'stock-tab-news':undefined} tabIndex={tab==='news'?0:undefined} hidden={tab!=='news'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab!=='news'}/>}</div>
+      <div role={tab==='news'||tab==='community'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'||tab==='community'?`stock-tab-${tab}`:undefined} tabIndex={tab==='news'||tab==='community'?0:undefined} hidden={tab!=='news'&&tab!=='community'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news')||visited.has('community'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab==='overview'} focus={tab==='community'?'community':'all'}/>}</div>
     </>}
   </div>;
 }
