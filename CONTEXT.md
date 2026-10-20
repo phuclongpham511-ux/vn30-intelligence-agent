@@ -1,5 +1,15 @@
 # Woofi — Domain Context
 
+## Financial Source-of-Truth V5.1 — evidence incomplete
+
+The exact official PNJ 2024 annual-report download returned HTTP 403; document
+reader screenshots returned text markers without image content. Binary SHA-256
+and original-page visual checks remain unverified. Decision C, not A/B. Existing
+ten saved-text facts replay successfully with balanced statements and scoped
+EN/VI HTML; public rights remain unresolved and public activation stays disabled.
+No application/runtime changes. See `docs/FINANCIAL_SOURCE_OF_TRUTH_V51.md` for
+field-level status, retrieval receipts and the exact rights question.
+
 ## Financial Source-of-Truth V5 — independent internal evidence
 
 PNJ's official 2024 annual report supplies five fields for 2024/2023 with explicit
