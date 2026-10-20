@@ -1,5 +1,16 @@
 # Woofi — Domain Context
 
+## SSI Summary No Content diagnosis — 2026-10-20
+
+Four saved Oct 20 Summary receipts are HTTP 200/business 204, not zero activity.
+SDK 3.2.1 current/historical methods share the dated endpoint; saved queries match
+the documented shape. Cause remains unproven; no application fix or activation.
+No new SSI/auth requests. Read-only production census found no runtime/listeners,
+with stale RUNNING intent; P1 and application pin unchanged. Recovery is separate.
+Twelve new offline boundary tests preserve raw envelopes and missing-data guards.
+See docs/SSI_SUMMARY_NO_CONTENT_DIAGNOSIS_V1.md for evidence and one bounded,
+separately authorized date-comparison experiment.
+
 ## Financial Research experience V2 — local source, 2026-10-19
 
 Existing Financial Analysis now has Business picture, Growth drivers, Valuation,
