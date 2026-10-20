@@ -1,4 +1,6 @@
 export const vietnamese = {
+  "Charts awaiting qualified inputs":"Biểu đồ đang chờ dữ liệu đủ điều kiện",
+  "Unavailable values are withheld; existing qualified metrics remain visible.":"Số liệu chưa đủ điều kiện được ẩn; các chỉ tiêu đã đủ điều kiện vẫn hiển thị.",
   "Chart method & source":"Phương pháp biểu đồ và nguồn",
   "Company data coverage":"Độ phủ dữ liệu doanh nghiệp",
   "Operating income and profit trends":"Xu hướng thu nhập hoạt động và lợi nhuận",

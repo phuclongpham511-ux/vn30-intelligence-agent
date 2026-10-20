@@ -120,6 +120,7 @@ class FundamentalMetricDisplay(DataModel):
     value: float | None = None
     formula: str
     reason: str | None = None
+    blockers: list[str] = Field(default_factory=list)
     consolidation: str | None = None
 
 

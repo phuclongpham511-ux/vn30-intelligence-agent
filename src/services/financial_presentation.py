@@ -17,21 +17,30 @@ METRICS = {
 }
 
 
-def inputs_reason(inputs, source, *, fixture=False):
+def inputs_reasons(inputs, source, *, fixture=False):
+    """Report independent gates together; never change the qualification decision."""
+    if not inputs:
+        return ['Unqualified input evidence']
+    reasons = []
     if not inputs or any(ref.get('source') != source or ref.get('currency') != 'VND'
             or not ref.get('code') or not ref.get('content_sha256')
             or ref.get('basis') not in ('annual', 'standalone', 'ytd', 'point_in_time') for ref in inputs):
-        return 'Unqualified input evidence'
+        reasons.append('Unqualified input evidence')
     bases = {ref.get('consolidation') for ref in inputs}
     if len(bases) != 1:
-        return 'Conflicting reporting bases'
+        reasons.append('Conflicting reporting bases')
     if not fixture and not bases <= {'consolidated', 'standalone'}:
-        return 'Reporting basis is not qualified'
+        reasons.append('Reporting basis is not qualified')
     if not fixture and any(not ref.get('source_context') or
             ref['source_context'].get('display_rights') != 'permitted' or
             not (ref['source_context'].get('display_rights_reference') or '').strip() for ref in inputs):
-        return 'Financial source display rights are not qualified'
-    return None
+        reasons.append('Financial source display rights are not qualified')
+    return reasons
+
+
+def inputs_reason(inputs, source, *, fixture=False):
+    reasons = inputs_reasons(inputs, source, fixture=fixture)
+    return reasons[0] if reasons else None
 
 
 def metric_status(row, key, result):
@@ -159,7 +168,11 @@ def display_financial_response(result: FinancialEngineResponse) -> FinancialEngi
             if result.profile == 'bank' and key in ('revenue', 'revenue_growth_yoy'):
                 key, label = ('operating_income', 'Operating income') if key == 'revenue' else ('operating_income_growth_yoy', 'Operating income YoY')
             status, reason = metric_status(current, key, result)
+            blockers = list(dict.fromkeys(([reason] if reason else []) + inputs_reasons(
+                current.get('calculations', {}).get(key, {}).get('inputs', []),
+                result.source, fixture=result.is_fixture))) if status in ('UNQUALIFIED', 'UNAVAILABLE') else []
             metrics.append(dict(key=key, group=group, label=label, unit=unit, status=status,
+                blockers=blockers,
                 value=current.get(key) if status in ('QUALIFIED', 'DEMO') else None,
                 formula=current.get('calculations', {}).get(key, {}).get('formula', 'No qualified calculation inputs'), reason=reason,
                 consolidation=next(iter({ref.get('consolidation') for ref in current.get('calculations', {}).get(key, {}).get('inputs', [])}), None)

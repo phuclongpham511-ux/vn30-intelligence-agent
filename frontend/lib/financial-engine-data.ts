@@ -50,6 +50,7 @@ export function financialEngineData(data:FundamentalResearch,ticker:string,frequ
     const keys=new Set<string>();
     for(const metric of summary.metrics){
       if(!metric.key||keys.has(metric.key)||!['valuation','performance','profitability','health'].includes(metric.group)||!['VND','VND/share','fraction','multiple'].includes(metric.unit)||!['QUALIFIED','UNAVAILABLE','UNQUALIFIED','DEMO'].includes(metric.status))throw new Error('Invalid financial metric qualification');
+      if(metric.blockers!==undefined&&(!Array.isArray(metric.blockers)||metric.blockers.length>16||metric.blockers.some(reason=>typeof reason!=='string')))throw new Error('Invalid financial qualification blockers');
       keys.add(metric.key);
       const supported=metric.key in FINANCIAL_LABELS||['market_cap','pe','pb','bvps'].includes(metric.key);
       const expectedUnit=['eps_reported','bvps'].includes(metric.key)?'VND/share':['debt_equity','current_ratio','quick_ratio','cash_conversion','pe','pb'].includes(metric.key)?'multiple':['roe','roa','gross_margin','net_margin','liabilities_assets'].includes(metric.key)||metric.key.includes('growth')?'fraction':'VND';

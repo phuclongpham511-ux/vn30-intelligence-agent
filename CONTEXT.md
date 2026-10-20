@@ -1,5 +1,16 @@
 # Woofi — Domain Context
 
+## Financial Data Activation V4 — partial, development only
+
+The owner attests lawful use of the financial data; this is not a provider-issued
+public redistribution license. The saved FPT/PNJ/VCB sample has 378 observations
+with no reporting-basis or original-unit fields. No new real metric is activated.
+Display projection now exposes independent blockers per metric; empty chart
+pairs share an inspectable disclosure while individually usable series remain.
+Existing calculations and guards are unchanged. See
+`docs/FINANCIAL_DATA_ACTIVATION_V4.md` for provider comparison, source hashes,
+rights distinction and the exact basis-evidence gate before activation.
+
 ## SSI Summary No Content diagnosis — 2026-10-20
 
 Four saved Oct 20 Summary receipts are HTTP 200/business 204, not zero activity.

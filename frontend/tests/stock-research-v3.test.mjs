@@ -72,8 +72,29 @@ test('financial source action navigates the existing section and period controls
  const props={data,loading:false,error:false,retry(){},onFrequency:value=>selected=value};
  let tree=render(props,'FundamentalTrendsView');const nodes=descendants(tree);
  nodes.find(n=>n.type==='button'&&text(n)==='Quarterly').props.onClick();assert.equal(selected,'quarterly');
- nodes.find(n=>n.type==='test-panel').props.onSources();
+ nodes.find(n=>n.type==='button'&&text(n)==='Inspect financial sources').props.onClick();
  tree=render(props,'FundamentalTrendsView');assert.match(text(tree),/Documents and sources/);
  assert.match(text(tree),/Provider receipts are available evidence, not original issuer filings/);
  assert.equal(descendants(tree).some(n=>n.type==='test-panel'),false);
+});
+
+test('empty charts share one disclosure while a qualified historical series remains visible',()=>{
+ for(const language of ['en','vi']){
+  const render=component('FundamentalTrends',language,{'./FinancialAnalysisPanel':{__esModule:true,default:'test-panel'},'./FinancialResearchCharts':{__esModule:true,default:()=>null},'./FinancialStatementTable':{__esModule:true,default:()=>null},'../ui/button':{Button:'button'},'../ui/skeleton':{Skeleton:'div'}});
+  const data=fixture(),props={data,loading:false,error:false,retry(){}};
+  let tree=render(props,'FundamentalTrendsView');
+  assert.equal(descendants(tree).filter(n=>n.props?.['data-financial-unavailable-group']!==undefined).length,1);
+  assert.equal(descendants(tree).filter(n=>n.type==='test-panel').length,0);
+  data.research_panels=[{key:'funding',status:'QUALIFIED',rows:[{period:'2025',values:{equity:0},statuses:{equity:'QUALIFIED'},bases:{equity:'consolidated'}}],reasons:[]}];
+  tree=render(props,'FundamentalTrendsView');
+  const panels=descendants(tree).filter(n=>n.type==='test-panel');
+  assert.equal(panels.length,1);assert.equal(panels[0].props.kind,'funding');
+  assert.equal(panels[0].props.panel.rows[0].values.equity,0);
+  data.profile='bank';data.financial_identity_guard=true;
+  descendants(tree).find(n=>n.type==='button'&&text(n)===localeTools(language).t('Growth drivers')).props.onClick();
+  tree=render(props,'FundamentalTrendsView');
+  const disclosure=descendants(tree).find(n=>n.props?.['data-financial-unavailable-group']!==undefined);
+  assert.ok(text(disclosure).includes(localeTools(language).ui('Operating income and profit trends')));
+  assert.ok(!text(disclosure).includes(localeTools(language).ui('Revenue and profit trends')));
+ }
 });

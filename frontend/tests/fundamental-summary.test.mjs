@@ -16,6 +16,17 @@ import {fixture} from './fixtures/fundamental-summary.mjs';
 test('missing or malformed reporting frequency metadata is rejected before the view can dereference it',()=>{
  for(const available_period_types of [undefined,null,'annual',{},['unrecognized'],[null]])assert.throws(()=>financialEngineData({...fixture(),available_period_types},'ABC','annual',true),/frequency metadata/);
 });
+test('independent blockers stay inspectable without enabling values; malformed evidence is rejected',()=>{
+ const data=fixture(),metric=data.fundamental_summary.metrics.find(m=>m.key==='pe');
+ metric.blockers=['Reporting basis is not qualified','Financial source display rights are not qualified'];
+ assert.equal(financialEngineData(data,'ABC','annual',true).fundamental_summary.metrics.find(m=>m.key==='pe').value,null);
+ const html=render(data);
+ for(const reason of metric.blockers)assert.ok(html.includes(reason));
+ for(const blockers of [null,'rights',[{}],Array(17).fill('rights')]){
+  metric.blockers=blockers;
+  assert.throws(()=>financialEngineData(data,'ABC','annual',true),/qualification blockers/);
+ }
+});
 function render(data=fixture(),unit='billions',language='en'){
  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:localeTools(language)},React.createElement(exports.FundamentalOverview,{data,unit})));
 }
