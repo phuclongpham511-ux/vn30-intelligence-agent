@@ -1,5 +1,20 @@
 # Woofi — Domain Context
 
+## Financial Data Intelligence V1 — isolated source increment
+
+The canonical financial engine now has 60 outputs (49 existing, 11 added).
+Normalized facts retain provenance, scope, optional fiscal/publication dates,
+revision/formula version and explicit quality. An explicit offline ingestion CLI
+writes a dedicated revision journal; industry APIs only read that journal and a
+reviewed, versioned, effective-dated taxonomy. Matched-cohort sums/ratios, coverage,
+peer rank/percentile and contributions have model-specific guards. No real
+taxonomy is enabled and no unqualified VCI field is promoted to public evidence.
+Four chart projections and a coverage/peer comparison page reuse existing UI.
+SStock research covers eighteen issuers and industry interactions; WiData
+methodology is separate from vendor-formula verification. SSI, dependencies,
+production config and other checkouts are preserved. See
+docs/FINANCIAL_DATA_INTELLIGENCE_V1.md and research/FINAL_RESEARCH_REPORT.md.
+
 ## Financial Analysis V6 — local personal research
 
 Owner-authorized personal use is separate from public redistribution permission.

@@ -1,0 +1,59 @@
+{
+  "contract": "financial-intelligence-validation-v1",
+  "recorded_at": "2026-10-20T17:20:19.292399+00:00",
+  "baseline": "b88f6f00250ea1a3ddc2a87ce7aabb95653d6573",
+  "backend": {
+    "command": "uv run pytest -q",
+    "passed": 1532,
+    "subtests_passed": 32,
+    "warnings": 1,
+    "warning": "Existing Starlette/httpx deprecation",
+    "duration_seconds": 280.83,
+    "baseline_passed": 1517
+  },
+  "frontend": {
+    "command": "npm test",
+    "passed": 323,
+    "skipped": 1,
+    "failed": 0,
+    "total": 324,
+    "baseline_passed": 321,
+    "baseline_skipped": 1
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "status": "PASS"
+  },
+  "build": {
+    "command": "npm run build -- --webpack",
+    "status": "PASS",
+    "normal_demo_artifact": "not-found; no synthetic heading or taxonomy content",
+    "post_build_runtime_recheck": "PENDING: final restart rejected by automatic approval review as blocked by policy"
+  },
+  "browser": {
+    "surface": "Codex Integrated Browser",
+    "actual_components": true,
+    "evidence": "Desktop and observed narrow pane; model/frequency/language/theme interactions",
+    "controlled_device_matrix": false,
+    "real_public_data_acceptance": false
+  },
+  "offline_ingestion": {
+    "stored_revisions": 23040,
+    "repeat_inserted": 0,
+    "provider_requests": 0,
+    "qualified": 0,
+    "unqualified": 17757,
+    "unavailable": 5283
+  },
+  "official_saved_text": {
+    "issuer": "PNJ",
+    "amount_matches": 10,
+    "differences": 0,
+    "original_binary_and_page_images_qualified": false
+  },
+  "limits": [
+    "Source tests do not establish complete financial correctness.",
+    "Synthetic browser fixtures do not qualify public financial data.",
+    "No production changes, deployment, push or merge."
+  ]
+}

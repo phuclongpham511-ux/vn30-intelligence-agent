@@ -13,6 +13,7 @@ from src.services import data
 from src.services.universe import browse_universe
 from src.services.live_market import get_live_market
 from src.schemas.financials import FinancialEngineResponse, FinancialStatementResponse
+from src.schemas.financial_intelligence import MetricSeriesResponse
 
 router = APIRouter(prefix="/stocks", tags=["stocks"])
 
@@ -249,6 +250,24 @@ def stock_financials(symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
         return result
     except ValueError:
         raise HTTPException(status_code=502, detail='Financial source is unavailable or invalid') from None
+
+
+@router.get('/{symbol}/financials/metrics',response_model=MetricSeriesResponse)
+def stock_financial_metrics(symbol: str = Path(pattern=r'^[A-Za-z0-9]{1,20}$'),
+                     frequency: Literal['annual', 'quarterly', 'ttm'] = 'annual',
+                     limit: int = Query(default=8, ge=1, le=20),
+                     session: Session = Depends(get_session),
+                     provider=Depends(data.get_fundamental_provider)):
+    from src.services.financial_intelligence import normalized_metrics
+    packet, _ = financial_packet_for_stock(symbol, session, provider)
+    try:
+        return MetricSeriesResponse(ticker=packet.ticker,frequency=frequency,
+            observations=normalized_metrics(packet,frequency=frequency,limit=limit),
+            limitations=['Publication timestamps and historical vintages are not qualified.',
+                'Blocked values remain null. The existing public display gates apply.',
+                'Accounting loan/deposit ratio is not regulatory LDR.'])
+    except ValueError:
+        raise HTTPException(status_code=502,detail='Financial source is unavailable or invalid') from None
 
 
 @router.get('/{symbol}/financials/statements/{statement}', response_model=FinancialStatementResponse)

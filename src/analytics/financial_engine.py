@@ -8,7 +8,7 @@ import math
 from src.providers.vnstock.financial_statements import MAP
 from src.schemas.financials import FinancialEngineResponse
 
-GROWTH_FIELDS = ('revenue', 'operating_income', 'net_profit', 'profit_parent')
+GROWTH_FIELDS = ('revenue', 'operating_income', 'net_profit', 'profit_parent', 'customer_loans', 'customer_deposits')
 FLOW_FIELDS = set(MAP['income']) - {'eps_reported'} | (set(MAP['cash']) - {'cash_beginning', 'cash_ending'})
 
 
@@ -139,11 +139,14 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         calculate('liabilities_assets', 'total_liabilities / total_assets', ['total_liabilities','total_assets'], lambda a,b:a/b, positive=('total_assets',))
         calculate('current_ratio', 'current_assets / current_liabilities', ['current_assets','current_liabilities'], lambda a,b:a/b, positive=('current_liabilities',), ordinary=True)
         calculate('quick_ratio', '(current_assets - inventory) / current_liabilities', ['current_assets','inventory','current_liabilities'], lambda a,b,c:(a-b)/c, positive=('current_liabilities',), ordinary=True)
+        calculate('net_working_capital', 'current_assets - current_liabilities', ['current_assets','current_liabilities'], lambda a,b:a-b, ordinary=True)
+        calculate('loan_deposit_ratio', 'gross customer loans / customer deposits; accounting ratio, not regulatory LDR',
+            ['customer_loans','customer_deposits'], lambda a,b:a/b if a>=0 and packet.profile=='bank' else None, positive=('customer_deposits',))
         calculate('cash_conversion', 'cash_operating / total profit after tax', ['cash_operating','net_profit'], lambda a,b:a/b, positive=('net_profit',), ordinary=True)
         calculate('capex_cash_outflow', '-capex_signed (only reported outflows)', ['capex_signed'], lambda a:-a if a<=0 else None, ordinary=True)
         calculate('free_cash_flow', 'cash_operating - capex_cash_outflow', ['cash_operating','capex_cash_outflow'], lambda a,b:a-b, ordinary=True)
         calculate('balance_residual', 'total_assets - total_liabilities - total equity', ['total_assets','total_liabilities','equity'], lambda a,b,c:a-b-c)
-        for metric, field in (('roe','equity'),('roa','total_assets')):
+        for metric, field in (('roe','equity'),('roa','total_assets'),('inventory_turnover','inventory')):
             prior_period = previous(period, years=1) if frequency != 'quarterly' else previous(period, quarters=1)
             prior_obs = indexed['balance'].get(prior_period)
             current_obs = indexed['balance'].get(period)
@@ -152,8 +155,19 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
                 prior_reason = prior_reason or 'nonpositive_prior_balance'
             if current_obs and prior_obs and not compatible(current_obs, prior_obs):
                 prior_reason = 'incompatible_prior_balance'
-            calculate(metric, f'total profit after tax / mean(current {field}, {prior_period} {field}); period return, not annualized',
-                ['net_profit',field], lambda p,b: p/((b+prior_value)/2), positive=(field,), extra=(prior_value,prior_refs,prior_reason))
+            average = {'equity':'average_equity','total_assets':'average_assets','inventory':'average_inventory'}[field]
+            calculate(average, f'mean(current {field}, {prior_period} {field})',
+                [field], lambda b:(b+prior_value)/2, positive=(field,), extra=(prior_value,prior_refs,prior_reason),
+                ordinary=field=='inventory')
+            if metric == 'inventory_turnover':
+                calculate(metric, '(revenue - gross_profit) / average_inventory; period turnover, not annualized',
+                    ['revenue','gross_profit',average], lambda r,g,b:(r-g)/b if r>=g else None,
+                    positive=(average,), ordinary=True)
+            else:
+                calculate(metric, f'total profit after tax / mean(current {field}, {prior_period} {field}); period return, not annualized',
+                    ['net_profit',field], lambda p,b: p/((b+prior_value)/2), positive=(field,), extra=(prior_value,prior_refs,prior_reason))
+        calculate('asset_turnover', 'revenue / average_assets; period turnover, not annualized',
+            ['revenue','average_assets'], lambda r,a:r/a if r>=0 else None, positive=('average_assets',), ordinary=True)
 
         for field in GROWTH_FIELDS:
             for suffix, prior_period in (('growth_yoy', previous(period, years=1)), ('growth_qoq', previous(period, quarters=1) if '-Q' in period else None)):

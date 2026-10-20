@@ -1,5 +1,11 @@
 # VN30 Intelligence Agent
 
+Financial Data Intelligence V1 adds normalized revisioned facts, offline journal
+ingestion, guarded industry aggregates/peers and four financial chart projections.
+Real source qualification and industry membership remain explicit gates. See
+[setup and contracts](docs/FINANCIAL_DATA_INTELLIGENCE_V1.md) and the
+[research delivery](research/FINAL_RESEARCH_REPORT.md).
+
 Help active retail investors know which changes deserve attention across Vietnamese equities.
 The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
 

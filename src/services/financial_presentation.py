@@ -100,6 +100,22 @@ def financial_research_panels(result):
          'Compatible dated prices, earnings per share and display rights are not qualified.'),
         ('pb', 'P/B history', 'unavailable', [('pb', 'P/B', 'multiple')], True,
          'Compatible dated prices, book value per share and display rights are not qualified.'),
+        ('cashflow', 'Cash flow and reinvestment', 'performance', [
+            ('cash_operating','Operating cash flow','VND'),('cash_investing','Investing cash flow','VND'),
+            ('cash_financing','Financing cash flow','VND')] + ([('free_cash_flow','Free cash flow','VND')] if ordinary else []), False,
+         'Standalone period flows; YTD is differenced only with compatible prior YTD evidence. Free cash flow is operating cash less reported capital expenditure outflows.'),
+        ('profitability', 'Profitability history', 'performance', [
+            ('roe','ROE','fraction'),('roa','ROA','fraction')] + ([('gross_margin','Gross Margin','fraction'),
+            ('net_margin','Net Margin','fraction')] if ordinary else []), False,
+         'ROE and ROA use average opening and closing balances. Quarterly returns are not annualized.'),
+        ('liquidity', 'Liquidity and leverage', 'performance', [
+            ('current_ratio','Current ratio','multiple'),('quick_ratio','Quick ratio','multiple'),
+            ('debt_equity','Debt / equity','multiple')] if ordinary else [], False,
+         'Current and quick ratios compare current assets with current liabilities. Debt/equity uses interest-bearing borrowings, not total liabilities.'),
+        ('bank_funding', 'Bank lending and deposits', 'performance', [
+            ('customer_loans','Customer loans','VND'),('customer_deposits','Customer deposits','VND'),
+            ('loan_deposit_ratio','Accounting loans / deposits','fraction')] if bank else [], False,
+         'Gross customer loans and customer deposits are period-end amounts. Their accounting ratio is not regulatory LDR. NIM, CASA and NPL are not inferred.'),
     ]
     panels = []
     for key, title, chart, fields, partial, methodology in definitions:

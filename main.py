@@ -34,6 +34,8 @@ app.include_router(ingestion.router)
 app.include_router(technical.router)
 from routers.personal_research import router as personal_research_router
 app.include_router(personal_research_router)
+from routers.financial_intelligence import router as financial_intelligence_router
+app.include_router(financial_intelligence_router)
 
 
 @app.exception_handler(ProviderError)

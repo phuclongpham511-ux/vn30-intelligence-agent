@@ -1,6 +1,6 @@
 import type {FinancialPanel,FundamentalResearch} from './types.ts';
 
-const specifications={balance_history:{chart:'performance',VND:['total_assets','total_liabilities','equity'],fraction:[],multiple:[]},assets:{chart:'stacked',VND:['cash_equivalents','inventory','customer_loans'],fraction:[],multiple:[]},funding:{chart:'stacked',VND:['total_liabilities','equity'],fraction:['liabilities_assets'],multiple:[]},growth:{chart:'performance',VND:['revenue','operating_income','net_profit'],fraction:['revenue_growth_yoy','operating_income_growth_yoy','net_profit_growth_yoy'],multiple:[]},quarterly:{chart:'performance',VND:['revenue','operating_income','net_profit'],fraction:['revenue_growth_yoy','operating_income_growth_yoy','net_profit_growth_yoy'],multiple:[]},pe:{chart:'unavailable',VND:[],fraction:[],multiple:['pe']},pb:{chart:'unavailable',VND:[],fraction:[],multiple:['pb']}} as const;
+const specifications={cashflow:{chart:'performance',VND:['cash_operating','cash_investing','cash_financing','free_cash_flow'],fraction:[],multiple:[]},profitability:{chart:'performance',VND:[],fraction:['roe','roa','gross_margin','net_margin'],multiple:[]},liquidity:{chart:'performance',VND:[],fraction:[],multiple:['current_ratio','quick_ratio','debt_equity']},bank_funding:{chart:'performance',VND:['customer_loans','customer_deposits'],fraction:['loan_deposit_ratio'],multiple:[]},balance_history:{chart:'performance',VND:['total_assets','total_liabilities','equity'],fraction:[],multiple:[]},assets:{chart:'stacked',VND:['cash_equivalents','inventory','customer_loans'],fraction:[],multiple:[]},funding:{chart:'stacked',VND:['total_liabilities','equity'],fraction:['liabilities_assets'],multiple:[]},growth:{chart:'performance',VND:['revenue','operating_income','net_profit'],fraction:['revenue_growth_yoy','operating_income_growth_yoy','net_profit_growth_yoy'],multiple:[]},quarterly:{chart:'performance',VND:['revenue','operating_income','net_profit'],fraction:['revenue_growth_yoy','operating_income_growth_yoy','net_profit_growth_yoy'],multiple:[]},pe:{chart:'unavailable',VND:[],fraction:[],multiple:['pe']},pb:{chart:'unavailable',VND:[],fraction:[],multiple:['pb']}} as const;
 const publicStatuses=['QUALIFIED','UNQUALIFIED','UNAVAILABLE','DEMO'];
 
 /** Validate server-qualified chart projections. Never calculate financial inputs. */
@@ -8,7 +8,7 @@ export function validateFinancialPanels(data:FundamentalResearch){
  const personal=data.display_scope==='personal_research'&&data.access_classification==='PERSONAL_RESEARCH';
  const statuses=[...publicStatuses,...(personal?['SOURCE_REPORTED']:[])];
  if(data.research_panels===undefined)return; // Older payloads get shells, never invented chart data.
- if(!Array.isArray(data.research_panels)||data.research_panels.length>(personal?7:6))throw Error('Invalid financial panels');
+ if(!Array.isArray(data.research_panels)||data.research_panels.length>(personal?11:10))throw Error('Invalid financial panels');
  const seen=new Set<string>(),periods=data.chart_rows?.map(r=>r.period)||[];
  for(const panel of data.research_panels){
   if(!panel||!Object.hasOwn(specifications,panel.key)||seen.has(panel.key))throw Error('Invalid financial panel ownership');
@@ -18,7 +18,7 @@ export function validateFinancialPanels(data:FundamentalResearch){
   const keys=new Set<string>();
   for(const s of panel.series){
    if(!s||typeof s.label!=='string'||!['VND','fraction','multiple'].includes(s.unit)||!(spec[s.unit] as readonly string[]).includes(s.key)||keys.has(s.key))throw Error('Invalid financial panel series');
-   if(data.financial_identity_guard&&['revenue','revenue_growth_yoy','cash_equivalents','inventory'].includes(s.key)||data.profile!=='bank'&&s.key==='customer_loans'||data.profile!=='bank'&&s.key.startsWith('operating_income'))throw Error('Unsafe financial panel issuer');
+   if(data.financial_identity_guard&&['revenue','revenue_growth_yoy','cash_equivalents','inventory'].includes(s.key)||data.profile!=='bank'&&['customer_loans','customer_deposits','loan_deposit_ratio'].includes(s.key)||data.profile!=='bank'&&s.key.startsWith('operating_income'))throw Error('Unsafe financial panel issuer');
    keys.add(s.key);
   }
   let available=false,blocked=false;
@@ -45,7 +45,7 @@ export function validateFinancialPanels(data:FundamentalResearch){
  }
 }
 
-export const panelTitles={balance_history:'Reported balance history',assets:'Asset composition',funding:'Funding composition',growth:'Revenue and profit trends',quarterly:'Quarterly operating results',pe:'P/E history',pb:'P/B history'} as const;
+export const panelTitles={cashflow:'Cash flow and reinvestment',profitability:'Profitability history',liquidity:'Liquidity and leverage',bank_funding:'Bank lending and deposits',balance_history:'Reported balance history',assets:'Asset composition',funding:'Funding composition',growth:'Revenue and profit trends',quarterly:'Quarterly operating results',pe:'P/E history',pb:'P/B history'} as const;
 export function financialSourceLink(value:string):string|undefined{
  try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:undefined;}catch{return undefined;}
 }

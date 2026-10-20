@@ -1,0 +1,16 @@
+{
+  "url": "https://api.github.com/repos/anhtri04/vnstock-java-kbs/git/trees/main?recursive=1",
+  "sha": "05cacac539ab5708d293c853d70c61394e8376bd",
+  "files": [
+    "LICENSE",
+    "vnstock-java-kbs-sample/src/main/java/com/vnstock/kbs/sample/config/VnstockKbsConfig.java",
+    "vnstock-java-kbs-sample/src/main/java/com/vnstock/kbs/sample/controller/FinanceController.java",
+    "vnstock-java-kbs-sample/src/main/java/com/vnstock/kbs/sample/service/FinanceService.java",
+    "vnstock-java-kbs-sample/src/test/java/com/vnstock/kbs/sample/FinanceServiceTest.java",
+    "vnstock-java-kbs/src/main/java/com/vnstock/kbs/config/KbsConfig.java",
+    "vnstock-java-kbs/src/main/java/com/vnstock/kbs/config/KbsConstants.java",
+    "vnstock-java-kbs/src/main/java/com/vnstock/kbs/service/FinanceService.java",
+    "vnstock-java-kbs/src/test/java/com/vnstock/kbs/KbsFinanceApiDiagnosticTest.java",
+    "vnstock-java-kbs/src/test/java/com/vnstock/kbs/KbsFinanceApiEndpointTest.java"
+  ]
+}

@@ -1,0 +1,15 @@
+# Implementation decisions
+
+Dedicated branch feature/financial-data-intelligence in ../woofi-financial-data; baseline b88f6f00250ea1a3ddc2a87ce7aabb95653d6573 from the clean latest integration worktree. Main and unrelated worktrees are preserved. App worktree registration tool could not resolve the parent directory as a repository, so git worktree add created the requested isolated checkout directly.
+
+Reuse the canonical financial engine rather than a parallel calculator. Add working capital, average assets/equity/inventory, period inventory/asset turnover, accounting customer loans/deposits and their growth. Quarter ratios remain period returns. Existing 49 common output values match the baseline synthetic contract. Source prices, EPS weighting, dividends, corporate actions and SSI behavior are unchanged.
+
+Normalize metric facts with units, fiscal labels/boundaries, scope, source, actual fetch time, unknown publication time, revision hash, formula version, kind and quality. Unknown publication/scope remains null/unknown. An extra accounting-identity gate excludes contradictory balance-dependent facts from the new comparison boundary without erasing source evidence.
+
+Retain reported/derived lineage even when public values are withheld. Revision hashes include quality, lineage and fiscal-boundary metadata, so a gate change cannot masquerade as an identical normalized version. The final measured ingestion uses .local/financial-metrics-delivery.sqlite; earlier exploratory journals are private and are not served.
+
+A dedicated offline SQLite journal retains revisions. Explicit CLI ingestion reads saved packets; HTTP reads never ingest or fetch. The journal rejects application-database tables and has a period/frequency index. Public normalized metrics reuse existing display qualification. The industry API is opt-in via WOOFI_FINANCIAL_JOURNAL and WOOFI_FINANCIAL_TAXONOMY; no default fabricated membership.
+
+Industry aggregates use matched numerator/denominator cohorts, known fiscal intervals, compatible source/unit/scope and explicit model membership. Sources conflicting within one issuer/metric are excluded. Negative earnings remain in observed profit sums; contributions are shown only with positive observed total. Rank is numerical descending with competition ties; percentile=(count below + 0.5*ties)/N. Valuation stays unavailable; no mean company P/E. Real-estate uses the non-financial base only; securities/insurance have common financial outputs with dedicated model guards, not fabricated specialized metrics. Sector growth and valuation history remain next-phase work.
+
+Four additional chart projections reuse qualified Python outputs, including separately scaled multiple axes. A coverage-aware industry page links from existing Stock Financial Analysis. No new dependencies, global navigation redesign, public provider activation, production DB/configuration changes or push/merge. The guarded /demo/financial-intelligence route uses clearly labelled synthetic fixtures only; normal production builds return not-found for that route.

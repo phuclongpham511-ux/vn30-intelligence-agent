@@ -420,3 +420,14 @@ new-code desktop/mobile browser inspection, numerical comparison, no overlap,
 useful default coverage and bounded30-symbol cold/read lifecycle qualification.
 Preview execution was denied by automatic policy in this task; no alternative
 preview launcher or canonical deployment can substitute for that missing gate.
+
+### Financial intelligence comparison
+
+Financial Analysis retains its own component and evidence hierarchy. Additional
+cash-flow, profitability, liquidity/leverage and bank-funding panels reuse the
+canonical chart contract. Show multiples as × and fractions as percentages;
+amount-unit changes must not round a nonzero subunit amount to an apparent zero.
+Industry comparison shows metric-specific coverage, missing peers, source/method
+disclosures and effective taxonomy date/version. Numerical ranks and percentiles
+must not be described as investment merit. Wide tables scroll within their
+container; explicit synthetic fixtures are confined to the replay-only demo route.

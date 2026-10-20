@@ -1,0 +1,398 @@
+{
+  "nonfinancial_overview": [
+    "field (settable)",
+    "Thực Chiến Coming Soon",
+    "Mã CP",
+    "Chọn kỳ",
+    "Chọn quý",
+    "Cả năm",
+    "Chọn năm",
+    "Website:",
+    "Mô hình kinh doanh",
+    "Đào tạo thực chiến",
+    "Tài Sản",
+    "Tiền, gửi ngân hàng",
+    "Phải thu",
+    "Tồn kho",
+    "Tài sản cố định",
+    "Xây dựng dở dang",
+    "Đầu tư tài chính",
+    "Tài sản khác",
+    "Tiền/TTS",
+    "Nguồn Vốn",
+    "Nợ vay",
+    "Nợ chiếm dụng",
+    "TD, LNCPP, các quỹ",
+    "Lợi ích cổ đông KKS",
+    "Vốn điều lệ",
+    "Nợ vay/TNV",
+    "Cơ Cấu Lợi Nhuận",
+    "Lợi nhuận khác",
+    "Lợi nhuận tài chính",
+    "Lợi nhuận kinh doanh",
+    "LNST công ty mẹ",
+    "Lưu Chuyển Tiền Tệ",
+    "Từ hoạt động kinh doanh",
+    "Từ hoạt động đầu tư",
+    "Từ hoạt động tài chính",
+    "Tiền và tương đương tiền cuối kỳ",
+    "Cơ Cấu Chi Phí",
+    "Chi phí khác",
+    "Chi phí bán hàng",
+    "Chi phí quản lý",
+    "Chi phí tài chính",
+    "Giá vốn hàng bán",
+    "Khấu hao tài sản cố định",
+    "Kết Quả Kinh Doanh (N)",
+    "Doanh thu thuần",
+    "Tăng trưởng DT (YoY)",
+    "Tăng trưởng LNST công ty mẹ (YoY)",
+    "Giá cổ phiếu"
+  ],
+  "bank_overview": [
+    "field (settable)",
+    "Thực Chiến Coming Soon",
+    "Mã CP",
+    "Chọn kỳ",
+    "Chọn quý",
+    "Cả năm",
+    "Chọn năm",
+    "Website:",
+    "Mô hình kinh doanh",
+    "Đào tạo thực chiến",
+    "Tài Sản",
+    "Tiền mặt, vàng bạc, đá quý",
+    "Tiền gửi tại NHNN",
+    "Tiền gửi & cho vay tại các TCTD khác",
+    "Chứng khoán KD & ĐT",
+    "Cho vay khách hàng",
+    "Tài sản cố định",
+    "Tài sản khác",
+    "Tăng trưởng tín dụng (YoY)",
+    "Nguồn Vốn",
+    "Nợ CP & NHNN",
+    "Tiền gửi & cho vay của các TCTD khác",
+    "Tiền gửi khách hàng",
+    "Phát hành giấy tờ có giá",
+    "Vốn khác",
+    "Lợi ích cổ đông KKS",
+    "TD, LNCPP, các quỹ",
+    "Tăng trưởng huy động (YoY)",
+    "Vốn điều lệ",
+    "Cơ Cấu Lợi Nhuận",
+    "Thu nhập khác",
+    "Ngoại hối & vàng",
+    "Hoạt động dịch vụ",
+    "Thu nhập lãi thuần",
+    "LN trước dự phòng",
+    "LNST công ty mẹ",
+    "Kết Quả Kinh Doanh (N)",
+    "TOI",
+    "Tăng trưởng TOI (YoY)",
+    "Tăng trưởng LNST công ty mẹ (YoY)",
+    "Giá cổ phiếu",
+    "Cơ Cấu Chi Phí",
+    "Chi phí dự phòng rủi ro tín dụng",
+    "Chi phí hoạt động",
+    "CIR",
+    "Khả Năng Sinh Lời",
+    "YEA",
+    "COF",
+    "NIM"
+  ],
+  "bank_growth": [
+    {
+      "title": "Khả Năng Sinh Lời",
+      "series": [
+        "YEA",
+        "COF",
+        "NIM"
+      ]
+    },
+    {
+      "title": "Hiệu Suất Sinh Lời",
+      "series": [
+        "ROA",
+        "ROE"
+      ]
+    },
+    {
+      "title": "Tỷ Lệ Nợ Xấu (NPL) & Tỷ Lệ Bao Phủ Nợ Xấu (LLR)",
+      "series": [
+        "LLR",
+        "NPL",
+        "NPL2"
+      ]
+    },
+    {
+      "title": "Cơ Cấu Cho Vay Theo Chất Lượng Nợ",
+      "series": [
+        "Dự phòng cho vay khách hàng",
+        "Tỷ lệ nợ đủ tiêu chuẩn",
+        "Nợ dưới tiêu chuẩn",
+        "Nợ cần chú ý",
+        "Nợ nghi ngờ",
+        "Nợ xấu có khả năng mất vốn"
+      ]
+    },
+    {
+      "title": "Cơ Cấu Cho Vay Theo Thời Gian",
+      "series": [
+        "Cho vay dài hạn",
+        "Cho vay trung hạn",
+        "Cho vay ngắn hạn",
+        "LDR"
+      ]
+    },
+    {
+      "title": "Cơ Cấu Tiền Gửi",
+      "series": [
+        "Tiền gửi không kỳ hạn",
+        "Tiền gửi có kỳ hạn, tiết kiệm",
+        "Tiền gửi ký quỹ",
+        "Tiền gửi vốn chuyên dùng",
+        "CASA"
+      ]
+    },
+    {
+      "title": "Cơ Cấu Cho Vay Theo Ngành",
+      "series": [
+        "Công nghiệp chế biến, chế tạo",
+        "Sản xuất và phân phối điện, khí đốt và nước",
+        "Xây dựng",
+        "Vận tải kho bãi và thông tin liên lạc",
+        "Khai khoáng",
+        "Nông, lâm, thủy hải sản",
+        "Nhà hàng, khách sạn",
+        "Hoạt động tài chính, ngân hàng và bảo hiểm",
+        "Bán buôn và bán lẻ, sửa chữa ô tô, xe máy và xe có động cơ khác",
+        "Cung cấp nước, hoạt động quản lý và xử lý rác thải, nước thải",
+        "Hoạt động làm thuê trong các hộ gia đình",
+        "Hoạt động kinh doanh bất động sản",
+        "Hoạt động hành chính và dịch vụ hỗ trợ",
+        "Hoạt động chuyên môn, khoa học và công nghệ",
+        "Giáo dục đào tạo",
+        "Hoạt động dịch vụ khác/ Thương mại dịch vụ",
+        "Y tế và hoạt động trợ giúp xã hội",
+        "Nghệ thuật, vui chơi, giải trí",
+        "Hoạt động Đảng, tổ chức chính trị - xã hội",
+        "Cho vay giao dịch ký quỹ và ứng trước cho khách hàng",
+        "Cho vay tại chi nhánh nước ngoài/ Tổ chức và cơ quan quốc tế",
+        "Cho vay cá nhân",
+        "Dư nợ khác",
+        "Khác (chưa phân loại)"
+      ]
+    },
+    {
+      "title": "Cơ Cấu Cho Vay Theo Loại Hình",
+      "series": [
+        "Doanh nghiệp nhà nước",
+        "CTCP khác, Công ty TNHH khác, Doanh nghiệp tư nhân, Công ty hợp danh",
+        "Doanh nghiệp có vốn đầu tư nước ngoài",
+        "Cá nhân, hộ kinh doanh",
+        "Hợp tác xã và liên hiệp hợp tác xã",
+        "Đơn vị hành chính sự nghiệp, Đảng, đoàn thể và hiệp hội",
+        "Cho vay tại chi nhánh nước ngoài",
+        "Cho vay giao dịch ký quỹ và ứng trước cho khách hàng",
+        "Thành phần kinh tế khác"
+      ]
+    }
+  ],
+  "securities_growth": [
+    {
+      "title": "Kết Quả Kinh Doanh",
+      "series": [
+        "Doanh thu hoạt động Năm",
+        "LNST công ty mẹ Năm",
+        "Giá cổ phiếu"
+      ]
+    },
+    {
+      "title": "Kết Quả Kinh Doanh (N)",
+      "series": [
+        "Doanh thu hoạt động",
+        "LNST công ty mẹ",
+        "Tăng trưởng DTHĐ (YoY)",
+        "Tăng trưởng LNST công ty mẹ (YoY)",
+        "Giá cổ phiếu"
+      ]
+    },
+    {
+      "title": "Mảng Môi Giới",
+      "series": [
+        "Lợi nhuận mảng môi giới",
+        "Biên lợi nhuận gộp mảng môi giới"
+      ]
+    },
+    {
+      "title": "Hiệu Suất Sinh Lời",
+      "series": [
+        "ROA",
+        "ROE"
+      ]
+    },
+    {
+      "title": "NAV Quản Lý & Tiền Gửi",
+      "series": [
+        "NAV nhà đầu tư",
+        "Tiền gửi nhà đầu tư"
+      ]
+    },
+    {
+      "title": "Cho Vay Ký Quỹ",
+      "series": [
+        "Dư nợ Margin",
+        "Vốn chủ sở hữu",
+        "Tỷ lệ Margin/VCSH"
+      ]
+    },
+    {
+      "title": "Cơ Cấu Tự Doanh",
+      "series": [
+        "Cổ phiếu niêm yết",
+        "Cổ phiếu chưa niêm yết",
+        "Trái phiếu",
+        "Tiền gửi và chứng chỉ tiền gửi"
+      ]
+    },
+    {
+      "title": "Cơ Cấu FVTPL",
+      "series": [
+        "Cổ phiếu niêm yết",
+        "Cổ phiếu chưa niêm yết",
+        "Trái phiếu",
+        "Tiền gửi và chứng chỉ tiền gửi"
+      ]
+    },
+    {
+      "title": "Cơ Cấu AFS",
+      "series": [
+        "Cổ phiếu niêm yết",
+        "Cổ phiếu chưa niêm yết",
+        "Trái phiếu"
+      ]
+    },
+    {
+      "title": "Cơ Cấu HTM",
+      "series": [
+        "Trái phiếu",
+        "Tiền gửi và chứng chỉ tiền gửi"
+      ]
+    },
+    {
+      "title": "DANH MỤC TỰ DOANH",
+      "series": [
+        "Mã cổ phiếu",
+        "Tổng khối lượng",
+        "Giá vốn (Đồng/CP)",
+        "Giá thị trường (Đồng/CP)",
+        "Giá trị vốn",
+        "Giá trị thị trường",
+        "Lãi/lỗ tạm tính  ↓",
+        "Tỷ lệ lãi/lỗ",
+        "MSB",
+        "MWG",
+        "HPG",
+        "FPT",
+        "VIC",
+        "CP khác"
+      ]
+    }
+  ],
+  "real_estate_growth": [
+    {
+      "title": "Kết Quả Kinh Doanh",
+      "series": [
+        "Doanh thu thuần Năm",
+        "LNST công ty mẹ Năm",
+        "Giá cổ phiếu"
+      ]
+    },
+    {
+      "title": "Kết Quả Kinh Doanh (N)",
+      "series": [
+        "Doanh thu thuần",
+        "LNST công ty mẹ",
+        "Tăng trưởng DT (YoY)",
+        "Tăng trưởng LNST công ty mẹ (YoY)",
+        "Giá cổ phiếu"
+      ]
+    },
+    {
+      "title": "Hiệu Suất Sinh Lời",
+      "series": [
+        "ROA",
+        "ROE"
+      ]
+    },
+    {
+      "title": "Biên Lợi Nhuận",
+      "series": [
+        "Biên lợi nhuận gộp",
+        "Biên lợi nhuận ròng"
+      ]
+    }
+  ],
+  "pnj_income": [
+    "1. Doanh thu bán hàng và cung cấp dịch vụ",
+    "2. Các khoản giảm trừ doanh thu",
+    "3. Doanh thu thuần",
+    "Tăng trưởng DTT (YoY)",
+    "4. Giá vốn hàng bán",
+    "5. Lợi nhuận gộp",
+    "Biên lợi nhuận gộp",
+    "6. Doanh thu hoạt động tài chính",
+    "7. Chi phí tài chính",
+    "Trong đó: chi phí lãi vay",
+    "8. Lãi/(Lỗ) từ công ty liên doanh, liên kết",
+    "9. Chi phí bán hàng",
+    "10. Chi phí quản lý doanh nghiệp",
+    "11. Lợi nhuận thuần từ hoạt động kinh doanh",
+    "12. Thu nhập khác",
+    "13. Chi phí khác",
+    "14. Lợi nhuận/(Lỗ) khác",
+    "15. Tổng lợi nhuận kế toán trước thuế",
+    "16. Chi phí thuế TNDN hiện hành",
+    "17. Chi phí thuế TNDN hoãn lại",
+    "18. Lợi nhuận sau thuế",
+    "19. Lợi nhuận sau thuế của cổ đông không kiểm soát",
+    "20. Lợi nhuận sau thuế của công ty mẹ",
+    "Tăng trưởng LNST công ty mẹ (YoY)",
+    "Biên lợi nhuận ròng"
+  ],
+  "pnj_balance": [
+    "CÂN ĐỐI KẾ TOÁN",
+    "CÂN ĐỐI KẾ TOÁN",
+    "A. TÀI SẢN NGẮN HẠN",
+    "I. Tiền và các khoản tương đương tiền",
+    "II. Các khoản đầu tư tài chính ngắn hạn",
+    "III. Các khoản phải thu ngắn hạn",
+    "IV. Hàng tồn kho",
+    "V. Tài sản ngắn hạn khác",
+    "B. TÀI SẢN DÀI HẠN",
+    "I. Các khoản phải thu dài hạn",
+    "II. Tài sản cố định",
+    "III. Bất động sản đầu tư",
+    "IV. Tài sản dở dang dài hạn",
+    "V. Đầu tư tài chính dài hạn",
+    "VI. Tài sản dài hạn khác",
+    "TỔNG TÀI SẢN",
+    "C. NỢ PHẢI TRẢ",
+    "I. Nợ ngắn hạn",
+    "II. Nợ dài hạn",
+    "D. VỐN CHỦ SỞ HỮU",
+    "I. Vốn chủ sở hữu",
+    "II. Nguồn kinh phí và các quỹ khác",
+    "TỔNG NGUỒN VỐN"
+  ],
+  "pnj_cash": [
+    "LƯU CHUYỂN TIỀN TỆ",
+    "LƯU CHUYỂN TIỀN TỆ",
+    "I. Lưu chuyển tiền từ hoạt động kinh doanh",
+    "II. Lưu chuyển tiền từ hoạt động đầu tư",
+    "III. Lưu chuyển tiền từ hoạt động tài chính",
+    "IV. Lưu chuyển tiền thuần trong kỳ",
+    "V. Tiền và tương đương tiền đầu kỳ",
+    "VI. Tiền và tương đương tiền cuối kỳ"
+  ]
+}

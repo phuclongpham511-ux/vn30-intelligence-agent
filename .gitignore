@@ -2,6 +2,7 @@
 .env.*
 !.env.example
 .venv/
+.local/
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -24,4 +25,6 @@ build/
 Thumbs.db
 *.log
 data/
+!research/data/
+!research/data/**
 *.ingestion.lock
