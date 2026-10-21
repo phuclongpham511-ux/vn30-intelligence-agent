@@ -15,7 +15,7 @@ function component(name,language='en',overrides={}){
  const values=[];let cursor=0;
  const react={...React,useState(initial){const key=cursor++;if(!(key in values))values[key]=typeof initial==='function'?initial():initial;return [values[key],next=>{values[key]=typeof next==='function'?next(values[key]):next;}];}};
  const exports={},code=transformSync(readFileSync(new URL(`../app/components/stock/${name}.tsx`,import.meta.url),'utf8'),{filename:name+'.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
- new Function('require','exports',code)(id=>id==='react'?react:id==='@/lib/i18n'?{useLocale:()=>localeTools(language)}:overrides[id]||require(id.startsWith('@/lib/')?`../lib/${id.slice(6)}.ts`:id),exports);
+ new Function('require','exports',code)(id=>id==='react'?react:id==='@/lib/i18n'?{useLocale:()=>localeTools(language)}:id==='@/lib/chart-motion'?{useChartMotion:()=>false}:overrides[id]||require(id.startsWith('@/lib/')?`../lib/${id.slice(6)}.ts`:id),exports);
  return (props,key='default')=>{cursor=0;return exports[key](props);};
 }
 

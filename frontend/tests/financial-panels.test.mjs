@@ -13,7 +13,7 @@ import {selectFinancialPanel,financialSourceLink} from '../lib/financial-panels.
 import {statementHierarchy} from '../lib/financial-statement-rows.ts';
 const require=createRequire(import.meta.url);
 function load(name){const exports={};const compiled=transformSync(readFileSync(new URL(`../app/components/stock/${name}.tsx`,import.meta.url),'utf8'),{filename:`${name}.tsx`,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;new Function('require','exports',compiled)(id=>require(id.startsWith('@/lib/')?`../lib/${id.slice(6)}.ts`:id),exports);return exports.default;}
-const Panel=load('FinancialAnalysisPanel'),Table=load('FinancialStatementTable');
+const Panel=load('FinancialAnalysisPanel'),Table=load('FinancialStatementTable'),ResearchChart=load('FinancialResearchCharts');
 function example(){
  const data=fixture();data.rows[0].total_liabilities=70;data.rows[0].equity=30;data.rows[0].liabilities_assets=.7;
  data.research_panels=[{key:'funding',title:'Funding composition',chart:'stacked',source:data.source,frequency:'annual',status:'QUALIFIED',partial:false,methodology:'Components only',reasons:[],series:[{key:'total_liabilities',label:'Total liabilities',unit:'VND'},{key:'equity',label:'Total equity',unit:'VND'},{key:'liabilities_assets',label:'Liabilities / assets',unit:'fraction'}],rows:[{period:'2025',values:{total_liabilities:70,equity:30,liabilities_assets:.7},statuses:{total_liabilities:'QUALIFIED',equity:'QUALIFIED',liabilities_assets:'QUALIFIED'},bases:{total_liabilities:'consolidated',equity:'consolidated',liabilities_assets:'consolidated'}}]}];return data;
@@ -48,6 +48,18 @@ test('explicit shells explain unavailable PE/PB and unknown data in EN/VI withou
  assert.match(html,/P\/E history/);assert.match(html,/Multiple/);assert.match(html,/UNAVAILABLE/);
  assert.doesNotMatch(html,/data-financial-chart=|VND bn/);
  assert.match(render(Panel,{kind:'assets',unit:'millions'},'vi'),/Cơ cấu tài sản/);
+});
+
+test('trend chart keeps amount and rate presentations distinct with keyboard-operable series controls',()=>{
+ const rows=fixture().rows;
+ rows[0].revenue=2_400_000_000;rows[0].net_profit=340_000_000;rows[0].net_margin=.14;
+ const amount=render(ResearchChart,{rows,fields:['revenue','net_profit'],title:'Revenue and profit',unit:'billions'});
+ const rate=render(ResearchChart,{rows,fields:['net_margin'],title:'Profitability',percentage:true,unit:'billions'});
+ assert.match(amount,/data-financial-chart="amount"/);assert.match(amount,/VND bn/);
+ assert.match(amount,/role="group" aria-label="Chart series"/);assert.match(amount,/aria-pressed="true"/);
+ assert.match(amount,/Revenue/);assert.match(amount,/Profit after tax/);
+ assert.match(rate,/data-financial-chart="percent"/);assert.match(rate,/Net Margin/);assert.match(rate,/· %/);
+ assert.match(amount,/min-h-7/);assert.match(rate,/financial-research-chart-canvas/);
 });
 
 test('defensive renderer withholds malformed unqualified or DEMO points from observations too',()=>{
