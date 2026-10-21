@@ -62,6 +62,11 @@ def metric_status(row, key, result):
                 reason or 'Required inputs are unavailable')
     if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or not evidence or reason:
         return 'UNQUALIFIED', reason or 'Unqualified input evidence'
+    refs = evidence.get('inputs', [])
+    reported = len(refs) == 1 and refs[0].get('field') == key and refs[0].get('value') == value
+    if not reported and any((r.get('source_context') or {}).get('original_metadata', {}).get(check) == 'FAIL'
+            for r in refs for check in ('balance_identity', 'cash_flow_identity')):
+        return 'UNQUALIFIED', 'Financial statement consistency failed'
     reason = inputs_reason(evidence.get('inputs', []), result.source, fixture=result.is_fixture, internal=result.display_scope == 'internal_research')
     if reason:
         return 'UNQUALIFIED', reason

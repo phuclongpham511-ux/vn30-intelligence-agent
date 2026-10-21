@@ -34,7 +34,7 @@ class FinancialSourceContext(DataModel):
     original_currency: str | None = None
     original_unit: str | None = None
     amount_multiplier: Literal[1, 1000, 1000000, 1000000000] = 1
-    unit_evidence: Literal['audited_vci_adapter_contract', 'original_filing'] = 'audited_vci_adapter_contract'
+    unit_evidence: Literal['audited_vci_adapter_contract', 'audited_cafef_adapter_contract', 'original_filing'] = 'audited_vci_adapter_contract'
     record_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
     audit_status: Literal['unknown'] = 'unknown'
     restatement_status: Literal['unknown'] = 'unknown'

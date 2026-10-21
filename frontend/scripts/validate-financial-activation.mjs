@@ -7,7 +7,7 @@ if(!directory||!report)throw Error('Usage: node scripts/validate-financial-activ
 const rows=[];
 for(const name of readdirSync(directory).filter(n=>/^[A-Z0-9]+-(annual|quarterly|ttm)\.json$/.test(n))){
  const data=JSON.parse(readFileSync(join(directory,name),'utf8'));
- const parsed=financialEngineData(data,data.ticker,data.period_type,true,false,true);
+ const parsed=financialEngineData(data,data.ticker,data.period_type,true,true,true);
  let publicRejected=false;
  try{financialEngineData(data,data.ticker,data.period_type,true);}catch{publicRejected=true;}
  if(!publicRejected)throw Error('Private observations entered public consumer');

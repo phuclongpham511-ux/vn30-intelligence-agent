@@ -21,12 +21,12 @@ function SourceEvidence({row}:{row:ActionObservation}) {
     </div>
   </details>;
 }
-export function StockActionsView({ticker,data,error=false,retry,category}:{ticker:string;data:ActionPage|null;error?:boolean;retry:()=>void;category?:ActionCategory}) {
+export function StockActionsView({ticker,data,error=false,retry,category,allowPersonal=false}:{ticker:string;data:ActionPage|null;error?:boolean;retry:()=>void;category?:ActionCategory;allowPersonal?:boolean}) {
   const {t,ui,date,number}=useLocale();
   const [selection,setSelection]=useState<ActionCategory>('all');
   const selected=category??selection;
   const status=(row:ActionObservation)=>[ui(actionStatus(row)),...(row.is_fixture&&actionStatus(row)!=='Fixture observation'?[t('Fixture observation')]:[])].join(' · ');
-  const matches=!!data&&data.ticker===ticker&&Array.isArray(data.items)&&data.items.every(row=>row.symbol===ticker);
+  const matches=!!data&&data.ticker===ticker&&Array.isArray(data.items)&&data.items.every(row=>row.symbol===ticker)&&(data.display_scope!=='personal_research'||allowPersonal&&data.public_display_eligible===false);
   const rows=matches?actionHistory(data.items,selected):[];
   const amount=(value:number)=>value!==0&&value<1e-20?String(value):number(value,20);
   const terms=(row:ActionObservation)=>{
@@ -34,6 +34,7 @@ export function StockActionsView({ticker,data,error=false,retry,category}:{ticke
     return <dl className="action-terms">{row.action_type==='cash_dividend'&&<div><dt>{t('Cash per share')}</dt><dd>{cash===null?'—':amount(cash)+' VND'}</dd></div>}{['stock_dividend','bonus_shares','rights_offering','additional_issuance'].includes(row.action_type)&&<div><dt>{t('New shares / old share')}</dt><dd>{shares===null?'—':amount(shares)+' / 1'}</dd></div>}{['rights_offering','additional_issuance'].includes(row.action_type)&&<div><dt>{t('Subscription price')}</dt><dd>{subscription===null?'—':amount(subscription)+' VND'}</dd></div>}</dl>;
   };
   return <section className="panel p-4 sm:p-5" aria-label={t('Dividends & corporate actions')}>
+    {matches&&data.display_scope==='personal_research'&&<p className="stock-note">{ui('Personal Research')} · {ui('Saved official dividend notices. Incomplete history; no inferred ex-dividend dates or dividend yield.')}</p>}
     <div className="stock-action-heading"><div><p className="stock-eyebrow">{t('Stored source records')}</p><h2>{t('Dividends & corporate actions')}</h2></div><span className="stock-badge">{t('Incomplete coverage')}</span></div>
     <p className="stock-note">{t('Only recorded source observations are shown. Missing dates stay unavailable; absence does not establish that no corporate action occurred.')}</p>
     {error?<p role="alert">{t('Corporate-action records are temporarily unavailable.')} <Button variant="outline" onClick={retry}>{t('Retry')}</Button></p>:!data?<p role="status">{t('Loading source records…')}</p>:!matches?<p role="alert">{t('Corporate-action records are temporarily unavailable.')}</p>:!data.items.length?<div className="stock-empty"><h3>{t('No recorded corporate actions for {ticker}',{ticker})}</h3><p>{t('Coverage is incomplete. No dividend dates or ratios are inferred.')}</p></div>:<>
@@ -53,7 +54,7 @@ export function StockActionsView({ticker,data,error=false,retry,category}:{ticke
     {matches&&<p className="stock-note">{t('Read at')} <time dateTime={data.as_of}>{date(data.as_of,true)}</time> ICT · {t('Stored evidence; no acquisition triggered.')}</p>}
   </section>;
 }
-export default function StockActions({ticker}:{ticker:string}) {
-  const state=useStockRead<ActionPage>(`/api/stocks/${encodeURIComponent(ticker)}/corporate-actions?limit=50`);
-  return <StockActionsView ticker={ticker} {...state}/>;
+export default function StockActions({ticker,personalResearch=false}:{ticker:string;personalResearch?:boolean}) {
+  const state=useStockRead<ActionPage>(personalResearch?`/api/personal-research/dividends/${encodeURIComponent(ticker)}`:`/api/stocks/${encodeURIComponent(ticker)}/corporate-actions?limit=50`);
+  return <StockActionsView ticker={ticker} {...state} allowPersonal={personalResearch}/>;
 }

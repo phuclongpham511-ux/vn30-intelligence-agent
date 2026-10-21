@@ -3,6 +3,44 @@ from collections import Counter
 import math
 
 STATUSES = ('VERIFIED', 'PARTIALLY_VERIFIED', 'UNAVAILABLE')
+DIMENSIONS = ('SOURCE_VERIFIED', 'ACCOUNTING_VERIFIED', 'POINT_IN_TIME_VERIFIED',
+              'PUBLICATION_RIGHTS_APPROVED', 'FULLY_VERIFIED')
+
+
+def verification_dimensions(refs, *, computable, fixture=False):
+    """Independent evidence decisions. None of these flags authorizes a value.
+
+    Source verification authenticates the reviewed extraction and original units,
+    not the accuracy of every issuer disclosure. Accounting adds compatible
+    scope, fiscal boundaries and the applicable statement consistency check.
+    Publication knowledge and redistribution permission are separate dimensions.
+    """
+    contexts = [r.get('source_context') or {} for r in refs]
+    source = bool(refs) and computable and not fixture
+    for ref, ctx in zip(refs, contexts):
+        meta = ctx.get('original_metadata') or {}
+        field = (meta.get('fields') or {}).get(ref.get('field'), {})
+        source &= bool(ref.get('source') and ref.get('code') and ref.get('content_sha256')
+            and ctx.get('record_sha256') and ctx.get('original_currency') == 'VND'
+            and (field.get('original_unit') or ctx.get('original_unit'))
+            and ctx.get('unit_evidence') == 'original_filing'
+            and meta.get('extraction_verified') is True and meta.get('page_image_verified') is True
+            and meta.get('binary_sha256'))
+    accounting = bool(source and len({r.get('source') for r in refs}) == 1
+        and len({r.get('consolidation') for r in refs}) == 1
+        and {r.get('consolidation') for r in refs} <= {'consolidated', 'standalone'}
+        and all(c.get('period_end') and (r.get('statement') == 'balance' or c.get('period_start'))
+            and r.get('basis') in ('annual', 'standalone', 'ytd', 'point_in_time')
+            and (r.get('statement') != 'balance' or c.get('original_metadata', {}).get('balance_identity') == 'PASS')
+            and (r.get('statement') != 'cash' or c.get('original_metadata', {}).get('cash_flow_identity') == 'PASS')
+            and (r.get('field') not in ('cash_beginning','cash_ending') or c.get('original_metadata', {}).get('cash_endpoint_identity') == 'PASS')
+            for r,c in zip(refs,contexts)))
+    pit = accounting and all(c.get('publication_time_qualified') is True for c in contexts)
+    rights = bool(refs) and not fixture and all(c.get('display_rights') == 'permitted'
+        and bool((c.get('display_rights_reference') or '').strip()) for c in contexts)
+    return dict(SOURCE_VERIFIED=bool(source), ACCOUNTING_VERIFIED=accounting,
+        POINT_IN_TIME_VERIFIED=pit, PUBLICATION_RIGHTS_APPROVED=rights,
+        FULLY_VERIFIED=bool(source and accounting and pit and rights))
 
 
 def verification_assessment(result, displayed_rows, *, audience):
@@ -61,7 +99,8 @@ def verification_assessment(result, displayed_rows, *, audience):
                 and math.isfinite(displayed_value) and displayed_value == raw_value)
             metrics[key] = dict(status=grade, display_eligible=eligible,
                 public_display_eligible=eligible and audience == 'public' and public_permission,
-                missing_evidence=list(dict.fromkeys(missing)))
+                missing_evidence=list(dict.fromkeys(missing)),
+                dimensions=verification_dimensions(refs, computable=computable, fixture=result.is_fixture))
         periods.append(dict(period=row['period'], metrics=metrics))
     latest = periods[-1]['metrics'] if periods else {}
     counts = Counter(m['status'] for m in latest.values())
@@ -69,4 +108,5 @@ def verification_assessment(result, displayed_rows, *, audience):
         frequency=result.period_type, audience=audience,
         statuses={s: counts.get(s, 0) for s in STATUSES},
         displayed_metric_ids=sorted(k for k, m in latest.items() if m['display_eligible']),
+        dimension_counts={key: sum(m['dimensions'][key] for m in latest.values()) for key in DIMENSIONS},
         periods=periods, point_in_time_qualified=False)

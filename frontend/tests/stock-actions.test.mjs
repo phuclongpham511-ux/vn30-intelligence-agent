@@ -12,10 +12,17 @@ let state;
 const compiled=transformSync(readFileSync(new URL('../app/components/stock/StockActions.tsx',import.meta.url),'utf8'),{filename:'StockActions.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 new Function('require','exports',compiled)(name=>name==='./useStockRead'?{useStockRead:()=>state}:name==='../ui/button'?{Button:({variant,...props})=>React.createElement('button',props)}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 const row={symbol:'ABC',action_id:'action',observation_id:'revision-2',observed_at:'2026-10-12T10:00:00Z',action_type:'cash_dividend',effective_date:null,record_date:'2026-10-20',payment_date:'2026-11-01',announced_at:null,announced_on:'2026-10-10',source:'VSDC',source_url:'https://vsdc.vn/notice',supporting_urls:['https://vsdc.vn/original.pdf'],source_title:'Original issuer evidence',evidence_text:'Preserved source wording',source_revision:'2',verified:true,withdrawn:false,is_fixture:false,terms:{cash_vnd_per_share:1500,new_shares_per_old:null,subscription_price_vnd:null}};
-function render(items=[],options={},language='en',ticker='ABC') {
+function render(items=[],options={},language='en',ticker='ABC',personalResearch=false) {
   state={data:{ticker,coverage:'INCOMPLETE',as_of:'2026-10-12T11:00:00Z',items,has_more:false},error:false,retry(){},...options};
-  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:{...localeTools(language),setLanguage(){}}},React.createElement(exports.default,{ticker})));
+  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:{...localeTools(language),setLanguage(){}}},React.createElement(exports.default,{ticker,personalResearch})));
 }
+
+test('private saved dividend observations require the explicitly enabled local consumer',()=>{
+ const privateData={ticker:'ABC',coverage:'INCOMPLETE',as_of:'2026-10-12T11:00:00Z',items:[row],has_more:false,display_scope:'personal_research',public_display_eligible:false};
+ assert.doesNotMatch(render([],{data:privateData}),/1,500 VND/);
+ const html=render([],{data:privateData},'en','ABC',true);
+ assert.match(html,/1,500 VND/);assert.match(html,/Personal Research/);assert.match(html,/no inferred ex-dividend dates/);
+});
 test('actual action renderer preserves original dates, units and source evidence; no inferred ex-rights',()=>{
   const html=render([row]);
   assert.match(html,/20 Oct 2026/);assert.match(html,/1 Nov 2026/);

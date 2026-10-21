@@ -1,6 +1,82 @@
 # Financial Data Intelligence V1
 
-## Real-data activation continuation — 21 October 2026
+## Free-data-first activation — current, 21 October 2026
+
+SStock is the product/UI benchmark. WiData is not a required provider and there
+are no paid APIs/subscriptions. Existing SSI/VCI remain primary. Strict saved
+original-report, CafeF annual summary and VSDC notice adapters use the existing
+financial engine, models and UI. New provider acquisition is not triggered by
+browsing, a cache miss or missing metric.
+
+The prepared immutable private bundle is `.local/free-data-v2-final`. It retains
+all eight original capture files unchanged, two separately selectable original
+report manifests/assets, VHM summary amounts, the SSI observed-membership review
+and three official dividend notices. Source archives/PDFs/PNGs/private response
+values remain outside Git/static hosting. Original normalized journal is unchanged.
+
+`financial-verification-v1` adds SOURCE_VERIFIED, ACCOUNTING_VERIFIED,
+POINT_IN_TIME_VERIFIED, PUBLICATION_RIGHTS_APPROVED and FULLY_VERIFIED per metric.
+They are independent of display authorization. Current report views qualify 100
+source/accounting observations (63 reported, 37 derived); PIT/public rights are
+zero. An unrelated missing field cannot erase a supported reported amount.
+Contradictory statement checks block affected derivations while preserving source
+facts. Both English/Vietnamese disclosures retain original evidence text.
+
+Private APIs (same existing default-off, development, literal-loopback socket/Host
+guards, no proxy-header authorization, private/no-store/noindex responses):
+
+~~~text
+GET /personal-research/financials/HPG?frequency=annual&evidence=preferred
+GET /personal-research/financials/HPG?frequency=annual&evidence=provider
+GET /personal-research/industries
+GET /personal-research/industries/8355?period=2025&frequency=annual
+GET /personal-research/dividends/FPT
+~~~
+
+`preferred` chooses an entire reviewed annual report packet if available;
+quarterly/TTM and `provider` retain the original history. Corrupt evidence fails,
+without silent fallback or metadata/source splicing. CafeF fields remain partial
+and unsupported net revenue/ratios are withheld. Original-report unit scaling
+occurs once; TCB EPS stays VND/share rather than million VND.
+
+The existing `/industries` proxy switches to the private observed contracts only
+when the existing personal runtime guard is enabled. It shows all 61 categories,
+individual available observations and per-metric missing coverage. Rank requires
+at least two compatible accounting-qualified issuers; actual sample has none.
+Historical totals remain disabled. This snapshot does not satisfy the separate
+versioned/effective-dated taxonomy contract documented below.
+
+Reproduce offline checks from this worktree using the existing private bundle:
+
+~~~powershell
+uv run python -m scripts.recover_financial_evidence --baseline .local/activation-captures --bundle .local/free-data-v2-final --output research/validation/free-data-v2
+uv run python -m scripts.validate_free_data --captures .local/free-data-v2-final --report research/validation/free-data-v2 --private .local/free-data-v2-final-api --probe-directory .local/free-source-probes
+Set-Location frontend
+node scripts/validate-financial-activation.mjs ../.local/free-data-v2-final-api/preferred ../research/validation/free-data-v2/preferred/REAL_DATA_FRONTEND_VALIDATION.json
+node scripts/validate-financial-activation.mjs ../.local/free-data-v2-final-api/provider ../research/validation/free-data-v2/provider/REAL_DATA_FRONTEND_VALIDATION.json
+node scripts/validate-free-financial-data.mjs ../.local/free-data-v2-final-api ../research/validation/free-data-v2/FREE_DATA_FRONTEND_VALIDATION.json
+~~~
+
+For a future newly reviewed revision, `scripts.prepare_free_financial_bundle`
+accepts `--captures`, a new `--destination`, repeatable `--report`/`--summary`,
+`--memberships` and `--dividends`. Its generic contracts are
+`reviewed-report-v2`, `cafef-saved-annual-v1`, `industry-membership-review-v1`
+and `vsdc-cash-dividends-v1`. It validates source inputs before writing and rejects
+an existing destination, provider replacement or public/static output path.
+Do not overwrite the final bundle to change evidence; create a new private
+revision. These original documents are operator-reviewed selected fields, not
+an automatic general-purpose PDF extractor or a public data licence.
+
+54 real stock API projections, 61 industry responses and nine dividend responses
+pass in-process checks; frontend contracts/rendering and regressions/build pass.
+**Runtime/browser/mobile: PENDING** after the prior policy rejection. No launch
+workaround was attempted. The supported launchers and exact real-data manual
+checks are in [dashboard verification](../research/DASHBOARD_VERIFICATION.md).
+See [delivery](../research/FREE_DATA_DELIVERY_REPORT.md),
+[provider audit](../research/PROVIDER_METADATA_AUDIT.md) and
+[remaining blockers](../research/REMAINING_BLOCKERS.md).
+
+## Prior 86000d3 activation from 591f665
 
 From 591f665, the existing saved-data reader now supports its original raw captures
 and canonical-financial-packet-v1 entries in the same hash-pinned index. Canonical

@@ -10,7 +10,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 from src.analytics.financial_engine import financial_engine
 from src.services.financial_presentation import display_financial_response
-from src.services.personal_financials import saved_packet, personal_projection
+from src.services.personal_financials import saved_packet, saved_research_packet, personal_projection
 from src.services.financial_intelligence import metric_unit
 
 
@@ -19,7 +19,7 @@ def require(condition, message):
         raise ValueError(message)
 
 
-def validate(captures, report_dir, private_responses, *, limit=8):
+def validate(captures, report_dir, private_responses, *, limit=8, evidence='preferred'):
     root = Path(captures).resolve(strict=True)
     report = Path(report_dir)
     private = Path(private_responses).resolve()
@@ -49,11 +49,14 @@ def validate(captures, report_dir, private_responses, *, limit=8):
                 original_units=sum(bool(o.source_context and o.source_context.original_unit) for o in observations),
                 publication_qualified=sum(bool(o.source_context and o.source_context.publication_time_qualified) for o in observations)))
             for frequency in ('annual', 'quarterly', 'ttm'):
+                packet,digest=saved_research_packet(root,ticker,frequency=frequency,evidence=evidence)
+                before=packet.model_dump()
+                observations=[o for r in packet.reports.values() for o in r.observations]
                 engine = financial_engine(packet, frequency=frequency, limit=limit)
                 public = display_financial_response(engine)
                 personal = personal_projection(packet, frequency=frequency, limit=limit,
                     authorization_reference='task:financial-real-data-activation-v1:' + digest)
-                response = client.get(f'/personal-research/financials/{ticker}?frequency={frequency}&limit={limit}')
+                response = client.get(f'/personal-research/financials/{ticker}?frequency={frequency}&limit={limit}&evidence={evidence}')
                 require(response.status_code == 200, 'Saved-data API did not return evidence')
                 body = response.json()
                 require(body['verification'] == personal['verification'], 'API verification differs from projection')
@@ -84,7 +87,7 @@ def validate(captures, report_dir, private_responses, *, limit=8):
                         panels[panel['key']] = dict(status=panel['status'],
                             points=sum(v is not None for r in panel['rows'] for v in r['values'].values()),
                             series=[s['key'] for s in panel['series']])
-                summaries.append(dict(ticker=ticker, frequency=frequency,
+                summaries.append(dict(ticker=ticker, frequency=frequency,source=packet.source,
                     periods=[r['period'] for r in body['rows']],
                     displayed_metric_ids=body['verification']['displayed_metric_ids'],
                     verification_counts=body['verification']['statuses'],
@@ -122,8 +125,9 @@ if __name__ == '__main__':
     parser.add_argument('--report-dir', required=True)
     parser.add_argument('--private-responses', required=True)
     parser.add_argument('--limit', type=int, default=8, choices=range(1, 21))
+    parser.add_argument('--evidence',choices=('preferred','provider'),default='preferred')
     args = parser.parse_args()
-    result = validate(args.captures, args.report_dir, args.private_responses, limit=args.limit)
+    result = validate(args.captures, args.report_dir, args.private_responses, limit=args.limit,evidence=args.evidence)
     print(json.dumps(dict(status=result['status'], projections=len(result['projections']),
         matrix_counts=result['matrix_counts'],
         public_qualified_observations=result['public_qualified_observations'], provider_requests=0)))

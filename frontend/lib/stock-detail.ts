@@ -22,7 +22,7 @@ export type ActionObservation = {
   verified:boolean;withdrawn:boolean;is_fixture:boolean;
   terms:{cash_vnd_per_share:number|null;new_shares_per_old:number|null;subscription_price_vnd:number|null}|null;
 };
-export type ActionPage={ticker:string;as_of:string;coverage:'INCOMPLETE';items:ActionObservation[];has_more:boolean};
+export type ActionPage={ticker:string;as_of:string;coverage:'INCOMPLETE';items:ActionObservation[];has_more:boolean;display_scope?:'personal_research';public_display_eligible?:false};
 // Reuse the repository's explicit unresolved-correction marker, not guesses from prose.
 export function actionConflict(row:ActionObservation) {return row.verification_note?.startsWith('Unresolved correction')===true;}
 export function actionStatus(row:ActionObservation) {

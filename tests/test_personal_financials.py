@@ -98,7 +98,7 @@ def test_public_request_cannot_select_personal_mode(monkeypatch,peer,host,env,he
 
 def test_loopback_opt_in_uses_saved_evidence_only(monkeypatch):
     for key,value in dict(WOOFI_PERSONAL_RESEARCH='1',APP_ENV='development',WOOFI_PERSONAL_BIND='127.0.0.1',WOOFI_PERSONAL_CAPTURES='synthetic').items():monkeypatch.setenv(key,value)
-    monkeypatch.setattr('routers.personal_research.saved_packet',lambda *args:(source(),'f'*64))
+    monkeypatch.setattr('routers.personal_research.saved_research_packet',lambda *args,**kwargs:(source(),'f'*64))
     app=FastAPI();app.include_router(router)
     response=TestClient(app,client=('127.0.0.1',1234),base_url='http://127.0.0.1').get('/personal-research/financials/ABC')
     assert response.status_code==200 and response.json()['rows'][-1]['revenue']==120

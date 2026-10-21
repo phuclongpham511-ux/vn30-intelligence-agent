@@ -1,5 +1,16 @@
 # Financial Data Intelligence V1 — real-data activation, 21 October 2026
 
+Current continuation from 86000d3 adds free saved CafeF, original HPG/TCB report
+and VSDC evidence. It activates 100 source/accounting-verified annual
+metric-period observations, partial VHM, industry observation tables and three
+official dividends. See [current delivery](FREE_DATA_DELIVERY_REPORT.md),
+[activation decision](ACTIVATION_DECISION.md), and
+[field-level evidence](EVIDENCE_RECOVERY_REPORT.md). The record below is the
+earlier 86000d3 checkpoint; its zero supported derivations is superseded only
+for the newly reviewed inputs. Runtime acceptance remains PENDING.
+
+## Prior activation record
+
 Base: 591f665 on feature/financial-data-intelligence, existing woofi-financial-data
 worktree. **PARTIAL: real saved-data/API and frontend contracts pass; runtime and
 new-code browser acceptance remain PENDING. Public activation remains zero.**

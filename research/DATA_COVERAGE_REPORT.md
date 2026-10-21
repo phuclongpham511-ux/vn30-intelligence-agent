@@ -1,6 +1,41 @@
 # Measured data coverage
 
-## Real-data activation continuation — 21 October 2026
+## Free-data-first measured coverage — current, 21 October 2026
+
+| Selection / evidence | Observations | Source verified | Accounting verified | PIT / public rights / fully verified |
+|---|---:|---:|---:|---:|
+| Original eight issuers, 24 views | 2,816 | 0 | 0 | 0 / 0 / 0 |
+| Preferred nine issuers, 27 views | 2,660 | 100 | 100 | 0 / 0 / 0 |
+| Original-report subset of preferred views | 100 (63 reported + 37 derived) | 100 | 100 | 0 / 0 / 0 |
+| New CafeF VHM subset | 32 (eight fields × four annual periods) | 0 | 0 | 0 / 0 / 0 |
+
+These are metric-period presentations, including repeated quarter/TTM balances,
+not counts of distinct metric definitions. Baseline distinct source-metric IDs:
+2,352; preferred: 2,196. The original provider view remains available: the union
+of selectable presentations is 2,948 = 2,816 + 100 + 32. Shorter reviewed annual
+history is selected as a whole, with no silent source splicing.
+
+HPG contributes 31 canonical reported cells and two extra FX reconciliation
+cells; TCB contributes 32 canonical cells. Known original VND/unit, consolidation
+and fiscal boundaries unlock annual calculations. Publication vintage stays
+unknown, never inferred from download/approval time. Original provider records
+are unchanged. CafeF's reviewed transport scale is inferred; its original unit,
+currency and scope remain unknown and its unsupported derivations stay withheld.
+
+Industry: 406 observed HOSE memberships / 61 categories, eight categories with
+one or more saved issuers, zero real compatible multi-issuer ranking cohorts.
+All 61 API bodies and both-language renders pass. Three official FPT dividend
+notices are available; other issuer histories are unsampled, not known empty.
+No historical aggregation or market-wide coverage percentage is asserted.
+
+See [field-level matrix](validation/free-data-v2/FIELD_LEVEL_EVIDENCE_MATRIX.csv),
+[preferred-view matrix](validation/free-data-v2/ACTIVATED_VIEW_EVIDENCE_MATRIX.csv),
+[per-metric counts](validation/free-data-v2/VERIFIED_METRIC_COVERAGE.csv),
+[counts/metadata origins](validation/free-data-v2/EVIDENCE_RECOVERY_COUNTS.json)
+and [application checks](validation/free-data-v2/FREE_DATA_APPLICATION_VALIDATION.json).
+Private inputs remain ignored. Runtime/browser/mobile PENDING.
+
+## Prior 86000d3 activation coverage
 
 The same eight immutable captures now populate a validated private research
 bundle, including canonical TCB/SSI captures. All 24 actual saved-data API bodies

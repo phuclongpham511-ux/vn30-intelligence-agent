@@ -1,0 +1,113 @@
+{
+  "contract": "real-financial-fixture-manifest-v1",
+  "issuers": [
+    {
+      "ticker": "FPT",
+      "capture_sha256": "fdcf9bc60642157ce6a9fced8e405ea3b2a4637a7d2a72cdc0ae30c778ccdb0f",
+      "source": "vnstock:VCI",
+      "source_version": "unknown",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "HPG",
+      "capture_sha256": "acf971412e5731df3acb19f409ed7147c0277ed0744e1fcfc36aaad54b1a74d8",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "MWG",
+      "capture_sha256": "79461eb3bccf0580d8f29eada87af96544d72e09a0baa09fc332ab8a2932aa4e",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "PNJ",
+      "capture_sha256": "18e0642234faf1c5d10f855506bc081869094f9f80b44d98ab7af7fb2748c0a6",
+      "source": "vnstock:VCI",
+      "source_version": "unknown",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "REE",
+      "capture_sha256": "9d8e5767cfc33d18cc82fa3cf1a18f94ee03dce4295fa9d540599436d74a0b13",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "SSI",
+      "capture_sha256": "836a5c85c431582b6b6ea94f9085260cbcf78e985e7851ff40ddfbf72913975e",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "financial_other",
+      "company_type": "CK",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "TCB",
+      "capture_sha256": "32a95d4849b4968cfc28f8eac66014efcb1a47aeb4297ee34cd3bf185d7d77c8",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "bank",
+      "company_type": "NH",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "VCB",
+      "capture_sha256": "9c608fea54f2d744dc416cef420be4ccd3d0c8331cfd69682f00fe39e608cb00",
+      "source": "vnstock:VCI",
+      "source_version": "unknown",
+      "profile": "bank",
+      "company_type": "NH",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "VHM",
+      "capture_sha256": "5ad1d2256a36e53304cb409fee068a1b56273e862318c3cd194fa2622676f40c",
+      "source": "CafeF:annual-summary",
+      "source_version": "cafef-saved-annual-v1",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 8,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    }
+  ]
+}

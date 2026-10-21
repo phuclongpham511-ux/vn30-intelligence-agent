@@ -1,6 +1,22 @@
 # Woofi — Domain Context
 
-## Financial real-data activation — partial, 2026-10-21
+## Financial free-data activation — 2026-10-21, current
+
+SStock is the product/UI benchmark; WiData and paid providers are not required.
+Existing SSI/VCI histories remain primary and unchanged. Strict saved CafeF,
+original HPG/TCB PDF and VSDC adapters add a ninth issuer, supported annual
+calculations and three official dividend notices. The two original-report views
+contain 100 SOURCE_VERIFIED and ACCOUNTING_VERIFIED metric-period observations
+(63 reported, 37 derived), with independent PIT/public-rights counts still zero.
+The source selector preserves original provider histories without source splicing.
+The private observed SSI snapshot now powers 61 industry directories and useful
+individual company tables/coverage; no historical totals or unqualified ranks.
+Actual 54 stock + 61 industry + nine dividend API responses pass offline checks;
+browser/mobile runtime stays PENDING after the prior policy denial. No restart,
+production/main change, push or merge. See research/FREE_DATA_DELIVERY_REPORT.md,
+research/ACTIVATION_DECISION.md and the updated V1 runbook.
+
+## Financial real-data activation — prior 86000d3 checkpoint
 
 The existing local research path now reads eight pinned VCI issuers, including
 canonical TCB/SSI adapter captures. Source lines, units, ownership, dates and

@@ -1,6 +1,36 @@
 # Woofi Financial Data Intelligence — delivery, 21 October 2026
 
-## Real-data activation continuation from 591f665
+## Free-data-first continuation from 86000d3 — current
+
+SStock is the product/UI benchmark. No WiData integration or paid subscription
+is required. Three explicit free saved-source adapters now add CafeF VHM annual
+amounts, selected original HPG/TCB filing evidence and official VSDC dividends.
+The existing four chart panels, statement tables, source selector, industry page
+and dividend timeline expose supported real data through private research mode.
+
+The two original-report views have **100 source-verified and 100
+accounting-verified metric-period observations** (63 reported, 37 derived).
+Publication-time/public-rights verification remains separate and zero. The
+original 2,816 provider presentations remain selectable; preferred views have
+2,660 and the union is 2,948. All 54 stock, 61 industry and nine dividend saved
+API responses pass; frontend data contracts/rendering, typecheck and build pass.
+Industry observations are usable in eight captured categories; qualified
+multi-company rankings/historical sector totals remain unavailable.
+
+Runtime/browser/mobile validation remains PENDING; the previous policy rejection
+was not bypassed. New reports and exact commands:
+[free-data delivery](FREE_DATA_DELIVERY_REPORT.md),
+[evidence recovery](EVIDENCE_RECOVERY_REPORT.md),
+[provider audit](PROVIDER_METADATA_AUDIT.md),
+[industry status](INDUSTRY_TAXONOMY_STATUS.md),
+[activation decision](ACTIVATION_DECISION.md),
+[coverage](validation/free-data-v2/VERIFIED_METRIC_COVERAGE.csv),
+[tests](validation/free-data-v2/TEST_RESULTS.json).
+
+The following sections preserve the earlier checkpoints; their zero derived-data
+and inactive industry statements do not describe the new private views.
+
+## Prior 86000d3 real-data activation from 591f665
 
 **DATA_ACTIVATION_STATUS:** PARTIAL. Eight real saved issuers now pass the existing
 private API and frontend contracts across 24 annual/quarterly/TTM projections.

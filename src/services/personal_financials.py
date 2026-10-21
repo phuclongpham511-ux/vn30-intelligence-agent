@@ -20,7 +20,7 @@ from src.services.financial_presentation import display_financial_response
 CONFIDENCES = ('OFFICIAL_VERIFIED', 'RECONCILED', 'SOURCE_REPORTED', 'UNVERIFIED', 'INVALID')
 
 
-def saved_packet(directory, ticker):
+def saved_packet(directory, ticker, *, collection='captures'):
     """Read a pinned source receipt only. No SDK, cache fallback or acquisition."""
     if not re.fullmatch(r'[A-Z0-9]{1,20}', ticker):
         raise ValueError('Invalid ticker')
@@ -30,18 +30,32 @@ def saved_packet(directory, ticker):
     index = json.loads((root / 'index.json').read_text(encoding='utf-8'))
     if index.get('contract') != 'personal-saved-captures-v1' or not isinstance(index.get('captures'), dict):
         raise ValueError('Invalid saved capture index')
-    item = index['captures'].get(ticker)
+    if collection not in ('captures', 'reviewed_reports'):
+        raise ValueError('Unknown saved evidence collection')
+    item = index.get(collection, {}).get(ticker)
     if not item:
         raise FileNotFoundError('Saved research coverage unavailable')
     path = (root / item['file']).resolve(strict=True)
     canonical = item.get('format') == 'canonical-financial-packet-v1'
-    if item.get('format') not in (None, 'vci-raw-capture-v1', 'canonical-financial-packet-v1'):
+    if item.get('format') not in (None, 'vci-raw-capture-v1', 'canonical-financial-packet-v1', 'reviewed-report-v2', 'cafef-saved-annual-v1'):
         raise ValueError('Unknown saved capture format')
     if not path.is_relative_to(root) or path.suffix != '.json' or path.stat().st_size > (32_000_000 if canonical else 10_000_000):
         raise ValueError('Invalid capture path')
     data = path.read_bytes()
     if hashlib.sha256(data).hexdigest() != item['sha256']:
         raise ValueError('Saved capture digest mismatch')
+    if item.get('format') == 'reviewed-report-v2':
+        from src.providers.reviewed_reports import report_packet
+        packet, _ = report_packet(json.loads(data), root)
+        if packet.ticker != ticker:
+            raise ValueError('Wrong reviewed report owner')
+        return packet, item['sha256']
+    if item.get('format') == 'cafef-saved-annual-v1':
+        from src.providers.cafef_statements import cafef_packet
+        packet = cafef_packet(json.loads(data))
+        if packet.ticker != ticker:
+            raise ValueError('Wrong CafeF capture owner')
+        return packet, item['sha256']
     if canonical:
         packet = validated_canonical_packet(data)
         if packet.ticker != ticker:
@@ -58,6 +72,24 @@ def saved_packet(directory, ticker):
         observed_at={kind: datetime.fromisoformat(r['observed_at']) for kind, r in reads.items()},
         urls={kind: r['url'] + '?section=' + r['params']['section'] for kind, r in reads.items()})
     return packet, item['sha256']
+
+
+def saved_research_packet(directory, ticker, *, frequency='annual', evidence='preferred'):
+    """Select a whole source packet, never splice provider and filing periods.
+
+    Reviewed annual reports take priority only in annual mode. The complete
+    original provider history remains selectable, and supplies quarterly/TTM.
+    """
+    if frequency not in ('annual', 'quarterly', 'ttm') or evidence not in ('preferred', 'provider'):
+        raise ValueError('Invalid research evidence selection')
+    if evidence == 'preferred' and frequency == 'annual':
+        path = Path(directory) / 'index.json'
+        if path.stat().st_size > 2_000_000:
+            raise ValueError('Saved capture index exceeds bound')
+        index = json.loads(path.read_text(encoding='utf-8'))
+        if ticker in index.get('reviewed_reports', {}):
+            return saved_packet(directory, ticker, collection='reviewed_reports')
+    return saved_packet(directory, ticker)
 
 
 def validated_canonical_packet(data):
@@ -127,8 +159,15 @@ def validated_canonical_packet(data):
 
 
 def personal_projection(packet, *, frequency='annual', limit=8, authorization_reference):
-    if not authorization_reference or packet.is_fixture or packet.source != 'vnstock:VCI':
-        raise ValueError('Personal projection requires real authorized VCI evidence')
+    if (authorization_reference and not packet.is_fixture and packet.source.startswith('issuer:')
+            and packet.source_version == 'reviewed-report-v2'):
+        # Original reports use the existing scoped filing projection. Provider
+        # captures are never enriched or overwritten with this separate source.
+        full = financial_engine(packet, frequency=frequency, limit=limit)
+        return display_financial_response(full,
+            internal_authorization_reference=authorization_reference).model_dump(mode='json')
+    if not authorization_reference or packet.is_fixture or packet.source not in ('vnstock:VCI', 'CafeF:annual-summary'):
+        raise ValueError('Personal projection requires real authorized saved evidence')
     full = financial_engine(packet, frequency=frequency, limit=limit)
     public = display_financial_response(full)
     # Work on dictionaries: never mutate canonical evidence or the public result.
@@ -142,8 +181,9 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
         obs = contexts.get((ref.get('statement'), ref.get('period')))
         context = obs.source_context if obs else None
         return (obs and context and context.display_rights != 'prohibited'
-            and context.unit_evidence == 'audited_vci_adapter_contract'
-            and context.amount_multiplier == 1 and obs.basis in ('annual','standalone','point_in_time')
+            and (context.unit_evidence, context.amount_multiplier) == (
+                ('audited_cafef_adapter_contract', 1000) if packet.source == 'CafeF:annual-summary' else ('audited_vci_adapter_contract', 1))
+            and obs.basis in ('annual','standalone','point_in_time')
             and ref.get('code') and ref.get('content_sha256') and ref.get('currency') == 'VND'
             and ref.get('value') is not None and obs.fields.get(ref.get('field')) == ref['value'])
 
@@ -176,7 +216,8 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
         # certified comparison against an UNKNOWN reporting basis.
         change['current'] = latest.get(change['metric'])
     for kind, statement in out['statements'].items():
-        supported = set(code for code, _ in MAP[kind].values())
+        supported = (set(code for code, _ in MAP[kind].values()) if packet.source == 'vnstock:VCI'
+            else {code for o in packet.reports[kind].observations for code in o.field_codes.values()})
         # Additional statement amounts have explicit source identifiers/labels;
         # no new metric calculation or public provider mapping is introduced.
         extras = ({'isa11':r'^operating profit/\(loss\)$',
