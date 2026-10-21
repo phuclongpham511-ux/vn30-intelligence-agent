@@ -4,7 +4,7 @@ import {FINANCIAL_LABELS,type FinancialKey,annualChartData} from './fundamental-
 export const amountFields=['revenue','net_profit'] as const;
 export const growthFields=['revenue_growth_yoy','net_profit_growth_yoy'] as const;
 export const ratioFields=['gross_margin','net_margin','roe'] as const;
-export const engineAmounts=['revenue','net_profit','operating_income','profit_parent','total_assets','equity','total_liabilities','cash_operating','cash_investing','cash_financing','free_cash_flow','customer_demand_deposits','classified_loans','classified_nonperforming_loans','classified_loan_allowance'] as const;
+export const engineAmounts=['ordinary_equity','revenue','net_profit','operating_income','profit_parent','total_assets','equity','total_liabilities','cash_operating','cash_investing','cash_financing','free_cash_flow','customer_demand_deposits','classified_loans','classified_nonperforming_loans','classified_loan_allowance'] as const;
 export const multipleFields=['debt_equity','current_ratio','quick_ratio','cash_conversion'] as const;
 export const researchSections=['overview','performance','balance','cashflow','profitability','health','valuation','statements','sources'] as const;
 export type ResearchSection=typeof researchSections[number];

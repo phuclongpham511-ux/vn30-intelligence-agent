@@ -64,7 +64,7 @@ export function actionUrl(value:string|null|undefined) {
 }
 export async function stockRead<T>(url:string,signal:AbortSignal,request:typeof fetch=fetch):Promise<T> {
   const response=await request(url,{signal,cache:'no-store'});
-  if(!response.ok)throw new Error('Stock data unavailable');
+  if(!response.ok)throw Object.assign(new Error('Stock data unavailable'),{status:response.status});
   const data:T=await response.json();
   signal.throwIfAborted();
   return data;

@@ -1,0 +1,106 @@
+{
+  "recorded_at": "2026-10-21T08:47:53.636722+00:00",
+  "status": "PASS",
+  "launchers": "existing saved-data API and personal Next custom server",
+  "private_api": "127.0.0.1:8432",
+  "frontend": "127.0.0.1:3431",
+  "core_backend_8431": "ABSENT",
+  "checks": [
+    {
+      "ticker": "FPT",
+      "status": 200,
+      "periods": [
+        "2022",
+        "2023",
+        "2024"
+      ],
+      "scope": "internal_research",
+      "cache_control": "private, no-store",
+      "robots": "noindex, nofollow"
+    },
+    {
+      "ticker": "HPG",
+      "status": 200,
+      "periods": [
+        "2024",
+        "2025"
+      ],
+      "scope": "internal_research",
+      "cache_control": "private, no-store",
+      "robots": "noindex, nofollow"
+    },
+    {
+      "ticker": "MWG",
+      "status": 200,
+      "periods": [
+        "2024"
+      ],
+      "scope": "internal_research",
+      "cache_control": "private, no-store",
+      "robots": "noindex, nofollow"
+    },
+    {
+      "ticker": "TCB",
+      "status": 200,
+      "periods": [
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "scope": "internal_research",
+      "cache_control": "private, no-store",
+      "robots": "noindex, nofollow"
+    },
+    {
+      "ticker": "VCB",
+      "status": 200,
+      "periods": [
+        "2024",
+        "2025"
+      ],
+      "scope": "internal_research",
+      "cache_control": "private, no-store",
+      "robots": "noindex, nofollow"
+    },
+    {
+      "ticker": "SSI",
+      "status": 200,
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "scope": "personal_research",
+      "cache_control": "private, no-store",
+      "robots": "noindex, nofollow"
+    },
+    {
+      "ticker": "VNM",
+      "status": 200,
+      "periods": [
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "scope": "personal_research",
+      "cache_control": "private, no-store",
+      "robots": "noindex, nofollow"
+    },
+    {
+      "check": "foreign Host denied",
+      "url": "http://127.0.0.1:3431/api/personal-research/financials/FPT",
+      "status": 403
+    },
+    {
+      "check": "foreign Host denied",
+      "url": "http://127.0.0.1:8432/personal-research/financials/FPT",
+      "status": 404
+    }
+  ]
+}

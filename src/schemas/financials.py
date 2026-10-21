@@ -15,7 +15,7 @@ class FinancialLine(DataModel):
     name_en: str
     name_vi: str
     parent: str | None = None
-    unit: Literal['VND', 'VND/share', 'source_units'] = 'VND'
+    unit: Literal['VND', 'VND/share', 'shares', 'source_units'] = 'VND'
     value: float | None = None
     raw_value: float | None = None
     semantic_status: Literal['reported', 'conflicted', 'unqualified'] = 'reported'

@@ -10,7 +10,7 @@ class MetricObservation(DataModel):
     ticker: str = Field(pattern=r'^[A-Z0-9]{1,20}$')
     metric_id: str = Field(pattern=r'^[a-z][a-z0-9_]{0,79}$')
     value: float | None
-    unit: Literal['VND','VND/share','fraction','multiple']
+    unit: Literal['VND','VND/share','shares','fraction','multiple']
     currency: Literal['VND'] = 'VND'
     period: str = Field(pattern=r'^\d{4}(?:-Q[1-4])?$')
     period_start: date | None = None

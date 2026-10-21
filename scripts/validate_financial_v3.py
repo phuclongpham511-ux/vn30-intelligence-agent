@@ -50,13 +50,13 @@ def validate(bundle, private, report):
             data=r.json();(private/'company-peers'/f'{ticker}.json').write_text(json.dumps(data),encoding='utf-8')
             qualified=[]
             for key,m in data['metrics'].items():
-                points=[o for o in m['observations'] if o['rank'] is not None]
+                points=[o for o in m['observations'] if o['comparison_eligible']]
                 if points:
                     values=[o['value'] for o in points]
                     assert m['distribution']==dict(count=len(values),minimum=min(values),median=median(values),maximum=max(values))
                     for o in points:
-                        assert o['rank']==1+sum(v>o['value'] for v in values)
-                        assert o['percentile']==(sum(v<o['value'] for v in values)+.5*sum(v==o['value'] for v in values))/len(values)
+                        assert o['rank'] is None and not m['industry_ranking_qualified']
+                        assert o['percentile'] is None
                     qualified.append(key)
             cohorts.append(dict(ticker=ticker,industry=data['industry']['id'],members=len(data['members']),qualified_comparison_metrics=qualified))
     with (report/'VERIFIED_METRIC_COVERAGE.csv').open(encoding='utf-8') as f:coverage=list(csv.DictReader(f))

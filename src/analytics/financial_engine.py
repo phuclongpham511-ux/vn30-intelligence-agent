@@ -28,7 +28,15 @@ def previous(period, years=0, quarters=0):
 
 def compatible(*observations):
     present = [item for item in observations if item is not None]
-    return bool(present) and len({(item.ticker, item.source, item.currency, item.consolidation) for item in present}) == 1
+    return bool(present) and len({(item.ticker, item.source, item.currency, item.consolidation,
+        (item.source_context.original_metadata.get('binary_sha256') if item.source_context else None)) for item in present}) == 1
+
+
+def compatible_refs(refs):
+    # A saved history may contain independently reviewed vintages. Matching
+    # issuer/scope alone does not establish cross-document comparability.
+    return len({(r['source'],r['currency'],r['consolidation'],
+        (r.get('source_context') or {}).get('original_metadata',{}).get('binary_sha256')) for r in refs}) <= 1
 
 
 def finite_result(value):
@@ -56,10 +64,11 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
 
     def input_ref(obs, field):
         receipt = packet.reports[obs.statement]
+        meta=obs.source_context.original_metadata if obs.source_context else {}
         return dict(statement=obs.statement, period=obs.period, field=field,
             code=obs.field_codes.get(field), value=obs.fields.get(field), source=obs.source,
             currency=obs.currency, basis=obs.basis, consolidation=obs.consolidation,
-            content_sha256=receipt.content_sha256,
+            content_sha256=meta.get('original_receipt_sha256',receipt.content_sha256),
             source_context=obs.source_context.model_dump(mode='json') if obs.source_context else None)
 
     def value_at(kind, period, field):
@@ -123,7 +132,7 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
             if extra:
                 refs += extra[1]
                 reason = reason or extra[2]
-            if len({(ref['source'],ref['currency'],ref['consolidation']) for ref in refs}) > 1:
+            if not compatible_refs(refs):
                 reason = 'incompatible_statement_basis'
             output = fn(*args) if reason is None else None
             if output is None and reason is None:
@@ -134,6 +143,8 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
             provenance[name] = refs
             evidence[name] = dict(formula=formula, inputs=refs, reason=reason)
 
+        calculate('bvps', 'ordinary shareholders capital and reserves / ordinary shares in circulation at the same reporting date; not a market valuation',
+            ['ordinary_equity','ordinary_shares'], lambda e,n:e/n if e>=0 and n==int(n) else None, positive=('ordinary_shares',))
         calculate('gross_margin', 'gross_profit / revenue', ['gross_profit', 'revenue'], lambda a,b:a/b, positive=('revenue',), ordinary=True)
         calculate('net_margin', 'total profit after tax / revenue', ['net_profit','revenue'], lambda a,b:a/b, positive=('revenue',), ordinary=True)
         calculate('total_debt', 'short_debt + long_debt', ['short_debt','long_debt'], lambda a,b:a+b if a>=0 and b>=0 else None, ordinary=True)
@@ -188,7 +199,7 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
                 before = prior_row[field] if prior_row else None
                 after = values.get(field)
                 all_refs = provenance[field] + (prior_row['calculations'][field]['inputs'] if prior_row else [])
-                comparable = prior_row and len({(ref['source'],ref['currency'],ref['consolidation']) for ref in all_refs}) <= 1
+                comparable = prior_row and compatible_refs(all_refs)
                 reason = 'missing_comparable_period' if before is None or after is None or not comparable else 'nonpositive_base' if before <= 0 else None
                 values[name] = finite_result((after-before)/before) if reason is None else None
                 if reason is None and values[name] is None:
@@ -200,7 +211,7 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         for field in ('gross_margin','net_margin','roe'):
             prior_row = results.get(previous(period, years=1))
             refs = provenance[field] + (prior_row['calculations'][field]['inputs'] if prior_row else [])
-            comparable = prior_row and len({(ref['source'],ref['currency'],ref['consolidation']) for ref in refs}) <= 1
+            comparable = prior_row and compatible_refs(refs)
             before = prior_row[field] if comparable else None
             values[field+'_change'] = finite_result(values[field]-before) if values[field] is not None and before is not None else None
             evidence[field+'_change'] = dict(formula='current ratio - exact prior-year ratio (fraction difference)',
@@ -222,7 +233,7 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         for field in (('operating_income','net_profit') if packet.profile == 'bank' else ('revenue','net_profit')):
             current = latest[field]
             comparable_refs = latest['calculations'][field]['inputs'] + (prior['calculations'][field]['inputs'] if prior else [])
-            before = prior[field] if prior and len({(ref['source'],ref['currency'],ref['consolidation']) for ref in comparable_refs}) <= 1 else None
+            before = prior[field] if prior and compatible_refs(comparable_refs) else None
             if current is not None:
                 changes.append(dict(metric=field,current_period=latest['period'],prior_period=prior_period,
                     current=current,previous=before,absolute_change=finite_result(current-before) if before is not None else None,

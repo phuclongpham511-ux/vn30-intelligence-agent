@@ -221,7 +221,7 @@ def test_observed_membership_ranking_requires_compatible_accounting_evidence(tmp
     response=service.observed_peers(tmp_path,'1234',period='2025')
     metric=response['metrics']['net_profit']
     assert metric['covered_companies']==2 and metric['expected_companies']==3
-    assert metric['comparable_companies']==2 and [o['rank'] for o in metric['observations']]==[1,1]
+    assert metric['comparable_companies']==2 and all(o['comparison_eligible'] and o['rank'] is None and o['percentile'] is None for o in metric['observations'])
     assert response['sector_totals'] is None and response['classification_effective_at'] is None
     assert response['public_display_eligible'] is False and response['historical_aggregation_enabled'] is False
     # Unknown-scope source amounts remain inspectable but receive no rank.

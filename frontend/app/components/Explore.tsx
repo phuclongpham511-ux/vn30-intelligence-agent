@@ -42,7 +42,10 @@ export default function Explore({ticker,personalResearch=false}:{ticker:string;p
     return()=>{window.removeEventListener('hashchange',restore);window.removeEventListener('popstate',restore);};
   },[]);
   const navigate=(next:StockSection)=>{select(next);window.history.pushState(null,'',`#stock-${next}`);};
-  if(identity.error||(identity.data&&!security))return <StockError ticker={ticker} message="Stock identity unavailable. Find an available listed equity in Explore." retry={identity.retry}/>;
+  // Saved financial/action endpoints validate their own ticker ownership. A
+  // missing market identity must not hide that independently authorized evidence.
+  const savedSection=personalResearch&&(tab==='fundamentals'||tab==='actions');
+  if(!savedSection&&(identity.error||(identity.data&&!security)))return <StockError ticker={ticker} message="Stock identity unavailable. Find an available listed equity in Explore." retry={identity.retry}/>;
   return <div className="page-stack stock-detail">
     <WorkspaceNav research/>
     <StockHeader available={!!security} stock={{symbol:ticker,company_name:security?.company_name||null,display_name_en:security?.display_name_en,exchange:security?.exchange||null}}/>
@@ -52,8 +55,9 @@ export default function Explore({ticker,personalResearch=false}:{ticker:string;p
         if(next){event.preventDefault();navigate(next);buttons.current[next]?.focus();}
       }}>{t(labels[section])}</button>)}
     </div>
-    {!security?<div aria-busy="true" role="status"><p className="stock-note">{t('Loading stock identity…')}</p><Skeleton className="h-96"/></div>:<>
-      <div className="stock-chart-layout" hidden={tab!=='overview'&&tab!=='technical'}>
+    {!security&&!savedSection?<div aria-busy="true" role="status"><p className="stock-note">{t('Loading stock identity…')}</p><Skeleton className="h-96"/></div>:<>
+      {!security&&<p className="stock-note" role="status">{t('Market data unavailable')} · {t('Personal Research')}</p>}
+      {security&&<div className="stock-chart-layout" hidden={tab!=='overview'&&tab!=='technical'}>
         <div className="stock-chart-main" role="tabpanel" id="stock-panel-price" aria-labelledby={`stock-tab-${tab==='technical'?'technical':'overview'}`} tabIndex={0}>
           {tab==='technical'&&<><p className="stock-note">{t('Chart indicators describe completed observations. Accepted Technical evidence has separate assurance; no trading recommendation.')}</p><TechnicalInsights ticker={ticker}/></>}
           {(visited.has('overview')||visited.has('technical'))&&<TechnicalChart ticker={ticker} priceOnly={tab!=='technical'} onRows={setTechnicalRows}/>}
@@ -63,7 +67,7 @@ export default function Explore({ticker,personalResearch=false}:{ticker:string;p
           <CompanyOverview security={security} syncedAt={identity.data?.last_synced_at??null}/>
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
-      </div>
+      </div>}
       <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} personalResearch={personalResearch} visible={tab==='fundamentals'} onActions={()=>navigate('actions')}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker} personalResearch={personalResearch}/>}</div>
       <div role={tab==='news'||tab==='community'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'||tab==='community'?`stock-tab-${tab}`:undefined} tabIndex={tab==='news'||tab==='community'?0:undefined} hidden={tab!=='news'&&tab!=='community'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news')||visited.has('community'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab==='overview'} focus={tab==='community'?'community':'all'}/>}</div>

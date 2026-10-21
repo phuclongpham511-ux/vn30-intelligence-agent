@@ -65,3 +65,16 @@ test('Community is a direct research destination sharing one retained intelligen
  assert.match(html,/data-focus="community"/);
  assert.doesNotMatch(html,/data-component="FundamentalTrends"/);
 });
+
+
+test('authorized saved financial and dividend views survive unavailable market identity',()=>{
+ for(const [tab,component] of [['fundamentals','FundamentalTrends'],['actions','StockActions']]){
+  selected=tab;visited=[tab];reads=[];identity={items:[],last_synced_at:null};
+  const html=renderToStaticMarkup(React.createElement(exports.default,{ticker:'ABC',personalResearch:true}));
+  assert.match(html,new RegExp('data-component="'+component+'"'));
+  assert.match(html,/Market data unavailable/);
+  assert.doesNotMatch(html,/Identity error|Original company name|data-component="TechnicalChart"/);
+  const publicHtml=renderToStaticMarkup(React.createElement(exports.default,{ticker:'ABC'}));
+  assert.match(publicHtml,/Identity error/);
+ }
+});

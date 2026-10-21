@@ -36,14 +36,25 @@ def prepare(captures, destination, *, reports=(), summaries=(), memberships=None
         if path.stat().st_size > 2_000_000:
             raise ValueError('Reviewed report manifest exceeds bound')
         body = path.read_bytes(); e=json.loads(body)
-        packet,_=report_packet(e,path.parent)
+        history=e.get('contract')=='reviewed-report-history-v1'
+        if history:
+            from src.providers.reviewed_history import history_packet
+            packet=history_packet(e,path.parent)
+            originals=[]
+            for d in e['documents']:
+                data=pinned_file(path.parent,d['file'],d['sha256'],2_000_000)
+                add(d['file'],data);originals.append(json.loads(data))
+        else:
+            packet,_=report_packet(e,path.parent)
+            originals=[e]
         if packet.ticker in index['reviewed_reports']:
             raise ValueError('Conflicting reviewed source; choose a separate bundle')
-        for name,digest,bound in [(e['document_file'],e['document_sha256'],40_000_000),
-                *((p['image_file'],p['image_sha256'],8_000_000) for p in e['pages'])]:
-            add(name,pinned_file(path.parent,name,digest,bound))
+        for original in originals:
+            for name,digest,bound in [(original['document_file'],original['document_sha256'],40_000_000),
+                    *((p['image_file'],p['image_sha256'],8_000_000) for p in original['pages'])]:
+                add(name,pinned_file(path.parent,name,digest,bound))
         name=f'{packet.ticker}-reviewed-{hashlib.sha256(body).hexdigest()}.json';add(name,body)
-        index['reviewed_reports'][packet.ticker]=dict(file=name,sha256=hashlib.sha256(body).hexdigest(),format='reviewed-report-v2')
+        index['reviewed_reports'][packet.ticker]=dict(file=name,sha256=hashlib.sha256(body).hexdigest(),format=e['contract'])
     for path in summaries:
         path=Path(path)
         if path.stat().st_size > 2_000_000:raise ValueError('Summary capture exceeds bound')

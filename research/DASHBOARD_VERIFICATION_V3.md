@@ -1,5 +1,7 @@
 # V3 real dashboard acceptance
 
+> Historical checkpoint. Current results and limitations: [V4 delivery](FINANCIAL_INTELLIGENCE_V4_DELIVERY.md) and [V4 acceptance](DASHBOARD_VERIFICATION_V4.md).
+
 Offline ASGI/contracts/static rendering and regression/build checks PASS.
 **Running Woofi, interactive charts, desktop and mobile visual acceptance:
 PENDING.** SStock benchmark browsing does not validate Woofi's new code.

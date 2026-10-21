@@ -65,7 +65,8 @@ def observed_peers(directory, code, *, period, frequency='annual'):
     members=sorted(i['ticker'] for i in review['entries'] if i['provider_code']==code)
     if not members:raise KeyError('Unobserved category')
     label=next(i['provider_label'] for i in review['entries'] if i['provider_code']==code)
-    output={key:dict(unit=metric_unit(key),observations=[],missing={},comparable_companies=0,distribution=None) for key in METRICS}
+    output={key:dict(unit=metric_unit(key),observations=[],missing={},comparable_companies=0,
+        comparison_kind='INDIVIDUAL_OBSERVATIONS',industry_ranking_qualified=False,distribution=None) for key in METRICS}
     for ticker in members:
         if ticker not in index['captures']:
             for metric in output.values():metric['missing'][ticker]='no_saved_financial_evidence'
@@ -86,7 +87,7 @@ def observed_peers(directory, code, *, period, frequency='annual'):
             signature=sorted({(r['statement'],r['period'],(r.get('source_context')or{}).get('period_start'),(r.get('source_context')or{}).get('period_end')) for r in refs},key=str)
             metric['observations'].append(dict(ticker=ticker,value=row[key],source=packet.source,
                 scope=next(iter(scopes)) if len(scopes)==1 else None,
-                verification=state['dimensions'],rank=None,percentile=None,
+                verification=state['dimensions'],rank=None,percentile=None,comparison_eligible=False,
                 record_hashes=sorted({r['source_context']['record_sha256'] for r in refs}),
                 # Internal comparison key is removed before responding.
                 compatibility=[packet.profile,signature]))
@@ -97,10 +98,12 @@ def observed_peers(directory, code, *, period, frequency='annual'):
         compatible=len({json.dumps([o['compatibility'],o['scope']]) for o in candidates})==1
         if len(candidates)>=2 and compatible:
             points=[o['value'] for o in candidates]
-            for o in candidates:
-                o['rank']=1+sum(v>o['value'] for v in points)
-                o['percentile']=(sum(v<o['value'] for v in points)+.5*sum(v==o['value'] for v in points))/len(points)
+            # This undated, incompletely covered provider snapshot cannot qualify
+            # industry ranks. Two values support a pair comparison, not a sector
+            # percentile. Keep the historical fields null for old consumers too.
+            for o in candidates:o['comparison_eligible']=True
             metric['comparable_companies']=len(candidates)
+            metric['comparison_kind']='TWO_COMPANY_COMPARISON' if len(candidates)==2 else 'COVERED_SAMPLE'
             metric['distribution']=dict(count=len(points),minimum=min(points),median=median(points),maximum=max(points))
         for o in metric['observations']:o.pop('compatibility')
         metric['covered_companies']=len(metric['observations'])

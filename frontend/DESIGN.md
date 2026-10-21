@@ -1,6 +1,35 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
-## Financial Intelligence V3 — current
+## Financial Intelligence V4 — current, 2026-10-21
+
+V4 supersedes the historical checkpoints below: **341 source/accounting and
+reporting-metadata-qualified observations (216 reported, 125 derived), 70 supported
+definitions out of 77 canonical definitions, ten saved issuers**. Qualified original
+histories cover FPT 2022–24, TCB 2023–25, VCB 2024–25, HPG 2024–25 flows/2025 balance
+and MWG pre-audit 2024. VNM/SSI remain useful partial provider coverage.
+Original captures and revisions remain preserved; metric-level gaps stay visible.
+FPT dated ordinary BVPS is supported for 2023/24; P/E/P/B/earnings yield remain
+unavailable without matched prices, shares and corporate-action evidence.
+The bank comparison is **TCB/VCB, 2/22 observed banks, 15 FY2025 metrics**;
+observed-industry ranks/percentiles are suppressed. Historical sector totals stay
+disabled. No WiData or paid subscription is required.
+
+Supported private launchers and live HTTP checks PASS. Actual integrated-browser
+desktop checks PASS for exercised flows; mobile, tooltips, exhaustive retries and
+full live-market context remain PENDING. Backend **1,600 + 32 subtests**, frontend
+**334 passed + one existing skip**, typecheck/build and real contracts/static
+rendering PASS. PIT/public-rights/fully-verified counts remain separately zero.
+See [V4 delivery](../research/FINANCIAL_INTELLIGENCE_V4_DELIVERY.md),
+[feature comparison](../research/SSTOCK_FEATURE_COMPARISON_V4.md),
+[acceptance and manual checklist](../research/DASHBOARD_VERIFICATION_V4.md),
+[coverage](../research/validation/free-data-v4/VERIFIED_METRIC_COVERAGE.csv), and
+[valuation decisions](../research/VALUATION_EVIDENCE_AUDIT.md).
+
+Use Woofi components and identity; keep private financial tabs usable independently of missing market identity. Show exact per-period original sources, units and separate verification counts. Preserve unavailable states and source-vintage warnings.
+
+## Historical context
+
+## Financial Intelligence V3 — historical checkpoint
 
 Financial Analysis uses a concise period-labelled highlight grid (two columns on
 small screens, three on wide screens), amount/growth charts first, dedicated

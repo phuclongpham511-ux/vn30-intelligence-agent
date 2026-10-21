@@ -13,7 +13,7 @@ from pydantic import Field
 from src.providers.financial_filings import StrictEvidence, _https
 from src.providers.vnstock.financial_statements import MAP, NON_FINANCIAL_ONLY, BANK_ONLY, content_hash
 from src.schemas.financials import FinancialPacket, FinancialSourceContext, FinancialLine, StatementObservation, StatementReceipt
-from src.analytics.financial_catalog import NOTE_FIELDS, NOTE_AMOUNTS, LOAN_QUALITY_FIELDS
+from src.analytics.financial_catalog import NOTE_FIELDS, BANK_NOTE_AMOUNTS, LOAN_QUALITY_FIELDS
 
 FIELD_KIND = {field: kind for kind, fields in MAP.items() for field in fields}
 FIELD_KIND.update({field:kind for kind,fields in NOTE_FIELDS.items() for field in fields})
@@ -38,14 +38,15 @@ class ReportAmount(StrictEvidence):
     code: str = Field(min_length=1, max_length=100)
     code_kind: Literal['printed_statement_code', 'reviewed_row_locator']
     label: str = Field(min_length=1, max_length=300)
+    period_layout: Literal['column', 'row'] = 'column'
     year: int = Field(ge=1900, le=2200)
     raw_token: str = Field(min_length=1, max_length=64)
-    column_periods: list[str] = Field(min_length=1, max_length=4)
-    column_values: list[str] = Field(min_length=1, max_length=4)
+    column_periods: list[str] = Field(min_length=1, max_length=16)
+    column_values: list[str] = Field(min_length=1, max_length=16)
     source_row: Quote
     column_header: Quote
     unit_quote: Quote
-    unit: Literal['VND', 'thousand VND', 'million VND', 'billion VND', 'VND/share']
+    unit: Literal['VND', 'thousand VND', 'million VND', 'billion VND', 'VND/share', 'shares']
     period_start: str | None = None
     period_end: str
 
@@ -128,13 +129,13 @@ def report_packet(manifest, directory):
     for a in e.amounts:
         # FX is a reviewed reconciliation line, not a new headline metric.
         kind = 'cash' if a.field == 'cash_fx_effect' else FIELD_KIND.get(a.field)
-        if kind is None or a.field in NON_FINANCIAL_ONLY and e.profile != 'non_financial' or a.field in (BANK_ONLY | NOTE_AMOUNTS) and e.profile != 'bank':
+        if kind is None or a.field in NON_FINANCIAL_ONLY and e.profile != 'non_financial' or a.field in (BANK_ONLY | BANK_NOTE_AMOUNTS) and e.profile != 'bank':
             raise ValueError('Unsupported field or issuer model')
         start, end = date.fromisoformat(a.period_start) if a.period_start else None, date.fromisoformat(a.period_end)
         if end != date(a.year, 12, 31) or (kind != 'balance' and start != date(a.year, 1, 1)) or (start and start != date(a.year, 1, 1)):
             raise ValueError('Unsupported or contradictory fiscal boundaries')
         source_row, header, unit_quote = quote(a.source_row), quote(a.column_header), quote(a.unit_quote)
-        if a.label not in source_row or str(a.year) not in header:
+        if a.label not in source_row or str(a.year) not in (source_row if a.period_layout=='row' else header):
             raise ValueError('Original field/column missing')
         if a.code_kind == 'printed_statement_code' and not re.search(r'(?<!\w)' + re.escape(a.code) + r'(?!\w)', source_row):
             raise ValueError('Original statement code missing')
@@ -151,10 +152,10 @@ def report_packet(manifest, directory):
             raise ValueError('Ambiguous monetary token')
         raw = Decimal(token.strip('()').replace('.', '').replace(',', '')) * (-1 if token.startswith('(') else 1)
         eps = a.field == 'eps_reported'
-        if eps != (a.unit == 'VND/share'):
+        if eps != (a.unit == 'VND/share') or (a.field == 'ordinary_shares') != (a.unit == 'shares'):
             raise ValueError('Per-share amounts must not use statement money scale')
-        scales = {'VND': 1, 'thousand VND': 1000, 'million VND': 1000000, 'billion VND': 1000000000, 'VND/share': 1}
-        wording = {'VND': r'\bVND\b|Đồng', 'thousand VND': r'nghìn|ngàn|thousand', 'million VND': r'[Tt]riệu|million', 'billion VND': r'tỷ|billion', 'VND/share': r'(?:đồng|VND)/cổ phiếu|VND/share'}
+        scales = {'VND': 1, 'thousand VND': 1000, 'million VND': 1000000, 'billion VND': 1000000000, 'VND/share': 1, 'shares':1}
+        wording = {'VND': r'\bVND\b|Đồng', 'thousand VND': r'nghìn|ngàn|thousand', 'million VND': r'[Tt]riệu|million', 'billion VND': r'tỷ|billion', 'VND/share': r'(?:đồng|VND)/cổ phiếu|VND/share|earnings per share', 'shares':r'Number of.*shares|Ordinary shares'}
         if not re.search(wording[a.unit], unit_quote) or a.unit == 'VND' and re.search(r'triệu|nghìn|ngàn|tỷ|million|thousand|billion', unit_quote, re.I):
             raise ValueError('Source amount scale mismatch')
         value = raw * scales[a.unit]
@@ -164,6 +165,7 @@ def report_packet(manifest, directory):
             original_value=token, normalized_value=int(value), original_unit=a.unit,
             multiplier=scales[a.unit], page=a.source_row.page, period_start=a.period_start,
             period_end=a.period_end, source_row=a.source_row.model_dump(), column_header=a.column_header.model_dump())
+        if a.period_layout=='row':record['period_layout']='row'
         bucket = grouped.setdefault((kind, str(a.year)), {})
         if a.field in bucket:
             raise ValueError('Duplicate report field/period')
@@ -216,7 +218,7 @@ def report_packet(manifest, directory):
                 field_codes={f:r['code'] for f,r in records.items()},
                 items=[FinancialLine(code=r['code'], name_en=f.replace('_',' '), name_vi=r['label'],
                     value=r['normalized_value'], raw_value=float(Decimal(r['original_value'].strip('()').replace('.','').replace(',','')) * (-1 if r['original_value'].startswith('(') else 1)),
-                    unit='VND/share' if f == 'eps_reported' else 'VND') for f,r in records.items()],
+                    unit='VND/share' if f == 'eps_reported' else 'shares' if f == 'ordinary_shares' else 'VND') for f,r in records.items()],
                 diagnostics=[] if valid else ['balance_identity_failed']))
         reports[kind] = StatementReceipt(statement=kind, status='healthy' if observations else 'unavailable',
             observations=observations, observed_at=observed, source_url=e.document_url,

@@ -38,3 +38,10 @@ test('following from Stock Detail preserves explicit review receipts for existin
   assert.deepEqual(updated.communitySeen,raw.communitySeen);
   assert.throws(()=>readWatchlist('{invalid'));
 });
+
+
+test('stock reads retain HTTP status so missing coverage differs from a service error',async()=>{
+ for(const status of [404,503]){
+  await assert.rejects(stockRead('/saved-financials',new AbortController().signal,async()=>({ok:false,status})),error=>error.status===status);
+ }
+});

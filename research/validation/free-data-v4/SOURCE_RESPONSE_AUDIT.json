@@ -1,0 +1,147 @@
+{
+  "request_strategy": "Bounded ordinary read-only GETs; no denied-resource retry, changed identity or access bypass",
+  "responses": [
+    {
+      "url": "https://file.fpts.com.vn/FileStore2/File/2024/03/28/20240328_FPT_240328_Annual_Report_2023.pdf",
+      "status": 200,
+      "bytes": 14731582,
+      "content_type": "application/pdf",
+      "sha256": "d55e25cc0522f92130e4f74f7e49523c5ec0746eb286d810c295ac85af4987e0",
+      "observed_at": "2026-10-21T05:02:22.713387+00:00",
+      "pages": 211,
+      "native_text_pages": 209,
+      "receipt_file": "fpt-annual-2023.pdf.receipt.json"
+    },
+    {
+      "url": "https://file.fpts.com.vn/FileStore2/File/2025/04/03/20250403_FPT_250403_Annual_Report_2024.pdf",
+      "status": 200,
+      "bytes": 10702019,
+      "content_type": "application/pdf",
+      "sha256": "764c24281433eda90277f5b1c39022ee879b48fdf363372fed989dda9381c240",
+      "observed_at": "2026-10-21T05:01:16.172503+00:00",
+      "pages": 215,
+      "native_text_pages": 213,
+      "receipt_file": "fpt-annual-2024.pdf.receipt.json"
+    },
+    {
+      "url": "https://file.hoaphat.com.vn/hoaphat-com-vn/2025/04/hpg-annual-report-2024.pdf",
+      "status": 403,
+      "bytes": 17,
+      "content_type": "text/plain; charset=UTF-8",
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "observed_at": "2026-10-21T05:01:14.912686+00:00",
+      "receipt_file": "hpg-annual-2024.pdf.receipt.json"
+    },
+    {
+      "url": "https://cdnv2.tgdd.vn/mwgvn/investorrelations/files/posts/2025/4/0/bd/b4/bdb4909af7f69858abb538dac47b2e76.pdf",
+      "status": 200,
+      "bytes": 28301264,
+      "content_type": "application/pdf",
+      "sha256": "de48ba442bc4045e0c984a6a7a6d5ef49035f6bbbcfd1e86a6f07481b31af11d",
+      "observed_at": "2026-10-21T05:06:24.160886+00:00",
+      "pages": 94,
+      "native_text_pages": 94,
+      "receipt_file": "mwg-annual-2024.pdf.receipt.json"
+    },
+    {
+      "url": "https://cdnv2.tgdd.vn/mwgvn/investorrelations/files/posts/2025/1/0/78/5a/785ad4456ebdacf62566069258c21da4.pdf",
+      "status": 200,
+      "bytes": 27147889,
+      "content_type": "application/pdf",
+      "sha256": "2dd845ed3d4442edc2e7adbefa964d2e79e60cfdf138f4de94517d2ae5d20f69",
+      "observed_at": "2026-10-21T05:08:30.795212+00:00",
+      "pages": 42,
+      "native_text_pages": 0,
+      "receipt_file": "mwg-q4-2024.pdf.receipt.json"
+    },
+    {
+      "url": "https://www.ssi.com.vn/upload/files/IR/Reports/SSI_BCTN2025_EN.pdf",
+      "status": 403,
+      "bytes": 25727,
+      "content_type": "text/html; charset=UTF-8",
+      "sha256": "09c9df34e4aacebcb859650c953853e3be083c9bfd37a97fb8e9cf2cfc06fcff",
+      "observed_at": "2026-10-21T05:01:15.010030+00:00",
+      "receipt_file": "ssi-annual-2025.pdf.receipt.json"
+    },
+    {
+      "url": "https://techcombank.com/content/dam/techcombank/public-site/documents/bao-cao-thuong-nien-nam-2024-eng.pdf",
+      "status": 200,
+      "bytes": 15014596,
+      "content_type": "application/pdf",
+      "sha256": "d579299d740a08885d2044459fd234a45e53a4902a38a01a683a039a8298d6e6",
+      "observed_at": "2026-10-21T05:02:16.715645+00:00",
+      "pages": 132,
+      "native_text_pages": 131,
+      "receipt_file": "tcb-annual-2024.pdf.receipt.json"
+    },
+    {
+      "url": "https://www.vinamilk.com.vn/static/uploads/article/1712225775-c2eddcbc7c85fa045be877727d5920211f4ae2071d56375fcdd0ba7957d4c5ac.pdf",
+      "status": 200,
+      "bytes": 562553,
+      "content_type": "text/html; charset=utf-8",
+      "sha256": "bb2b114327de855b963c54e89d689264e9fa99c25f43fb5cded5ca064e46edc7",
+      "observed_at": "2026-10-21T05:01:18.448036+00:00",
+      "receipt_file": "vnm-annual-2023.pdf.receipt.json"
+    },
+    {
+      "url": "https://www.vinamilk.com.vn/bao-cao-thuong-nien/bao-cao/2024/doc/en/vinamilk-ar-eng-full-layout-interactive.pdf",
+      "status": 200,
+      "bytes": 27001307,
+      "content_type": "application/pdf",
+      "sha256": "4313d34c5d2131803e87c11bdd34ff3313d607e901dd37ea6e09f5600441a6ab",
+      "observed_at": "2026-10-21T05:02:29.509625+00:00",
+      "pages": 97,
+      "native_text_pages": 97,
+      "receipt_file": "vnm-annual-2024.pdf.receipt.json"
+    },
+    {
+      "url": "https://www.vinamilk.com.vn/bao-cao-thuong-nien/bao-cao/2024/doc/en/bctc-vas.pdf",
+      "status": 200,
+      "bytes": 393615,
+      "content_type": "application/pdf",
+      "sha256": "214683c2d111b9af985db01ef8bae5a704bbf76fbd5af952cd54ae47eb9ae24f",
+      "observed_at": "2026-10-21T05:06:23.169954+00:00",
+      "pages": 2,
+      "native_text_pages": 2,
+      "receipt_file": "vnm-vas-2024.pdf.receipt.json"
+    },
+    {
+      "ticker": "VNM",
+      "statement": "income",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 1,
+        "Symbol": "VNM",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "body_sha256": "b1dfd771b2331210ef7cb0fb587c3aa0d0edc1a1b49b0761fb568143e324ac11",
+      "observed_at": "2026-10-21T05:12:25.023269+00:00",
+      "bytes": 2968,
+      "source": "CafeF:annual-summary",
+      "quality": "PARTIALLY_VERIFIED"
+    },
+    {
+      "ticker": "VNM",
+      "statement": "balance",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 2,
+        "Symbol": "VNM",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "body_sha256": "481a3718778bfe3dce517648a37ae1933e17e02120a9892a304529ad1a6781d2",
+      "observed_at": "2026-10-21T05:12:25.360524+00:00",
+      "bytes": 2077,
+      "source": "CafeF:annual-summary",
+      "quality": "PARTIALLY_VERIFIED"
+    }
+  ]
+}

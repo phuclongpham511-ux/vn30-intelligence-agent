@@ -12,7 +12,7 @@ test('reviewed source and accounting verification do not imply point-in-time or 
  }
 });
 
-function observed(){return {contract:'observed-industry-peers-v1',display_scope:'personal_research',industry:{id:'1234',label:'Synthetic category'},period:'2025',frequency:'annual',members:['ABC','DEF'],observed_at:'2026-10-17T00:00:00Z',classification_source:'synthetic://test',taxonomy_version:null,taxonomy_level:null,classification_effective_at:null,historical_aggregation_enabled:false,sector_totals:null,public_display_eligible:false,metrics:{net_profit:{unit:'VND',covered_companies:1,expected_companies:2,comparable_companies:0,missing:{DEF:'no_saved_financial_evidence'},observations:[{ticker:'ABC',value:100,source:'synthetic://test',scope:'consolidated',verification:dimensions(),rank:null,percentile:null,record_hashes:['a'.repeat(64)]}]}}};}
+function observed(){return {contract:'observed-industry-peers-v1',display_scope:'personal_research',industry:{id:'1234',label:'Synthetic category'},period:'2025',frequency:'annual',members:['ABC','DEF'],observed_at:'2026-10-17T00:00:00Z',classification_source:'synthetic://test',taxonomy_version:null,taxonomy_level:null,classification_effective_at:null,historical_aggregation_enabled:false,sector_totals:null,public_display_eligible:false,metrics:{net_profit:{unit:'VND',covered_companies:1,expected_companies:2,comparable_companies:0,comparison_kind:'INDIVIDUAL_OBSERVATIONS',industry_ranking_qualified:false,missing:{DEF:'no_saved_financial_evidence'},observations:[{ticker:'ABC',value:100,source:'synthetic://test',scope:'consolidated',verification:dimensions(),rank:null,percentile:null,comparison_eligible:false,record_hashes:['a'.repeat(64)]}]}}};}
 test('private industry observations retain missing coverage and cannot become public or historical totals',()=>{
  const d=observed();assert.throws(()=>observedIndustryData(d,'1234','2025'));
  assert.doesNotThrow(()=>observedIndustryData(d,'1234','2025',true));
@@ -45,4 +45,18 @@ test('optional new note fields do not weaken existing explicit-null chart contra
  data.chart_rows=data.rows.map(r=>({...r}));
  delete data.chart_rows[0].gross_margin;
  assert.throws(()=>financialEngineData(data,'ABC','annual',true),/Chart does not match/);
+});
+
+
+test('two-company statistics cannot claim industry rank or percentile',()=>{
+ const d=observed(),m=d.metrics.net_profit;
+ m.observations[0].comparison_eligible=true;
+ m.observations.push({...structuredClone(m.observations[0]),ticker:'DEF',value:200});
+ m.missing={};m.covered_companies=2;m.comparable_companies=2;
+ m.comparison_kind='TWO_COMPANY_COMPARISON';m.distribution={count:2,minimum:100,median:150,maximum:200};
+ assert.doesNotThrow(()=>observedIndustryData(d,'1234','2025',true));
+ for(const mutate of [x=>x.industry_ranking_qualified=true,x=>x.comparison_kind='COVERED_SAMPLE',x=>x.observations[0].rank=1,x=>x.observations[0].percentile=.75]){
+  const bad=structuredClone(d);mutate(bad.metrics.net_profit);
+  assert.throws(()=>observedIndustryData(bad,'1234','2025',true));
+ }
 });

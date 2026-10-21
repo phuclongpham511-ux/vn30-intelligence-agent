@@ -1,6 +1,35 @@
 # Financial Data Intelligence V1
 
-## V3 current implementation and reproduction
+## Financial Intelligence V4 — current, 2026-10-21
+
+V4 supersedes the historical checkpoints below: **341 source/accounting and
+reporting-metadata-qualified observations (216 reported, 125 derived), 70 supported
+definitions out of 77 canonical definitions, ten saved issuers**. Qualified original
+histories cover FPT 2022–24, TCB 2023–25, VCB 2024–25, HPG 2024–25 flows/2025 balance
+and MWG pre-audit 2024. VNM/SSI remain useful partial provider coverage.
+Original captures and revisions remain preserved; metric-level gaps stay visible.
+FPT dated ordinary BVPS is supported for 2023/24; P/E/P/B/earnings yield remain
+unavailable without matched prices, shares and corporate-action evidence.
+The bank comparison is **TCB/VCB, 2/22 observed banks, 15 FY2025 metrics**;
+observed-industry ranks/percentiles are suppressed. Historical sector totals stay
+disabled. No WiData or paid subscription is required.
+
+Supported private launchers and live HTTP checks PASS. Actual integrated-browser
+desktop checks PASS for exercised flows; mobile, tooltips, exhaustive retries and
+full live-market context remain PENDING. Backend **1,600 + 32 subtests**, frontend
+**334 passed + one existing skip**, typecheck/build and real contracts/static
+rendering PASS. PIT/public-rights/fully-verified counts remain separately zero.
+See [V4 delivery](../research/FINANCIAL_INTELLIGENCE_V4_DELIVERY.md),
+[feature comparison](../research/SSTOCK_FEATURE_COMPARISON_V4.md),
+[acceptance and manual checklist](../research/DASHBOARD_VERIFICATION_V4.md),
+[coverage](../research/validation/free-data-v4/VERIFIED_METRIC_COVERAGE.csv), and
+[valuation decisions](../research/VALUATION_EVIDENCE_AUDIT.md).
+
+Current reproduction: use the immutable `.local/free-data-v4-ready` bundle and commands in the V4 acceptance checklist. History manifests pin one whole original per period; derived inputs must share an original document binary. No public exposure or price multiple is enabled by source verification alone.
+
+## Historical context
+
+## V3 historical implementation and reproduction
 
 Continue with `.local/free-data-v3-final`, preserving previous bundles. The same
 original-report adapter now reads selected VCB annual statements and TCB notes.

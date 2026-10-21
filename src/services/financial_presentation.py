@@ -238,7 +238,7 @@ def display_financial_response(result: FinancialEngineResponse, *, internal_auth
             context = period.get('source_context')
             qualified = (result.is_fixture or period['consolidation'] in ('consolidated', 'standalone') and
                 display_allowed(context, internal=result.display_scope == 'internal_research')) and period['basis'] in ('annual', 'standalone', 'ytd', 'point_in_time')
-            periods.append({**period, 'items': [line if qualified and line['unit'] in ('VND', 'VND/share') or line['value'] is None else
+            periods.append({**period, 'items': [line if qualified and line['unit'] in ('VND', 'VND/share', 'shares') or line['value'] is None else
                 {**line, 'value': None, 'semantic_status': 'unqualified'} for line in period['items']]})
         statements[kind] = {**statement, 'periods': periods}
     latest = len(result.rows) - 1

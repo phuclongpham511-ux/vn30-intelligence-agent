@@ -37,13 +37,18 @@ def saved_packet(directory, ticker, *, collection='captures'):
         raise FileNotFoundError('Saved research coverage unavailable')
     path = (root / item['file']).resolve(strict=True)
     canonical = item.get('format') == 'canonical-financial-packet-v1'
-    if item.get('format') not in (None, 'vci-raw-capture-v1', 'canonical-financial-packet-v1', 'reviewed-report-v2', 'cafef-saved-annual-v1'):
+    if item.get('format') not in (None, 'vci-raw-capture-v1', 'canonical-financial-packet-v1', 'reviewed-report-v2', 'reviewed-report-history-v1', 'cafef-saved-annual-v1'):
         raise ValueError('Unknown saved capture format')
     if not path.is_relative_to(root) or path.suffix != '.json' or path.stat().st_size > (32_000_000 if canonical else 10_000_000):
         raise ValueError('Invalid capture path')
     data = path.read_bytes()
     if hashlib.sha256(data).hexdigest() != item['sha256']:
         raise ValueError('Saved capture digest mismatch')
+    if item.get('format') == 'reviewed-report-history-v1':
+        from src.providers.reviewed_history import history_packet
+        packet=history_packet(json.loads(data),root)
+        if packet.ticker!=ticker:raise ValueError('Wrong history owner')
+        return packet,item['sha256']
     if item.get('format') == 'reviewed-report-v2':
         from src.providers.reviewed_reports import report_packet
         packet, _ = report_packet(json.loads(data), root)
@@ -160,7 +165,7 @@ def validated_canonical_packet(data):
 
 def personal_projection(packet, *, frequency='annual', limit=8, authorization_reference):
     if (authorization_reference and not packet.is_fixture and packet.source.startswith('issuer:')
-            and packet.source_version == 'reviewed-report-v2'):
+            and packet.source_version in ('reviewed-report-v2','reviewed-report-history-v1')):
         # Original reports use the existing scoped filing projection. Provider
         # captures are never enriched or overwritten with this separate source.
         full = financial_engine(packet, frequency=frequency, limit=limit)

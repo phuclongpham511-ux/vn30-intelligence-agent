@@ -56,9 +56,9 @@ for(const name of readdirSync(join(directory,'dividends')).filter(n=>/^[A-Z0-9]+
 }
 assert.ok(categories.length&&dividends.length);
 const financialViews=[];
-for(const ticker of ['FPT','HPG','TCB','VCB','VHM']){
+for(const ticker of ['FPT','HPG','MWG','TCB','VCB','SSI','VNM','VHM']){
  const data=JSON.parse(readFileSync(join(directory,'preferred',ticker+'-annual.json'),'utf8'));
- for(const section of ['overview','performance','balance','cashflow','profitability','health','statements','sources'])for(const language of ['en','vi']){
+ for(const section of ['overview','performance','balance','cashflow','profitability','health','valuation','statements','sources'])for(const language of ['en','vi']){
   const html=render(financials.FundamentalTrendsView,{data,loading:false,error:false,retry(){},initialSection:section,frequency:'annual'},language);
   assert.ok(html.includes(data.source));assert.ok(!html.includes('NaN')&&!html.includes('Infinity'));
   if(section==='health'&&ticker==='TCB')assert.ok(html.includes('data-financial-panel="bank_quality"')&&html.includes(localeTools(language).ui('NPL / classified customer loans')));

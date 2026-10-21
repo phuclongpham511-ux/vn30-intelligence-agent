@@ -1,5 +1,7 @@
 # Free data first — financial intelligence delivery
 
+> Historical checkpoint. Current results and limitations: [V4 delivery](FINANCIAL_INTELLIGENCE_V4_DELIVERY.md) and [V4 acceptance](DASHBOARD_VERIFICATION_V4.md).
+
 Current V3 results supersede the checkpoint below: **175 verified observations,
 64 supported definitions, and 15 qualified TCB/VCB peer metrics**. See
 [V3 delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),

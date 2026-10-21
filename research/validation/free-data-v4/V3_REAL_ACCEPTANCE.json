@@ -1,0 +1,191 @@
+{
+  "contract": "financial-v3-real-acceptance-v1",
+  "status": "PASS",
+  "recorded_at": "2026-10-21T08:45:25.454963+00:00",
+  "supported_metric_definitions": 70,
+  "source_verified_definitions": 70,
+  "reported_definitions": 36,
+  "derived_definitions": 34,
+  "original_note_checks": [
+    {
+      "ticker": "FPT",
+      "period": "2022",
+      "checked": [],
+      "status": "PASS"
+    },
+    {
+      "ticker": "FPT",
+      "period": "2023",
+      "checked": [],
+      "status": "PASS"
+    },
+    {
+      "ticker": "FPT",
+      "period": "2024",
+      "checked": [
+        "roa",
+        "roe"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "TCB",
+      "period": "2023",
+      "checked": [],
+      "status": "PASS"
+    },
+    {
+      "ticker": "TCB",
+      "period": "2024",
+      "checked": [
+        "classified_loan_coverage",
+        "demand_deposit_share",
+        "npl_classified_ratio"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "TCB",
+      "period": "2025",
+      "checked": [
+        "classified_loan_coverage",
+        "demand_deposit_share",
+        "npl_classified_ratio",
+        "roa",
+        "roe"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "HPG",
+      "period": "2024",
+      "checked": [],
+      "status": "PASS"
+    },
+    {
+      "ticker": "HPG",
+      "period": "2025",
+      "checked": [],
+      "status": "PASS"
+    },
+    {
+      "ticker": "VCB",
+      "period": "2024",
+      "checked": [],
+      "status": "PASS"
+    },
+    {
+      "ticker": "VCB",
+      "period": "2025",
+      "checked": [
+        "roa",
+        "roe"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "MWG",
+      "period": "2024",
+      "checked": [],
+      "status": "PASS"
+    }
+  ],
+  "company_peer_api_checks": [
+    {
+      "ticker": "FPT",
+      "industry": "9537",
+      "members": 3,
+      "qualified_comparison_metrics": []
+    },
+    {
+      "ticker": "HPG",
+      "industry": "1757",
+      "members": 11,
+      "qualified_comparison_metrics": []
+    },
+    {
+      "ticker": "MWG",
+      "industry": "5379",
+      "members": 7,
+      "qualified_comparison_metrics": []
+    },
+    {
+      "ticker": "PNJ",
+      "industry": "3767",
+      "members": 2,
+      "qualified_comparison_metrics": []
+    },
+    {
+      "ticker": "REE",
+      "industry": "7535",
+      "members": 25,
+      "qualified_comparison_metrics": []
+    },
+    {
+      "ticker": "SSI",
+      "industry": "8777",
+      "members": 21,
+      "qualified_comparison_metrics": []
+    },
+    {
+      "ticker": "TCB",
+      "industry": "8355",
+      "members": 22,
+      "qualified_comparison_metrics": [
+        "net_profit",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities",
+        "equity",
+        "operating_income",
+        "net_interest_income",
+        "customer_loans",
+        "customer_deposits",
+        "cash_operating",
+        "cash_investing",
+        "cash_financing",
+        "roe",
+        "roa",
+        "loan_deposit_ratio"
+      ]
+    },
+    {
+      "ticker": "VCB",
+      "industry": "8355",
+      "members": 22,
+      "qualified_comparison_metrics": [
+        "net_profit",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities",
+        "equity",
+        "operating_income",
+        "net_interest_income",
+        "customer_loans",
+        "customer_deposits",
+        "cash_operating",
+        "cash_investing",
+        "cash_financing",
+        "roe",
+        "roa",
+        "loan_deposit_ratio"
+      ]
+    },
+    {
+      "ticker": "VHM",
+      "industry": "8633",
+      "members": 56,
+      "qualified_comparison_metrics": []
+    },
+    {
+      "ticker": "VNM",
+      "industry": "3577",
+      "members": 11,
+      "qualified_comparison_metrics": []
+    }
+  ],
+  "provider_requests": 0,
+  "runtime": "PENDING",
+  "browser": "PENDING",
+  "transport": "in-process ASGI; no listener"
+}

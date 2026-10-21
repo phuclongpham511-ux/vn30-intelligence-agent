@@ -10,7 +10,7 @@ FRACTIONS = {'gross_margin','net_margin','roe','roa','liabilities_assets','loan_
 
 
 def metric_unit(key):
-    return ('VND/share' if key == 'eps_reported' else 'multiple' if key in MULTIPLES else
+    return ('VND/share' if key in ('eps_reported','bvps') else 'shares' if key=='ordinary_shares' else 'multiple' if key in MULTIPLES else
         'fraction' if key in FRACTIONS or '_growth_' in key else 'VND')
 
 
@@ -21,7 +21,7 @@ def normalized_metrics(packet, *, frequency='annual', limit=20):
         a,l,e = (obs.fields.get(k) for k in ('total_assets','total_liabilities','equity'))
         if None not in (a,l,e) and abs(a-l-e) > max(1, abs(a)*1e-6):
             invalid_balances.add(obs.period)
-    raw_fields = {field for fields in MAP.values() for field in fields} | NOTE_AMOUNTS
+    raw_fields = {field for fields in MAP.values() for field in fields} | NOTE_AMOUNTS | {'ordinary_shares'}
     observations = []
     for row in result.rows:
         for key, evidence in row['calculations'].items():

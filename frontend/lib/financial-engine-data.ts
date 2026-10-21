@@ -36,7 +36,7 @@ export function financialEngineData(data:FundamentalResearch,ticker:string,frequ
   for(const statement of Object.values(data.statements))for(const row of statement.periods){
     if(row.ticker!==ticker||row.source!==data.source||row.currency!=='VND'||!pattern.test(row.period)||!seen.has(row.period))throw new Error('Invalid statement ownership');
     for(const line of row.items){
-      if(!line.code||!['VND','VND/share','source_units'].includes(line.unit)||!['reported','conflicted','unqualified'].includes(line.semantic_status))throw new Error('Invalid financial line');
+      if(!line.code||!['VND','VND/share','shares','source_units'].includes(line.unit)||!['reported','conflicted','unqualified'].includes(line.semantic_status))throw new Error('Invalid financial line');
       for(const value of [line.value,line.raw_value])if(value!==null&&(typeof value!=='number'||!Number.isFinite(value)))throw new Error('Invalid source amount');
       if(line.semantic_status!=='reported'&&line.value!==null)throw new Error('Unsafe source conflict');
     }
@@ -69,7 +69,17 @@ export function financialEngineData(data:FundamentalResearch,ticker:string,frequ
       const basis=metric.consolidation===undefined?summary.consolidation:metric.consolidation;
       if(['UNQUALIFIED','UNAVAILABLE'].includes(metric.status)&&metric.value!==null||metric.status==='QUALIFIED'&&(data.is_fixture||!['consolidated','standalone'].includes(basis||''))||metric.status==='DEMO'&&!data.is_fixture)throw new Error('Unsafe financial qualification');
       if(metric.key in FINANCIAL_LABELS&&metric.value!==(data.rows.at(-1)?.[metric.key as FinancialKey]??null))throw new Error('Financial summary does not match displayed facts');
-      if(['market_cap','pe','pb','bvps'].includes(metric.key)&&metric.value!==null)throw new Error('Unsupported valuation inputs');
+      if(['market_cap','pe','pb'].includes(metric.key)&&metric.value!==null)throw new Error('Unsupported valuation inputs');
+      if(metric.key==='bvps'&&metric.value!==null){
+        const latest=data.rows.at(-1),state=data.verification?.periods.at(-1)?.metrics.bvps;
+        const inputs=latest?.calculations?.bvps?.inputs||[];
+        if(data.display_scope!=='internal_research'||!allowInternal||data.is_fixture||metric.status!=='QUALIFIED'
+          ||!state?.dimensions?.ACCOUNTING_VERIFIED||!state.dimensions.REPORTING_METADATA_COMPLETE
+          ||!Number.isInteger(latest?.ordinary_shares)||(latest?.ordinary_shares||0)<=0
+          ||inputs.length!==2||inputs.some(ref=>ref.statement!=='balance'||ref.period!==latest?.period
+            ||!['ordinary_equity','ordinary_shares'].includes(String(ref.field)))
+          ||new Set(inputs.map(ref=>ref.field)).size!==2)throw new Error('Unsupported valuation inputs');
+      }
     }
   }
   validateFinancialPanels(data);

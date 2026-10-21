@@ -1,0 +1,778 @@
+{
+  "contract": "free-data-frontend-validation-v3",
+  "status": "PASS",
+  "industry_categories": 61,
+  "financial_views": 144,
+  "financialViewCases": [
+    {
+      "ticker": "FPT",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "FPT",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "FPT",
+      "section": "sources",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "HPG",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "HPG",
+      "section": "sources",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "MWG",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "MWG",
+      "section": "sources",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "TCB",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "TCB",
+      "section": "sources",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "VCB",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "VCB",
+      "section": "sources",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "SSI",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "SSI",
+      "section": "sources",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "VNM",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "VNM",
+      "section": "sources",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "overview",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "overview",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "performance",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "performance",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "balance",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "balance",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "cashflow",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "cashflow",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "profitability",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "profitability",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "health",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "health",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "valuation",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "valuation",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "statements",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "statements",
+      "language": "vi"
+    },
+    {
+      "ticker": "VHM",
+      "section": "sources",
+      "language": "en"
+    },
+    {
+      "ticker": "VHM",
+      "section": "sources",
+      "language": "vi"
+    }
+  ],
+  "dividends": [
+    {
+      "ticker": "FPT",
+      "observations": 3
+    },
+    {
+      "ticker": "HPG",
+      "observations": 0
+    },
+    {
+      "ticker": "MWG",
+      "observations": 0
+    },
+    {
+      "ticker": "PNJ",
+      "observations": 0
+    },
+    {
+      "ticker": "REE",
+      "observations": 0
+    },
+    {
+      "ticker": "SSI",
+      "observations": 0
+    },
+    {
+      "ticker": "TCB",
+      "observations": 0
+    },
+    {
+      "ticker": "VCB",
+      "observations": 0
+    },
+    {
+      "ticker": "VHM",
+      "observations": 0
+    },
+    {
+      "ticker": "VNM",
+      "observations": 0
+    }
+  ],
+  "languages": [
+    "en",
+    "vi"
+  ],
+  "public_consumer_rejected": true,
+  "mode": "saved real API contracts and server rendering",
+  "browser": "PENDING",
+  "mobile_visual_acceptance": "PENDING"
+}

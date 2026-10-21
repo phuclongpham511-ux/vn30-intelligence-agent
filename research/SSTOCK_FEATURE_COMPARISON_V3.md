@@ -1,5 +1,7 @@
 # SStock feature comparison — V3
 
+> Historical checkpoint. Current results and limitations: [V4 delivery](FINANCIAL_INTELLIGENCE_V4_DELIVERY.md) and [V4 acceptance](DASHBOARD_VERIFICATION_V4.md).
+
 Status describes the delivered bounded financial experience, including data and
 acceptance limits. COMPLETE requires usable supported data, correct behavior and
 end-to-end acceptance for the stated scope; a component/endpoint is insufficient.

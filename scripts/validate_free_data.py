@@ -65,6 +65,7 @@ def validate_free(captures,report,private,*,probe_directory=None):
         response=personal_projection(packet,authorization_reference='task:real-source-validation')
         for row in response['rows']:
             comparisons={}
+            if row.get('bvps') is not None:comparisons['bvps']=row['ordinary_equity']/row['ordinary_shares']
             if row.get('net_margin') is not None:comparisons['net_margin']=row['net_profit']/row['revenue']
             if row.get('gross_margin') is not None:comparisons['gross_margin']=row['gross_profit']/row['revenue']
             if row.get('free_cash_flow') is not None:comparisons['free_cash_flow']=row['cash_operating']+row['capex_signed']

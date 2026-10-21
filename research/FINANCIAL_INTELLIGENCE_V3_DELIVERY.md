@@ -1,5 +1,7 @@
 # Financial Intelligence V3 — implementation delivery
 
+> Historical checkpoint. Current results and limitations: [V4 delivery](FINANCIAL_INTELLIGENCE_V4_DELIVERY.md) and [V4 acceptance](DASHBOARD_VERIFICATION_V4.md).
+
 21 October 2026. Existing `woofi-financial-data` worktree,
 `feature/financial-data-intelligence`, base `bdc70ad`. No paid API, subscription,
 WiData requirement, dependency upgrade, production change, push or merge.

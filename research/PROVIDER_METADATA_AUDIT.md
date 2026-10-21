@@ -1,6 +1,61 @@
 # Provider metadata and free-source audit
 
-Current V3 results supersede the checkpoint below: **175 verified observations,
+## Financial Intelligence V4 — current, 2026-10-21
+
+V4 supersedes the historical checkpoints below: **341 source/accounting and
+reporting-metadata-qualified observations (216 reported, 125 derived), 70 supported
+definitions out of 77 canonical definitions, ten saved issuers**. Qualified original
+histories cover FPT 2022–24, TCB 2023–25, VCB 2024–25, HPG 2024–25 flows/2025 balance
+and MWG pre-audit 2024. VNM/SSI remain useful partial provider coverage.
+Original captures and revisions remain preserved; metric-level gaps stay visible.
+FPT dated ordinary BVPS is supported for 2023/24; P/E/P/B/earnings yield remain
+unavailable without matched prices, shares and corporate-action evidence.
+The bank comparison is **TCB/VCB, 2/22 observed banks, 15 FY2025 metrics**;
+observed-industry ranks/percentiles are suppressed. Historical sector totals stay
+disabled. No WiData or paid subscription is required.
+
+Supported private launchers and live HTTP checks PASS. Actual integrated-browser
+desktop checks PASS for exercised flows; mobile, tooltips, exhaustive retries and
+full live-market context remain PENDING. Backend **1,600 + 32 subtests**, frontend
+**334 passed + one existing skip**, typecheck/build and real contracts/static
+rendering PASS. PIT/public-rights/fully-verified counts remain separately zero.
+See [V4 delivery](FINANCIAL_INTELLIGENCE_V4_DELIVERY.md),
+[feature comparison](SSTOCK_FEATURE_COMPARISON_V4.md),
+[acceptance and manual checklist](DASHBOARD_VERIFICATION_V4.md),
+[coverage](validation/free-data-v4/VERIFIED_METRIC_COVERAGE.csv), and
+[valuation decisions](VALUATION_EVIDENCE_AUDIT.md).
+
+## V4 original-response decisions
+
+No dependency or provider SDK was upgraded. Existing saved VCI/SSI records are
+preserved. New FPT 2023/2024 annual reports (public FPTS-hosted originals), TCB
+2024 annual report and MWG January 2025 pre-audit 2024 statements supplied selected
+visually reviewed cells, explicit currency/units/calendar/scope and original
+binary/page/record evidence. Whole-period selection chooses the later comparative
+for overlapping FPT/TCB years; no cell-level filling across documents occurs.
+The collection receipt links to the issuer disclosure index; each period and
+calculation input retains its exact original PDF/receipt. Original overlapping
+revisions remain pinned privately. Publication timestamps are still unknown.
+
+VNM's accessible 2024 annual report contains IFRS summary pages, while its VAS
+audit link returns only two audit pages, without full statements/notes. Neither
+supports silently combining IFRS amounts with VAS evidence. The old 2023 PDF URL
+returned HTML despite HTTP 200 and was excluded. MWG's later annual summary uses
+beginning/ending/current/previous labels without the needed calendar note in the
+selected pages; it is not blended with the explicitly labelled pre-audit vintage.
+The existing CafeF adapter adds four VNM annual summaries, with inferred scale
+and unknown original scope/currency kept PARTIALLY_VERIFIED; gross sales is not
+net revenue. No missing period is fabricated.
+
+HPG's 2024 annual PDF returned HTTP 403 (`error code: 1010`); SSI's 2025 annual
+PDF returned HTTP 403 HTML. No denied-resource retry, identity change or bypass
+was attempted. Exact URLs, content types, lengths, hashes and observations are in
+[the response audit](validation/free-data-v4/SOURCE_RESPONSE_AUDIT.json).
+No new KBS request, paid provider or WiData access was needed.
+
+## Historical record (superseded by V4 above)
+
+Historical V3 results superseded the checkpoint below: **175 verified observations,
 64 supported definitions, and 15 qualified TCB/VCB peer metrics**. See
 [V3 delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
 [current comparison](SSTOCK_FEATURE_COMPARISON_V3.md), and
