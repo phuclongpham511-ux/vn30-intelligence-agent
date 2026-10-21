@@ -112,6 +112,31 @@ def test_quarter_and_ttm_flows_point_balances_and_eps_are_distinct():
     assert broken['revenue'] is None and broken['net_profit'] is None
 
 
+def test_engine_accepts_full_vci_quarterly_capture_window():
+    result=financial_engine(packet(),frequency='quarterly',limit=34)
+    assert len(result.rows)==12
+    assert result.rows[0]['period']=='2023-Q1'
+    assert result.rows[-1]['period']=='2025-Q4'
+    with pytest.raises(ValueError):financial_engine(packet(),frequency='quarterly',limit=41)
+
+
+def test_vci_statement_units_follow_explicit_per_share_and_share_volume_labels():
+    metadata,reports=fixture()
+    metadata.extend([
+        dict(field_name='isa24',report_name=SECTIONS['income'],en_name='EPS diluted (VND)',name='Lãi trên cổ phiếu pha loãng'),
+        dict(field_name='nos360',report_name=SECTIONS['balance'],en_name='Outstanding Shares (Volume)',name='Khối lượng cổ phiếu lưu hành'),
+    ])
+    for raw in reports['income']['years']+reports['income']['quarters']:
+        raw['isa24']=1.25
+    for raw in reports['balance']['years']+reports['balance']['quarters']:
+        raw['nos360']=123456
+    income=normalize_statement('ABC','vnstock:VCI','income',reports['income'],metadata,'non_financial')
+    balance=normalize_statement('ABC','vnstock:VCI','balance',reports['balance'],metadata,'financial_other')
+    assert next(line for line in income.observations[-1].items if line.code=='isa24').unit=='VND/share'
+    volume=next(line for line in balance.observations[-1].items if line.code=='nos360')
+    assert volume.unit=='shares' and volume.value==123456
+
+
 def test_explicit_ytd_requires_previous_same_year_and_comparable_basis():
     meta,reports=fixture()
     for kind in ('income','cash'):

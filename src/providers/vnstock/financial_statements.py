@@ -44,6 +44,18 @@ NON_FINANCIAL_ONLY = {'revenue', 'gross_profit', 'current_assets', 'current_liab
 BANK_ONLY = {'operating_income', 'net_interest_income', 'customer_loans', 'customer_deposits'}
 
 
+def statement_line_unit(code, label):
+    """Use only explicit VCI labels for non-currency statement units."""
+    name = str(label or '').strip()
+    if code in ('isa23', 'isa24') and re.fullmatch(r'EPS\s+(?:basic|diluted)\s*\(VND\)', name, re.I):
+        return 'VND/share'
+    if re.fullmatch(r'(?:Outstanding Shares|Treasury stocks)\s*\(Volume\)', name, re.I):
+        return 'shares'
+    if re.search(r'\b(?:percentage|percent|ratio|yield|margin)\b|%', name, re.I):
+        return 'source_units'
+    return 'VND'
+
+
 def content_hash(data):
     return hashlib.sha256(json.dumps(data, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
@@ -124,7 +136,7 @@ def normalize_statement(ticker, source, kind, payload, metadata, profile, *, obs
                 parent = definition.get('parent')
                 items.append(FinancialLine(code=code, name_en=str(definition.get('en_name') or code),
                     name_vi=str(definition.get('name') or code), parent=parent if isinstance(parent, str) else None,
-                    unit='VND/share' if code in ('isa23', 'isa24') else 'VND',
+                    unit=statement_line_unit(code, definition.get('en_name')),
                     value=None if conflicted else value, raw_value=value,
                     semantic_status='conflicted' if conflicted else 'reported', source_labels=alternatives[code]))
             # Quarterly flow convention was audited against annual totals and cash roll-forward.

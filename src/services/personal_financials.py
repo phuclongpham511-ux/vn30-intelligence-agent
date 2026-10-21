@@ -13,7 +13,7 @@ import math
 
 from src.analytics.financial_engine import financial_engine
 from src.providers.vnstock.financial_packet import metadata_rows, packet_from_payloads
-from src.providers.vnstock.financial_statements import MAP, NON_FINANCIAL_ONLY, BANK_ONLY
+from src.providers.vnstock.financial_statements import MAP, NON_FINANCIAL_ONLY, BANK_ONLY, statement_line_unit
 from src.schemas.financials import FinancialPacket
 from src.services.financial_presentation import display_financial_response
 
@@ -236,14 +236,25 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
             for line in period['items']:
                 src = source_lines[line['code']]
                 ctx = original.source_context
+                direct_unit = statement_line_unit(src.code, src.name_en) if packet.source == 'vnstock:VCI' else None
+                direct_vci_line = (packet.source == 'vnstock:VCI' and ctx and ctx.display_rights != 'prohibited'
+                    and ctx.unit_evidence == 'audited_vci_adapter_contract' and ctx.amount_multiplier == 1
+                    and src.semantic_status == 'reported' and src.value is not None and math.isfinite(src.value)
+                    and src.raw_value == src.value and src.unit in (direct_unit, 'VND')
+                    and direct_unit in ('VND', 'VND/share', 'shares'))
                 extra = (line['code'] in extras and re.fullmatch(extras[line['code']],src.name_en.casefold().strip())
                     and ctx and ctx.display_rights != 'prohibited' and ctx.unit_evidence == 'audited_vci_adapter_contract'
                     and original.basis in ('annual','standalone','point_in_time') and src.value is not None
                     and math.isfinite(src.value))
                 # Whitelist qualified definitions, not every numeric provider
-                # column. EPS/share counts and unrelated ratios are not money.
-                if (line['code'] in supported & allowed or extra) and src.semantic_status == 'reported':
+                # column for calculations. Direct VCI statement lines are safe in
+                # private research when their source code, amount unit and value
+                # are intact; the containing period retains standalone/YTD/balance
+                # basis so a cumulative flow is never presented as a quarter flow.
+                if direct_vci_line or (line['code'] in supported & allowed or extra) and src.semantic_status == 'reported':
                     line.update(value=src.value, semantic_status='reported', data_confidence='SOURCE_REPORTED', access_classification='PERSONAL_RESEARCH')
+                    if direct_vci_line:
+                        line['unit'] = direct_unit
                 else:
                     line.update(value=None, semantic_status='unqualified', data_confidence='INVALID' if src.semantic_status=='conflicted' else 'UNVERIFIED')
             period.update(data_confidence='SOURCE_REPORTED', access_classification='PERSONAL_RESEARCH')

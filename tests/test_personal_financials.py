@@ -9,6 +9,7 @@ from src.analytics.financial_engine import financial_engine
 from src.services.financial_presentation import display_financial_response
 from test_financial_engine import fixture
 from src.providers.vnstock.financial_packet import packet_from_payloads
+from src.schemas.financials import FinancialLine
 
 
 def source(company='CT', ticker='ABC'):
@@ -80,6 +81,44 @@ def test_unknown_basis_does_not_turn_ytd_into_reported_quarter_or_fill_missing_p
     assert all(p['values']['revenue'] is None for p in next(p for p in result['research_panels'] if p['key']=='growth')['rows'])
 
 
+def test_private_statement_table_exposes_direct_ytd_vci_lines_without_relabeling_them():
+    packet=source()
+    observation=next(row for row in packet.reports['income'].observations if row.period=='2025-Q1')
+    observation.basis='ytd'
+    observation.source_context.original_metadata['flowBasis']='ytd'
+    observation.items.append(FinancialLine(code='isa900',name_en='Other reported income',name_vi='Thu nhập khác',
+        parent=None,unit='VND',value=77,raw_value=77,semantic_status='reported'))
+    balance=next(row for row in packet.reports['balance'].observations if row.period=='2025-Q1')
+    balance.items.append(FinancialLine(code='nos360',name_en='Outstanding Shares (Volume)',name_vi='Khối lượng cổ phiếu lưu hành',
+        parent=None,unit='VND',value=123456,raw_value=123456,semantic_status='reported'))
+    balance.items.append(FinancialLine(code='ratio999',name_en='Return ratio (%)',name_vi='Tỷ lệ sinh lời (%)',
+        parent=None,unit='VND',value=15,raw_value=15,semantic_status='reported'))
+    result=personal_projection(packet,frequency='quarterly',limit=34,authorization_reference='synthetic')
+    period=next(row for row in result['statements']['income']['periods'] if row['period']=='2025-Q1')
+    direct=next(row for row in period['items'] if row['code']=='isa900')
+    assert direct['value']==77 and direct['semantic_status']=='reported'
+    assert period['basis']=='ytd' and period['access_classification']=='PERSONAL_RESEARCH'
+    balance_period=next(row for row in result['statements']['balance']['periods'] if row['period']=='2025-Q1')
+    volume=next(row for row in balance_period['items'] if row['code']=='nos360')
+    assert volume['value']==123456 and volume['unit']=='shares'
+    assert all(row['code']!='ratio999' or row['value'] is None for row in balance_period['items'])
+    row=next(row for row in result['rows'] if row['period']=='2025-Q1')
+    assert row['revenue'] is None
+
+
+@pytest.mark.parametrize('mutation',['prohibited','unit'])
+def test_unmapped_statement_lines_stay_hidden_without_vci_rights_and_unit_evidence(mutation):
+    packet=source()
+    observation=next(row for row in packet.reports['balance'].observations if row.period=='2025-Q1')
+    observation.items.append(FinancialLine(code='bsa900',name_en='Other reported assets',name_vi='Tài sản khác',
+        unit='VND',value=123,raw_value=123,semantic_status='reported'))
+    if mutation=='prohibited':observation.source_context.display_rights='prohibited'
+    else:observation.source_context.unit_evidence='original_filing'
+    result=personal_projection(packet,frequency='quarterly',limit=34,authorization_reference='synthetic')
+    period=next(row for row in result['statements']['balance']['periods'] if row['period']=='2025-Q1')
+    assert all(line['code']!='bsa900' for line in period['items'])
+
+
 @pytest.mark.parametrize('peer,host,env,headers',[
  ('127.0.0.1','127.0.0.1',{},{}),
  ('192.0.2.1','127.0.0.1',{'WOOFI_PERSONAL_RESEARCH':'1'}, {'X-Forwarded-For':'127.0.0.1'}),
@@ -100,6 +139,7 @@ def test_loopback_opt_in_uses_saved_evidence_only(monkeypatch):
     for key,value in dict(WOOFI_PERSONAL_RESEARCH='1',APP_ENV='development',WOOFI_PERSONAL_BIND='127.0.0.1',WOOFI_PERSONAL_CAPTURES='synthetic').items():monkeypatch.setenv(key,value)
     monkeypatch.setattr('routers.personal_research.saved_research_packet',lambda *args,**kwargs:(source(),'f'*64))
     app=FastAPI();app.include_router(router)
-    response=TestClient(app,client=('127.0.0.1',1234),base_url='http://127.0.0.1').get('/personal-research/financials/ABC')
-    assert response.status_code==200 and response.json()['rows'][-1]['revenue']==120
+    client=TestClient(app,client=('127.0.0.1',1234),base_url='http://127.0.0.1')
+    response=client.get('/personal-research/financials/ABC?frequency=quarterly&limit=34')
+    assert response.status_code==200 and response.json()['rows'][-1]['revenue']==30
     assert response.headers['cache-control']=='private, no-store'

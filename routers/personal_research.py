@@ -18,7 +18,7 @@ router = APIRouter(prefix='/personal-research', include_in_schema=False,
 
 @router.get('/financials/{symbol}')
 def financials(request: Request, symbol: str = Path(pattern=r'^[A-Z0-9]{1,20}$'),
-               frequency: Literal['annual','quarterly','ttm'] = 'annual', limit: int = Query(8, ge=1, le=20),
+               frequency: Literal['annual','quarterly','ttm'] = 'annual', limit: int = Query(34, ge=1, le=40),
                evidence: Literal['preferred','provider'] = 'preferred'):
     # request.client is the ASGI socket peer, not X-Forwarded-For. The supported
     # launcher disables proxy_headers and binds only the numeric loopback host.

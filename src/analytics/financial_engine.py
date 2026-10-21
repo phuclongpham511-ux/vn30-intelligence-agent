@@ -44,7 +44,7 @@ def finite_result(value):
 
 
 def financial_engine(packet, *, frequency='annual', limit=8, sector=None, industry=None):
-    if frequency not in ('annual', 'quarterly', 'ttm') or not 1 <= limit <= 20:
+    if frequency not in ('annual', 'quarterly', 'ttm') or not 1 <= limit <= 40:
         raise ValueError('Unsupported financial projection')
     indexed = {}
     for kind, receipt in packet.reports.items():

@@ -23,6 +23,13 @@ test('personal source observations require explicit research consumer; UNKNOWN i
   const bad=structuredClone(d);mutate(bad);assert.throws(()=>financialEngineData(bad,'ABC','annual',true,false,true));
  }
 });
+test('34-quarter personal histories pass the existing financial-engine contract',()=>{
+ const d=fixture(),periods=Array.from({length:34},(_,i)=>`${2018+Math.floor(i/4)}-Q${i%4+1}`),base=d.rows[0];
+ d.period_type='quarterly';d.available_period_types=['quarterly'];d.fundamental_summary.frequency='quarterly';d.fundamental_summary.period=periods.at(-1);
+ d.rows=periods.map(period=>({...base,period,frequency:'quarterly'}));d.chart_rows=d.rows.map(row=>({...row}));
+ const result=financialEngineData(d,'ABC','quarterly');
+ assert.equal(result.rows.length,34);assert.equal(result.rows[0].period,'2018-Q1');assert.equal(result.rows.at(-1).period,'2026-Q2');
+});
 test('personal observation status cannot enter an ordinary public payload',()=>{
  const d=personal();d.display_scope='public';d.read_kind='provider_or_process_cache';
  assert.throws(()=>financialEngineData(d,'ABC','annual',true));

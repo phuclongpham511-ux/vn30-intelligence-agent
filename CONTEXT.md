@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+## Financial Data Expansion V5.1 — current, 2026-10-21
+
+The private VCI history path now exposes the existing 34 quarterly periods
+(2018-Q1–2026-Q2) for FPT, HPG, MWG, TCB, VCB and SSI. The previous eight-period
+request and twenty-period engine caps were presentation limits; saved source
+histories were already complete. VNM has four saved CafeF annual periods and no
+saved quarterly packet. VCI source lines retain their source field IDs and parent
+hierarchy in the existing statement table; direct values keep their reported
+standalone/YTD/period-end labels. Unknown financial units and conflicting lines
+remain withheld. No new provider, source permission, or public-display approval
+was added. See `docs/FINANCIAL_DATA_EXPANSION_V5_1.md` for measured V4 comparison,
+provider limits, and regression results.
+
 ## Financial Intelligence V4 — current, 2026-10-21
 
 V4 supersedes the historical checkpoints below: **341 source/accounting and
