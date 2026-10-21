@@ -4,6 +4,7 @@ from datetime import datetime
 import json
 from pathlib import Path
 import re
+from statistics import median
 from src.providers.reviewed_reports import pinned_file
 from src.services.personal_financials import saved_research_packet, personal_projection
 from src.services.financial_intelligence import metric_unit
@@ -11,7 +12,8 @@ from src.services.financial_intelligence import metric_unit
 METRICS = ('revenue','gross_profit','net_profit','profit_parent','total_assets','total_liabilities',
     'equity','operating_income','net_interest_income','customer_loans','customer_deposits',
     'cash_operating','cash_investing','cash_financing','free_cash_flow','inventory',
-    'gross_margin','net_margin','roe','roa','current_ratio','quick_ratio','debt_equity','loan_deposit_ratio')
+    'gross_margin','net_margin','roe','roa','current_ratio','quick_ratio','debt_equity','loan_deposit_ratio',
+    'demand_deposit_share','npl_classified_ratio','classified_loan_coverage')
 
 
 def membership_evidence(directory):
@@ -63,7 +65,7 @@ def observed_peers(directory, code, *, period, frequency='annual'):
     members=sorted(i['ticker'] for i in review['entries'] if i['provider_code']==code)
     if not members:raise KeyError('Unobserved category')
     label=next(i['provider_label'] for i in review['entries'] if i['provider_code']==code)
-    output={key:dict(unit=metric_unit(key),observations=[],missing={},comparable_companies=0) for key in METRICS}
+    output={key:dict(unit=metric_unit(key),observations=[],missing={},comparable_companies=0,distribution=None) for key in METRICS}
     for ticker in members:
         if ticker not in index['captures']:
             for metric in output.values():metric['missing'][ticker]='no_saved_financial_evidence'
@@ -99,6 +101,7 @@ def observed_peers(directory, code, *, period, frequency='annual'):
                 o['rank']=1+sum(v>o['value'] for v in points)
                 o['percentile']=(sum(v<o['value'] for v in points)+.5*sum(v==o['value'] for v in points))/len(points)
             metric['comparable_companies']=len(candidates)
+            metric['distribution']=dict(count=len(points),minimum=min(points),median=median(points),maximum=max(points))
         for o in metric['observations']:o.pop('compatibility')
         metric['covered_companies']=len(metric['observations'])
         metric['expected_companies']=len(members)
@@ -107,3 +110,11 @@ def observed_peers(directory, code, *, period, frequency='annual'):
         observed_at=review['receipt']['fetched_at'],classification_source=review['source'],
         taxonomy_version=None,taxonomy_level=None,classification_effective_at=None,
         historical_aggregation_enabled=False,sector_totals=None,public_display_eligible=False,metrics=output)
+
+
+def company_peers(directory, ticker, *, period, frequency='annual'):
+    if not re.fullmatch(r'[A-Z0-9]{1,20}',ticker):raise ValueError('Invalid company')
+    _,review=membership_evidence(directory)
+    item=next((i for i in review['entries'] if i['ticker']==ticker),None)
+    if item is None:raise FileNotFoundError('No observed company membership')
+    return observed_peers(directory,item['provider_code'],period=period,frequency=frequency)

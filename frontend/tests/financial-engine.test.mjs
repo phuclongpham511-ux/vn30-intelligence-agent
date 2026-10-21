@@ -45,9 +45,9 @@ test('display projection accepts historical facts without duplicated calculation
  assert.match(html,/Calculation evidence/);assert.match(html,/total profit \/ average total equity/);
  assert.match(html,/isa20/);assert.match(html,/2024/);
 });
-test('five research sections, frequency and units remain visible; source fixtures and missing values are honest',()=>{
+test('financial task sections, frequency and units remain visible; source fixtures and missing values are honest',()=>{
  const html=render();
- for(const label of ['Business picture','Growth drivers','Valuation','Documents and sources','Financial statements','Financial ratios','Annual','Quarterly','TTM','VND bn','Fixture data'])assert.match(html,new RegExp(label));
+ for(const label of ['Financial overview','Revenue, earnings','Balance sheet','Profitability','Documents and sources','Financial statements','Financial ratios','Annual','Quarterly','TTM','VND bn','Fixture data'])assert.match(html,new RegExp(label));
  assert.match(render({},'en','sources'),/ROE uses total profit/);assert.match(render({},'en','sources'),/Calculation evidence/);assert.match(render({},'en','performance'),/>0 VND bn<\/dd>/);
  assert.match(render({},'vi','sources'),/Bằng chứng tính toán/);assert.match(render({loading:true}),/Loading financial statements/);
  assert.match(render({error:true}),/temporarily unavailable/);assert.match(render({data:{...data,rows:[]}}),/No financial observations/);
@@ -86,6 +86,6 @@ test('empty observations preserve section shells and never fabricate valuation h
  const business=render({data:empty});
  assert.match(business,/No financial observations/);assert.match(business,/Asset composition/);assert.match(business,/Funding composition/);
  const valuation=render({data:empty},'en','valuation');
- assert.match(valuation,/P\/E history/);assert.match(valuation,/P\/B history/);assert.doesNotMatch(valuation,/data-financial-chart=/);
+ assert.match(valuation,/No price or market-cap comparison/);assert.doesNotMatch(valuation,/data-financial-panel="(?:pe|pb)"/);assert.doesNotMatch(valuation,/data-financial-chart=/);
  assert.match(render({data:empty},'vi','performance'),/Kết quả kinh doanh quý/);
 });

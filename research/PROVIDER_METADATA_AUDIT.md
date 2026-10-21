@@ -1,5 +1,13 @@
 # Provider metadata and free-source audit
 
+Current V3 results supersede the checkpoint below: **175 verified observations,
+64 supported definitions, and 15 qualified TCB/VCB peer metrics**. See
+[V3 delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
+[current comparison](SSTOCK_FEATURE_COMPARISON_V3.md), and
+[current manual acceptance](DASHBOARD_VERIFICATION_V3.md). Runtime remains PENDING.
+
+## Prior bdc70ad checkpoint record
+
 21 October 2026. No dependency upgrade, paid subscription or WiData dependency.
 Existing SSI and VCI integrations remain primary. New sources are explicit,
 bounded offline saved-evidence adapters, never automatic fallback requests.

@@ -80,3 +80,11 @@ def dividends(symbol: str = Path(pattern=r'^[A-Z0-9]{1,20}$')):
         entry=index['dividends']
         return dividend_page(json.loads(pinned_file(root,entry['file'],entry['sha256'],4_000_000)),symbol)
     return private_read(read)
+
+
+@router.get('/peers/{symbol}')
+def peers(symbol: str = Path(pattern=r'^[A-Z0-9]{1,20}$'),
+          period: str = Query(pattern=r'^\d{4}(?:-Q[1-4])?$'),
+          frequency: Literal['annual','quarterly','ttm']='annual'):
+    from src.services.observed_industries import company_peers
+    return private_read(lambda: company_peers(os.environ['WOOFI_PERSONAL_CAPTURES'],symbol,period=period,frequency=frequency))

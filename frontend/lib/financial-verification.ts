@@ -1,9 +1,9 @@
 import type {FundamentalResearch} from './types.ts';
 
 export type VerificationStatus='VERIFIED'|'PARTIALLY_VERIFIED'|'UNAVAILABLE';
-export const verificationDimensions=['SOURCE_VERIFIED','ACCOUNTING_VERIFIED','POINT_IN_TIME_VERIFIED','PUBLICATION_RIGHTS_APPROVED','FULLY_VERIFIED'] as const;
+export const verificationDimensions=['SOURCE_VERIFIED','ACCOUNTING_VERIFIED','REPORTING_METADATA_COMPLETE','POINT_IN_TIME_VERIFIED','PUBLICATION_RIGHTS_APPROVED','FULLY_VERIFIED'] as const;
 export type VerificationDimension=typeof verificationDimensions[number];
-export const verificationDimensionLabels:Record<VerificationDimension,string>={SOURCE_VERIFIED:'Source evidence',ACCOUNTING_VERIFIED:'Accounting compatibility',POINT_IN_TIME_VERIFIED:'Point-in-time evidence',PUBLICATION_RIGHTS_APPROVED:'Public display rights',FULLY_VERIFIED:'All verification dimensions'};
+export const verificationDimensionLabels:Record<VerificationDimension,string>={SOURCE_VERIFIED:'Source evidence',ACCOUNTING_VERIFIED:'Accounting compatibility',REPORTING_METADATA_COMPLETE:'Reporting metadata',POINT_IN_TIME_VERIFIED:'Point-in-time evidence',PUBLICATION_RIGHTS_APPROVED:'Public display rights',FULLY_VERIFIED:'All verification dimensions'};
 export type FinancialVerification={
  contract:'financial-verification-v1';ticker:string;frequency:'annual'|'quarterly'|'ttm';
  audience:'public'|'personal_research'|'internal_research';
@@ -28,14 +28,14 @@ export function validateFinancialVerification(data:FundamentalResearch){
    if(metric.display_eligible!==present||metric.public_display_eligible&&(!present||v.audience!=='public')||metric.status==='VERIFIED'&&metric.missing_evidence.some(m=>m!=='public_display_permission')||metric.status==='UNAVAILABLE'&&present)throw Error('Verification cannot authorize financial values');
    if(v.dimension_counts!==undefined){
     const d=metric.dimensions;
-    if(!d||Object.keys(d).length!==5||verificationDimensions.some(k=>typeof d[k]!=='boolean')||d.ACCOUNTING_VERIFIED&&!d.SOURCE_VERIFIED||d.POINT_IN_TIME_VERIFIED&&!d.ACCOUNTING_VERIFIED||d.FULLY_VERIFIED!==verificationDimensions.slice(0,4).every(k=>d[k])||data.is_fixture&&verificationDimensions.some(k=>d[k])||metric.status==='UNAVAILABLE'&&d.SOURCE_VERIFIED)throw Error('Invalid independent verification dimensions');
+    if(!d||Object.keys(d).length!==verificationDimensions.length||verificationDimensions.some(k=>typeof d[k]!=='boolean')||d.ACCOUNTING_VERIFIED&&(!d.SOURCE_VERIFIED||!d.REPORTING_METADATA_COMPLETE)||d.POINT_IN_TIME_VERIFIED&&!d.ACCOUNTING_VERIFIED||d.FULLY_VERIFIED!==verificationDimensions.filter(k=>k!=='FULLY_VERIFIED').every(k=>d[k])||data.is_fixture&&verificationDimensions.some(k=>d[k])||metric.status==='UNAVAILABLE'&&d.SOURCE_VERIFIED)throw Error('Invalid independent verification dimensions');
     if(index===v.periods.length-1)for(const k of verificationDimensions)dimensionCounts[k]+=Number(d[k]);
    }else if(metric.dimensions!==undefined)throw Error('Missing dimension coverage');
    if(index===v.periods.length-1){counts[metric.status]++;if(present)visible.push(key);}
   }
  }
  if(Object.keys(v.statuses).length!==3||Object.entries(counts).some(([key,n])=>v.statuses[key as VerificationStatus]!==n)||JSON.stringify([...v.displayed_metric_ids].sort())!==JSON.stringify(visible.sort()))throw Error('Invalid verification coverage');
- if(v.dimension_counts!==undefined&&(Object.keys(v.dimension_counts).length!==5||verificationDimensions.some(k=>v.dimension_counts![k]!==dimensionCounts[k])))throw Error('Invalid verification dimension counts');
+ if(v.dimension_counts!==undefined&&(Object.keys(v.dimension_counts).length!==verificationDimensions.length||verificationDimensions.some(k=>v.dimension_counts![k]!==dimensionCounts[k])))throw Error('Invalid verification dimension counts');
 }
 
 export const verificationEvidence:Record<string,string>={

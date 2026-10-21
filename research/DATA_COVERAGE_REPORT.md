@@ -1,6 +1,23 @@
 # Measured data coverage
 
-## Free-data-first measured coverage — current, 21 October 2026
+## V3 coverage — current
+
+64 distinct supported definitions: 34 reported and 30 derived. Three original-
+report issuers supply 175 SOURCE_VERIFIED, ACCOUNTING_VERIFIED and separately
+REPORTING_METADATA_COMPLETE observations (113 reported / 62 derived). PIT/public
+rights/fully-verified counts stay zero. Nine issuers total; selected qualified
+annual sources cover 2024–25, HPG closing balance only 2025. Original provider
+2018–25 annual and 2018-Q1–2026-Q2 quarterly captures remain available. Preferred
+views have 2,615 presentations; original 2,816 remain selectable; all-source union
+3,023 includes 32 partial VHM CafeF observations and repeated source views.
+Twenty-five of 27 preferred API views are populated; VHM quarter/TTM are empty.
+Fifteen qualified TCB/VCB FY2025 peer metrics cover two of 22 observed banks;
+other members remain missing. Historical membership/totals are disabled.
+[Counts and metadata origins](validation/free-data-v3/EVIDENCE_RECOVERY_COUNTS.json),
+[per-metric CSV](validation/free-data-v3/VERIFIED_METRIC_COVERAGE.csv),
+[delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md).
+
+## Prior bdc70ad coverage
 
 | Selection / evidence | Observations | Source verified | Accounting verified | PIT / public rights / fully verified |
 |---|---:|---:|---:|---:|

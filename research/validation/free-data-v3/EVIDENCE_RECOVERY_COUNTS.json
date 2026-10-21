@@ -1,0 +1,129 @@
+{
+  "contract": "free-data-evidence-recovery-v2",
+  "provider_requests": 0,
+  "source_mutations": 0,
+  "baseline": {
+    "observations": 2816,
+    "distinct_source_metric_observations": 2352,
+    "kinds": {
+      "reported": 2816
+    },
+    "SOURCE_VERIFIED": 0,
+    "ACCOUNTING_VERIFIED": 0,
+    "REPORTING_METADATA_COMPLETE": 0,
+    "POINT_IN_TIME_VERIFIED": 0,
+    "PUBLICATION_RIGHTS_APPROVED": 0,
+    "FULLY_VERIFIED": 0,
+    "lineage_counts": {
+      "RAW_RESPONSE_REPLAY": 2320,
+      "CANONICAL_LINES_ONLY_ORIGINAL_TRANSPORT_ABSENT": 496
+    },
+    "metadata_origins": {
+      "unit_origin": {
+        "inferred_adapter_contract": 2816
+      },
+      "currency_origin": {
+        "unknown_original_currency": 2816
+      },
+      "scope_origin": {
+        "unknown": 2816
+      },
+      "fiscal_boundaries_origin": {
+        "unknown": 2816
+      },
+      "flow_basis_origin": {
+        "inferred_adapter_convention": 2816
+      },
+      "publication_origin": {
+        "reported_unqualified": 2816
+      }
+    }
+  },
+  "preferred_views": {
+    "observations": 2615,
+    "distinct_source_metric_observations": 2151,
+    "kinds": {
+      "reported": 2553,
+      "derived": 62
+    },
+    "SOURCE_VERIFIED": 175,
+    "ACCOUNTING_VERIFIED": 175,
+    "REPORTING_METADATA_COMPLETE": 175,
+    "POINT_IN_TIME_VERIFIED": 0,
+    "PUBLICATION_RIGHTS_APPROVED": 0,
+    "FULLY_VERIFIED": 0,
+    "lineage_counts": {
+      "RAW_RESPONSE_REPLAY": 2064,
+      "ORIGINAL_PDF_AND_REVIEWED_PAGES": 175,
+      "CANONICAL_LINES_ONLY_ORIGINAL_TRANSPORT_ABSENT": 376
+    },
+    "metadata_origins": {
+      "unit_origin": {
+        "inferred_adapter_contract": 2440,
+        "reported_original_filing": 175
+      },
+      "currency_origin": {
+        "unknown_original_currency": 2440,
+        "reported": 175
+      },
+      "scope_origin": {
+        "unknown": 2440,
+        "reported": 175
+      },
+      "fiscal_boundaries_origin": {
+        "unknown": 2440,
+        "reported": 175
+      },
+      "flow_basis_origin": {
+        "inferred_adapter_convention": 2440,
+        "reported_or_original_report": 175
+      },
+      "publication_origin": {
+        "reported_unqualified": 2408,
+        "unknown": 207
+      }
+    }
+  },
+  "original_report_views": {
+    "observations": 175,
+    "distinct_source_metric_observations": 175,
+    "kinds": {
+      "reported": 113,
+      "derived": 62
+    },
+    "SOURCE_VERIFIED": 175,
+    "ACCOUNTING_VERIFIED": 175,
+    "REPORTING_METADATA_COMPLETE": 175,
+    "POINT_IN_TIME_VERIFIED": 0,
+    "PUBLICATION_RIGHTS_APPROVED": 0,
+    "FULLY_VERIFIED": 0,
+    "lineage_counts": {
+      "ORIGINAL_PDF_AND_REVIEWED_PAGES": 175
+    },
+    "metadata_origins": {
+      "unit_origin": {
+        "reported_original_filing": 175
+      },
+      "currency_origin": {
+        "reported": 175
+      },
+      "scope_origin": {
+        "reported": 175
+      },
+      "fiscal_boundaries_origin": {
+        "reported": 175
+      },
+      "flow_basis_origin": {
+        "reported_or_original_report": 175
+      },
+      "publication_origin": {
+        "unknown": 175
+      }
+    }
+  },
+  "limitations": [
+    "Observation counts include separately requested quarterly/TTM balance presentations; distinct source IDs are also counted.",
+    "Preferred annual filing views do not replace the selectable original provider history.",
+    "Verification dimensions do not grant public rights or establish runtime/browser acceptance."
+  ]
+}

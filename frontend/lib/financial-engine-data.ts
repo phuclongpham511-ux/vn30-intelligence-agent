@@ -1,7 +1,9 @@
 import type {FundamentalResearch,FinancialFrequency} from './types.ts';
-import {FINANCIAL_LABELS,type FinancialKey} from './fundamental-data.ts';
+import {FINANCIAL_LABELS,noteFinancialFields,type FinancialKey} from './fundamental-data.ts';
 import {validateFinancialPanels} from './financial-panels.ts';
 import {validateFinancialVerification} from './financial-verification.ts';
+
+const optionalLegacyFields=new Set<string>(noteFinancialFields);
 
 /** Validate presentation ownership; all financial calculations remain in Python. */
 export function financialEngineData(data:FundamentalResearch,ticker:string,frequency:FinancialFrequency,requireSummary=false,allowInternal=false,allowPersonal=false):FundamentalResearch{
@@ -20,7 +22,7 @@ export function financialEngineData(data:FundamentalResearch,ticker:string,frequ
     if(row.ticker!==ticker||row.source!==data.source||row.currency!=='VND'||row.frequency!==frequency||!pattern.test(row.period)||seen.has(row.period))throw new Error('Invalid financial period ownership');
     seen.add(row.period);
     if(row.is_fixture!==data.is_fixture)throw new Error('Invalid fixture ownership');
-    for(const field of Object.keys(FINANCIAL_LABELS) as FinancialKey[])if(row[field]!==null&&(typeof row[field]!=='number'||!Number.isFinite(row[field])))throw new Error('Invalid financial engine value');
+    for(const field of Object.keys(FINANCIAL_LABELS) as FinancialKey[])if(row[field]!==null&&!(row[field]===undefined&&optionalLegacyFields.has(field))&&(typeof row[field]!=='number'||!Number.isFinite(row[field])))throw new Error('Invalid financial engine value');
     if(data.financial_identity_guard&&(row.revenue!==null||row.gross_margin!==null||row.net_margin!==null||row.revenue_growth_yoy!==null))throw new Error('Unsafe financial issuer fields');
   }
   if(data.rows.some((row,index)=>index>0&&row.period<=data.rows[index-1].period))throw new Error('Unordered financial observations');
@@ -28,7 +30,7 @@ export function financialEngineData(data:FundamentalResearch,ticker:string,frequ
   for(const row of data.chart_rows){
     if(!pattern.test(row.period)||chartSeen.has(row.period))throw new Error('Invalid chart periods');chartSeen.add(row.period);
     const original=data.rows.find(item=>item.period===row.period);
-    for(const key of Object.keys(FINANCIAL_LABELS) as FinancialKey[])if(row[key]!== (original?.[key]??null))throw new Error('Chart does not match financial observations');
+    for(const key of Object.keys(FINANCIAL_LABELS) as FinancialKey[])if((row[key]===undefined&&optionalLegacyFields.has(key)?null:row[key])!== (original?.[key]??null))throw new Error('Chart does not match financial observations');
   }
   if(data.rows.some(row=>!chartSeen.has(row.period)))throw new Error('Chart omits financial observations');
   for(const statement of Object.values(data.statements))for(const row of statement.periods){

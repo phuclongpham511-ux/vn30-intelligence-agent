@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 import math
 from src.providers.vnstock.financial_statements import MAP
 from src.schemas.financials import FinancialEngineResponse
+from src.analytics.financial_catalog import NOTE_FIELDS
 
 GROWTH_FIELDS = ('revenue', 'operating_income', 'net_profit', 'profit_parent', 'customer_loans', 'customer_deposits')
 FLOW_FIELDS = set(MAP['income']) - {'eps_reported'} | (set(MAP['cash']) - {'cash_beginning', 'cash_ending'})
@@ -90,7 +91,8 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         observations = [indexed[kind].get(period) for kind in MAP]
         values, evidence, provenance = {}, {}, {}
         coherent = compatible(*observations)
-        for kind, fields in MAP.items():
+        for kind in MAP:
+            fields = (*MAP[kind], *NOTE_FIELDS.get(kind,{}))
             for field in fields:
                 value, refs, reason = value_at(kind, period, field)
                 if frequency == 'ttm' and field in FLOW_FIELDS:
@@ -142,6 +144,16 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         calculate('net_working_capital', 'current_assets - current_liabilities', ['current_assets','current_liabilities'], lambda a,b:a-b, ordinary=True)
         calculate('loan_deposit_ratio', 'gross customer loans / customer deposits; accounting ratio, not regulatory LDR',
             ['customer_loans','customer_deposits'], lambda a,b:a/b if a>=0 and packet.profile=='bank' else None, positive=('customer_deposits',))
+        calculate('demand_deposit_share', 'customer demand deposits / total customer deposits; accounting CASA-style share, not vendor CASA',
+            ['customer_demand_deposits','customer_deposits'], lambda a,b:a/b if 0<=a<=b and packet.profile=='bank' else None, positive=('customer_deposits',))
+        calculate('classified_nonperforming_loans', 'loan grades 3 + 4 + 5; excludes securities margin lending',
+            ['loan_grade_3','loan_grade_4','loan_grade_5'], lambda a,b,c:a+b+c if min(a,b,c)>=0 and packet.profile=='bank' else None)
+        calculate('classified_loan_allowance', 'general + specific allowance for classified customer loans; excludes margin allowance',
+            ['loan_allowance_general','loan_allowance_specific'], lambda a,b:a+b if min(a,b)>=0 and packet.profile=='bank' else None)
+        calculate('npl_classified_ratio', 'loan grades 3–5 / classified customer loans; excludes securities margin lending from both numerator and denominator',
+            ['classified_nonperforming_loans','classified_loans'], lambda a,b:a/b if 0<=a<=b else None, positive=('classified_loans',))
+        calculate('classified_loan_coverage', 'general and specific classified-loan allowance / grades 3–5 loans; excludes securities margin lending',
+            ['classified_loan_allowance','classified_nonperforming_loans'], lambda a,b:a/b, positive=('classified_nonperforming_loans',))
         calculate('cash_conversion', 'cash_operating / total profit after tax', ['cash_operating','net_profit'], lambda a,b:a/b, positive=('net_profit',), ordinary=True)
         calculate('capex_cash_outflow', '-capex_signed (only reported outflows)', ['capex_signed'], lambda a:-a if a<=0 else None, ordinary=True)
         calculate('free_cash_flow', 'cash_operating - capex_cash_outflow', ['cash_operating','capex_cash_outflow'], lambda a,b:a-b, ordinary=True)
@@ -264,5 +276,5 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
             'Source publication dates are unqualified local strings; read time is not publication time.',
             'Consolidation is unknown unless explicitly supplied; matching unknown bases do not certify consolidation.',
             'Quarterly ROE/ROA are period returns, not annualized. TTM needs four contiguous qualified quarters.',
-            'Valuation, NIM, NPL and CASA lack qualified inputs and remain unavailable.',
+            'Valuation and NIM require additional qualified inputs. Loan quality and demand-deposit shares use only explicitly mapped note definitions, not vendor or regulatory equivalents.',
             'Annual and quarterly reports retain their independent source versions; differences are not reconciled by overwriting.'])

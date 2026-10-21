@@ -1,0 +1,872 @@
+{
+  "contract": "real-financial-frontend-validation-v1",
+  "status": "PASS",
+  "mode": "offline frontend data contracts",
+  "browser_status": "PENDING",
+  "projections": [
+    {
+      "ticker": "FPT",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "FPT",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 25
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "FPT",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "HPG",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "HPG",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 25
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "HPG",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "MWG",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "MWG",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 25
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "MWG",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "PNJ",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "PNJ",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 48,
+        "UNAVAILABLE": 26
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "PNJ",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "REE",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "REE",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 25
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "REE",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 28
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "SSI",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 21,
+        "UNAVAILABLE": 53
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "SSI",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 23,
+        "UNAVAILABLE": 51
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 24
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "SSI",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 20,
+        "UNAVAILABLE": 54
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "TCB",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 28,
+        "UNAVAILABLE": 46
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        }
+      ]
+    },
+    {
+      "ticker": "TCB",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 33,
+        "UNAVAILABLE": 41
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        }
+      ]
+    },
+    {
+      "ticker": "TCB",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 30,
+        "UNAVAILABLE": 44
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        }
+      ]
+    },
+    {
+      "ticker": "VCB",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 28,
+        "UNAVAILABLE": 46
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        }
+      ]
+    },
+    {
+      "ticker": "VCB",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 33,
+        "UNAVAILABLE": 41
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        }
+      ]
+    },
+    {
+      "ticker": "VCB",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 30,
+        "UNAVAILABLE": 44
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "SOURCE_REPORTED",
+          "points": 16
+        }
+      ]
+    },
+    {
+      "ticker": "VHM",
+      "frequency": "annual",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 19,
+        "UNAVAILABLE": 55
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNQUALIFIED",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "VHM",
+      "frequency": "quarterly",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 0,
+        "UNAVAILABLE": 0
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    },
+    {
+      "ticker": "VHM",
+      "frequency": "ttm",
+      "verification": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 0,
+        "UNAVAILABLE": 0
+      },
+      "public_consumer_rejected": true,
+      "panels": [
+        {
+          "key": "cashflow",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "profitability",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "liquidity",
+          "status": "UNAVAILABLE",
+          "points": 0
+        },
+        {
+          "key": "bank_funding",
+          "status": "UNAVAILABLE",
+          "points": 0
+        }
+      ]
+    }
+  ]
+}

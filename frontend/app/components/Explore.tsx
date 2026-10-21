@@ -64,7 +64,7 @@ export default function Explore({ticker,personalResearch=false}:{ticker:string;p
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
       </div>
-      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} personalResearch={personalResearch} visible={tab==='fundamentals'}/>}</div>
+      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} personalResearch={personalResearch} visible={tab==='fundamentals'} onActions={()=>navigate('actions')}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker} personalResearch={personalResearch}/>}</div>
       <div role={tab==='news'||tab==='community'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'||tab==='community'?`stock-tab-${tab}`:undefined} tabIndex={tab==='news'||tab==='community'?0:undefined} hidden={tab!=='news'&&tab!=='community'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news')||visited.has('community'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab==='overview'} focus={tab==='community'?'community':'all'}/>}</div>
     </>}

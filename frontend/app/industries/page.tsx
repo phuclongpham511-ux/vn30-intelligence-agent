@@ -15,6 +15,13 @@ export default function IndustryPage(){
   if(!['industry-directory-v1','observed-industry-directory-v1'].includes(d.contract)||!Array.isArray(d.industries)||d.industries.length>200)throw Error();
   if(d.contract==='observed-industry-directory-v1'&&(d.display_scope!=='personal_research'||d.public_display_eligible!==false||d.historical_aggregation_enabled!==false||d.taxonomy_version!==null||d.industries.some((i:ObservedIndustryDirectory['industries'][number])=>!/^\d{1,16}$/.test(i.id)||!i.label||!Number.isInteger(i.members)||!Number.isInteger(i.saved_companies)||i.saved_companies<0||i.saved_companies>i.members)))throw Error();
   setDirectory(d);setId(d.industries[0]?.id||'');setStatus('ready');
+  const context=new URLSearchParams(window.location.search),company=context.get('ticker'),selectedPeriod=context.get('period'),selectedFrequency=context.get('frequency');
+  if(selectedFrequency&&['annual','quarterly','ttm'].includes(selectedFrequency)&&selectedPeriod&&/^\d{4}(?:-Q[1-4])?$/.test(selectedPeriod)){setFrequency(selectedFrequency as typeof frequency);setPeriod(selectedPeriod);}
+  if(d.contract==='observed-industry-directory-v1'&&company&&/^[A-Z0-9]{1,20}$/.test(company)){
+   const q=new URLSearchParams({period:selectedPeriod||period,frequency:selectedFrequency||frequency});
+   const response=await fetch(`/api/personal-research/peers/${company}?${q}`,{signal:controller.signal});
+   if(response.ok){const value=await response.json();if(value.contract==='observed-industry-peers-v1'&&d.industries.some((i:ObservedIndustryDirectory['industries'][number])=>i.id===value.industry?.id)){setId(value.industry.id);}}
+  }
  }).catch(()=>{if(!controller.signal.aborted)setStatus('error');});return()=>controller.abort();},[attempt]);
  useEffect(()=>{
   if(!id)return;

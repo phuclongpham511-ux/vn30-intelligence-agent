@@ -1,0 +1,39 @@
+{
+  "contract": "free-source-expansion-v3",
+  "responses": [
+    {
+      "name": "fpt-annual-2025.pdf.receipt.json",
+      "url": "https://bctn2025.fpt.com/wp-content/uploads/2026/04/Annual-Report-2025.pdf",
+      "status": 403,
+      "bytes": 17,
+      "content_type": "text/plain; charset=UTF-8",
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "observed_at": "2026-10-21T04:16:52.619243+00:00"
+    },
+    {
+      "name": "hpg-audited-2025.pdf.receipt.json",
+      "url": "https://file.hoaphat.com.vn/hoaphat-com-vn/2026/03/20260327-hpg-audited-consolidated-financial-statements-for-the-year-ended-31-december-2025.pdf",
+      "status": 403,
+      "bytes": 17,
+      "content_type": "text/plain; charset=UTF-8",
+      "sha256": "2938e9f1284180959e33ab1718d0793a72ff6e4cdb8108c34dcd14e69446de5c",
+      "observed_at": "2026-10-21T04:16:52.640572+00:00"
+    },
+    {
+      "name": "vcb-audited-2025.pdf.receipt.json",
+      "url": "https://www.vietcombank.com.vn/-/media/Project/VCB-Sites/VCB/Nha-Dau-tu/Files/BC-dinh-ky/BCTC/2025/20260327---VCB---BCTC-hop-nhat-kiem-toan-nam-2025.pdf?ts=00010101000000",
+      "status": 200,
+      "bytes": 11552186,
+      "content_type": "application/pdf",
+      "sha256": "295f397de287f84c26dafbfa06f668604aa696a013e236253149d8547d032d1f",
+      "observed_at": "2026-10-21T04:16:52.904332+00:00"
+    }
+  ],
+  "provider_sdk": "vnstock 4.0.2 unchanged",
+  "additional_sdk_families": 0,
+  "new_original_issuer_sources": 1,
+  "existing_issuer_note_sources_expanded": 1,
+  "restricted_sources_retried": false,
+  "paid_services_used": false,
+  "private_bodies_committed": false
+}

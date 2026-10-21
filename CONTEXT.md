@@ -1,6 +1,22 @@
 # Woofi — Domain Context
 
-## Financial free-data activation — 2026-10-21, current
+## Financial Intelligence V3 — current, 2026-10-21
+
+V3 deepens the same private engine/data path: original VCB 2025 audited
+statements and TCB deposit/loan-quality notes raise supported definitions from
+50 to 64 and source/accounting-verified metric-period observations from 100 to
+175 (113 reported, 62 derived). Reporting metadata is a separate verification
+dimension; current private displays still do not require historical PIT evidence.
+Nine saved issuers and original provider histories remain; no source splicing.
+TCB/VCB FY2025 now support 15 qualified peer metrics, ranks and covered medians
+within the existing 406/61 observed SSI snapshot. Financial highlights, dedicated
+balance/cash/profitability/health navigation, company-context industry links and
+a dividend shortcut reuse Woofi components. No WiData/paid service or dependency
+upgrade. Backend 1,591 + 32 subtests; frontend 331 + one existing skip; typecheck,
+build and real contracts/static rendering pass. Runtime/browser/mobile PENDING;
+prior policy denial not bypassed. See research/FINANCIAL_INTELLIGENCE_V3_DELIVERY.md.
+
+## Financial free-data activation — prior bdc70ad checkpoint
 
 SStock is the product/UI benchmark; WiData and paid providers are not required.
 Existing SSI/VCI histories remain primary and unchanged. Strict saved CafeF,

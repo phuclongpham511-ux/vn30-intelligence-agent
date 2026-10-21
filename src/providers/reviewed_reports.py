@@ -13,8 +13,10 @@ from pydantic import Field
 from src.providers.financial_filings import StrictEvidence, _https
 from src.providers.vnstock.financial_statements import MAP, NON_FINANCIAL_ONLY, BANK_ONLY, content_hash
 from src.schemas.financials import FinancialPacket, FinancialSourceContext, FinancialLine, StatementObservation, StatementReceipt
+from src.analytics.financial_catalog import NOTE_FIELDS, NOTE_AMOUNTS, LOAN_QUALITY_FIELDS
 
 FIELD_KIND = {field: kind for kind, fields in MAP.items() for field in fields}
+FIELD_KIND.update({field:kind for kind,fields in NOTE_FIELDS.items() for field in fields})
 
 
 class PageEvidence(StrictEvidence):
@@ -126,7 +128,7 @@ def report_packet(manifest, directory):
     for a in e.amounts:
         # FX is a reviewed reconciliation line, not a new headline metric.
         kind = 'cash' if a.field == 'cash_fx_effect' else FIELD_KIND.get(a.field)
-        if kind is None or a.field in NON_FINANCIAL_ONLY and e.profile != 'non_financial' or a.field in BANK_ONLY and e.profile != 'bank':
+        if kind is None or a.field in NON_FINANCIAL_ONLY and e.profile != 'non_financial' or a.field in (BANK_ONLY | NOTE_AMOUNTS) and e.profile != 'bank':
             raise ValueError('Unsupported field or issuer model')
         start, end = date.fromisoformat(a.period_start) if a.period_start else None, date.fromisoformat(a.period_end)
         if end != date(a.year, 12, 31) or (kind != 'balance' and start != date(a.year, 1, 1)) or (start and start != date(a.year, 1, 1)):
@@ -152,7 +154,7 @@ def report_packet(manifest, directory):
         if eps != (a.unit == 'VND/share'):
             raise ValueError('Per-share amounts must not use statement money scale')
         scales = {'VND': 1, 'thousand VND': 1000, 'million VND': 1000000, 'billion VND': 1000000000, 'VND/share': 1}
-        wording = {'VND': r'\bVND\b|Đồng', 'thousand VND': r'nghìn|ngàn|thousand', 'million VND': r'[Tt]riệu|million', 'billion VND': r'tỷ|billion', 'VND/share': r'đồng/cổ phiếu|VND/share'}
+        wording = {'VND': r'\bVND\b|Đồng', 'thousand VND': r'nghìn|ngàn|thousand', 'million VND': r'[Tt]riệu|million', 'billion VND': r'tỷ|billion', 'VND/share': r'(?:đồng|VND)/cổ phiếu|VND/share'}
         if not re.search(wording[a.unit], unit_quote) or a.unit == 'VND' and re.search(r'triệu|nghìn|ngàn|tỷ|million|thousand|billion', unit_quote, re.I):
             raise ValueError('Source amount scale mismatch')
         value = raw * scales[a.unit]
@@ -178,6 +180,10 @@ def report_packet(manifest, directory):
             residual = (records['total_assets']['normalized_value'] - records['total_liabilities']['normalized_value'] - records['equity']['normalized_value']) if complete else None
             valid = residual is None or abs(residual) <= max(1, abs(records['total_assets']['normalized_value']) * 1e-6)
             balance_identity='PASS' if complete and valid else 'FAIL' if complete else 'NOT_TESTED'
+            quality_complete = LOAN_QUALITY_FIELDS <= records.keys()
+            quality_residual = (sum(records[f'loan_grade_{i}']['normalized_value'] for i in range(1,6)) - records['classified_loans']['normalized_value']) if quality_complete else None
+            quality_valid = quality_complete and all(records[f]['normalized_value'] >= 0 for f in LOAN_QUALITY_FIELDS)
+            quality_identity = 'NOT_TESTED' if quality_residual is None else 'PASS' if quality_valid and abs(quality_residual) <= max(r['multiplier'] for r in records.values()) else 'FAIL'
             checks.append(dict(statement=kind, period=period, balance_identity='PASS' if complete and valid else 'FAIL' if not valid else 'NOT_TESTED', residual=residual))
             cash_fields = ('cash_operating','cash_investing','cash_financing','cash_net_change')
             cash_residual = (sum(records[f]['normalized_value'] for f in cash_fields[:3]) - records['cash_net_change']['normalized_value']) if all(f in records for f in cash_fields) else None
@@ -200,12 +206,13 @@ def report_packet(manifest, directory):
                     review_reference=e.review_reference, fields=records, evidence_kind='reviewed_original_pdf',
                     metadata_origin='reported', publication_date=None, publication_time_qualified=False,
                     balance_identity=balance_identity,
+                    loan_quality_identity=quality_identity,
                     cash_flow_identity=cash_identity, cash_endpoint_identity=endpoint_identity,
                     page_evidence={str(n): dict(text_sha256=p.text_sha256, image_sha256=p.image_sha256, method=p.method) for n,p in pages.items()}))
             observations.append(StatementObservation(ticker=e.ticker, source=e.source, statement=kind,
                 period=period, frequency='annual', basis='point_in_time' if kind == 'balance' else 'annual',
                 consolidation=e.scope, source_context=context,
-                fields={f: records[f]['normalized_value'] if f in records else None for f in MAP[kind]},
+                fields={f: records[f]['normalized_value'] if f in records else None for f in (*MAP[kind], *NOTE_FIELDS.get(kind,{}))},
                 field_codes={f:r['code'] for f,r in records.items()},
                 items=[FinancialLine(code=r['code'], name_en=f.replace('_',' '), name_vi=r['label'],
                     value=r['normalized_value'], raw_value=float(Decimal(r['original_value'].strip('()').replace('.','').replace(',','')) * (-1 if r['original_value'].startswith('(') else 1)),

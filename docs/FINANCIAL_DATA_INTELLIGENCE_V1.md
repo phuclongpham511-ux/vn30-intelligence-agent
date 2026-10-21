@@ -1,6 +1,36 @@
 # Financial Data Intelligence V1
 
-## Free-data-first activation — current, 21 October 2026
+## V3 current implementation and reproduction
+
+Continue with `.local/free-data-v3-final`, preserving previous bundles. The same
+original-report adapter now reads selected VCB annual statements and TCB notes.
+The canonical engine adds nine explicit bank note fields and five derived
+definitions (74 total catalogue outputs, 64 observed supported definitions).
+It does not guess extra VCI source mappings. REPORTING_METADATA_COMPLETE is an
+independent per-metric dimension alongside source/accounting/PIT/rights/full.
+The private `/personal-research/peers/{symbol}?period=2025&frequency=annual` and
+same-origin private proxy resolve only the observed exact SSI membership. Covered
+median/min/max and rank/percentile require at least two compatible qualified
+issuers; no sector sum or historical classification is inferred.
+
+Financial Analysis adds highlights and usable task navigation without empty
+valuation charts. Company-specific industry links retain reporting context; the
+dividend shortcut uses the existing stock action destination. Public/private
+boundaries and approved launcher configuration are unchanged.
+
+~~~powershell
+uv run python -m scripts.recover_financial_evidence --baseline .local/activation-captures --bundle .local/free-data-v3-final --output research/validation/free-data-v3
+uv run python -m scripts.validate_free_data --captures .local/free-data-v3-final --report research/validation/free-data-v3 --private .local/free-data-v3-api --probe-directory .local/free-source-probes
+uv run python -m scripts.validate_financial_v3 --bundle .local/free-data-v3-final --private .local/free-data-v3-api --report research/validation/free-data-v3
+~~~
+
+Backend/frontend/typecheck/build and real contract/rendering checks pass;
+interactive Woofi runtime/browser/mobile acceptance remains PENDING. See
+[V3 delivery](../research/FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
+[comparison](../research/SSTOCK_FEATURE_COMPARISON_V3.md), and
+[exact approved-operator checklist](../research/DASHBOARD_VERIFICATION_V3.md).
+
+## Prior bdc70ad activation
 
 SStock is the product/UI benchmark. WiData is not a required provider and there
 are no paid APIs/subscriptions. Existing SSI/VCI remain primary. Strict saved

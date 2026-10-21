@@ -13,7 +13,7 @@ def panels(p=None, frequency='annual'):
 
 def test_all_six_panels_exist_and_use_individually_qualified_values_without_new_math():
     output = panels()
-    assert set(output) == {'assets', 'funding', 'growth', 'quarterly', 'pe', 'pb','cashflow','profitability','liquidity','bank_funding'}
+    assert set(output) == {'assets', 'funding', 'growth', 'quarterly', 'pe', 'pb','cashflow','profitability','liquidity','bank_funding','bank_quality'}
     funding = output['funding']['rows'][-1]['values']
     assert funding == {'total_liabilities': 120, 'equity': 100, 'liabilities_assets': .6}
     assert output['growth']['rows'][-1]['values']['revenue'] == 120

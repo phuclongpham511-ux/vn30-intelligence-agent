@@ -1,6 +1,22 @@
 # Woofi Financial Data Intelligence — delivery, 21 October 2026
 
-## Free-data-first continuation from 86000d3 — current
+## V3 free-data expansion — current
+
+From bdc70ad, the existing financial-data branch now delivers 64 supported
+definitions and 175 source/accounting-verified observations (113 reported,
+62 derived), with original VCB statements and deeper TCB notes. A separately
+exposed reporting-metadata dimension also qualifies 175 observations. Fifteen
+TCB/VCB FY2025 peer metrics now have ranks, percentiles and covered distributions.
+The financial experience adds source-backed highlights and dedicated task views,
+company-specific industry navigation and a dividend shortcut. Nine issuers, all
+original captures and the 406/61 classification snapshot remain preserved.
+Runtime/browser/mobile PENDING; no paid provider, WiData requirement, push/merge.
+See [V3 delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
+[feature matrix](SSTOCK_FEATURE_COMPARISON_V3.md),
+[coverage](validation/free-data-v3/VERIFIED_METRIC_COVERAGE.csv), and
+[manual acceptance](DASHBOARD_VERIFICATION_V3.md).
+
+## Prior bdc70ad free-data continuation
 
 SStock is the product/UI benchmark. No WiData integration or paid subscription
 is required. Three explicit free saved-source adapters now add CafeF VHM annual

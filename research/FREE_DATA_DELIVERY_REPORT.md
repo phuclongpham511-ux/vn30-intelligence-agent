@@ -1,5 +1,13 @@
 # Free data first — financial intelligence delivery
 
+Current V3 results supersede the checkpoint below: **175 verified observations,
+64 supported definitions, and 15 qualified TCB/VCB peer metrics**. See
+[V3 delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
+[current comparison](SSTOCK_FEATURE_COMPARISON_V3.md), and
+[current manual acceptance](DASHBOARD_VERIFICATION_V3.md). Runtime remains PENDING.
+
+## Prior bdc70ad checkpoint record
+
 21 October 2026. Worktree `woofi-financial-data`, branch
 `feature/financial-data-intelligence`, starting commit `86000d3`.
 

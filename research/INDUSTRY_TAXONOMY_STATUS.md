@@ -1,5 +1,13 @@
 # Industry membership and useful partial analytics
 
+Current V3 results supersede the checkpoint below: **175 verified observations,
+64 supported definitions, and 15 qualified TCB/VCB peer metrics**. See
+[V3 delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
+[current comparison](SSTOCK_FEATURE_COMPARISON_V3.md), and
+[current manual acceptance](DASHBOARD_VERIFICATION_V3.md). Runtime remains PENDING.
+
+## Prior bdc70ad checkpoint record
+
 21 October 2026. The existing SSI archive supplies **406 ordinary HOSE
 memberships / 61 exact category codes**, observed at
 `2026-10-17T13:26:47.008268+00:00`. Audit excludes 379 nonordinary rows and finds

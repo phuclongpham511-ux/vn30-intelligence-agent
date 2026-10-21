@@ -49,7 +49,7 @@ def test_original_reports_unlock_supported_calculations_but_not_publication_or_r
     assert next(m for m in private['fundamental_summary']['metrics'] if m['key']=='pe')['value'] is None
     assert private['display_scope']=='internal_research'
     d=private['verification']['periods'][-1]['metrics']['roe']['dimensions']
-    assert d==dict(SOURCE_VERIFIED=True,ACCOUNTING_VERIFIED=True,POINT_IN_TIME_VERIFIED=False,PUBLICATION_RIGHTS_APPROVED=False,FULLY_VERIFIED=False)
+    assert d==dict(SOURCE_VERIFIED=True,ACCOUNTING_VERIFIED=True,REPORTING_METADATA_COMPLETE=True,POINT_IN_TIME_VERIFIED=False,PUBLICATION_RIGHTS_APPROVED=False,FULLY_VERIFIED=False)
     assert all(m.value is None for m in public.fundamental_summary.metrics)
     assert evidence==before and audit['selected_reported_fields']==20
 
@@ -231,7 +231,7 @@ def test_observed_membership_ranking_requires_compatible_accounting_evidence(tmp
     assert all(o['rank'] is None and o['percentile'] is None for o in partial['observations'])
 
 
-@pytest.mark.parametrize('path',['/personal-research/industries','/personal-research/industries/1234?period=2025','/personal-research/dividends/ABC'])
+@pytest.mark.parametrize('path',['/personal-research/industries','/personal-research/industries/1234?period=2025','/personal-research/dividends/ABC','/personal-research/peers/ABC?period=2025'])
 def test_new_research_routes_share_the_existing_socket_and_host_boundary(monkeypatch,path):
     from fastapi import FastAPI
     from fastapi.testclient import TestClient

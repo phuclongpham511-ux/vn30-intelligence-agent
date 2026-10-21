@@ -1,5 +1,19 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Financial Intelligence V3 — current
+
+Financial Analysis uses a concise period-labelled highlight grid (two columns on
+small screens, three on wide screens), amount/growth charts first, dedicated
+balance/cash-flow/profitability/health destinations and shared source/period/unit
+controls. Hide unrelated empty module navigation while retaining source/missing
+evidence. Reuse the dividend action destination and pass company/period context
+into industry research. Bank credit quality uses explicitly named classified-loan
+and allowance populations; demand-deposit share is not labelled vendor CASA.
+Peer medians/ranks describe the covered compatible sample with visible missing
+counts, never all-industry totals. No empty P/E/P/B chart is added as a module.
+Static contracts/rendering pass; current Woofi visual/mobile acceptance PENDING.
+See research/FINANCIAL_INTELLIGENCE_V3_DELIVERY.md.
+
 ## Personal Financial Research V6 — local development only
 
 Reuse the existing Financial Analysis destinations/tables/charts. The separate

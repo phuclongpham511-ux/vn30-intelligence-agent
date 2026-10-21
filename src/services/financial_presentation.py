@@ -1,6 +1,7 @@
 """Display qualification over the existing engine; no new financial calculations."""
 import math
 from src.schemas.financials import FinancialEngineResponse, FundamentalSummary
+from src.analytics.financial_catalog import specialist_consistency
 
 
 # Units describe engine outputs, not guesses from a provider's arbitrary columns.
@@ -67,6 +68,8 @@ def metric_status(row, key, result):
     if not reported and any((r.get('source_context') or {}).get('original_metadata', {}).get(check) == 'FAIL'
             for r in refs for check in ('balance_identity', 'cash_flow_identity')):
         return 'UNQUALIFIED', 'Financial statement consistency failed'
+    if not reported and not all(specialist_consistency(ref) for ref in refs):
+        return 'UNQUALIFIED', 'Loan quality note does not reconcile'
     reason = inputs_reason(evidence.get('inputs', []), result.source, fixture=result.is_fixture, internal=result.display_scope == 'internal_research')
     if reason:
         return 'UNQUALIFIED', reason
@@ -121,6 +124,11 @@ def financial_research_panels(result):
             ('customer_loans','Customer loans','VND'),('customer_deposits','Customer deposits','VND'),
             ('loan_deposit_ratio','Accounting loans / deposits','fraction')] if bank else [], False,
          'Gross customer loans and customer deposits are period-end amounts. Their accounting ratio is not regulatory LDR. NIM, CASA and NPL are not inferred.'),
+        ('bank_quality', 'Bank deposit and credit quality', 'performance', [
+            ('demand_deposit_share','Demand-deposit share (accounting)','fraction'),
+            ('npl_classified_ratio','NPL / classified customer loans','fraction'),
+            ('classified_loan_coverage','Classified loan provision coverage','fraction')] if bank else [], False,
+         'Demand deposits divided by customer deposits is an accounting CASA-style share. NPL is grades 3–5 divided by classified loans; coverage uses the matching general and specific allowance. Securities margin lending is excluded from the classified-loan denominators. NIM is unavailable.'),
     ]
     panels = []
     for key, title, chart, fields, partial, methodology in definitions:

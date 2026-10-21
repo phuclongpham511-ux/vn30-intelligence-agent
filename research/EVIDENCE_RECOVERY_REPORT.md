@@ -1,5 +1,13 @@
 # Financial evidence recovery V2
 
+Current V3 results supersede the checkpoint below: **175 verified observations,
+64 supported definitions, and 15 qualified TCB/VCB peer metrics**. See
+[V3 delivery](FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
+[current comparison](SSTOCK_FEATURE_COMPARISON_V3.md), and
+[current manual acceptance](DASHBOARD_VERIFICATION_V3.md). Runtime remains PENDING.
+
+## Prior bdc70ad checkpoint record
+
 21 October 2026. Recovery starts from the original eight immutable captures,
 not a new UI or a provider ratio import. The original 2,816 eligible observations
 are traced individually in

@@ -91,7 +91,7 @@ test('empty charts share one disclosure while a qualified historical series rema
   assert.equal(panels.length,1);assert.equal(panels[0].props.kind,'funding');
   assert.equal(panels[0].props.panel.rows[0].values.equity,0);
   data.profile='bank';data.financial_identity_guard=true;
-  descendants(tree).find(n=>n.type==='button'&&text(n)===localeTools(language).t('Growth drivers')).props.onClick();
+  descendants(tree).find(n=>n.type==='button'&&text(n)===localeTools(language).t('Revenue, earnings & growth')).props.onClick();
   tree=render(props,'FundamentalTrendsView');
   const disclosure=descendants(tree).find(n=>n.props?.['data-financial-unavailable-group']!==undefined);
   assert.ok(text(disclosure).includes(localeTools(language).ui('Operating income and profit trends')));

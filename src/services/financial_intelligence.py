@@ -3,9 +3,10 @@ from src.analytics.financial_engine import financial_engine
 from src.providers.vnstock.financial_statements import MAP, content_hash
 from src.schemas.financial_intelligence import MetricObservation
 from src.services.financial_presentation import metric_status, inputs_reasons
+from src.analytics.financial_catalog import NOTE_AMOUNTS, NOTE_RATIOS
 
 MULTIPLES = {'debt_equity','current_ratio','quick_ratio','cash_conversion','inventory_turnover','asset_turnover'}
-FRACTIONS = {'gross_margin','net_margin','roe','roa','liabilities_assets','loan_deposit_ratio'}
+FRACTIONS = {'gross_margin','net_margin','roe','roa','liabilities_assets','loan_deposit_ratio'} | NOTE_RATIOS
 
 
 def metric_unit(key):
@@ -20,7 +21,7 @@ def normalized_metrics(packet, *, frequency='annual', limit=20):
         a,l,e = (obs.fields.get(k) for k in ('total_assets','total_liabilities','equity'))
         if None not in (a,l,e) and abs(a-l-e) > max(1, abs(a)*1e-6):
             invalid_balances.add(obs.period)
-    raw_fields = {field for fields in MAP.values() for field in fields}
+    raw_fields = {field for fields in MAP.values() for field in fields} | NOTE_AMOUNTS
     observations = []
     for row in result.rows:
         for key, evidence in row['calculations'].items():

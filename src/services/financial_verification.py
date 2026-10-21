@@ -1,9 +1,10 @@
 """Evidence grades and activation eligibility; never a financial calculator."""
 from collections import Counter
 import math
+from src.analytics.financial_catalog import specialist_consistency
 
 STATUSES = ('VERIFIED', 'PARTIALLY_VERIFIED', 'UNAVAILABLE')
-DIMENSIONS = ('SOURCE_VERIFIED', 'ACCOUNTING_VERIFIED', 'POINT_IN_TIME_VERIFIED',
+DIMENSIONS = ('SOURCE_VERIFIED', 'ACCOUNTING_VERIFIED', 'REPORTING_METADATA_COMPLETE', 'POINT_IN_TIME_VERIFIED',
               'PUBLICATION_RIGHTS_APPROVED', 'FULLY_VERIFIED')
 
 
@@ -26,11 +27,14 @@ def verification_dimensions(refs, *, computable, fixture=False):
             and ctx.get('unit_evidence') == 'original_filing'
             and meta.get('extraction_verified') is True and meta.get('page_image_verified') is True
             and meta.get('binary_sha256'))
-    accounting = bool(source and len({r.get('source') for r in refs}) == 1
+    metadata_complete = bool(refs and computable and not fixture and len({r.get('source') for r in refs}) == 1
         and len({r.get('consolidation') for r in refs}) == 1
         and {r.get('consolidation') for r in refs} <= {'consolidated', 'standalone'}
         and all(c.get('period_end') and (r.get('statement') == 'balance' or c.get('period_start'))
+            and c.get('original_currency') and c.get('original_unit') and c.get('record_sha256')
             and r.get('basis') in ('annual', 'standalone', 'ytd', 'point_in_time')
+            for r,c in zip(refs,contexts)))
+    accounting = bool(source and metadata_complete and all(specialist_consistency(r)
             and (r.get('statement') != 'balance' or c.get('original_metadata', {}).get('balance_identity') == 'PASS')
             and (r.get('statement') != 'cash' or c.get('original_metadata', {}).get('cash_flow_identity') == 'PASS')
             and (r.get('field') not in ('cash_beginning','cash_ending') or c.get('original_metadata', {}).get('cash_endpoint_identity') == 'PASS')
@@ -38,7 +42,7 @@ def verification_dimensions(refs, *, computable, fixture=False):
     pit = accounting and all(c.get('publication_time_qualified') is True for c in contexts)
     rights = bool(refs) and not fixture and all(c.get('display_rights') == 'permitted'
         and bool((c.get('display_rights_reference') or '').strip()) for c in contexts)
-    return dict(SOURCE_VERIFIED=bool(source), ACCOUNTING_VERIFIED=accounting,
+    return dict(SOURCE_VERIFIED=bool(source), ACCOUNTING_VERIFIED=accounting, REPORTING_METADATA_COMPLETE=metadata_complete,
         POINT_IN_TIME_VERIFIED=pit, PUBLICATION_RIGHTS_APPROVED=rights,
         FULLY_VERIFIED=bool(source and accounting and pit and rights))
 

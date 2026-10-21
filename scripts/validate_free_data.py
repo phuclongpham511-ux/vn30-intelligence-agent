@@ -72,6 +72,13 @@ def validate_free(captures,report,private,*,probe_directory=None):
             if row.get('current_ratio') is not None:comparisons['current_ratio']=row['current_assets']/row['current_liabilities']
             if row.get('quick_ratio') is not None:comparisons['quick_ratio']=(row['current_assets']-row['inventory'])/row['current_liabilities']
             if row.get('debt_equity') is not None:comparisons['debt_equity']=(row['short_debt']+row['long_debt'])/row['equity']
+            if row.get('demand_deposit_share') is not None:comparisons['demand_deposit_share']=row['customer_demand_deposits']/row['customer_deposits']
+            if row.get('npl_classified_ratio') is not None:comparisons['npl_classified_ratio']=sum(row[f'loan_grade_{i}'] for i in (3,4,5))/row['classified_loans']
+            if row.get('classified_loan_coverage') is not None:comparisons['classified_loan_coverage']=(row['loan_allowance_general']+row['loan_allowance_specific'])/sum(row[f'loan_grade_{i}'] for i in (3,4,5))
+            if row.get('roe') is not None:
+                prior=next(r for r in response['rows'] if r['period']==str(int(row['period'])-1))
+                comparisons['roe']=row['net_profit']/((row['equity']+prior['equity'])/2)
+                comparisons['roa']=row['net_profit']/((row['total_assets']+prior['total_assets'])/2)
             for key,value in comparisons.items():require(math.isclose(row[key],value,rel_tol=1e-12,abs_tol=1e-9),'Original report calculation mismatch')
             calculations.append(dict(ticker=ticker,period=row['period'],checked=sorted(comparisons),status='PASS'))
     cross=[]
