@@ -8,29 +8,62 @@ export function validateFinancialPanels(data:FundamentalResearch){
  const personal=data.display_scope==='personal_research'&&data.access_classification==='PERSONAL_RESEARCH';
  const statuses=[...publicStatuses,...(personal?['SOURCE_REPORTED']:[])];
  if(data.research_panels===undefined)return; // Older payloads get shells, never invented chart data.
- if(!Array.isArray(data.research_panels)||data.research_panels.length>(personal?12:11))throw Error('Invalid financial panels');
+ if(!Array.isArray(data.research_panels)||data.research_panels.length>(personal?96:11))throw Error('Invalid financial panels');
  const seen=new Set<string>(),periods=data.chart_rows?.map(r=>r.period)||[];
  for(const panel of data.research_panels){
-  if(!panel||!Object.hasOwn(specifications,panel.key)||seen.has(panel.key))throw Error('Invalid financial panel ownership');
+  const hierarchyPanel=typeof panel?.key==='string'&&/^components:(income|balance|cash):[a-z0-9_]+$/i.test(panel.key);
+  const rootLines=hierarchyPanel&&panel.component_scope==='unparented_lines';
+  const componentStatement=hierarchyPanel?panel.statement as 'income'|'balance'|'cash':undefined;
+  const componentData=componentStatement?data.statements?.[componentStatement]:undefined;
+  const componentPrefixes=componentStatement?{income:['isa','isb','iss'],balance:['bsa','bsb','bss','bsi'],cash:['cfa','cfb','cfs']}[componentStatement]:undefined;
+  if(!panel||(!Object.hasOwn(specifications,panel.key)&&!hierarchyPanel)||seen.has(panel.key))throw Error('Invalid financial panel ownership');
+  if(hierarchyPanel){
+   if(!personal||data.source!=='vnstock:VCI'||!['income','balance','cash'].includes(panel.statement||''))throw Error('Invalid personal hierarchy panel');
+   if(rootLines?(panel.key!==`components:${panel.statement}:root`||panel.component_scope!=='unparented_lines'||panel.parent_code!==undefined):
+      (panel.component_scope!=='reported_parent'||panel.key!==`components:${panel.statement}:${panel.parent_code?.toLowerCase()}`||!panel.parent_code||!panel.parent_code.trim()))throw Error('Invalid component scope');
+   if(!componentData||!['stacked','performance'].includes(panel.chart)||panel.chart==='stacked'&&panel.statement!=='balance')throw Error('Invalid component statement');
+   if(!rootLines&&!componentPrefixes!.some(prefix=>panel.parent_code!.toLowerCase().startsWith(prefix)))throw Error('Invalid component parent');
+  }
   if(panel.key==='balance_history'&&!personal)throw Error('Research panel is not public data');
-  seen.add(panel.key);const spec=specifications[panel.key];
-  if(panel.source!==data.source||panel.frequency!==data.period_type||panel.chart!==spec.chart||!statuses.includes(panel.status)||typeof panel.partial!=='boolean'||typeof panel.methodology!=='string'||!Array.isArray(panel.series)||panel.series.length>5||!Array.isArray(panel.rows)||panel.rows.length!==periods.length||!Array.isArray(panel.reasons)||panel.reasons.some(r=>typeof r!=='string'))throw Error('Invalid financial panel contract');
+  seen.add(panel.key);const spec=hierarchyPanel?undefined:specifications[panel.key as keyof typeof specifications];
+  if(panel.source!==data.source||panel.frequency!==data.period_type||(!hierarchyPanel&&panel.chart!==spec!.chart)||!statuses.includes(panel.status)||typeof panel.partial!=='boolean'||typeof panel.methodology!=='string'||!Array.isArray(panel.series)||panel.series.length>(hierarchyPanel?40:5)||!Array.isArray(panel.rows)||panel.rows.length!==periods.length||!Array.isArray(panel.reasons)||panel.reasons.some(r=>typeof r!=='string'))throw Error('Invalid financial panel contract');
   const keys=new Set<string>();
   for(const s of panel.series){
-   if(!s||typeof s.label!=='string'||!['VND','fraction','multiple'].includes(s.unit)||!(spec[s.unit] as readonly string[]).includes(s.key)||keys.has(s.key))throw Error('Invalid financial panel series');
+   if(!s||typeof s.label!=='string'||!['VND','fraction','multiple'].includes(s.unit)||(hierarchyPanel?(s.unit!=='VND'||!s.key||keys.has(s.key)||!componentPrefixes!.some(prefix=>s.key.toLowerCase().startsWith(prefix))):(!(spec![s.unit] as readonly string[]).includes(s.key)||keys.has(s.key))))throw Error('Invalid financial panel series');
    if(data.financial_identity_guard&&['revenue','revenue_growth_yoy','cash_equivalents','inventory'].includes(s.key)||data.profile!=='bank'&&['customer_loans','customer_deposits','loan_deposit_ratio'].includes(s.key)||data.profile!=='bank'&&s.key.startsWith('operating_income'))throw Error('Unsafe financial panel issuer');
    keys.add(s.key);
   }
   let available=false,blocked=false;
   for(const [i,row] of panel.rows.entries()){
    if(row.period!==periods[i]||!row.values||!row.statuses||!row.bases||Object.keys(row.values).length!==keys.size||Object.keys(row.values).some(k=>!keys.has(k)))throw Error('Invalid financial panel periods');
+   if(hierarchyPanel){
+    const sourcePeriod=componentData!.periods.find(item=>item.period===row.period);
+    if(!sourcePeriod){
+     if(row.statement_basis!=='unavailable'||Object.values(row.values).some(value=>value!==null)||Object.values(row.statuses).some(value=>value!=='UNAVAILABLE'))throw Error('Invalid missing component period');
+    }else if(rootLines){
+     if(sourcePeriod.basis!==row.statement_basis)throw Error('Invalid root-line reporting basis');
+     for(const key of keys){
+      const line=sourcePeriod.items.find(item=>item.code===key),value=row.values[key];
+      const direct=!!line&&line.parent===null&&line.unit==='VND'&&line.semantic_status==='reported'&&line.value!==null;
+      if(direct?(panel.status==='UNQUALIFIED'?(row.statuses[key]!=='UNQUALIFIED'||value!==null):(row.statuses[key]!=='SOURCE_REPORTED'||value!==line!.value)):(row.statuses[key]!=='UNAVAILABLE'||value!==null))throw Error('Root-line value differs from source line');
+     }
+    }else{
+     const parent=sourcePeriod.items.find(item=>item.code.toLowerCase()===panel.parent_code!.toLowerCase());
+     if(sourcePeriod.basis!==row.statement_basis||!parent||parent.unit!=='VND'||parent.semantic_status!=='reported')throw Error('Invalid component parent evidence');
+     for(const key of keys){
+      const line=sourcePeriod.items.find(item=>item.code===key),value=row.values[key];
+      const direct=!!line&&line.parent?.toLowerCase()===panel.parent_code!.toLowerCase()&&line.unit==='VND'&&line.semantic_status==='reported'&&line.value!==null;
+      if(direct?(panel.status==='UNQUALIFIED'?(row.statuses[key]!=='UNQUALIFIED'||value!==null):(row.statuses[key]!=='SOURCE_REPORTED'||value!==line!.value)):(row.statuses[key]!=='UNAVAILABLE'||value!==null))throw Error('Component value differs from source line');
+     }
+    }
+   }
    for(const key of keys){
     const value=row.values[key],status=row.statuses[key];
     if(!statuses.includes(status)||value!==null&&(typeof value!=='number'||!Number.isFinite(value)))throw Error('Invalid financial panel point');
     if(['UNAVAILABLE','UNQUALIFIED'].includes(status)&&value!==null||status==='DEMO'&&!data.is_fixture||status==='QUALIFIED'&&(data.is_fixture||!['consolidated','standalone'].includes(row.bases[key]||'')))throw Error('Unsafe financial panel qualification');
-    if(status==='SOURCE_REPORTED'&&(!personal||panel.chart==='stacked'||panel.series.find(s=>s.key===key)?.unit!=='VND'||value===null))throw Error('Unsafe personal research chart');
+    if(status==='SOURCE_REPORTED'&&(!personal||panel.chart==='stacked'&&!hierarchyPanel||panel.series.find(s=>s.key===key)?.unit!=='VND'||value===null))throw Error('Unsafe personal research chart');
     if(value===null&&['QUALIFIED','DEMO'].includes(status))throw Error('Missing qualified financial point');
-    if(value!==null&&value!==(data.chart_rows?.[i] as unknown as Record<string,unknown>)?.[key])throw Error('Financial panel differs from displayed observation');
+   if(!hierarchyPanel&&value!==null&&value!==(data.chart_rows?.[i] as unknown as Record<string,unknown>)?.[key])throw Error('Financial panel differs from displayed observation');
     available ||= value!==null;blocked ||= status==='UNQUALIFIED';
    }
    const amounts=panel.series.filter(s=>s.unit==='VND').map(s=>s.key).filter(k=>row.values[k]!==null);
@@ -45,13 +78,14 @@ export function validateFinancialPanels(data:FundamentalResearch){
  }
 }
 
-export const panelTitles={bank_quality:'Bank deposit and credit quality',cashflow:'Cash flow and reinvestment',profitability:'Profitability history',liquidity:'Liquidity and leverage',bank_funding:'Bank lending and deposits',balance_history:'Reported balance history',assets:'Asset composition',funding:'Funding composition',growth:'Revenue and profit trends',quarterly:'Quarterly operating results',pe:'P/E history',pb:'P/B history'} as const;
+export const panelTitles:Record<string,string>={bank_quality:'Bank deposit and credit quality',cashflow:'Cash flow and reinvestment',profitability:'Profitability history',liquidity:'Liquidity and leverage',bank_funding:'Bank lending and deposits',balance_history:'Reported balance history',assets:'Asset composition',funding:'Funding composition',growth:'Revenue and profit trends',quarterly:'Quarterly operating results',pe:'P/E history',pb:'P/B history'};
 export function financialSourceLink(value:string):string|undefined{
  try{const url=new URL(value);return url.protocol==='https:'&&!url.username&&!url.password?url.href:undefined;}catch{return undefined;}
 }
 export function selectFinancialPanel(data:FundamentalResearch,key:FinancialPanel['key'],periods:string[]):FinancialPanel|undefined{
  const panel=data.research_panels?.find(p=>p.key===key);
  if(!panel)return undefined;
+ if(panel.statement)panelTitles[key]=panel.title;
  const rows=panel.rows.filter(r=>r.period>=(periods[0]||'')&&r.period<=(periods.at(-1)||''));
  const available=rows.some(r=>Object.values(r.values).some(v=>v!==null)),blocked=rows.some(r=>Object.values(r.statuses).includes('UNQUALIFIED'));
  return {...panel,rows,status:available?rows.some(r=>Object.values(r.statuses).includes('SOURCE_REPORTED'))?'SOURCE_REPORTED':data.is_fixture?'DEMO':'QUALIFIED':blocked?'UNQUALIFIED':'UNAVAILABLE'};

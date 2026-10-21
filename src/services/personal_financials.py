@@ -285,6 +285,8 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
         rows=[dict(period=r['period'], values={k:r.get(k) if k in evidence.get(r['period'],{}) else None for k in keys},
             statuses={k:'SOURCE_REPORTED' if k in evidence.get(r['period'],{}) else 'UNAVAILABLE' for k in keys},
             bases={k:evidence.get(r['period'],{}).get(k,{}).get('consolidation') for k in keys}) for r in out['chart_rows']]))
+    if packet.source == 'vnstock:VCI':
+        out['research_panels'].extend(_vci_hierarchy_component_panels(packet, out['chart_rows'], frequency))
     for panel in out['research_panels']:
         bases = {p['bases'][k] for p in panel['rows'] for k,v in p['values'].items() if v is not None}
         if len(bases) > 1:
@@ -300,3 +302,158 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
     from src.services.financial_verification import verification_assessment
     out['verification'] = verification_assessment(full, out['rows'], audience='personal_research')
     return out
+
+
+def _vci_hierarchy_component_panels(packet, chart_rows, frequency):
+    """Project direct VCI sibling lines without deriving totals or residuals.
+
+    A panel is emitted only when the source metadata identifies a numeric parent
+    line and at least two VND child lines. The parent is deliberately excluded
+    from its children series. Stacking is limited to non-negative balance-sheet
+    siblings; all other groups remain grouped observations.
+    """
+    from src.schemas.financials import FinancialLine
+
+    namespace = {'income': ('isa', 'isb', 'iss'), 'balance': ('bsa', 'bsb', 'bss'),
+        'cash': ('cfa', 'cfs')}
+    wanted = {row['period'] for row in chart_rows}
+    observations = {}
+    for kind, receipt in packet.reports.items():
+        if kind not in namespace:
+            continue
+        for obs in receipt.observations:
+            if obs.period in wanted and obs.frequency == frequency and obs.source_context:
+                observations[(kind, obs.period)] = obs
+
+    # Only source-reported, amount-valued lines in the existing VCI adapter
+    # contract are eligible. Other units, conflicts and prohibited evidence stay out.
+    def direct_amount(obs, line):
+        ctx = obs.source_context
+        return bool(ctx and ctx.display_rights != 'prohibited'
+            and ctx.unit_evidence == 'audited_vci_adapter_contract' and ctx.amount_multiplier == 1
+            and line.semantic_status == 'reported' and line.unit == 'VND'
+            and line.value is not None and math.isfinite(line.value) and line.raw_value == line.value)
+
+    def reported_parent(obs, line, prefixes):
+        ctx = obs.source_context
+        return bool(line.code.casefold().startswith(prefixes) and line.unit == 'VND'
+            and line.semantic_status == 'reported' and ctx and ctx.display_rights != 'prohibited'
+            and ctx.unit_evidence == 'audited_vci_adapter_contract' and ctx.amount_multiplier == 1)
+
+    def reported_amount_definition(obs, line):
+        ctx = obs.source_context
+        return bool(ctx and ctx.display_rights != 'prohibited'
+            and ctx.unit_evidence == 'audited_vci_adapter_contract' and ctx.amount_multiplier == 1
+            and line.semantic_status == 'reported' and line.unit == 'VND')
+
+    panels = []
+    for kind, prefixes in namespace.items():
+        periods = [row['period'] for row in chart_rows]
+        if not any((kind, period) in observations for period in periods):
+            continue
+        parents = {}
+        for period in periods:
+            obs = observations.get((kind, period))
+            if not obs:
+                continue
+            lines = {line.code: line for line in obs.items}
+            for parent_code, parent in lines.items():
+                if not reported_parent(obs, parent, prefixes):
+                    continue
+                children = [line for line in obs.items if line.parent
+                    and line.parent.casefold() == parent_code.casefold() and reported_amount_definition(obs, line)]
+                if len(children) < 2:
+                    continue
+                group = parents.setdefault(parent_code, {'parent': parent, 'children': {}})
+                for child in children:
+                    group['children'][child.code] = child
+
+        for parent_code, group in parents.items():
+            codes = sorted(group['children'])
+            if len(codes) < 2:
+                continue
+            if not any(direct_amount(observations[(kind, period)], line)
+                for period in periods if (kind, period) in observations
+                for line in observations[(kind, period)].items
+                if line.code in codes and line.parent and line.parent.casefold() == parent_code.casefold()):
+                continue
+            rows = []
+            all_nonnegative = kind == 'balance'
+            for period in periods:
+                obs = observations.get((kind, period))
+                if not obs:
+                    rows.append(dict(period=period, values={code:None for code in codes},
+                        statuses={code:'UNAVAILABLE' for code in codes}, bases={code:None for code in codes},
+                        statement_basis='unavailable'))
+                    continue
+                by_code = {line.code: line for line in obs.items}
+                values, statuses, bases = {}, {}, {}
+                for code in codes:
+                    line = by_code.get(code)
+                    usable = bool(line and line.parent and line.parent.casefold() == parent_code.casefold()
+                        and direct_amount(obs, line))
+                    value = line.value if usable else None
+                    values[code] = value
+                    statuses[code] = 'SOURCE_REPORTED' if usable else 'UNAVAILABLE'
+                    bases[code] = obs.consolidation
+                    if value is not None and value < 0:
+                        all_nonnegative = False
+                rows.append(dict(period=period, values=values, statuses=statuses, bases=bases,
+                    statement_basis=obs.basis))
+            key = f'components:{kind}:{parent_code.casefold()}'
+            line_coverage = '; '.join(
+                f"{row['period']} {sum(status == 'SOURCE_REPORTED' for status in row['statuses'].values())}/{len(codes)} observed child codes have values"
+                for row in rows)
+            panels.append(dict(key=key, title=f"Reported components · {group['parent'].name_en}",
+                chart='stacked' if all_nonnegative else 'performance', source=packet.source,
+                frequency=frequency, status='SOURCE_REPORTED', partial=True,
+                methodology=('Direct VCI source-reported sibling lines under the displayed parent. The parent total is excluded; no sum, residual, or coverage percentage is calculated. Each period retains its source reporting basis.'),
+                reasons=['Personal research only. Source-line hierarchy does not certify public display rights or independent accounting reconciliation.',
+                    'Observed child-code availability by period (not a share of the reported parent total; codes absent from all selected periods cannot be counted): ' + line_coverage],
+                statement=kind, parent_code=parent_code, component_scope='reported_parent',
+                series=[dict(key=code, label=group['children'][code].name_en, unit='VND') for code in codes],
+                rows=rows))
+
+        roots = {}
+        for period in periods:
+            obs = observations.get((kind, period))
+            if not obs:
+                continue
+            for line in obs.items:
+                if line.parent is None and reported_amount_definition(obs, line):
+                    roots[line.code] = line
+        codes = sorted(code for code in roots if any(
+            direct_amount(observations[(kind, period)], line)
+            for period in periods if (kind, period) in observations
+            for line in observations[(kind, period)].items if line.code == code and line.parent is None))
+        if len(codes) >= 2:
+            rows = []
+            for period in periods:
+                obs = observations.get((kind, period))
+                if not obs:
+                    rows.append(dict(period=period, values={code:None for code in codes},
+                        statuses={code:'UNAVAILABLE' for code in codes}, bases={code:None for code in codes},
+                        statement_basis='unavailable'))
+                    continue
+                by_code = {line.code:line for line in obs.items}
+                values, statuses, bases = {}, {}, {}
+                for code in codes:
+                    line = by_code.get(code)
+                    usable = bool(line and line.parent is None and direct_amount(obs, line))
+                    values[code] = line.value if usable else None
+                    statuses[code] = 'SOURCE_REPORTED' if usable else 'UNAVAILABLE'
+                    bases[code] = obs.consolidation
+                rows.append(dict(period=period, values=values, statuses=statuses, bases=bases,
+                    statement_basis=obs.basis))
+            line_coverage = '; '.join(
+                f"{row['period']} {sum(status == 'SOURCE_REPORTED' for status in row['statuses'].values())}/{len(codes)} observed root lines have values"
+                for row in rows)
+            panels.append(dict(key=f'components:{kind}:root', title=f'Reported top-level {kind} statement lines',
+                chart='performance', source=packet.source, frequency=frequency,
+                status='SOURCE_REPORTED', partial=True,
+                methodology=('Direct VCI lines whose source metadata has no parent. Each is shown as an independent reported series; root-line overlap is not established, so no stacking, total, residual, or composition share is calculated.'),
+                reasons=['Personal research only. Source-line hierarchy does not certify public display rights or independent accounting reconciliation.',
+                    'Observed root-line availability by period: ' + line_coverage],
+                statement=kind, component_scope='unparented_lines',
+                series=[dict(key=code, label=roots[code].name_en, unit='VND') for code in codes], rows=rows))
+    return panels

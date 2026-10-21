@@ -106,6 +106,31 @@ def test_private_statement_table_exposes_direct_ytd_vci_lines_without_relabeling
     assert row['revenue'] is None
 
 
+def test_hierarchy_component_panels_keep_siblings_and_missing_periods_without_parent_totals():
+    packet=source()
+    observations=packet.reports['balance'].observations
+    for observation in observations:
+        observation.items.extend([
+            FinancialLine(code='bsa900',name_en='Source parent total',name_vi='Tổng nguồn',
+                parent=None,unit='VND',value=100,raw_value=100,semantic_status='reported'),
+            FinancialLine(code='bsa901',name_en='Cash component',name_vi='Tiền',
+                parent='BSA900',unit='VND',value=65,raw_value=65,semantic_status='reported'),
+            FinancialLine(code='bsa902',name_en='Other component',name_vi='Khác',
+                parent='BSA900',unit='VND',value=35,raw_value=35,semantic_status='reported'),
+        ])
+    observations[-1].items[-1].value=None
+    observations[-1].items[-1].raw_value=None
+    result=personal_projection(packet,frequency='quarterly',limit=34,authorization_reference='synthetic')
+    panel=next(p for p in result['research_panels'] if p['key']=='components:balance:bsa900')
+    assert panel['chart']=='stacked' and panel['partial'] is True
+    assert [series['key'] for series in panel['series']]==['bsa901','bsa902']
+    assert all(series['key']!='bsa900' for series in panel['series'])
+    assert panel['rows'][-1]['statement_basis']=='point_in_time'
+    assert panel['rows'][-1]['values']=={'bsa901':65,'bsa902':None}
+    assert panel['rows'][-1]['statuses']=={'bsa901':'SOURCE_REPORTED','bsa902':'UNAVAILABLE'}
+    assert any('1/2 observed child codes have values' in reason and 'not a share of the reported parent total' in reason for reason in panel['reasons'])
+
+
 @pytest.mark.parametrize('mutation',['prohibited','unit'])
 def test_unmapped_statement_lines_stay_hidden_without_vci_rights_and_unit_evidence(mutation):
     packet=source()

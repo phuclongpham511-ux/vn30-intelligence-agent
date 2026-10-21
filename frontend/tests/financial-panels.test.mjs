@@ -9,7 +9,7 @@ import {transformSync} from 'next/dist/build/swc/index.js';
 import {LanguageContext,localeTools} from '../lib/i18n.ts';
 import {fixture} from './fixtures/fundamental-summary.mjs';
 import {financialEngineData} from '../lib/financial-engine-data.ts';
-import {selectFinancialPanel,financialSourceLink} from '../lib/financial-panels.ts';
+import {selectFinancialPanel,financialSourceLink,validateFinancialPanels} from '../lib/financial-panels.ts';
 import {statementHierarchy} from '../lib/financial-statement-rows.ts';
 const require=createRequire(import.meta.url);
 function load(name){const exports={};const compiled=transformSync(readFileSync(new URL(`../app/components/stock/${name}.tsx`,import.meta.url),'utf8'),{filename:`${name}.tsx`,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;new Function('require','exports',compiled)(id=>require(id.startsWith('@/lib/')?`../lib/${id.slice(6)}.ts`:id),exports);return exports.default;}
@@ -25,6 +25,24 @@ test('server chart values must match their displayed period and qualified inputs
  for(const mutate of [d=>d.research_panels[0].source='OTHER',d=>d.research_panels[0].rows[0].period='2024',d=>d.research_panels[0].rows[0].values.equity=31,d=>d.research_panels[0].series[0].unit='multiple',d=>d.research_panels[0].rows[0].statuses.equity='UNQUALIFIED',d=>d.research_panels[0].rows[0].bases.equity='standalone',d=>d.research_panels[0].rows[0].bases.liabilities_assets='standalone',d=>d.research_panels[0].status='DEMO']){
   const data=example();mutate(data);assert.throws(()=>financialEngineData(data,'ABC','annual',true));
  }
+});
+
+test('personal VCI hierarchy panels preserve sibling values and never mix public data',()=>{
+ const line=(code,parent,value)=>({code,name_en:code,name_vi:code,parent,unit:'VND',value,raw_value:value,semantic_status:'reported'});
+ const data={display_scope:'personal_research',access_classification:'PERSONAL_RESEARCH',source:'vnstock:VCI',period_type:'annual',is_fixture:false,
+  chart_rows:[{period:'2025'}],statements:{balance:{periods:[{period:'2025',basis:'point_in_time',items:[line('bsa900',null,100),line('bsa901','BSA900',60),line('bsa902','BSA900',40),line('bsa903',null,55),line('bsa904',null,45)]}]}},
+  research_panels:[{key:'components:balance:bsa900',title:'Reported components · Total',statement:'balance',parent_code:'bsa900',component_scope:'reported_parent',chart:'stacked',source:'vnstock:VCI',frequency:'annual',status:'SOURCE_REPORTED',partial:true,methodology:'Sibling source lines; no derived total.',reasons:[],
+   series:[{key:'bsa901',label:'Cash',unit:'VND'},{key:'bsa902',label:'Other',unit:'VND'}],rows:[{period:'2025',statement_basis:'point_in_time',values:{bsa901:60,bsa902:40},statuses:{bsa901:'SOURCE_REPORTED',bsa902:'SOURCE_REPORTED'},bases:{bsa901:null,bsa902:null}}]},
+   {key:'components:balance:root',title:'Top-level balance lines',statement:'balance',component_scope:'unparented_lines',chart:'performance',source:'vnstock:VCI',frequency:'annual',status:'SOURCE_REPORTED',partial:true,methodology:'Independent unparented source lines.',reasons:[],series:[{key:'bsa903',label:'Current assets',unit:'VND'},{key:'bsa904',label:'Other assets',unit:'VND'}],rows:[{period:'2025',statement_basis:'point_in_time',values:{bsa903:55,bsa904:45},statuses:{bsa903:'SOURCE_REPORTED',bsa904:'SOURCE_REPORTED'},bases:{bsa903:null,bsa904:null}}]}]};
+ assert.doesNotThrow(()=>validateFinancialPanels(data));
+ const selected=selectFinancialPanel(data,'components:balance:bsa900',['2025']);
+ assert.equal(selected.title,'Reported components · Total');
+ const componentHtml=render(Panel,{kind:'components:balance:bsa900',panel:selected,unit:'billions',personalResearch:true});
+ assert.match(componentHtml,/data-financial-chart="stacked"/);assert.match(componentHtml,/Cash/);assert.match(componentHtml,/SOURCE_REPORTED/);
+ assert.doesNotThrow(()=>selectFinancialPanel(data,'components:balance:root',['2025']));
+ const bad=structuredClone(data);bad.display_scope='public';assert.throws(()=>validateFinancialPanels(bad),/hierarchy/);
+ const wrongParent=structuredClone(data);wrongParent.research_panels[0].series[1].key='bsa901';assert.throws(()=>validateFinancialPanels(wrongParent),/series|keys/);
+ const wrongValue=structuredClone(data);wrongValue.research_panels[0].rows[0].values.bsa902=41;assert.throws(()=>validateFinancialPanels(wrongValue),/source line/);
 });
 
 test('valuation, negative compositions and annual-labelled quarterly values fail closed',()=>{

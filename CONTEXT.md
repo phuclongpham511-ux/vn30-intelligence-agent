@@ -1,6 +1,28 @@
 # Woofi — Domain Context
 
-## Financial Data Expansion V5.2 — current, 2026-10-22
+## Financial Intelligence V5.3 — current, 2026-10-22
+
+The private VCI research projection now turns source-reported VND statement
+lines into reusable sibling-component charts and separate unparented-line
+history views. It reuses each saved VCI `FinancialLine` code, parent, source
+labels, units, values and period basis. Parent totals never enter their own
+child panels; root lines are grouped bars, not a claimed composition. Only
+non-negative balance-sheet sibling groups use stacks. Component availability
+is shown per observed source code and period; no residual, total, or coverage
+percentage is inferred. The personal-research gate remains in place and this
+does not approve public redistribution rights.
+
+All 21 saved packets with VCI hierarchy support expose component groups (12
+non-financial, seven banks, two securities); the two CafeF-only annual packets
+for VHM/VNM remain outside this VCI hierarchy projection. Per issuer, panels
+contain 183 source-line series for non-financial, 104 for banks and 345 for
+securities. FPT/HPG/MWG/PNJ/REE/SSI/TCB/VCB retain 34 quarterly periods; the
+other VCI packets provide four quarterly periods. Eight issuers provide eight
+annual periods; the remaining VCI packets provide four. See
+`docs/FINANCIAL_DATA_COMPONENTS_V5_3.md` for line groups, coverage and
+validation.
+
+## Financial Data Expansion V5.2 — historical, 2026-10-22
 
 The saved VCI capture bundle now has 23 issuers, up from ten in V5.1. A 13-company
 pilot used the installed `vnstock==4.0.2` public Finance methods for four quarterly
