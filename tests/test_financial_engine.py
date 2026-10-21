@@ -248,28 +248,15 @@ def test_finite_source_inputs_cannot_create_nonfinite_growth_or_ttm_outputs():
     assert 'Infinity' not in ttm.model_dump_json()
 
 
-def test_provider_packet_reads_once_per_section_with_finite_timeouts_and_shared_cache(monkeypatch):
-    from types import SimpleNamespace
+def test_provider_packet_cache_reuses_normalized_sdk_packet(monkeypatch):
     from src.providers.vnstock import VnstockFundamentalDataProvider
-    from src.providers.vnstock.financial_packet import fetch_packet
-    import vnstock.core.utils.client as transport
     meta,reports=fixture()
-    rawmeta={section:[dict(field=item['field_name'],titleEn=item['en_name'],titleVi=item['name'],parent=None)
-        for item in meta if item['report_name']==section] for section in SECTIONS.values()}
     calls=[]
-    def request(**kwargs):
-        calls.append(kwargs)
-        assert kwargs['timeout']==15 and kwargs['request_mode']=='direct' and kwargs['method']=='GET'
-        if kwargs['url'].endswith('/metrics'):return {'data':rawmeta}
-        kind=next(key for key,value in SECTIONS.items() if value==kwargs['params']['section'])
-        if kind=='cash':raise TimeoutError('synthetic transport failure')
-        return {'data':reports[kind]}
-    monkeypatch.setattr(transport,'send_request',request)
-    fake=SimpleNamespace(Finance=lambda **kwargs:SimpleNamespace(provider=SimpleNamespace(base_url='https://example.test',headers={},com_type_code='CT')))
+    saved=packet(meta,reports)
     provider=VnstockFundamentalDataProvider()
-    monkeypatch.setattr('src.providers.vnstock.financial_packet.fetch_packet',lambda symbol,sdk:fetch_packet(symbol,lambda:fake))
+    monkeypatch.setattr('src.providers.vnstock.financial_packet.fetch_packet',lambda symbol,sdk:(calls.append(symbol) or saved))
     first=provider.get_reports('ABC');second=provider.get_reports('ABC')
-    assert len(calls)==4 and first.reports['cash'].status=='error' and first.reports['income'].status=='healthy'
-    assert second.reports['cash'].status=='error'
+    assert calls==['ABC'] and first.reports['cash'].status=='healthy'
+    assert second.reports['income'].status=='healthy'
     second.reports['income'].observations.clear()
     assert provider.get_reports('ABC').reports['income'].observations

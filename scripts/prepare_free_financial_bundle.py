@@ -31,6 +31,21 @@ def prepare(captures, destination, *, reports=(), summaries=(), memberships=None
             raise ValueError('Use original VCI baseline as capture input')
         data = pinned_file(source,entry['file'],entry['sha256'],32_000_000)
         add(entry['file'],data); index['captures'][ticker] = entry
+    prior_revisions = original.get('capture_history', {})
+    if not isinstance(prior_revisions, dict) or len(prior_revisions) > 2000:
+        raise ValueError('Invalid capture revision history')
+    for ticker, entries in prior_revisions.items():
+        if ticker not in index['captures'] or not isinstance(entries, list) or len(entries) > 100:
+            raise ValueError('Invalid capture revision history entry')
+        kept = []
+        for entry in entries:
+            if not isinstance(entry, dict) or entry.get('format') not in (
+                    None, 'vci-raw-capture-v1', 'canonical-financial-packet-v1'):
+                raise ValueError('Unsupported historical capture format')
+            data = pinned_file(source, entry['file'], entry['sha256'], 32_000_000)
+            add(entry['file'], data)
+            kept.append(entry)
+        index.setdefault('capture_history', {})[ticker] = kept
     for path in reports:
         path = Path(path).resolve(strict=True)
         if path.stat().st_size > 2_000_000:

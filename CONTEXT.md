@@ -1,6 +1,29 @@
 # Woofi — Domain Context
 
-## Financial Data Expansion V5.1 — current, 2026-10-21
+## Financial Data Expansion V5.2 — current, 2026-10-22
+
+The saved VCI capture bundle now has 23 issuers, up from ten in V5.1. A 13-company
+pilot used the installed `vnstock==4.0.2` public Finance methods for four quarterly
+and four annual periods per issuer. The batch is serial, resumable, hash-pinned,
+rate-paced, isolates issuer failures, and keeps immutable revisions; a shorter
+response cannot replace longer saved histories. The new bank sample includes
+ACB, BID, CTG, MBB and VPB; securities VCI; real estate VIC/VRE; manufacturing,
+retail and energy captures are also present. Existing V5.1 34-quarter histories
+remain unchanged. Current private API projections serve the new packets with
+income, balance and cash-flow statement families. Source labels/hierarchies are
+preserved; currency/unit, consolidation scope, exact fiscal boundaries and
+publication dates remain unknown when the SDK does not supply them. SSI-observed
+peer coverage has expanded, but taxonomy verification and peer rankings remain
+disabled. No paid provider, dependency upgrade, public-rights grant, UI redesign,
+preview restart or browser acceptance was added. Backend tests passed 1,618
+tests and 32 subtests; frontend 336 passed with one existing skip; typecheck and
+production build passed. The private API passed in-process checks for all 13 new
+issuers while FPT, TCB and VCB retained 34-quarter results. Visual/browser
+acceptance remains pending. See
+`docs/FINANCIAL_DATA_EXPANSION_V5_2.md` for per-company periods, line counts,
+industry sample sizes, API checks and regression results.
+
+## Financial Data Expansion V5.1 — historical, 2026-10-21
 
 The private VCI history path now exposes the existing 34 quarterly periods
 (2018-Q1–2026-Q2) for FPT, HPG, MWG, TCB, VCB and SSI. The previous eight-period

@@ -191,6 +191,29 @@ def test_preferred_reports_preserve_original_provider_history_and_no_corrupt_fal
     assert saved_research_packet(destination,'ABC',evidence='provider')[0].source=='vnstock:VCI'
 
 
+def test_private_bundle_preserves_hash_pinned_capture_revisions(tmp_path):
+    from scripts.prepare_free_financial_bundle import prepare
+    from test_personal_financials import source
+    baseline=tmp_path/'baseline';baseline.mkdir()
+    packet=source()
+    raw=packet.model_dump_json().encode()
+    (baseline/'current.json').write_bytes(raw)
+    old_raw=packet.model_copy(deep=True).model_dump_json(indent=2).encode()
+    (baseline/'old.json').write_bytes(old_raw)
+    index=dict(contract='personal-saved-captures-v1',
+        captures={'ABC':dict(file='current.json',sha256=hashlib.sha256(raw).hexdigest(),format='canonical-financial-packet-v1')},
+        capture_history={'ABC':[dict(file='old.json',sha256=hashlib.sha256(old_raw).hexdigest(),format='canonical-financial-packet-v1')]})
+    (baseline/'index.json').write_text(json.dumps(index),encoding='utf-8')
+    destination=tmp_path/'bundle'
+    prepare(baseline,destination)
+    result=json.loads((destination/'index.json').read_text(encoding='utf-8'))
+    assert result['capture_history']==index['capture_history']
+    assert (destination/'old.json').read_bytes()==old_raw
+    index['capture_history']['ABC'][0]['sha256']='0'*64
+    (baseline/'index.json').write_text(json.dumps(index),encoding='utf-8')
+    with pytest.raises(ValueError):prepare(baseline,tmp_path/'invalid-bundle')
+
+
 def membership_bundle(tmp_path):
     from src.services.industry_membership_review import review_memberships
     records=[dict(symbol=t,board='HOSE',stockType='Stock',icbCode='1234',icbName='Observed category') for t in ('ABC','DEF','GHI')]
