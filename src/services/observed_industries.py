@@ -13,7 +13,9 @@ METRICS = ('revenue','gross_profit','net_profit','profit_parent','total_assets',
     'equity','operating_income','net_interest_income','customer_loans','customer_deposits',
     'cash_operating','cash_investing','cash_financing','free_cash_flow','inventory',
     'gross_margin','net_margin','roe','roa','current_ratio','quick_ratio','debt_equity','loan_deposit_ratio',
-    'demand_deposit_share','npl_classified_ratio','classified_loan_coverage')
+    'demand_deposit_share','npl_classified_ratio','classified_loan_coverage',
+    'customer_loans_growth_yoy','customer_deposits_growth_yoy',
+    'customer_loans_growth_qoq','customer_deposits_growth_qoq')
 
 
 def membership_evidence(directory):

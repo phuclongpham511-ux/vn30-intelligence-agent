@@ -1,6 +1,26 @@
 # Woofi — Domain Context
 
-## Financial Intelligence V5.3 — current, 2026-10-22
+## Financial Intelligence V5.4 — current, 2026-10-22
+
+The existing private banking dashboard now compares customer-loan and customer-
+deposit growth from saved VCI lines for TCB, VCB, ACB, BID, CTG, MBB and VPB.
+Exact period pairs use the canonical engine formula; VCI-derived rates remain
+`PARTIALLY_VERIFIED` with missing reporting scope, fiscal boundaries,
+publication timing, original-document review and public-use rights explicit.
+Those rates are visible only in the authorized personal-research view. Public
+consumers continue to withhold them. Source-reported amounts and derived growth
+remain distinct. No new provider, acquisition, or chart system was added.
+
+The FY2025 bank comparison contains seven observed loan/deposit growth values,
+but only TCB and VCB form a comparable two-company sample out of 22 observed
+banks; no sector ranking is asserted. Existing TCB original-note NPL, allowance
+coverage and accounting demand-deposit-share metrics remain limited to 2024–25.
+NIM and cost of funds remain unavailable for lack of matched bases. Visual
+acceptance is pending; preview services were not restarted. See
+`docs/FINANCIAL_BANKING_SPECIALIST_V5_4.md` for periods, rates, evidence gates,
+sample counts and metric limits.
+
+## Financial Intelligence V5.3 — historical, 2026-10-22
 
 The private VCI research projection now turns source-reported VND statement
 lines into reusable sibling-component charts and separate unparented-line

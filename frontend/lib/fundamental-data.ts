@@ -9,6 +9,7 @@ export const FINANCIAL_LABELS = {
   ordinary_equity:'Ordinary shareholders capital and reserves',ordinary_shares:'Ordinary shares in circulation',bvps:'Period-end book value per ordinary share',eps_reported:'Reported basic EPS',roa:'ROA',debt_equity:'Debt / equity',liabilities_assets:'Liabilities / assets',
   loan_grade_1:'Standard loans',loan_grade_2:'Special mention loans',loan_grade_3:'Substandard loans',loan_grade_4:'Doubtful loans',loan_grade_5:'Loss loans',loan_allowance_general:'General loan allowance',loan_allowance_specific:'Specific loan allowance',
   customer_demand_deposits:'Customer demand deposits',classified_loans:'Classified customer loans',classified_nonperforming_loans:'Nonperforming classified loans',classified_loan_allowance:'Classified loan allowance',demand_deposit_share:'Demand-deposit share (accounting)',npl_classified_ratio:'NPL / classified customer loans',classified_loan_coverage:'Classified loan provision coverage',
+  customer_loans:'Customer loans',customer_deposits:'Customer deposits',customer_loans_growth_yoy:'Customer loans YoY',customer_deposits_growth_yoy:'Customer deposits YoY',customer_loans_growth_qoq:'Customer loans QoQ',customer_deposits_growth_qoq:'Customer deposits QoQ',
   current_ratio:'Current ratio',quick_ratio:'Quick ratio',cash_conversion:'Operating cash flow / profit',
 } as const;
 export type FinancialKey = keyof typeof FINANCIAL_LABELS;

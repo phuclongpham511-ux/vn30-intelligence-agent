@@ -59,6 +59,62 @@ def test_bank_is_not_given_industrial_revenue_or_inventory_ratios():
     assert next(p for p in view['research_panels'] if p['key']=='growth')['series'][0]['key']=='operating_income'
 
 
+def test_bank_growth_is_visible_only_as_partially_verified_from_exact_private_vci_period_pairs():
+    packet=source('NH')
+    for obs in packet.reports['balance'].observations:
+        if obs.frequency=='annual':
+            loan,deposit={'2023':(100,80),'2024':(110,88),'2025':(121,96)}[obs.period]
+        elif obs.period.startswith('2023'):
+            loan,deposit=100,80
+        elif obs.period.startswith('2024'):
+            loan,deposit=110,88
+        else:
+            loan,deposit=120+int(obs.period[-1])*10,96+int(obs.period[-1])*8
+        obs.fields.update(customer_loans=loan,customer_deposits=deposit)
+        obs.field_codes.update(customer_loans='bsb104',customer_deposits='bsb113')
+        for field,code,value in [('customer_loans','bsb104',loan),('customer_deposits','bsb113',deposit)]:
+            line=next(line for line in obs.items if line.code==code)
+            line.value=value;line.raw_value=value;line.unit='VND';line.semantic_status='reported'
+    annual=personal_projection(packet,frequency='annual',authorization_reference='synthetic-bank-growth')
+    qtr=personal_projection(packet,frequency='quarterly',authorization_reference='synthetic-bank-growth')
+    annual_latest=annual['rows'][-1]
+    assert annual_latest['customer_loans_growth_yoy']==pytest.approx(.1)
+    assert annual['verification']['periods'][-1]['metrics']['customer_loans_growth_yoy']['status']=='PARTIALLY_VERIFIED'
+    assert annual['verification']['periods'][-1]['metrics']['customer_loans_growth_yoy']['display_eligible'] is True
+    assert annual['verification']['periods'][-1]['metrics']['customer_loans_growth_yoy']['dimensions']['ACCOUNTING_VERIFIED'] is False
+    growth=next(panel for panel in annual['research_panels'] if panel['key']=='bank_growth')
+    assert growth['status']=='PARTIALLY_VERIFIED'
+    assert growth['rows'][-1]['values']['customer_loans_growth_yoy']==pytest.approx(.1)
+    assert growth['rows'][-1]['statuses']['customer_loans_growth_yoy']=='PARTIALLY_VERIFIED'
+    assert growth['rows'][-1]['values']['customer_loans_growth_qoq'] is None
+    qgrowth=next(panel for panel in qtr['research_panels'] if panel['key']=='bank_growth')
+    assert qgrowth['rows'][-1]['values']['customer_loans_growth_qoq']==pytest.approx(10/150)
+    assert qgrowth['rows'][-1]['values']['customer_deposits_growth_qoq']==pytest.approx(8/120)
+    assert qgrowth['rows'][-1]['values']['customer_loans_growth_yoy']==pytest.approx(50/110)
+    public=display_financial_response(financial_engine(packet,frequency='annual'))
+    assert all(row['customer_loans_growth_yoy'] is None for row in public.rows)
+
+
+@pytest.mark.parametrize('mutation',['prohibited','wrong_line','missing_comparable','conflicting_scope'])
+def test_private_bank_growth_fails_closed_on_bad_source_evidence(mutation):
+    packet=source('NH')
+    for obs in packet.reports['balance'].observations:
+        value=100 if obs.period=='2024' else 110
+        obs.fields.update(customer_loans=value,customer_deposits=value)
+        obs.field_codes.update(customer_loans='bsb104',customer_deposits='bsb113')
+        for code in ('bsb104','bsb113'):
+            line=next(line for line in obs.items if line.code==code)
+            line.value=value;line.raw_value=value;line.unit='VND';line.semantic_status='reported'
+    current=next(obs for obs in packet.reports['balance'].observations if obs.period=='2025')
+    prior=next(obs for obs in packet.reports['balance'].observations if obs.period=='2024')
+    if mutation=='prohibited':current.source_context.display_rights='prohibited'
+    elif mutation=='wrong_line':current.field_codes['customer_loans']='bsb999'
+    elif mutation=='missing_comparable':packet.reports['balance'].observations.remove(prior)
+    else:prior.consolidation='consolidated';current.consolidation='standalone'
+    result=personal_projection(packet,authorization_reference='synthetic-bank-growth')
+    assert result['rows'][-1]['customer_loans_growth_yoy'] is None
+
+
 def test_conflicting_bases_remain_individual_observations_but_never_form_a_chart():
     packet=source()
     for kind,receipt in packet.reports.items():

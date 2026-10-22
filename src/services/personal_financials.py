@@ -11,13 +11,19 @@ from pathlib import Path
 import re
 import math
 
-from src.analytics.financial_engine import financial_engine
+from src.analytics.financial_engine import financial_engine, previous
 from src.providers.vnstock.financial_packet import metadata_rows, packet_from_payloads
 from src.providers.vnstock.financial_statements import MAP, NON_FINANCIAL_ONLY, BANK_ONLY, statement_line_unit
 from src.schemas.financials import FinancialPacket
 from src.services.financial_presentation import display_financial_response
 
 CONFIDENCES = ('OFFICIAL_VERIFIED', 'RECONCILED', 'SOURCE_REPORTED', 'UNVERIFIED', 'INVALID')
+BANK_GROWTH_FIELDS = {
+    'customer_loans_growth_yoy': ('customer_loans', 'year'),
+    'customer_deposits_growth_yoy': ('customer_deposits', 'year'),
+    'customer_loans_growth_qoq': ('customer_loans', 'quarter'),
+    'customer_deposits_growth_qoq': ('customer_deposits', 'quarter'),
+}
 
 
 def saved_packet(directory, ticker, *, collection='captures'):
@@ -195,6 +201,7 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
     evidence = {}
     for raw, row in zip(full.rows, out['rows']):
         states = {}
+        calculated_states = {}
         for key, calc in raw['calculations'].items():
             refs = calc.get('inputs', [])
             # Exactly one original observation; never relabel YTD differences,
@@ -206,7 +213,20 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
                 states[key] = dict(data_confidence='SOURCE_REPORTED', access_classification='PERSONAL_RESEARCH',
                     consolidation=refs[0].get('consolidation'), source=packet.source,
                     receipt_sha256=refs[0]['content_sha256'], source_field=refs[0]['code'])
+        if packet.source == 'vnstock:VCI' and packet.profile == 'bank' and frequency in ('annual', 'quarterly'):
+            for key in BANK_GROWTH_FIELDS:
+                if _private_bank_growth_evidence(packet, raw, key, frequency):
+                    row[key] = raw[key]
+                    calculated_states[key] = dict(
+                        classification='DERIVED_FROM_SOURCE_REPORTED',
+                        status='PARTIALLY_VERIFIED',
+                        formula=raw['calculations'][key]['formula'],
+                        inputs=raw['calculations'][key]['inputs'],
+                        missing_evidence=['reporting_scope', 'fiscal_boundaries', 'qualified_publication_timestamp',
+                            'original_document_verification', 'public_display_permission'],
+                    )
         row['research_evidence'] = states
+        row['calculated_research_evidence'] = calculated_states
         evidence[row['period']] = states
     by_period = {r['period']: r for r in out['rows']}
     out['chart_rows'] = [{**r, **{k:v for k,v in by_period.get(r['period'],{}).items() if k != 'calculations'}} for r in out['chart_rows']]
@@ -276,6 +296,22 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
                         point['bases'][key] = evidence[point['period']][key]['consolidation']
             if any(v is not None for p in panel['rows'] for v in p['values'].values()):
                 panel['status'] = 'SOURCE_REPORTED'
+        if panel['key'] == 'bank_growth' and packet.source == 'vnstock:VCI' and packet.profile == 'bank':
+            partial_visible = False
+            research_rows = {row['period']: row for row in out['rows']}
+            for point in panel['rows']:
+                research_row = research_rows.get(point['period'], {})
+                for series in panel['series']:
+                    key = series['key']
+                    if key in research_row.get('calculated_research_evidence', {}):
+                        point['values'][key] = research_row[key]
+                        point['statuses'][key] = 'PARTIALLY_VERIFIED'
+                        point['bases'][key] = None
+                        partial_visible = True
+            if partial_visible:
+                panel['status'] = 'PARTIALLY_VERIFIED'
+                panel['partial'] = True
+                panel['reasons'].append('Calculated from source-reported VCI balance lines; scope, exact fiscal boundaries, publication timing and public-display rights are not verified.')
     keys = ['total_assets', 'total_liabilities', 'equity']
     out['research_panels'].append(dict(key='balance_history', title='Reported balance history', chart='performance',
         source=packet.source, frequency=frequency, status='SOURCE_REPORTED' if any(k in e for e in evidence.values() for k in keys) else 'UNAVAILABLE',
@@ -302,6 +338,63 @@ def personal_projection(packet, *, frequency='annual', limit=8, authorization_re
     from src.services.financial_verification import verification_assessment
     out['verification'] = verification_assessment(full, out['rows'], audience='personal_research')
     return out
+
+
+def _private_bank_growth_evidence(packet, row, key, frequency):
+    """Qualify a narrow, private VCI growth display without upgrading its evidence grade.
+
+    The calculation is visible as PARTIALLY_VERIFIED only when the exact source
+    line code, period pair, VND amount and immutable receipt are consistent.
+    Reporting scope, fiscal boundaries, publication time and public rights stay
+    explicit gaps; this helper never authorizes public use or peer ranking.
+    """
+    if key not in BANK_GROWTH_FIELDS or frequency not in ('annual', 'quarterly'):
+        return False
+    field, interval = BANK_GROWTH_FIELDS[key]
+    if interval == 'quarter' and frequency != 'quarterly':
+        return False
+    calculation = row.get('calculations', {}).get(key, {})
+    current = row.get(key)
+    refs = calculation.get('inputs', [])
+    if calculation.get('reason') or type(current) not in (int, float) or not math.isfinite(current) or len(refs) != 2:
+        return False
+    prior_period = previous(row['period'], years=1) if interval == 'year' else previous(row['period'], quarters=1)
+    if {ref.get('period') for ref in refs} != {row['period'], prior_period}:
+        return False
+    code = MAP['balance'][field][0]
+    observations = []
+    for ref in refs:
+        if (ref.get('statement') != 'balance' or ref.get('field') != field or ref.get('code') != code
+                or ref.get('source') != packet.source or ref.get('currency') != 'VND'
+                or ref.get('basis') != 'point_in_time' or type(ref.get('value')) not in (int, float)
+                or not math.isfinite(ref['value']) or not ref.get('content_sha256')):
+            return False
+        obs = next((item for item in packet.reports['balance'].observations if item.period == ref['period']), None)
+        if (obs is None or obs.frequency != frequency or obs.basis != 'point_in_time'
+                or obs.source != packet.source or obs.source_context is None
+                or obs.source_context.display_rights == 'prohibited'
+                or obs.source_context.unit_evidence != 'audited_vci_adapter_contract'
+                or obs.source_context.amount_multiplier != 1
+                or obs.field_codes.get(field) != code or obs.fields.get(field) != ref['value']):
+            return False
+        source_context = ref.get('source_context') or {}
+        expected_receipt = obs.source_context.original_metadata.get(
+            'original_receipt_sha256', packet.reports['balance'].content_sha256)
+        if (source_context.get('record_sha256') != obs.source_context.record_sha256
+                or ref.get('content_sha256') != expected_receipt):
+            return False
+        line = next((item for item in obs.items if item.code == code), None)
+        if (line is None or line.semantic_status != 'reported' or line.unit != 'VND'
+                or line.value != ref['value'] or line.raw_value != ref['value']):
+            return False
+        observations.append(obs)
+    if len({obs.source_context.record_sha256 for obs in observations}) != 2:
+        return False
+    if len({ref.get('content_sha256') for ref in refs}) != 1:
+        return False
+    if len({ref.get('consolidation') for ref in refs}) != 1:
+        return False
+    return True
 
 
 def _vci_hierarchy_component_panels(packet, chart_rows, frequency):

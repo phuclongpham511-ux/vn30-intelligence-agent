@@ -124,6 +124,12 @@ def financial_research_panels(result):
             ('customer_loans','Customer loans','VND'),('customer_deposits','Customer deposits','VND'),
             ('loan_deposit_ratio','Accounting loans / deposits','fraction')] if bank else [], False,
          'Gross customer loans and customer deposits are period-end amounts. Their accounting ratio is not regulatory LDR. NIM, CASA and NPL are not inferred.'),
+        ('bank_growth', 'Bank credit and deposit growth', 'performance', [
+            ('customer_loans_growth_yoy','Customer loans YoY','fraction'),
+            ('customer_deposits_growth_yoy','Customer deposits YoY','fraction'),
+            ('customer_loans_growth_qoq','Customer loans QoQ','fraction'),
+            ('customer_deposits_growth_qoq','Customer deposits QoQ','fraction')] if bank else [], True,
+         'Calculated from the same source-reported period-end customer-loan and customer-deposit lines. Rates require the exact comparable prior period and a positive prior balance; provider histories with unknown scope or fiscal boundaries remain partially verified in personal research.'),
         ('bank_quality', 'Bank deposit and credit quality', 'performance', [
             ('demand_deposit_share','Demand-deposit share (accounting)','fraction'),
             ('npl_classified_ratio','NPL / classified customer loans','fraction'),

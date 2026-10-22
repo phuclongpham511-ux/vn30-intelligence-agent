@@ -13,7 +13,7 @@ def panels(p=None, frequency='annual'):
 
 def test_all_six_panels_exist_and_use_individually_qualified_values_without_new_math():
     output = panels()
-    assert set(output) == {'assets', 'funding', 'growth', 'quarterly', 'pe', 'pb','cashflow','profitability','liquidity','bank_funding','bank_quality'}
+    assert set(output) == {'assets', 'funding', 'growth', 'quarterly', 'pe', 'pb','cashflow','profitability','liquidity','bank_funding','bank_growth','bank_quality'}
     funding = output['funding']['rows'][-1]['values']
     assert funding == {'total_liabilities': 120, 'equity': 100, 'liabilities_assets': .6}
     assert output['growth']['rows'][-1]['values']['revenue'] == 120
@@ -23,6 +23,7 @@ def test_all_six_panels_exist_and_use_individually_qualified_values_without_new_
     for key in ('pe', 'pb', 'quarterly'):
         assert output[key]['status'] == 'UNAVAILABLE'
         assert all(v is None for p in output[key]['rows'] for v in p['values'].values())
+    assert output['bank_growth']['status']=='UNAVAILABLE'
 
 
 def test_unknown_basis_and_missing_rights_never_reappear_through_panel_projection():
@@ -80,6 +81,10 @@ def test_bank_projection_uses_loans_and_operating_income_not_industrial_metrics(
     keys = {s['key'] for s in output['growth']['series']}
     assert 'operating_income' in keys and 'revenue' not in keys
     assert output['growth']['status'] == 'DEMO'
+    assert output['bank_growth']['status']=='UNAVAILABLE'
+    assert {s['key'] for s in output['bank_growth']['series']} == {
+        'customer_loans_growth_yoy','customer_deposits_growth_yoy',
+        'customer_loans_growth_qoq','customer_deposits_growth_qoq'}
     assert not any(x['status'] == 'QUALIFIED' for x in output.values())
 
 

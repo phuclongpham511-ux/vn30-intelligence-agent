@@ -3,7 +3,7 @@ import {FINANCIAL_LABELS,noteFinancialFields,type FinancialKey} from './fundamen
 import {validateFinancialPanels} from './financial-panels.ts';
 import {validateFinancialVerification} from './financial-verification.ts';
 
-const optionalLegacyFields=new Set<string>(noteFinancialFields);
+const optionalLegacyFields=new Set<string>([...noteFinancialFields,'customer_loans','customer_deposits','customer_loans_growth_yoy','customer_deposits_growth_yoy','customer_loans_growth_qoq','customer_deposits_growth_qoq']);
 
 /** Validate presentation ownership; all financial calculations remain in Python. */
 export function financialEngineData(data:FundamentalResearch,ticker:string,frequency:FinancialFrequency,requireSummary=false,allowInternal=false,allowPersonal=false):FundamentalResearch{

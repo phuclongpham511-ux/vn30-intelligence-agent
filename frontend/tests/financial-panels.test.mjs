@@ -45,6 +45,28 @@ test('personal VCI hierarchy panels preserve sibling values and never mix public
  const wrongValue=structuredClone(data);wrongValue.research_panels[0].rows[0].values.bsa902=41;assert.throws(()=>validateFinancialPanels(wrongValue),/source line/);
 });
 
+test('partially verified bank growth is private, source-matched, formula-checked and chartable',()=>{
+ const hash='a'.repeat(64),record='b'.repeat(64),priorRecord='c'.repeat(64);
+ const context=recordHash=>({unit_evidence:'audited_vci_adapter_contract',amount_multiplier:1,display_rights:'unreviewed',record_sha256:recordHash});
+ const refs=[
+  {statement:'balance',period:'2025',field:'customer_loans',code:'bsb104',value:110,source:'vnstock:VCI',currency:'VND',basis:'point_in_time',consolidation:null,content_sha256:hash,source_context:context(record)},
+  {statement:'balance',period:'2024',field:'customer_loans',code:'bsb104',value:100,source:'vnstock:VCI',currency:'VND',basis:'point_in_time',consolidation:null,content_sha256:hash,source_context:context(priorRecord)},
+ ];
+ const line=(value)=>({code:'bsb104',name_en:'Loans and advances to customers',name_vi:'Cho vay khách hàng',parent:null,unit:'VND',value,raw_value:value,semantic_status:'reported'});
+ const panel={key:'bank_growth',title:'Bank credit and deposit growth',chart:'performance',source:'vnstock:VCI',frequency:'annual',status:'PARTIALLY_VERIFIED',partial:true,methodology:'Calculated from source-reported balances; metadata remains incomplete.',reasons:['Scope is unknown.'],series:[{key:'customer_loans_growth_yoy',label:'Customer loans YoY',unit:'fraction'}],rows:[{period:'2025',values:{customer_loans_growth_yoy:.1},statuses:{customer_loans_growth_yoy:'PARTIALLY_VERIFIED'},bases:{customer_loans_growth_yoy:null}}]};
+ const data={display_scope:'personal_research',access_classification:'PERSONAL_RESEARCH',source:'vnstock:VCI',profile:'bank',period_type:'annual',is_fixture:false,
+  chart_rows:[{period:'2025',customer_loans_growth_yoy:.1,calculations:{customer_loans_growth_yoy:{formula:'(current - prior) / prior',inputs:refs}}}],
+  statements:{balance:{periods:[{period:'2025',source:'vnstock:VCI',basis:'point_in_time',source_context:context(record),items:[line(110)]},{period:'2024',source:'vnstock:VCI',basis:'point_in_time',source_context:context(priorRecord),items:[line(100)]}]}},
+  verification:{periods:[{period:'2025',metrics:{customer_loans_growth_yoy:{status:'PARTIALLY_VERIFIED',display_eligible:true,public_display_eligible:false,missing_evidence:['reporting_scope'],dimensions:{ACCOUNTING_VERIFIED:false}}}}]},research_panels:[panel]};
+ assert.doesNotThrow(()=>validateFinancialPanels(data));
+ const html=render(Panel,{kind:'bank_growth',panel,unit:'billions',personalResearch:true});
+ assert.match(html,/data-chart-availability="available"/);assert.match(html,/PARTIALLY_VERIFIED/);assert.match(html,/10/);
+ const forged=structuredClone(data);forged.chart_rows[0].customer_loans_growth_yoy=.8;forged.research_panels[0].rows[0].values.customer_loans_growth_yoy=.8;
+ assert.throws(()=>validateFinancialPanels(forged),/partially verified|displayed observation/i);
+ const publicData=structuredClone(data);publicData.display_scope='public';publicData.access_classification='PUBLIC_DISPLAY_REVIEW_REQUIRED';
+ assert.throws(()=>validateFinancialPanels(publicData));
+});
+
 test('valuation, negative compositions and annual-labelled quarterly values fail closed',()=>{
  const negative=example();negative.rows[0].equity=-30;negative.research_panels[0].rows[0].values.equity=-30;
  assert.throws(()=>financialEngineData(negative,'ABC','annual',true),/composition/);
