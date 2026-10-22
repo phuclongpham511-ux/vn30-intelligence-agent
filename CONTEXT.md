@@ -1,5 +1,20 @@
 # Woofi — Domain Context
 
+## Financial SQLite foundation V5.5 — private offline storage, 2026-10-22
+
+The dedicated financial MetricJournal now supports explicit backed-up schema
+upgrades, immutable capture revisions, complete annual/quarterly statement
+observations and source/basis/scope-specific period selection. The existing
+23-issuer bundle and five reviewed alternatives are mirrored privately; all
+eight 34-quarter histories, source codes, hierarchies, nulls and provenance remain.
+Shorter saved candidates can add new periods without replacing older revisions.
+Persistence is independent of the unchanged engine/display response limits;
+the legacy metric importer now requests 40 rather than 20 periods and also keeps
+all base statements. Read-only parity tools reuse existing packet/projection
+contracts. APIs still read saved captures; no database serving, acquisition,
+production/configuration, frontend or rights changes were activated. See
+`docs/FINANCIAL_SQLITE_STORAGE_V5_5.md` for commands, coverage and rollback.
+
 ## Financial Intelligence V5.4 — current, 2026-10-22
 
 The existing private banking dashboard now compares customer-loan and customer-

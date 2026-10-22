@@ -41,6 +41,14 @@ def saved_packet(directory, ticker, *, collection='captures'):
     item = index.get(collection, {}).get(ticker)
     if not item:
         raise FileNotFoundError('Saved research coverage unavailable')
+    return saved_capture_entry(root, ticker, item)
+
+
+def saved_capture_entry(directory, ticker, item):
+    """Read one pinned current or historical entry without rewriting its index."""
+    if not re.fullmatch(r'[A-Z0-9]{1,20}', ticker):
+        raise ValueError('Invalid ticker')
+    root = Path(directory).resolve(strict=True)
     path = (root / item['file']).resolve(strict=True)
     canonical = item.get('format') == 'canonical-financial-packet-v1'
     if item.get('format') not in (None, 'vci-raw-capture-v1', 'canonical-financial-packet-v1', 'reviewed-report-v2', 'reviewed-report-history-v1', 'cafef-saved-annual-v1'):

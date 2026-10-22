@@ -160,7 +160,8 @@ def test_offline_ingestion_is_dynamic_idempotent_and_records_actual_denominators
     from scripts import ingest_financial_intelligence as command
     captures=tmp_path/'captures';captures.mkdir()
     (captures/'index.json').write_text(json.dumps({'contract':'personal-saved-captures-v1','captures':{'DEF':{}}}))
-    monkeypatch.setattr(command,'saved_packet',lambda root,ticker:(balanced(ticker),'a'*64))
+    packet=balanced('DEF')  # A saved capture has fixed receipt timestamps on every read.
+    monkeypatch.setattr(command,'saved_packet',lambda root,ticker:(packet,'a'*64))
     first=command.ingest(captures,tmp_path/'journal.sqlite',tmp_path/'report')
     second=command.ingest(captures,tmp_path/'journal.sqlite',tmp_path/'report')
     assert first['inserted_revisions']>0 and second['inserted_revisions']==0
