@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+## Financial coverage intelligence V5.6 — private offline planning, 2026-10-22
+
+Two dated HOSE membership snapshots (effective 2026-02-02 and 2026-08-03) now
+frame a read-only VN30/VN100 financial coverage inventory over the V5.5 SQLite
+journal. The July snapshot confirms 30 VN30 and 100 VN100 constituents; 20 and
+23 respectively have saved financial data. An internal service and CLI derive
+statement/metric/industry gaps and a prioritized machine-readable acquisition
+backlog without duplicating observations or changing HTTP contracts. Missing
+history stays unknown outside observed boundaries, proposed source availability
+remains untested, SSI industry labels stay provisional, and stored values retain
+their separate public-display gates. See `docs/FINANCIAL_COVERAGE_V5_6.md` and
+the per-ticker CSV for evidence and limits.
+
 ## Financial SQLite foundation V5.5 — private offline storage, 2026-10-22
 
 The dedicated financial MetricJournal now supports explicit backed-up schema
