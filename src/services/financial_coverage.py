@@ -123,6 +123,10 @@ def _public_eligible(observation):
 
 
 def _metric_state(facts, field_observations, statement):
+    if facts and not field_observations and all(
+        'reported_definition_or_scope_unverified' in f.get('quality_reasons', []) for f in facts
+    ):
+        return 'PARTIAL', 'reported_definition_or_scope_unverified'
     if any(f['quality_status'] == 'QUALIFIED' and f['value'] is not None for f in facts):
         return 'AVAILABLE', 'qualified_calculation_or_reported_fact'
     if any(f['metric_kind'] == 'reported' and any(r.get('value') is not None for r in f['input_refs'])

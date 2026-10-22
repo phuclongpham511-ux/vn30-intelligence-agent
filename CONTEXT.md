@@ -1,5 +1,18 @@
 # Woofi — Domain Context
 
+## Financial collector V5.7 — controlled private pilot, 2026-10-22
+
+A bounded collector now consumes fingerprinted V5.6 P0 tasks and appends to the
+existing V5.5 journal. HDB/MSN/VJC add four annual and four quarterly periods each;
+an independently reviewed HDB original adds 24 source amounts. Coverage rises
+from 23 to 26 VN100 issuers, resolving 18 initial statement-family P0 gaps. Original
+document bytes, SDK captures, reviewed evidence, resumable acquisition state and
+before/after reports remain private. A directly reported HDB NIM is retained as
+unqualified page evidence and PARTIAL coverage; public rights are not promoted.
+Existing source revisions and longer histories remain unchanged. See
+`docs/FINANCIAL_COLLECTOR_V5_7.md` for source restrictions, commands and measured
+limits. APIs and the Financial Engine retain their existing behavior.
+
 ## Financial coverage intelligence V5.6 — private offline planning, 2026-10-22
 
 Two dated HOSE membership snapshots (effective 2026-02-02 and 2026-08-03) now
