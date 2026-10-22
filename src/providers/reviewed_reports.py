@@ -1,9 +1,10 @@
 """Offline, hash-pinned original-report evidence for the existing financial engine.
 
-Selected annual fields only. Page text/transcriptions and rendered pages remain
+Selected annual/quarterly fields only. Page text/transcriptions and rendered pages remain
 private. A review is not an audit opinion, publication vintage or public licence.
 """
 from datetime import date, datetime
+from calendar import monthrange
 from decimal import Decimal
 import hashlib
 from pathlib import Path
@@ -49,6 +50,9 @@ class ReportAmount(StrictEvidence):
     unit: Literal['VND', 'thousand VND', 'million VND', 'billion VND', 'VND/share', 'shares']
     period_start: str | None = None
     period_end: str
+    quarter: int | None = Field(default=None, ge=1, le=4)
+    flow_basis: Literal['standalone', 'ytd'] | None = None
+    period_quote: Quote | None = None
 
 
 class ReviewedReport(StrictEvidence):
@@ -81,6 +85,47 @@ def pinned_file(root, filename, digest, bound):
     if hashlib.sha256(data).hexdigest() != digest:
         raise ValueError('Report evidence hash mismatch')
     return data
+
+
+def _date_in_quote(value, text):
+    forms = [value.isoformat(), value.strftime('%d.%m.%Y'), value.strftime('%d/%m/%Y'),
+             f'{value.day} {value:%B %Y}', value.strftime('%d %B %Y')]
+    return any(re.search(r'(?<!\d)' + re.escape(form) + r'(?!\d)', text, re.I) for form in forms)
+
+
+def _amount_period(amount, kind, quote):
+    start = date.fromisoformat(amount.period_start) if amount.period_start else None
+    end = date.fromisoformat(amount.period_end)
+    if amount.quarter is None:
+        if (amount.flow_basis is not None or amount.period_quote is not None
+                or end != date(amount.year, 12, 31)
+                or kind != 'balance' and start != date(amount.year, 1, 1)
+                or start and start != date(amount.year, 1, 1)):
+            raise ValueError('Unsupported or contradictory fiscal boundaries')
+        return str(amount.year), None if kind == 'balance' else start, end, 'point_in_time' if kind == 'balance' else 'annual'
+    month = amount.quarter * 3
+    if end != date(amount.year, month, monthrange(amount.year, month)[1]) or amount.period_quote is None:
+        raise ValueError('Quarter requires explicit matching fiscal boundaries')
+    text = quote(amount.period_quote)
+    if not _date_in_quote(end, text):
+        raise ValueError('Quarter end lacks original date evidence')
+    if kind == 'balance':
+        if start is not None or amount.flow_basis is not None:
+            raise ValueError('Balance must remain a point-in-time observation')
+        basis = 'point_in_time'
+    else:
+        if amount.flow_basis is None:
+            raise ValueError('Quarterly flow basis must be explicit')
+        first_month = 1 if amount.flow_basis == 'ytd' else month - 2
+        if start != date(amount.year, first_month, 1):
+            raise ValueError('Quarterly start contradicts flow basis')
+        # A calendar-year first quarter explicitly starts on January 1. Other
+        # quarters need both dates so a six-month YTD cannot become Q2 alone.
+        first_quarter = amount.quarter == 1 and re.search(r'first\s+quarter', text, re.I)
+        if not _date_in_quote(start, text) and not first_quarter:
+            raise ValueError('Quarter start lacks original date evidence')
+        basis = amount.flow_basis
+    return f'{amount.year}-Q{amount.quarter}', start, end, basis
 
 
 def report_packet(manifest, directory):
@@ -125,15 +170,16 @@ def report_packet(manifest, directory):
         raise ValueError('Only explicit calendar-year statements supported')
     if not re.search(r'VND|đồng Việt Nam|Vietnamese [Dd]ong', quote(e.currency_quote)):
         raise ValueError('Currency lacks original evidence')
-    grouped = {}
+    grouped, period_metadata = {}, {}
     for a in e.amounts:
         # FX is a reviewed reconciliation line, not a new headline metric.
         kind = 'cash' if a.field == 'cash_fx_effect' else FIELD_KIND.get(a.field)
         if kind is None or a.field in NON_FINANCIAL_ONLY and e.profile != 'non_financial' or a.field in (BANK_ONLY | BANK_NOTE_AMOUNTS) and e.profile != 'bank':
             raise ValueError('Unsupported field or issuer model')
-        start, end = date.fromisoformat(a.period_start) if a.period_start else None, date.fromisoformat(a.period_end)
-        if end != date(a.year, 12, 31) or (kind != 'balance' and start != date(a.year, 1, 1)) or (start and start != date(a.year, 1, 1)):
-            raise ValueError('Unsupported or contradictory fiscal boundaries')
+        period, start, end, basis = _amount_period(a, kind, quote)
+        boundaries = (start, end, basis)
+        if period_metadata.setdefault((kind, period), boundaries) != boundaries:
+            raise ValueError('Conflicting statement period bases')
         source_row, header, unit_quote = quote(a.source_row), quote(a.column_header), quote(a.unit_quote)
         if a.label not in source_row or str(a.year) not in (source_row if a.period_layout=='row' else header):
             raise ValueError('Original field/column missing')
@@ -143,8 +189,8 @@ def report_packet(manifest, directory):
             raise ValueError('Reviewer locator must be distinguished from printed code')
         # The selected token is a complete original cell, not a code/note substring.
         if (len(a.column_periods) != len(a.column_values) or len(set(a.column_periods)) != len(a.column_periods)
-                or str(a.year) not in a.column_periods
-                or a.column_values[a.column_periods.index(str(a.year))] != a.raw_token
+                or period not in a.column_periods
+                or a.column_values[a.column_periods.index(period)] != a.raw_token
                 or source_row.split()[-len(a.column_values):] != a.column_values):
             raise ValueError('Original monetary cell missing')
         token = a.raw_token
@@ -166,7 +212,9 @@ def report_packet(manifest, directory):
             multiplier=scales[a.unit], page=a.source_row.page, period_start=a.period_start,
             period_end=a.period_end, source_row=a.source_row.model_dump(), column_header=a.column_header.model_dump())
         if a.period_layout=='row':record['period_layout']='row'
-        bucket = grouped.setdefault((kind, str(a.year)), {})
+        if a.quarter is not None:
+            record.update(fiscal_quarter=a.quarter, basis=basis, period_quote=a.period_quote.model_dump())
+        bucket = grouped.setdefault((kind, period), {})
         if a.field in bucket:
             raise ValueError('Duplicate report field/period')
         bucket[a.field] = record
@@ -198,8 +246,10 @@ def report_packet(manifest, directory):
                 checks[-1].update(cash_flow_identity=cash_identity, cash_flow_residual=cash_residual,
                     cash_endpoint_identity=endpoint_identity, cash_endpoint_residual=endpoint_residual)
                 valid = valid and cash_identity != 'FAIL'
-            context = FinancialSourceContext(fiscal_year=int(period),
-                period_start=f'{period}-01-01' if kind != 'balance' else None, period_end=f'{period}-12-31',
+            start, end, basis = period_metadata[(kind, period)]
+            quarter = int(period[-1]) if '-Q' in period else None
+            context = FinancialSourceContext(fiscal_year=int(period[:4]), fiscal_quarter=quarter,
+                period_start=start.isoformat() if start else None, period_end=end.isoformat(),
                 original_currency='VND', original_unit=next(iter(records.values()))['original_unit'],
                 amount_multiplier=next(iter(records.values()))['multiplier'], unit_evidence='original_filing',
                 record_sha256=content_hash(records),
@@ -212,7 +262,7 @@ def report_packet(manifest, directory):
                     cash_flow_identity=cash_identity, cash_endpoint_identity=endpoint_identity,
                     page_evidence={str(n): dict(text_sha256=p.text_sha256, image_sha256=p.image_sha256, method=p.method) for n,p in pages.items()}))
             observations.append(StatementObservation(ticker=e.ticker, source=e.source, statement=kind,
-                period=period, frequency='annual', basis='point_in_time' if kind == 'balance' else 'annual',
+                period=period, frequency='quarterly' if quarter else 'annual', basis=basis,
                 consolidation=e.scope, source_context=context,
                 fields={f: records[f]['normalized_value'] if f in records else None for f in (*MAP[kind], *NOTE_FIELDS.get(kind,{}))},
                 field_codes={f:r['code'] for f,r in records.items()},
@@ -223,6 +273,12 @@ def report_packet(manifest, directory):
         reports[kind] = StatementReceipt(statement=kind, status='healthy' if observations else 'unavailable',
             observations=observations, observed_at=observed, source_url=e.document_url,
             content_sha256=content_hash([o.model_dump(mode='json') for o in observations]) if observations else None)
+    metadata = e.model_dump()
+    # Preserve exact annual packet identities for existing immutable revisions.
+    for amount in metadata['amounts']:
+        for key in ('quarter', 'flow_basis', 'period_quote'):
+            if amount[key] is None:
+                amount.pop(key)
     return FinancialPacket(ticker=e.ticker, source=e.source, source_version='reviewed-report-v2',
-        company_type=e.company_type, profile=e.profile, metadata_sha256=content_hash(e.model_dump()),
+        company_type=e.company_type, profile=e.profile, metadata_sha256=content_hash(metadata),
         reports=reports), dict(checks=checks, selected_reported_fields=len(e.amounts), public_activated=False)

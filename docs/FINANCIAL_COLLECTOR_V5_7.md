@@ -4,6 +4,10 @@ Assessment: 22 October 2026. Baseline: `94baed8` on
 `feature/financial-data-intelligence`. The pilot consumes the preserved V5.6
 backlog and the dated August 2026 VN30 membership snapshot.
 
+The subsequent [cached VJC quarterly review](FINANCIAL_COLLECTOR_V5_7_VJC_FOLLOWUP.md)
+records the completed selected-row extraction and its separate before/after audit.
+The measurements below describe the original pilot checkpoint.
+
 ## Pilot and measured result
 
 HDB, MSN and VJC were selected from the actual P0 backlog: each had zero saved
