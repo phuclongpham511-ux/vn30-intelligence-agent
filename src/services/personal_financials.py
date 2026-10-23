@@ -177,6 +177,30 @@ def validated_canonical_packet(data):
     return packet
 
 
+def saved_financial_insights(journal_path, capture_id, *, authorization_reference,
+                            metrics=None, frequency='annual', comparison='yoy', current_period=None):
+    """Explicit whole-revision private research; never change SQLite selection."""
+    from src.services.financial_journal import MetricJournal
+    from src.services.financial_insights import financial_insights
+
+    if not isinstance(authorization_reference, str) or not authorization_reference.strip():
+        raise ValueError('Financial insights require explicit private research authorization')
+    journal = MetricJournal(journal_path, readonly=True)
+    packet = journal.read_packet(capture_id)
+    capture = next(c for c in journal.captures(ticker=packet.ticker, source=packet.source)
+        if c['capture_id'] == capture_id)
+    out = financial_insights(packet, metrics=metrics, frequency=frequency, comparison=comparison,
+        current_period=current_period, authorization_reference=authorization_reference)
+    out.capture_id = capture_id
+    out.capture_sha256 = capture['capture_sha256']
+    out.packet_sha256 = capture['packet_sha256']
+    for insight in out.insights:
+        for ref in insight.evidence_references:
+            ref.update(capture_id=capture_id, capture_sha256=capture['capture_sha256'],
+                packet_sha256=capture['packet_sha256'])
+    return out
+
+
 def personal_projection(packet, *, frequency='annual', limit=8, authorization_reference):
     if (authorization_reference and not packet.is_fixture and packet.source.startswith('issuer:')
             and packet.source_version in ('reviewed-report-v2','reviewed-report-history-v1')):

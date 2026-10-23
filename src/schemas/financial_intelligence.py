@@ -1,7 +1,7 @@
 """Versioned facts for offline ingestion and compatible industry comparisons."""
 from datetime import date
 from typing import Literal
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, ConfigDict, Field, model_validator
 from src.schemas.data import DataModel
 from src.schemas.financials import Frequency
 
@@ -67,6 +67,63 @@ class MetricSeriesResponse(DataModel):
     observations: list[MetricObservation]
     point_in_time_qualified: Literal[False] = False
     limitations: list[str] = Field(default_factory=list)
+
+
+class FinancialAttention(DataModel):
+    model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
+    policy: Literal['financial-attention-v1'] = 'financial-attention-v1'
+    noteworthy: bool = False
+    criteria: list[str] = Field(default_factory=list)
+    thresholds: dict[str, float] = Field(default_factory=lambda: dict(
+        relative_movement=.20, fraction_change=.05, multiple_change=.25,
+        historical_multiplier=3., minimum_historical_changes=5.))
+    historical_status: Literal['ASSESSED', 'INSUFFICIENT_COMPARABLE_DATA'] = 'INSUFFICIENT_COMPARABLE_DATA'
+    historical_median_absolute_change: float | None = None
+    historical_comparisons: list[dict] = Field(default_factory=list)
+
+
+class FinancialInsight(DataModel):
+    model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
+    ticker: str
+    metric: str
+    unit: str
+    metric_formula: str | None
+    change_formula: Literal['current - comparison; (current - comparison) / comparison only for a positive comparison value'] = 'current - comparison; (current - comparison) / comparison only for a positive comparison value'
+    current_period: str | None
+    comparison_period: str | None
+    current_value: float | None
+    comparison_value: float | None
+    absolute_change: float | None
+    percentage_change: float | None
+    observed_change: Literal['INCREASE', 'DECREASE', 'UNCHANGED', 'OBSERVATION_ONLY', 'UNAVAILABLE']
+    attention_reason: FinancialAttention
+    evidence_references: list[dict]
+    missing_information: list[str]
+    qualification_status: Literal['COMPARABLE', 'INSUFFICIENT_COMPARABLE_DATA']
+    verification_dimensions: dict[str, bool]
+    causal_explanation: None = None
+
+
+class FinancialInsightsResponse(DataModel):
+    model_config = ConfigDict(extra='forbid', allow_inf_nan=False)
+    contract: Literal['financial-insights-v58'] = 'financial-insights-v58'
+    ticker: str
+    source: str
+    frequency: Literal['annual', 'quarterly']
+    comparison: Literal['yoy', 'qoq']
+    display_scope: Literal['internal_research'] = 'internal_research'
+    authorization_reference: str
+    capture_id: str | None = None
+    capture_sha256: str | None = None
+    packet_sha256: str
+    is_fixture: bool
+    insights: list[FinancialInsight]
+    public_display_activated: Literal[False] = False
+    limitations: list[str] = Field(default_factory=lambda: [
+        'Private research; comparison qualification does not grant publication rights.',
+        'Publication vintage is not qualified; not a point-in-time backtest.',
+        'Numerical movements alone do not establish causes or predict future results.',
+    ])
 
 
 class IndustryDefinition(DataModel):
