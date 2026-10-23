@@ -1,8 +1,9 @@
-"""Default-off, socket-verified loopback access; no provider or database calls."""
+"""Default-off, socket-verified loopback access; no acquisition or journal writes."""
 import os
+import sqlite3
 from fastapi import APIRouter, HTTPException, Request, Query, Path, Depends
 from typing import Literal
-from src.services.personal_financials import saved_research_packet, personal_projection
+from src.services.personal_financials import configured_research_packet, personal_projection
 
 def require_personal_request(request: Request):
     if (os.getenv('WOOFI_PERSONAL_RESEARCH') != '1' or os.getenv('APP_ENV') != 'development'
@@ -19,26 +20,30 @@ router = APIRouter(prefix='/personal-research', include_in_schema=False,
 @router.get('/financials/{symbol}')
 def financials(request: Request, symbol: str = Path(pattern=r'^[A-Z0-9]{1,20}$'),
                frequency: Literal['annual','quarterly','ttm'] = 'annual', limit: int = Query(34, ge=1, le=40),
-               evidence: Literal['preferred','provider'] = 'preferred'):
+               evidence: Literal['preferred','provider'] = 'preferred',
+               source: str | None = Query(None, max_length=200),
+               capture_id: str | None = Query(None, pattern=r'^[a-f0-9]{64}$')):
     # request.client is the ASGI socket peer, not X-Forwarded-For. The supported
     # launcher disables proxy_headers and binds only the numeric loopback host.
     try:
-        packet, digest = saved_research_packet(os.environ['WOOFI_PERSONAL_CAPTURES'], symbol,
-            frequency=frequency, evidence=evidence)
+        packet, digest = configured_research_packet(os.environ['WOOFI_PERSONAL_CAPTURES'], symbol,
+            frequency=frequency, evidence=evidence, source=source, capture_id=capture_id)
         result = personal_projection(packet, frequency=frequency, limit=limit,
             authorization_reference='task:financial-v6-personal-research:' + digest)
         if packet.source.startswith('issuer:'):
-            from src.services.personal_financials import saved_packet
             from src.analytics.financial_engine import financial_engine
             try:
-                provider,_ = saved_packet(os.environ['WOOFI_PERSONAL_CAPTURES'], symbol)
+                provider,_ = configured_research_packet(os.environ['WOOFI_PERSONAL_CAPTURES'], symbol,
+                    frequency=frequency, evidence='provider')
                 result['available_period_types'] = sorted(set(result['available_period_types']) |
                     set(financial_engine(provider,limit=1).available_period_types))
-            except FileNotFoundError:
+            except (FileNotFoundError, ValueError):
+                # Availability of another source is optional; it cannot invalidate
+                # an explicitly selected, already validated original revision.
                 pass
     except FileNotFoundError:
         raise HTTPException(404, 'Saved personal financial coverage unavailable') from None
-    except (ValueError, KeyError, TypeError, OSError):
+    except (ValueError, KeyError, TypeError, OSError, sqlite3.DatabaseError):
         raise HTTPException(503, 'Saved personal evidence invalid or unavailable') from None
     from fastapi.responses import JSONResponse
     return JSONResponse(result, headers={'Cache-Control':'private, no-store', 'X-Robots-Tag':'noindex, nofollow'})

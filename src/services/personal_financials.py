@@ -177,6 +177,83 @@ def validated_canonical_packet(data):
     return packet
 
 
+def sqlite_research_packet(journal_path, ticker, *, frequency='annual', evidence='preferred',
+                           source=None, capture_id=None, capture_directory=None):
+    """Read one immutable whole revision; never merge selected statement rows.
+
+    The existing file index can pin its matching SQLite revision without reading
+    source files. Otherwise only an unambiguous source/revision is selectable.
+    """
+    from src.services.financial_journal import MetricJournal
+    if (not re.fullmatch(r'[A-Z0-9]{1,20}', ticker)
+            or frequency not in ('annual', 'quarterly', 'ttm')
+            or evidence not in ('preferred', 'provider')):
+        raise ValueError('Invalid SQLite research selection')
+    path = Path(journal_path).resolve()
+    if not path.is_file():
+        raise ValueError('Existing financial journal required')
+    journal = MetricJournal(path, readonly=True)
+    candidates = journal.captures(ticker=ticker, source=source)
+    if capture_id:
+        candidates = [c for c in candidates if c['capture_id'] == capture_id]
+    wanted = 'quarterly' if frequency == 'ttm' else frequency
+    all_candidates = candidates
+    candidates = [c for c in candidates if any(o.frequency == wanted
+        for r in journal.read_packet(c['capture_id']).reports.values() for o in r.observations)]
+    if not capture_id and source is None and capture_directory:
+        index_path = Path(capture_directory) / 'index.json'
+        if index_path.is_file():
+            if index_path.stat().st_size > 2_000_000:
+                raise ValueError('Saved capture index exceeds bound')
+            index = json.loads(index_path.read_text(encoding='utf-8'))
+            if index.get('contract') != 'personal-saved-captures-v1':
+                raise ValueError('Invalid saved capture index')
+            item = (index.get('reviewed_reports', {}).get(ticker)
+                if evidence == 'preferred' and frequency == 'annual' else None)
+            item = item or index.get('captures', {}).get(ticker)
+            if item:
+                pinned = [c for c in all_candidates if c['capture_sha256'] == item['sha256']]
+                eligible = [c for c in candidates if c['capture_sha256'] == item['sha256']]
+                # A legacy annual-only packet cannot hide a new quarterly packet.
+                # A missing pinned revision, however, must fail rather than drift.
+                if eligible or not pinned:
+                    candidates = eligible
+    if source is None and not capture_id and len(candidates) > 1:
+        providers = [c for c in candidates if not c['source'].startswith('issuer:')]
+        if evidence == 'provider' or frequency != 'annual':
+            candidates = providers
+        else:
+            originals = [c for c in candidates if c['source'].startswith('issuer:')]
+            candidates = originals or providers
+    if not candidates:
+        raise FileNotFoundError('SQLite research revision unavailable')
+    if len(candidates) != 1:
+        raise ValueError('Ambiguous SQLite revisions; select source and capture explicitly')
+    selected = candidates[0]
+    packet = journal.read_packet(selected['capture_id'])
+    if packet.is_fixture:
+        raise ValueError('Fixture is not private source evidence')
+    return packet, selected['capture_sha256']
+
+
+def configured_research_packet(directory, ticker, *, frequency='annual', evidence='preferred',
+                               source=None, capture_id=None):
+    """Explicit development-only serving switch; invalid SQLite fails closed."""
+    import os
+    mode = os.getenv('WOOFI_PERSONAL_FINANCIAL_READS', 'captures')
+    if mode == 'captures':
+        if source or capture_id:
+            raise ValueError('Explicit revision selection requires SQLite mode')
+        return saved_research_packet(directory, ticker, frequency=frequency, evidence=evidence)
+    if (mode != 'sqlite' or os.getenv('APP_ENV') != 'development'
+            or os.getenv('WOOFI_PERSONAL_RESEARCH') != '1'
+            or os.getenv('WOOFI_PERSONAL_BIND') != '127.0.0.1'):
+        raise ValueError('SQLite reads require explicit private development configuration')
+    return sqlite_research_packet(os.environ['WOOFI_PERSONAL_SQLITE'], ticker,
+        frequency=frequency, evidence=evidence, source=source, capture_id=capture_id,
+        capture_directory=directory)
+
+
 def saved_financial_insights(journal_path, capture_id, *, authorization_reference,
                             metrics=None, frequency='annual', comparison='yoy', current_period=None):
     """Explicit whole-revision private research; never change SQLite selection."""

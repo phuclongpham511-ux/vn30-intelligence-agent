@@ -1,7 +1,9 @@
-"""Loopback-only saved financial research API. No acquisition or persistent DB.
+"""Loopback-only financial research API. No acquisition or journal writes.
 
 python -m scripts.serve_personal_financials PRIVATE_CAPTURE_DIRECTORY
 Uses the one canonical main.app; public/source acquisition routes are denied.
+Optional WOOFI_PERSONAL_FINANCIAL_READS=sqlite and WOOFI_PERSONAL_SQLITE select
+an existing read-only financial journal. Default reads remain saved captures.
 """
 import os
 from pathlib import Path
