@@ -92,3 +92,58 @@ def test_mixed_flow_bases_in_one_statement_are_rejected(tmp_path):
     evidence['amounts'][1]['flow_basis'] = 'ytd'
     with pytest.raises(ValueError, match='Conflicting statement period bases'):
         report_packet(evidence, tmp_path)
+
+
+def comparative_report(tmp_path):
+    evidence = quarterly_report(tmp_path)
+    title = 'Separate statement of income for the first quarter ended 31 March 2025'
+    header = title + '\nQuarter I This year Previous year'
+    evidence['pages'][0]['text'] += '\n' + header
+    evidence['pages'][0]['text_sha256'] = hashlib.sha256(evidence['pages'][0]['text'].encode()).hexdigest()
+    evidence['amounts'] = [a for a in evidence['amounts'] if a['field']=='revenue']
+    a = evidence['amounts'][0]
+    a.update(year=2024, raw_token=a['column_values'][1], period_start='2024-01-01',
+        period_end='2024-03-31', relative_year='previous_year',
+        column_header=dict(page=1,text=header),period_quote=dict(page=1,text=title))
+    return evidence
+
+
+def test_explicit_previous_year_first_quarter_column(tmp_path):
+    packet,_ = report_packet(comparative_report(tmp_path), tmp_path)
+    obs = packet.reports['income'].observations[0]
+    assert obs.period=='2024-Q1' and obs.source_context.period_start=='2024-01-01'
+    assert obs.source_context.period_end=='2024-03-31'
+
+
+def test_comparative_column_enables_saved_private_insight_only(tmp_path):
+    import copy
+    from src.services.personal_financials import saved_financial_insights
+    evidence=comparative_report(tmp_path)
+    current=copy.deepcopy(evidence['amounts'][0])
+    current.pop('relative_year')
+    current.update(year=2025,period_start='2025-01-01',period_end='2025-03-31',
+        raw_token=current['column_values'][0])
+    evidence['amounts'].append(current)
+    packet,_=report_packet(evidence,tmp_path)
+    journal=MetricJournal(tmp_path/'journal.sqlite')
+    journal.initialize()
+    capture=journal.import_packet(packet,content_hash(packet.model_dump(mode='json')))
+    out=saved_financial_insights(journal.path,capture['capture_id'],metrics=['revenue'],
+        frequency='quarterly',comparison='yoy',authorization_reference='synthetic-review')
+    assert out.insights[0].qualification_status=='COMPARABLE'
+    assert all(r['capture_id']==capture['capture_id'] for r in out.insights[0].evidence_references)
+    public=display_financial_response(financial_engine(packet,frequency='quarterly'))
+    assert all(m.value is None for m in public.fundamental_summary.metrics)
+    assert journal.import_packet(packet,content_hash(packet.model_dump(mode='json')))['inserted_captures']==0
+
+
+@pytest.mark.parametrize('bad',['relation','header','columns','basis','quarter'])
+def test_previous_year_requires_unambiguous_same_quarter_column(tmp_path,bad):
+    e=comparative_report(tmp_path)
+    a=e['amounts'][0]
+    if bad=='relation': a.pop('relative_year')
+    elif bad=='header': a['column_header']['text']=a['period_quote']['text']
+    elif bad=='columns': a['column_periods'].reverse()
+    elif bad=='basis': a['flow_basis']='ytd'
+    else: a['quarter']=2
+    with pytest.raises(ValueError): report_packet(e,tmp_path)

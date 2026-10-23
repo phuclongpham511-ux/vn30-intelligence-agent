@@ -53,6 +53,7 @@ class ReportAmount(StrictEvidence):
     quarter: int | None = Field(default=None, ge=1, le=4)
     flow_basis: Literal['standalone', 'ytd'] | None = None
     period_quote: Quote | None = None
+    relative_year: Literal['previous_year'] | None = None
 
 
 class ReviewedReport(StrictEvidence):
@@ -96,6 +97,11 @@ def _date_in_quote(value, text):
 def _amount_period(amount, kind, quote):
     start = date.fromisoformat(amount.period_start) if amount.period_start else None
     end = date.fromisoformat(amount.period_end)
+    relative = amount.relative_year == 'previous_year'
+    if relative and (kind == 'balance' or amount.quarter != 1 or amount.flow_basis != 'standalone'
+            or amount.column_periods != [f'{amount.year + 1}-Q1', f'{amount.year}-Q1']
+            or not re.search(r'Quarter\s+I\s+This year\s+Previous year', quote(amount.column_header))):
+        raise ValueError('Previous-year column requires explicit first-quarter flow evidence')
     if amount.quarter is None:
         if (amount.flow_basis is not None or amount.period_quote is not None
                 or end != date(amount.year, 12, 31)
@@ -107,7 +113,8 @@ def _amount_period(amount, kind, quote):
     if end != date(amount.year, month, monthrange(amount.year, month)[1]) or amount.period_quote is None:
         raise ValueError('Quarter requires explicit matching fiscal boundaries')
     text = quote(amount.period_quote)
-    if not _date_in_quote(end, text):
+    quoted_end = date(amount.year + 1, 3, 31) if relative else end
+    if not _date_in_quote(quoted_end, text):
         raise ValueError('Quarter end lacks original date evidence')
     if kind == 'balance':
         if start is not None or amount.flow_basis is not None:
@@ -181,7 +188,8 @@ def report_packet(manifest, directory):
         if period_metadata.setdefault((kind, period), boundaries) != boundaries:
             raise ValueError('Conflicting statement period bases')
         source_row, header, unit_quote = quote(a.source_row), quote(a.column_header), quote(a.unit_quote)
-        if a.label not in source_row or str(a.year) not in (source_row if a.period_layout=='row' else header):
+        header_year = a.year + 1 if a.relative_year else a.year
+        if a.label not in source_row or str(header_year) not in (source_row if a.period_layout=='row' else header):
             raise ValueError('Original field/column missing')
         if a.code_kind == 'printed_statement_code' and not re.search(r'(?<!\w)' + re.escape(a.code) + r'(?!\w)', source_row):
             raise ValueError('Original statement code missing')
@@ -276,7 +284,7 @@ def report_packet(manifest, directory):
     metadata = e.model_dump()
     # Preserve exact annual packet identities for existing immutable revisions.
     for amount in metadata['amounts']:
-        for key in ('quarter', 'flow_basis', 'period_quote'):
+        for key in ('quarter', 'flow_basis', 'period_quote', 'relative_year'):
             if amount[key] is None:
                 amount.pop(key)
     return FinancialPacket(ticker=e.ticker, source=e.source, source_version='reviewed-report-v2',
