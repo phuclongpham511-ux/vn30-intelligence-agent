@@ -49,19 +49,29 @@ def _read_json(path, bound=12_000_000):
 
 def validate_plan(plan, backlog):
     """Bind a small explicit selection to a preserved, real V5.6 backlog."""
-    if plan.get('contract') != 'financial-collector-plan-v57' or backlog.get('contract') != 'financial-coverage-v56':
+    expansion = plan.get('contract') == 'financial-collector-plan-v512'
+    if plan.get('contract') not in ('financial-collector-plan-v57', 'financial-collector-plan-v512') or backlog.get('contract') != 'financial-coverage-v56':
         raise ValueError('Unknown collector or backlog contract')
     if plan.get('backlog_sha256') != _sha(_json(backlog)):
         raise ValueError('Backlog fingerprint mismatch')
-    if backlog['membership']['effective_date'] != '2026-08-03':
+    if not expansion and backlog['membership']['effective_date'] != '2026-08-03':
         raise ValueError('Pilot requires the dated August 2026 membership snapshot')
-    snapshot = membership_snapshot('2026-08-03')
+    if expansion and plan['as_of'] != backlog['as_of']:
+        raise ValueError('Plan and backlog date must match')
+    snapshot = membership_snapshot(plan['as_of'] if expansion else '2026-08-03')
+    if snapshot['effective_date'] != backlog['membership']['effective_date']:
+        raise ValueError('Backlog membership date differs from preserved snapshot')
     tasks = {t['task_id']: t for t in backlog['acquisition_backlog']}
     chosen = plan['task_ids']
     if not chosen or len(chosen) != len(set(chosen)) or any(t not in tasks for t in chosen):
         raise ValueError('Choose unique existing backlog task IDs')
     selected = [tasks[t] for t in chosen]
-    if any(t['priority'] != 'P0' or t['ticker'] not in snapshot['vn30'] for t in selected):
+    if expansion:
+        families = {f'{frequency}_{kind}' for frequency in ('annual', 'quarterly') for kind in ('income', 'balance', 'cash')}
+        if any(t['priority'] != 'P3' or t['ticker'] not in snapshot['vn100']
+               or t['ticker'] in snapshot['vn30'] or t['family'] not in families for t in selected):
+            raise ValueError('Expansion requires actual non-VN30 VN100 P3 statement gaps')
+    elif any(t['priority'] != 'P0' or t['ticker'] not in snapshot['vn30'] for t in selected):
         raise ValueError('Pilot tasks must be actual VN30 P0 statement gaps')
     tickers = {t['ticker'] for t in selected}
     candidates = plan['candidates']
@@ -170,7 +180,8 @@ def coverage_delta(before, after, tasks):
         if a['count'] == 0 and b['count'] > 0:
             resolved.append(task_id)
     return dict(before=before['summary'], after=after['summary'], cells=cells,
-        resolved_initial_p0_tasks=resolved,
+        resolved_initial_p0_tasks=resolved if all(t['priority'] == 'P0' for t in tasks) else [],
+        resolved_initial_tasks=resolved,
         new_issuer_period_pairs=sum(len({p for cell in c['statements'].values()
             for span in cell.values() for p in span['source_lines_by_period']}
             - {p for cell in old[c['ticker']]['statements'].values() for span in cell.values()

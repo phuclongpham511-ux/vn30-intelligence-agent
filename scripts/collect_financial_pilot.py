@@ -1,4 +1,4 @@
-"""Run a reviewed 3-5 issuer V5.6 P0 acquisition plan against existing private SQLite."""
+"""Run a reviewed 3-5 issuer VN30 P0 or VN100 P3 plan against existing private SQLite."""
 import argparse
 import json
 
@@ -30,7 +30,8 @@ def main(argv=None):
         refresh_documents=args.refresh_documents, refresh_sdk=args.refresh_sdk)
     print(json.dumps(dict(run_id=result['run_id'], tickers=result['tickers'],
         status_counts=result['status_counts'], results=result['results'],
-        resolved_initial_p0_tasks=result['coverage']['resolved_initial_p0_tasks']), indent=2, ensure_ascii=False))
+        resolved_initial_p0_tasks=result['coverage']['resolved_initial_p0_tasks'],
+        resolved_initial_tasks=result['coverage']['resolved_initial_tasks']), indent=2, ensure_ascii=False))
     return int(any(r['status'] in ('FAILED', 'EXTRACTION_FAILURE', 'SOURCE_UNAVAILABLE') for r in result['results']))
 
 

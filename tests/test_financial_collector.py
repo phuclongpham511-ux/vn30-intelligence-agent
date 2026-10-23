@@ -162,6 +162,41 @@ def test_plan_requires_actual_backlog_and_small_confirmed_universe(tmp_path):
         validate_plan(bad, backlog)
 
 
+def test_vn100_expansion_reuses_collector_and_resumes_without_acquisition(tmp_path):
+    journal, backlog, plan = setup(tmp_path)
+    tickers = sorted({t['ticker'] for t in backlog['acquisition_backlog'] if t['priority'] == 'P3'})[:3]
+    plan.update(contract='financial-collector-plan-v512', task_ids=[t['task_id'] for t in
+        backlog['acquisition_backlog'] if t['priority'] == 'P3' and t['ticker'] in tickers])
+    plan['candidates'] = [dict(plan['candidates'][0], id=t.lower(), ticker=t,
+        url='https://example.test/' + t) for t in tickers]
+    first = run(tmp_path, journal, backlog, plan)
+    assert first['coverage']['after']['financial_tickers_covered'] == 3
+    assert len(first['coverage']['resolved_initial_tasks']) == 18
+    before = journal.storage_summary()
+    repeat = run(tmp_path, journal, backlog, plan,
+        fetch_packet=lambda _: pytest.fail('Repeat must not acquire'))
+    assert journal.storage_summary() == before
+    assert repeat['coverage']['resolved_initial_tasks'] == []
+    legacy = dict(plan, contract='financial-collector-plan-v57')
+    with pytest.raises(ValueError, match='VN30'):
+        validate_plan(legacy, backlog)
+
+
+def test_vn100_expansion_rejects_non_statement_tasks_and_mismatched_dates(tmp_path):
+    _, backlog, plan = setup(tmp_path)
+    plan['contract'] = 'financial-collector-plan-v512'
+    plan['as_of'] = '2026-10-23'
+    with pytest.raises(ValueError, match='date'):
+        validate_plan(plan, backlog)
+    plan['as_of'] = backlog['as_of']
+    task = next(t for t in backlog['acquisition_backlog'] if t['priority'] == 'P3')
+    task['family'] = 'net_margin'
+    plan['backlog_sha256'] = _sha(_json(backlog))
+    plan['task_ids'] = [task['task_id']]
+    with pytest.raises(ValueError, match='statement gaps'):
+        validate_plan(plan, backlog)
+
+
 def test_refresh_appends_new_periods_and_keeps_selected_old_values(tmp_path):
     journal, backlog, plan = setup(tmp_path)
     run(tmp_path, journal, backlog, plan)
