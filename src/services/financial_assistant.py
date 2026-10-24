@@ -123,6 +123,23 @@ def verify_draft(draft, facts, citations):
         and draft.answer == INTRO + '\n' + '\n'.join(render_fact(fact) for fact in selected))
 
 
+def plan_tools(intent, capture_id, periods):
+    """Shared deterministic plan; a model cannot choose executable tools."""
+    arguments = dict(ticker=intent.ticker, capture_id=capture_id, frequency=intent.frequency, periods=periods)
+    plans = ([('get_financial_statements', dict(arguments, statement=intent.statement))] if intent.kind == 'statement' else
+        [('get_financial_insights', dict(arguments, metrics=intent.metrics, comparison=intent.comparison))] if intent.kind == 'comparison' else
+        [('get_financial_metrics', dict(arguments, metrics=intent.metrics))])
+    if intent.kind == 'performance':
+        plans.append(('get_financial_insights', dict(arguments, metrics=intent.metrics, comparison=intent.comparison)))
+    return plans
+
+
+def model_context(intent, facts):
+    """Identical minimal context for local inference and synthetic evaluation."""
+    return _json(dict(intent=intent.model_dump(mode='json'),
+        facts=[dict(id=f.id, text=render_fact(f), evidence_ids=f.evidence_ids) for f in facts]))
+
+
 class LocalFinancialAssistant:
     def __init__(self, request, *, model: FinancialAnswerModel | None = None):
         self.request = request
@@ -162,12 +179,7 @@ class LocalFinancialAssistant:
             return self._decline('UNAVAILABLE', 'saved_evidence_invalid_or_unavailable', usage, intent)
         periods = intent.periods or sorted({o.period for receipt in packet.reports.values()
             for o in receipt.observations if o.frequency == intent.frequency})[-1:]
-        arguments = dict(ticker=intent.ticker, capture_id=matches[0]['capture_id'], frequency=intent.frequency, periods=periods)
-        plans = ([('get_financial_statements', dict(arguments, statement=intent.statement))] if intent.kind == 'statement' else
-            [('get_financial_insights', dict(arguments, metrics=intent.metrics, comparison=intent.comparison))] if intent.kind == 'comparison' else
-            [('get_financial_metrics', dict(arguments, metrics=intent.metrics))])
-        if intent.kind == 'performance':
-            plans.append(('get_financial_insights', dict(arguments, metrics=intent.metrics, comparison=intent.comparison)))
+        plans = plan_tools(intent, matches[0]['capture_id'], periods)
         tools = NativeFinancialTools(self.request)
         results = []
         try:
@@ -183,7 +195,7 @@ class LocalFinancialAssistant:
             return AssistantAnswer(status='UNAVAILABLE', answer=(
                 'Chưa có báo cáo dòng tiền cho kỳ ' + ', '.join(periods) + ' trong capture đã chọn.'),
                 used_tools=used_tools, missing_information=missing, intent=intent, usage=usage)
-        context = _json(dict(intent=intent.model_dump(mode='json'), facts=[dict(id=f.id, text=render_fact(f), evidence_ids=f.evidence_ids) for f in facts]))
+        context = model_context(intent, facts)
         # UTF-8 bytes conservatively charge token bounds in mock mode. No vendor
         # tokenizer, pricing assumption or external provider call is involved.
         usage.input_token_upper_bound = len(context.encode('utf-8')) + len(question.question.encode('utf-8'))
