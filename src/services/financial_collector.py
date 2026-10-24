@@ -49,8 +49,9 @@ def _read_json(path, bound=12_000_000):
 
 def validate_plan(plan, backlog):
     """Bind a small explicit selection to a preserved, real V5.6 backlog."""
-    expansion = plan.get('contract') == 'financial-collector-plan-v512'
-    if plan.get('contract') not in ('financial-collector-plan-v57', 'financial-collector-plan-v512') or backlog.get('contract') != 'financial-coverage-v56':
+    complete = plan.get('contract') == 'financial-collector-plan-v513'
+    expansion = complete or plan.get('contract') == 'financial-collector-plan-v512'
+    if plan.get('contract') not in ('financial-collector-plan-v57', 'financial-collector-plan-v512', 'financial-collector-plan-v513') or backlog.get('contract') != 'financial-coverage-v56':
         raise ValueError('Unknown collector or backlog contract')
     if plan.get('backlog_sha256') != _sha(_json(backlog)):
         raise ValueError('Backlog fingerprint mismatch')
@@ -68,14 +69,20 @@ def validate_plan(plan, backlog):
     selected = [tasks[t] for t in chosen]
     if expansion:
         families = {f'{frequency}_{kind}' for frequency in ('annual', 'quarterly') for kind in ('income', 'balance', 'cash')}
-        if any(t['priority'] != 'P3' or t['ticker'] not in snapshot['vn100']
-               or t['ticker'] in snapshot['vn30'] or t['family'] not in families for t in selected):
+        if any(t['priority'] not in (('P0', 'P3') if complete else ('P3',)) or t['ticker'] not in snapshot['vn100']
+               or (not complete and t['ticker'] in snapshot['vn30']) or t['family'] not in families for t in selected):
             raise ValueError('Expansion requires actual non-VN30 VN100 P3 statement gaps')
+        if complete:
+            companies = {c['ticker']: c for c in backlog['companies']}
+            for task in selected:
+                frequency, kind = task['family'].split('_', 1)
+                if companies[task['ticker']]['statements'][kind][frequency]['count']:
+                    raise ValueError('Complete queue only accepts absent statement families')
     elif any(t['priority'] != 'P0' or t['ticker'] not in snapshot['vn30'] for t in selected):
         raise ValueError('Pilot tasks must be actual VN30 P0 statement gaps')
     tickers = {t['ticker'] for t in selected}
     candidates = plan['candidates']
-    if not 3 <= len(tickers) <= 5 or not 1 <= len(candidates) <= MAX_CANDIDATES:
+    if not (1 if complete else 3) <= len(tickers) <= 5 or not 1 <= len(candidates) <= MAX_CANDIDATES:
         raise ValueError('Pilot requires 3-5 issuers and at most 10 source candidates')
     identifiers = []
     for c in candidates:
