@@ -1,0 +1,33 @@
+{
+  "contract": "vnstock-vci-events-offline-v1",
+  "is_fixture": true,
+  "semantics_reference": "synthetic-fixture-v1: field names documented; label and unit declarations not provider-verified",
+  "records": [
+    {
+      "case": "cash",
+      "requested_symbol": "ABC",
+      "amount_unit": "VND/share",
+      "ratio_basis": null,
+      "raw": {"id": "cash-1", "symbol": "ABC", "event_code": "DIV", "action_type_en": "Cash dividend", "action_type_vi": "Cổ tức bằng tiền", "event_title_vi": "DEMO: Thông báo cổ tức bằng tiền", "value_per_share": 1500, "exercise_ratio": null, "public_date": "2026-09-01", "exright_date": "2026-09-09", "record_date": "2026-09-10", "payout_date": "2026-09-30", "display_date1": "2026-09-01"}
+    },
+    {"case": "stock", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": "percent_new_per_old", "raw": {"id": "stock-1", "event_code": "DIV", "action_type_en": "Stock dividend", "exercise_ratio": 10, "public_date": "2026-09-01", "record_date": "2026-09-10"}},
+    {"case": "bonus", "requested_symbol": "XYZ", "amount_unit": null, "ratio_basis": "fraction_new_per_old", "raw": {"id": "bonus-1", "symbol": "XYZ", "event_code": "ISS", "action_type_en": "Bonus shares", "exercise_ratio": 0.2, "exright_date": "2026-09-09", "record_date": "2026-09-10", "payout_date": "2026-10-15", "display_date2": "2026-10-16"}},
+    {"case": "rights", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": "fraction_new_per_old", "raw": {"id": "rights-1", "symbol": "ABC", "event_code": "ISS", "action_type_en": "Rights offering", "exercise_ratio": 0.25, "value_per_share": 12000, "record_date": "2026-09-10", "issue_date": "2026-10-01", "listing_date": "2026-10-20"}},
+    {"case": "cash_corrected", "requested_symbol": "ABC", "amount_unit": "VND/share", "ratio_basis": null, "raw": {"id": "cash-1", "symbol": "ABC", "event_code": "DIV", "action_type_en": "Cash dividend", "event_title_vi": "DEMO: Đính chính số tiền và ngày thanh toán", "value_per_share": 1600, "public_date": "2026-09-02", "exright_date": "2026-09-09", "record_date": "2026-09-10", "payout_date": "2026-10-05"}},
+    {"case": "missing_cash_zero", "requested_symbol": "ABC", "amount_unit": "VND/share", "ratio_basis": null, "raw": {"id": "cash-zero", "event_code": "DIV", "action_type_en": "Cash dividend", "value_per_share": 0, "display_date1": "2026-09-01"}},
+    {"case": "missing_ratio", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "raw": {"id": "stock-partial", "event_code": "DIV", "action_type_en": "Stock dividend", "exercise_ratio": null}},
+    {"case": "ambiguous_ratio", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "ratio_basis_required", "raw": {"id": "ratio-ambiguous", "event_code": "DIV", "action_type_en": "Stock dividend", "exercise_ratio": 10}},
+    {"case": "unknown_type", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "unsupported_event_type", "raw": {"id": "type-unknown", "event_code": "OTHE", "action_type_en": "Other event"}},
+    {"case": "conflicting_labels", "requested_symbol": "ABC", "amount_unit": "VND/share", "ratio_basis": null, "error": "ambiguous_event_type", "raw": {"id": "type-conflict", "event_code": "DIV", "action_type_en": "Cash dividend", "action_type_vi": "Cổ tức bằng cổ phiếu", "value_per_share": 1500}},
+    {"case": "missing_unit", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "amount_unit_required", "raw": {"id": "unit-missing", "event_code": "DIV", "action_type_en": "Cash dividend", "value_per_share": 1500}},
+    {"case": "invalid_calendar", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "invalid_calendar_date", "raw": {"id": "date-invalid", "event_code": "DIV", "action_type_en": "Cash dividend", "exright_date": "2026-02-30"}},
+    {"case": "contradictory_dates", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "contradictory_event_dates", "raw": {"id": "date-conflict", "event_code": "DIV", "action_type_en": "Cash dividend", "exright_date": "2026-09-11", "record_date": "2026-09-10"}},
+    {"case": "missing_id", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "missing_or_invalid_event_id", "raw": {"id": null, "event_code": "DIV", "action_type_en": "Cash dividend"}},
+    {"case": "wrong_owner", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "event_owner_mismatch", "raw": {"id": "owner-conflict", "symbol": "XYZ", "event_code": "DIV", "action_type_en": "Cash dividend"}},
+    {"case": "invalid_numeric", "requested_symbol": "ABC", "amount_unit": "VND/share", "ratio_basis": null, "error": "invalid_numeric_term", "raw": {"id": "amount-boolean", "event_code": "DIV", "action_type_en": "Cash dividend", "value_per_share": true}},
+    {"case": "text_ratio", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": "fraction_new_per_old", "error": "invalid_numeric_term", "raw": {"id": "ratio-text", "event_code": "ISS", "action_type_en": "Bonus shares", "exercise_ratio": "10:1"}},
+    {"case": "timestamp_date", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "error": "ambiguous_date_precision", "raw": {"id": "timestamp", "event_code": "DIV", "action_type_en": "Cash dividend", "public_date": "2026-09-01T00:00:00Z"}},
+    {"case": "type_corrected", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": "percent_new_per_old", "raw": {"id": "cash-1", "symbol": "ABC", "event_code": "DIV", "action_type_en": "Stock dividend", "event_title_vi": "DEMO: Đính chính loại phân phối", "exercise_ratio": 5, "record_date": "2026-09-10"}},
+    {"case": "missing_cash_amount", "requested_symbol": "ABC", "amount_unit": null, "ratio_basis": null, "raw": {"id": "cash-partial", "event_code": "DIV", "action_type_en": "Cash dividend", "value_per_share": null}}
+  ]
+}
