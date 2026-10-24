@@ -304,11 +304,36 @@ def test_cli_default_and_live_refusal_have_no_configuration_side_effects(capsys)
 def test_https_transport_refuses_redirect_without_forwarding(monkeypatch):
     connections = []
     class Connection:
-        def __init__(self, host, timeout): connections.append(host)
+        def __init__(self, *args, **kwargs): connections.append(args[0])
         def request(self, *args, **kwargs): pass
         def getresponse(self): return type('Reply', (), {'status': 302})()
         def close(self): pass
     monkeypatch.setattr('http.client.HTTPSConnection', Connection)
+    monkeypatch.setenv('WOOFI_LLM_GATEWAY_TOKEN', 'test-token-with-more-than-32-characters')
     with pytest.raises(EvaluationStopped, match='request_failed'):
-        HTTPSGatewayTransport().send('https://approved.example.test/eval', b'{}')
+        HTTPSGatewayTransport('test-run').send('https://approved.example.test/eval', b'{}')
     assert connections == ['approved.example.test']
+
+
+def test_https_transport_sends_separate_caller_auth_and_verifies_tls(monkeypatch):
+    captured = {}
+    class Reply:
+        status = 200
+        def read(self, limit): return b'{"ok":true}'
+    class Connection:
+        def __init__(self, host, port, timeout, context):
+            captured.update(host=host, port=port, timeout=timeout, context=context)
+        def request(self, method, path, body, headers):
+            captured.update(method=method, path=path, headers=headers)
+        def getresponse(self): return Reply()
+        def close(self): pass
+    monkeypatch.setattr('http.client.HTTPSConnection', Connection)
+    monkeypatch.setenv('WOOFI_LLM_GATEWAY_TOKEN', 'test-token-with-more-than-32-characters')
+    monkeypatch.delenv('WOOFI_LLM_GATEWAY_CA_FILE', raising=False)
+    from src.services.financial_model_adapter import HTTPSGatewayTransport
+    result = HTTPSGatewayTransport('approved:run').send('https://127.0.0.1:8765/evaluate', b'{}')
+    assert result == b'{"ok":true}'
+    assert captured['method'] == 'POST' and captured['port'] == 8765
+    assert captured['headers']['Authorization'] == 'Bearer test-token-with-more-than-32-characters'
+    assert captured['headers']['X-Woofi-Run-ID'] == 'approved:run'
+    assert captured['context'].check_hostname and captured['context'].verify_mode == 2

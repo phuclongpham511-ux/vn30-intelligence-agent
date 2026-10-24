@@ -7,7 +7,10 @@ from datetime import datetime, timezone
 from decimal import Decimal
 import hashlib
 import http.client
+import ipaddress
 import json
+import os
+import ssl
 import time
 from urllib.parse import urlsplit
 
@@ -110,8 +113,14 @@ class RunLedger:
 def destination(endpoint):
     try:
         url = urlsplit(endpoint)
+        try:
+            loopback = url.hostname == 'localhost' or ipaddress.ip_address(url.hostname).is_loopback
+        except ValueError:
+            loopback = False
         if (url.scheme != 'https' or not url.hostname or url.username or url.password
-                or url.query or url.fragment or url.port not in (None, 443)):
+                or url.query or url.fragment or (url.port not in (None, 443) and not loopback)):
+            raise ValueError
+        if url.port == 0:
             raise ValueError
         url.hostname.encode('ascii')
     except (ValueError, UnicodeError):
@@ -120,13 +129,23 @@ def destination(endpoint):
 
 
 class HTTPSGatewayTransport:
-    """One POST, no redirect, proxy environment, retries, SDK or dynamic imports."""
+    """One authenticated POST; no redirect, retries, SDK or dynamic imports."""
+    def __init__(self, run_id):
+        self.run_id = run_id
+
     def send(self, endpoint, body):
         url = destination(endpoint)
-        connection = http.client.HTTPSConnection(url.hostname, timeout=15)
+        token = os.environ.get('WOOFI_LLM_GATEWAY_TOKEN', '')
+        if len(token) < 32:
+            raise EvaluationStopped('gateway_caller_token_missing')
+        ca_file = os.environ.get('WOOFI_LLM_GATEWAY_CA_FILE')
+        context = ssl.create_default_context(cafile=ca_file) if ca_file else ssl.create_default_context()
+        connection = http.client.HTTPSConnection(url.hostname, url.port or 443, timeout=15, context=context)
         try:
             connection.request('POST', url.path or '/', body=body,
-                headers={'Content-Type': 'application/json', 'Accept': 'application/json'})
+                headers={'Content-Type': 'application/json', 'Accept': 'application/json',
+                    'Authorization': f'Bearer {token}',
+                    'X-Woofi-Run-ID': self.run_id})
             response = connection.getresponse()
             if response.status != 200:
                 raise EvaluationStopped('gateway_request_failed')
@@ -147,7 +166,7 @@ class SyntheticGatewayModel:
         self.config = LiveEvaluationConfig.model_validate(config)
         self.gate = gate
         self.ledger = RunLedger(self.config)
-        self.transport = transport if transport is not None else HTTPSGatewayTransport()
+        self.transport = transport if transport is not None else HTTPSGatewayTransport(self.config.approval.reference)
         self.operator_enabled = operator_enabled
         self.egress_authorized = egress_authorized
         self.authorized_attempts = 0
