@@ -15,6 +15,8 @@ def run(argv=None):
     parser.add_argument('--config', help='Reviewed gateway/approval/budget JSON; no credentials')
     parser.add_argument('--enable-real', action='store_true')
     parser.add_argument('--authorize-synthetic-egress', action='store_true')
+    parser.add_argument('--request-interval-seconds', type=float, default=0,
+        help='Optional spacing between real requests; recorded separately from model latency')
     parser.add_argument('--holdout', action='store_true')
     parser.add_argument('--release-holdout', action='store_true')
     parser.add_argument('--describe', action='store_true', help='Print approval hashes and thresholds, without inference')
@@ -35,9 +37,10 @@ def run(argv=None):
             model = SyntheticGatewayModel(config, SyntheticEgressGate(dataset),
                 operator_enabled=args.enable_real, egress_authorized=args.authorize_synthetic_egress)
             report = evaluate(dataset, model=model, real=True,
-                output_tokens=config.budget.per_request_output_tokens)
+                output_tokens=config.budget.per_request_output_tokens,
+                request_interval_seconds=args.request_interval_seconds)
         else:
-            if args.config or args.enable_real or args.authorize_synthetic_egress:
+            if args.config or args.enable_real or args.authorize_synthetic_egress or args.request_interval_seconds:
                 raise ValueError('mock_does_not_consume_live_configuration')
             report = evaluate(dataset)
         print(json.dumps(report, ensure_ascii=False, indent=2))

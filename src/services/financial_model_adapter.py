@@ -37,6 +37,10 @@ def prompt_digest():
     return hashlib.sha256(json_text(prompt_contract()).encode()).hexdigest()
 
 
+def config_digest(config):
+    return hashlib.sha256(json_text(config.model_dump(mode='json')).encode()).hexdigest()
+
+
 class EvaluationStopped(ValueError):
     """Stable code only; never expose gateway exceptions, response text or paths."""
 

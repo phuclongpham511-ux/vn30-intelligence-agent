@@ -8,6 +8,7 @@ from collections import Counter
 from dataclasses import dataclass
 import hashlib
 import json
+import math
 from pathlib import Path
 import re
 import time
@@ -163,7 +164,10 @@ def _mean(values):
     return sum(values) / len(values) if values else None
 
 
-def evaluate(dataset, *, model=None, real=False, output_tokens=16384):
+def evaluate(dataset, *, model=None, real=False, output_tokens=16384, request_interval_seconds=0):
+    if (type(request_interval_seconds) not in (int, float) or not math.isfinite(request_interval_seconds) or
+            not 0 <= request_interval_seconds <= 3600 or (not real and request_interval_seconds != 0)):
+        raise EvaluationStopped('invalid_real_request_interval')
     if real and (model is None or model.kind != 'synthetic_evaluation_gateway'):
         raise EvaluationStopped('real_mode_requires_guarded_gateway')
     if not real and model is not None and model.external_io is not False:
@@ -171,6 +175,8 @@ def evaluate(dataset, *, model=None, real=False, output_tokens=16384):
     model = model if model is not None else DeterministicFinancialModel()
     outcomes, drafts, stopped = [], [], None
     input_bounds = output_bounds = 0
+    last_request_start = None
+    pacing_seconds = 0
     start_run = time.perf_counter()
     for case in dataset.cases():
         if real and case['attack']:
@@ -191,6 +197,15 @@ def evaluate(dataset, *, model=None, real=False, output_tokens=16384):
             input_bounds += len(context.encode())
             raw = None
             try:
+                if real and last_request_start is not None and request_interval_seconds:
+                    delay = last_request_start + request_interval_seconds - time.monotonic()
+                    if delay > 0:
+                        before_pause = time.perf_counter()
+                        time.sleep(delay)
+                        start += time.perf_counter() - before_pause  # Exclude pacing from request latency.
+                        pacing_seconds += delay
+                if real:
+                    last_request_start = time.monotonic()
                 raw = model.generate(context, max_output_tokens=output_tokens)
                 if not real:
                     raw = mutate_mock(raw, case['attack'])
@@ -239,6 +254,11 @@ def evaluate(dataset, *, model=None, real=False, output_tokens=16384):
     return dict(contract='woofi-llm-evaluation-report-v1', mode='real_gateway' if real else 'deterministic_mock',
         real_llm_test_status='RUN' if real else 'NOT RUN', split=dataset.split, dataset_sha256=dataset.sha256,
         prompt_sha256=prompt_digest(), thresholds=ACCEPTANCE_THRESHOLDS,
+        model_configuration=dict(provider=model.config.provider, model=model.config.model,
+            input_usd_per_million=str(model.config.input_usd_per_million),
+            output_usd_per_million=str(model.config.output_usd_per_million),
+            cost_basis='gateway_standard_rate_estimate_not_invoice') if real else None,
+        pacing=dict(request_interval_seconds=request_interval_seconds, scheduled_wait_seconds=round(pacing_seconds, 3)),
         cases_completed=len(outcomes), stopped_reason=stopped, host_routing_metrics=host_metrics,
         tool_argument_case_count=sum(r['arguments_valid'] is not None for r in outcomes),
         raw_model_metrics=metrics(drafts), clean_model_metrics=clean_metrics,
