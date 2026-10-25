@@ -57,8 +57,9 @@ def review(config, **changes):
 
 
 class FakeGroqHTTP:
-    def __init__(self, *, status=200, mutation=None, raw=None, timeout=False):
+    def __init__(self, *, status=200, mutation=None, raw=None, timeout=False, headers=None):
         self.status, self.mutation, self.raw, self.timeout = status, mutation, raw, timeout
+        self.headers = {key.lower(): value for key, value in (headers or {}).items()}
         self.requests = []
         self.connections = []
 
@@ -74,6 +75,7 @@ class FakeGroqHTTP:
                 return self
             @property
             def status(self): return owner.status
+            def getheader(self, name, default=None): return owner.headers.get(name.lower(), default)
             def read(self, limit):
                 if owner.raw is not None:
                     return owner.raw[:limit]
@@ -120,6 +122,7 @@ def call(gateway, body=None, token=TOKEN):
 def test_valid_groq_wire_mapping_contract_tls_and_notional_accounting(tmp_path, monkeypatch):
     gateway, http, _ = setup(tmp_path, monkeypatch)
     reply = json.loads(call(gateway))
+    assert set(reply) == {'contract', 'draft', 'input_tokens', 'output_tokens', 'actual_cost_usd'}
     assert reply['contract'] == 'woofi-llm-gateway-v1'
     assert reply['input_tokens'] == 1000 and reply['output_tokens'] == 500
     assert Decimal(reply['actual_cost_usd']) == Decimal('.00045')
@@ -140,16 +143,35 @@ def test_valid_groq_wire_mapping_contract_tls_and_notional_accounting(tmp_path, 
     assert gateway.ledger.state['input_actual'] == 1000
 
 
-@pytest.mark.parametrize('status,code', [(401, 'groq_authentication_failed'),
-    (403, 'groq_permission_denied'), (429, 'groq_rate_limited'), (500, 'groq_request_failed'),
-    (302, 'groq_request_failed')])
-def test_http_errors_stop_once_without_retry_or_body_echo(tmp_path, monkeypatch, status, code):
-    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(status=status))
+@pytest.mark.parametrize('status,code,category,error_type,error_code,rate_limited', [
+    (400, 'groq_request_failed', 'request_rejected', 'invalid_request_error', 'bad_request', False),
+    (401, 'groq_authentication_failed', 'authentication', 'authentication_error', 'invalid_api_key', False),
+    (403, 'groq_permission_denied', 'permission', 'permission_error', 'insufficient_permissions', False),
+    (404, 'groq_request_failed', 'not_found', 'not_found_error', 'model_not_found', False),
+    (422, 'groq_request_failed', 'request_rejected', 'unprocessable_entity_error', 'unprocessable_entity', False),
+    (429, 'groq_rate_limited', 'rate_limit', 'rate_limit_error', 'rate_limit_exceeded', True),
+    (500, 'groq_request_failed', 'provider_server_error', 'server_error', 'unrecognized', False),
+    (502, 'groq_request_failed', 'provider_server_error', 'server_error', 'unrecognized', False),
+    (503, 'groq_request_failed', 'provider_server_error', 'server_error', 'unrecognized', True),
+])
+def test_http_errors_persist_allowlisted_diagnostics_and_stop_once_without_retry(
+        tmp_path, monkeypatch, status, code, category, error_type, error_code, rate_limited):
+    body = json.dumps({'error': {'message': 'secret sk-test-private Bearer private-token',
+        'type': error_type, 'code': error_code, 'debug': 'private diagnostic payload'}}).encode()
+    headers = {'Retry-After': '7'} if status == 503 else {'X-Private-Header': 'do-not-save'}
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(status=status, raw=body, headers=headers))
     with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
         call(gateway)
     assert len(http.requests) == 1 and gateway.ledger.state['stopped']
     assert gateway.ledger.state['failure_code'] == code
     assert Decimal(gateway.ledger.state['cost_reserved']) == Decimal('.0017664')
+    diagnostic = gateway.ledger.state['provider_failure']
+    assert diagnostic == {'http_status': status, 'provider_error_type': error_type,
+        'provider_error_code': error_code, 'failure_category': category,
+        'rate_limit_indicated': rate_limited, 'usage_received': False}
+    persisted = (tmp_path / 'usage.json').read_text()
+    assert 'secret sk-test-private' not in persisted and 'private-token' not in persisted
+    assert 'private diagnostic payload' not in persisted and 'do-not-save' not in persisted
     with pytest.raises(EvaluationStopped):
         call(gateway)
     assert len(http.requests) == 1
@@ -181,6 +203,82 @@ def test_malformed_envelope_and_timeout_are_sanitized(tmp_path, monkeypatch, htt
     gateway, http, _ = setup(tmp_path, monkeypatch, http=http)
     with pytest.raises(EvaluationStopped, match='^gateway_provider_failed_run_stopped$'):
         call(gateway)
+    assert len(http.requests) == 1 and gateway.ledger.state['stopped']
+
+
+def test_timeout_diagnostics_are_safe_and_uncertain_reservation_is_retained(tmp_path, monkeypatch):
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(timeout=True))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped') as error:
+        call(gateway)
+    assert str(error.value) == 'gateway_provider_failed_run_stopped'
+    assert len(http.requests) == 1
+    assert gateway.ledger.state['provider_failure'] == {
+        'http_status': None, 'provider_error_type': None, 'provider_error_code': None,
+        'failure_category': 'network_timeout', 'rate_limit_indicated': False, 'usage_received': False}
+    assert gateway.ledger.state['in_flight'] and gateway.ledger.state['usage_missing']
+    assert Decimal(gateway.ledger.state['cost_reserved']) == Decimal('.0017664')
+
+
+def test_http_error_usage_signal_does_not_release_uncertain_reservation(tmp_path, monkeypatch):
+    body = json.dumps({'error': {'type': 'invalid_request_error', 'code': 'bad_request'},
+        'usage': {'prompt_tokens': 7}}).encode()
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(status=400, raw=body))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
+        call(gateway)
+    assert len(http.requests) == 1
+    assert gateway.ledger.state['provider_failure']['usage_received'] is True
+    assert gateway.ledger.state['usage_missing'] and gateway.ledger.state['in_flight']
+    assert Decimal(gateway.ledger.state['cost_reserved']) == Decimal('.0017664')
+
+
+def test_malformed_provider_json_and_missing_usage_have_bounded_diagnostics(tmp_path, monkeypatch):
+    malformed, _, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(raw=b'{"api_key":"sk-private"'))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
+        call(malformed)
+    assert malformed.ledger.state['provider_failure'] == {
+        'http_status': 200, 'provider_error_type': None, 'provider_error_code': None,
+        'failure_category': 'malformed_response', 'rate_limit_indicated': False, 'usage_received': False}
+    assert 'sk-private' not in (tmp_path / 'usage.json').read_text()
+
+    missing_dir = tmp_path / 'missing-usage'; missing_dir.mkdir()
+    missing, _, _ = setup(missing_dir, monkeypatch, http=FakeGroqHTTP(mutation=lambda value: value.pop('usage')))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
+        call(missing)
+    assert missing.ledger.state['provider_failure'] == {
+        'http_status': 200, 'provider_error_type': None, 'provider_error_code': None,
+        'failure_category': 'usage_missing', 'rate_limit_indicated': False, 'usage_received': False}
+    assert missing.ledger.state['in_flight'] and missing.ledger.state['usage_missing']
+
+
+def test_unrecognized_provider_labels_are_redacted_and_ledger_allowlist_is_strict(tmp_path, monkeypatch):
+    body = json.dumps({'error': {'message': 'sk-sensitive-body', 'type': 'Bearer secret-type',
+        'code': 'sk-sensitive-code'}}).encode()
+    gateway, _, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(status=400, raw=body))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
+        call(gateway)
+    diagnostic = gateway.ledger.state['provider_failure']
+    assert diagnostic['provider_error_type'] == diagnostic['provider_error_code'] == 'unrecognized'
+    persisted_path = tmp_path / 'usage.json'
+    persisted = persisted_path.read_text()
+    assert 'sk-sensitive' not in persisted and 'Bearer secret-type' not in persisted
+    state = json.loads(persisted)
+    state['state']['provider_failure']['provider_message'] = 'unapproved persisted field'
+    persisted_path.write_text(json.dumps(state), encoding='utf-8')
+    with pytest.raises(EvaluationStopped, match='state_invalid'):
+        RealLLMGateway(gateway.config, TOKEN, str(persisted_path))
+
+
+def test_draft_validation_failure_records_received_usage_without_leaking_text(tmp_path, monkeypatch):
+    http = FakeGroqHTTP(mutation=lambda value: value['choices'][0]['message'].update(
+        content='Bearer private-token malformed draft'))
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=http)
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped') as error:
+        call(gateway)
+    assert str(error.value) == 'gateway_provider_failed_run_stopped'
+    diagnostic = gateway.ledger.state['provider_failure']
+    assert diagnostic == {'http_status': 200, 'provider_error_type': None, 'provider_error_code': None,
+        'failure_category': 'invalid_response', 'rate_limit_indicated': False, 'usage_received': True}
+    assert 'private-token' not in (tmp_path / 'usage.json').read_text()
     assert len(http.requests) == 1 and gateway.ledger.state['stopped']
 
 

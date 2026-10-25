@@ -11,7 +11,10 @@ from src.schemas.financial_assistant import ModelDraft
 from src.schemas.financial_evaluation import GatewayReply, LiveEvaluationConfig
 from src.services.financial_model_adapter import EvaluationStopped, config_digest, json_text, prompt_contract, prompt_digest
 from src.services.financial_evaluation import DATASET_HASHES
-from src.services.financial_groq_adapter import GROQ_MODELS, GroqChatTransport
+from src.services.financial_groq_adapter import (
+    GROQ_FAILURE_CODES, GROQ_MODELS, GroqChatTransport, GroqProviderFailure,
+    validate_failure_diagnostics,
+)
 
 
 # Standard text rates, USD per million tokens, reviewed from official model pages 2026-10-24.
@@ -98,6 +101,14 @@ class GatewayUsageLedger:
                     raise ValueError
                 self.state.update(saved['state'])
                 b, s = config.budget, self.state
+                if (config.provider == 'groq' and 'failure_code' in s and
+                        (type(s['failure_code']) is not str or s['failure_code'] not in GROQ_FAILURE_CODES)):
+                    raise ValueError
+                if s.get('provider_failure') is not None:
+                    try:
+                        validate_failure_diagnostics(s['provider_failure'])
+                    except Exception:
+                        raise ValueError
                 if (any(type(s[key]) is not int or s[key] < 0 for key in (
                         'requests', 'input_reserved', 'output_reserved', 'input_actual', 'output_actual')) or
                         any(type(s[key]) is not bool for key in ('stopped', 'usage_missing', 'in_flight')) or
@@ -268,6 +279,7 @@ class RealLLMGateway:
                 raise EvaluationStopped('gateway_run_configuration_changed')
             limits = self.provider.preflight() if c.provider == 'groq' else None
             reserved = self.ledger.reserve(limits)
+            provider_diagnostics = None
             try:
                 provider_payload = {'model': c.model, 'store': False,
                     'reasoning': {'effort': 'none'},
@@ -283,6 +295,10 @@ class RealLLMGateway:
                 if not isinstance(raw_reply, bytes) or len(raw_reply) > MAX_PROVIDER_RESPONSE_BYTES:
                     raise ValueError
                 provider_reply = _strict_json(raw_reply)
+                if c.provider == 'groq' and isinstance(provider_reply, dict):
+                    diagnostics = provider_reply.get('diagnostics')
+                    if diagnostics is not None:
+                        provider_diagnostics = validate_failure_diagnostics(diagnostics)
                 usage = provider_reply.get('usage')
                 if not isinstance(usage, dict):
                     self.ledger.state['usage_missing'] = True
@@ -319,8 +335,17 @@ class RealLLMGateway:
                 self.ledger.state['stopped'] = True
                 self.ledger.state['usage_missing'] = True
                 code = str(error) if isinstance(error, EvaluationStopped) else ''
-                if code in {'groq_authentication_failed', 'groq_permission_denied', 'groq_rate_limited',
-                        'groq_request_failed', 'groq_response_size_limit', 'groq_free_plan_review_invalid'}:
+                if code in GROQ_FAILURE_CODES:
                     self.ledger.state['failure_code'] = code
+                if c.provider == 'groq':
+                    diagnostics = error.diagnostics if isinstance(error, GroqProviderFailure) else provider_diagnostics
+                    if diagnostics is not None:
+                        safe_diagnostics = dict(diagnostics)
+                        if safe_diagnostics['failure_category'] == 'provider_response':
+                            safe_diagnostics['failure_category'] = 'invalid_response'
+                        try:
+                            self.ledger.state['provider_failure'] = validate_failure_diagnostics(safe_diagnostics)
+                        except Exception:
+                            self.ledger.state['provider_failure'] = None
                 self.ledger.save()
                 raise EvaluationStopped('gateway_provider_failed_run_stopped') from None
