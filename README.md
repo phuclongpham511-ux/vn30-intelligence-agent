@@ -1,5 +1,11 @@
 # VN30 Intelligence Agent
 
+## Project navigation
+
+- [Documentation index](docs/README.md)
+- [Local project structure and naming](docs/WOOFI_PROJECT_STRUCTURE_GUIDE.md)
+- [Historical milestone catalog](docs/archive/README.md)
+
 Financial Data Intelligence V1 adds normalized revisioned facts, offline journal
 ingestion, guarded industry aggregates/peers and four financial chart projections.
 Real source qualification and industry membership remain explicit gates. See
@@ -312,7 +318,7 @@ Full VN30 coverage and tick-level streaming remain outside the initial MVP.
 
 ## Documents
 
-- [Original product brief](docs/PRODUCT_BRIEF.md)
+- [Original product brief](docs/product/PRODUCT_BRIEF.md)
 - [Historical Day 0 report](docs/DAY0_REPORT.md)
 - [Section 1 report](docs/SECTION1_REPORT.md)
 - [UI refresh report and screenshots](docs/UI_REFRESH_REPORT.md)

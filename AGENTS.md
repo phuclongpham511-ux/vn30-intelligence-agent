@@ -50,7 +50,7 @@ Do not perform opportunistic architecture refactors unless the current task is b
 
 ### Agent skills
 
-Repo-local Codex skills may be installed under the Agent Skills convention. The recommended set and install commands are documented in `docs/AGENT_SKILLS_SETUP.md`.
+Repo-local Codex skills may be installed under the Agent Skills convention. The recommended set and install commands are documented in `docs/operations/AGENT_SKILLS_SETUP.md`.
 
 Use skills only when the task matches:
 - `grill-with-docs`: resolve a substantial design decision before implementation.
