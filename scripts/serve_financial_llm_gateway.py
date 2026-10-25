@@ -25,7 +25,7 @@ class LocalGatewayServer(ThreadingHTTPServer):
     allow_reuse_address = False
 
 
-def run():
+def run(*, on_ready=None):
     process_lock = server = None
     try:
         config_path = Path(os.environ['WOOFI_LLM_GATEWAY_CONFIG'])
@@ -90,6 +90,8 @@ def run():
         tls.minimum_version = ssl.TLSVersion.TLSv1_2
         tls.load_cert_chain(certfile=cert_path, keyfile=key_path)
         server.socket = tls.wrap_socket(server.socket, server_side=True)
+        if on_ready is not None:
+            on_ready(server)
         print('Woofi synthetic LLM gateway listening on HTTPS loopback; Ctrl+C to stop.', file=sys.stderr)
         server.serve_forever()
         return 0
