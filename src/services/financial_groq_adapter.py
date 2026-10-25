@@ -26,7 +26,7 @@ PROVIDER_ERROR_CODES = frozenset({
     'bad_request', 'invalid_request', 'invalid_api_key', 'insufficient_permissions',
     'model_not_found', 'unprocessable_entity', 'rate_limit_exceeded', 'rate_limit_reached',
     'context_length_exceeded', 'token_limit_exceeded', 'insufficient_quota', 'request_too_large',
-    'unrecognized',
+    'json_validate_failed', 'unrecognized',
 })
 FAILURE_CATEGORIES = frozenset({
     'authentication', 'permission', 'rate_limit', 'request_rejected', 'not_found',

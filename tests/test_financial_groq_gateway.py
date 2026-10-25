@@ -134,6 +134,12 @@ def test_valid_groq_wire_mapping_contract_tls_and_notional_accounting(tmp_path, 
     assert json.loads(payload['messages'][0]['content']) == prompt_contract()
     assert payload['model'] == GROQ_MODEL and payload['max_completion_tokens'] == 1280
     assert payload['response_format']['json_schema']['strict'] is True
+    schema = payload['response_format']['json_schema']['schema']
+    assert schema['type'] == 'object' and schema['additionalProperties'] is False
+    assert set(schema['required']) == set(schema['properties']) == {'answer', 'fact_ids', 'evidence_ids'}
+    assert schema['properties']['answer']['type'] == 'string'
+    for field in ('fact_ids', 'evidence_ids'):
+        assert schema['properties'][field] == {'type': 'array', 'items': {'type': 'string'}}
     assert payload['service_tier'] == 'on_demand' and payload['reasoning_format'] == 'hidden'
     assert payload['reasoning_effort'] == 'low' and not payload['stream']
     assert 'tools' not in payload and 'store' not in payload
@@ -229,6 +235,77 @@ def test_http_error_usage_signal_does_not_release_uncertain_reservation(tmp_path
     assert gateway.ledger.state['provider_failure']['usage_received'] is True
     assert gateway.ledger.state['usage_missing'] and gateway.ledger.state['in_flight']
     assert Decimal(gateway.ledger.state['cost_reserved']) == Decimal('.0017664')
+
+
+def test_json_validation_failure_preserves_safe_code_and_discards_failed_generation(tmp_path, monkeypatch):
+    # Reconstructed error envelope, not a retained Trial #2 response body.
+    body = json.dumps({'error': {'type': 'invalid_request_error', 'code': 'json_validate_failed',
+        'message': 'unapproved provider message', 'failed_generation': 'private failed draft'},
+        'usage': {'prompt_tokens': 1275, 'completion_tokens': 1280, 'total_tokens': 2555}}).encode()
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(status=400, raw=body))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
+        call(gateway)
+    assert gateway.ledger.state['provider_failure'] == {
+        'http_status': 400, 'provider_error_type': 'invalid_request_error',
+        'provider_error_code': 'json_validate_failed', 'failure_category': 'request_rejected',
+        'rate_limit_indicated': False, 'usage_received': True}
+    assert gateway.ledger.state['usage_missing'] and gateway.ledger.state['in_flight']
+    assert Decimal(gateway.ledger.state['cost_reserved']) == Decimal('.0017664')
+    persisted = (tmp_path / 'usage.json').read_text()
+    assert 'unapproved provider message' not in persisted and 'private failed draft' not in persisted
+    with pytest.raises(EvaluationStopped):
+        call(gateway)
+    assert len(http.requests) == 1
+
+
+@pytest.mark.parametrize('scenario', ['truncated_json', 'empty_response', 'missing_property',
+    'extra_property', 'wrong_array_type', 'null_answer', 'output_exhaustion', 'reasoning_in_content'])
+def test_structured_output_failures_stop_with_full_reservation(tmp_path, monkeypatch, scenario):
+    def mutate(value):
+        message = value['choices'][0]['message']
+        draft = json.loads(message['content'])
+        if scenario == 'truncated_json': message['content'] = message['content'][:-1]
+        elif scenario == 'empty_response': message['content'] = ''
+        elif scenario == 'reasoning_in_content': message['content'] = '<think>synthetic reasoning</think>' + message['content']
+        elif scenario == 'output_exhaustion':
+            # Even complete-looking JSON cannot override an explicit length finish.
+            value['choices'][0]['finish_reason'] = 'length'
+            value['usage'].update(completion_tokens=1280, total_tokens=2280)
+        else:
+            if scenario == 'missing_property': draft.pop('fact_ids')
+            elif scenario == 'extra_property': draft['unapproved'] = 'synthetic extra field'
+            elif scenario == 'wrong_array_type': draft['evidence_ids'] = [42]
+            elif scenario == 'null_answer': draft['answer'] = None
+            message['content'] = json_text(draft)
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(mutation=mutate))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
+        call(gateway)
+    assert gateway.ledger.state['provider_failure']['failure_category'] == 'invalid_response'
+    assert gateway.ledger.state['provider_failure']['usage_received'] is True
+    assert gateway.ledger.state['stopped'] and gateway.ledger.state['in_flight']
+    assert gateway.ledger.state['usage_missing']
+    assert gateway.ledger.state['input_reserved'] == 6656
+    assert gateway.ledger.state['output_reserved'] == 1280
+    assert Decimal(gateway.ledger.state['cost_reserved']) == Decimal('.0017664')
+    with pytest.raises(EvaluationStopped):
+        call(gateway)
+    assert len(http.requests) == 1
+
+
+def test_complete_json_at_token_cap_counts_reasoning_in_total_without_exposing_it(tmp_path, monkeypatch):
+    def mutate(value):
+        # Synthetic accounting example, not a tokenizer estimate of fixture text.
+        value['usage'].update(prompt_tokens=1275, completion_tokens=1280, total_tokens=2555,
+            completion_tokens_details={'reasoning_tokens': 256})
+        value['choices'][0]['message']['reasoning'] = 'synthetic reasoning must not be persisted'
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(mutation=mutate))
+    reply = json.loads(call(gateway))
+    assert reply['output_tokens'] == gateway.ledger.state['output_actual'] == 1280
+    assert Decimal(reply['actual_cost_usd']) == Decimal('.00095925')
+    assert not gateway.ledger.state['stopped'] and not gateway.ledger.state['in_flight']
+    assert 'synthetic reasoning' not in json_text(reply)
+    assert 'synthetic reasoning' not in (tmp_path / 'usage.json').read_text()
+    assert len(http.requests) == 1
 
 
 def test_malformed_provider_json_and_missing_usage_have_bounded_diagnostics(tmp_path, monkeypatch):
