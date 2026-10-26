@@ -23,7 +23,7 @@ from src.schemas.financial_evaluation import LiveEvaluationConfig
 from src.services.financial_evaluation import load_dataset
 from src.services.financial_groq_adapter import GroqChatTransport
 from src.services.financial_model_adapter import (
-    EvaluationStopped, SyntheticEgressGate, SyntheticGatewayModel, config_digest,
+    PROMPT_VARIANTS, EvaluationStopped, SyntheticEgressGate, SyntheticGatewayModel, config_digest,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -56,7 +56,7 @@ def evaluator_environment(environment, token, ca_file):
     return result
 
 
-def load_approved_config(path, *, trial_profile='baseline'):
+def load_approved_config(path, *, trial_profile='baseline', prompt_variant='default'):
     raw = path.read_bytes()
     if len(raw) > 16384:
         raise EvaluationStopped('configuration_too_large')
@@ -75,7 +75,7 @@ def load_approved_config(path, *, trial_profile='baseline'):
         raise EvaluationStopped('one_request_trial_limits_required')
     # Reuse all original dataset, prompt, expiry and destination gates. No send.
     SyntheticGatewayModel(config, SyntheticEgressGate(load_dataset()),
-        operator_enabled=True, egress_authorized=True)
+        operator_enabled=True, egress_authorized=True, prompt_variant=prompt_variant)
     return config
 
 
@@ -110,7 +110,7 @@ def authentication_check(ca_file):
         connection.close()
 
 
-def evaluate_once(directory, config, nonce):
+def evaluate_once(directory, config, nonce, *, prompt_variant='default', diagnostics_directory=None):
     # Persist before starting the child: even an uncertain launch is never retried.
     with (directory / 'live-attempt-started.json').open('x', encoding='utf-8') as handle:
         json.dump(dict(config_sha256=config_digest(config), approval_reference=config.approval.reference,
@@ -120,6 +120,10 @@ def evaluate_once(directory, config, nonce):
     args = [sys.executable, '-B', '-m', 'scripts.evaluate_financial_llm', '--mode', 'real',
         '--config', str(directory / 'gateway-config.json'), '--enable-real', '--authorize-synthetic-egress',
         '--request-interval-seconds', '0']
+    if prompt_variant != 'default':
+        args += ['--prompt-variant', prompt_variant]
+    if diagnostics_directory is not None:
+        args += ['--enable-rejected-draft-diagnostics', '--diagnostics-directory', str(diagnostics_directory)]
     with (directory / 'first-report.json').open('x', encoding='utf-8') as output, \
             (directory / 'evaluator-errors.txt').open('x', encoding='utf-8') as errors:
         result = subprocess.run(args, cwd=ROOT, env=environment, stdin=subprocess.DEVNULL,
@@ -129,7 +133,7 @@ def evaluate_once(directory, config, nonce):
     return result.returncode, report
 
 
-def run(directory, *, trial_profile='baseline'):
+def run(directory, *, trial_profile='baseline', prompt_variant='default', diagnostics_directory=None):
     directory = directory.resolve(strict=True)
     if directory == ROOT or ROOT in directory.parents:
         raise EvaluationStopped('private_directory_outside_git_required')
@@ -157,6 +161,7 @@ def run(directory, *, trial_profile='baseline'):
             WOOFI_LLM_GATEWAY_CONFIG=str(config_path), WOOFI_LLM_GATEWAY_STATE=str(directory / 'usage.json'),
             WOOFI_LLM_GATEWAY_TLS_CERT=str(directory / 'loopback-cert.pem'),
             WOOFI_LLM_GATEWAY_TLS_KEY=str(directory / 'loopback-key.pem'))
+        os.environ['WOOFI_LLM_PROMPT_VARIANT'] = prompt_variant
         write_json(state_path, status)
         print('Key is held in this gateway process. Waiting for reviewed account/config and explicit operator commands.')
         seen = set()
@@ -171,7 +176,7 @@ def run(directory, *, trial_profile='baseline'):
             if command.get('operation') == 'shutdown':
                 return 0
             try:
-                config = load_approved_config(config_path, trial_profile=trial_profile)
+                config = load_approved_config(config_path, trial_profile=trial_profile, prompt_variant=prompt_variant)
                 GroqChatTransport.from_environment(config).preflight()  # No provider request.
                 if command.get('operation') == 'serve_only':
                     approve_command(command, config, live=False)
@@ -198,7 +203,8 @@ def run(directory, *, trial_profile='baseline'):
                         raise EvaluationStopped('gateway_preflight_required')
                     status.update(state='one_live_attempt_started', real_llm_requests=None)
                     write_json(state_path, status)
-                    exit_code, report = evaluate_once(directory, config, nonce)
+                    exit_code, report = evaluate_once(directory, config, nonce,
+                        prompt_variant=prompt_variant, diagnostics_directory=diagnostics_directory)
                     usage = report.get('usage') or {}
                     status.update(state='one_attempt_finished_no_retry', evaluator_exit_code=exit_code,
                         real_llm_requests=usage.get('requests') if usage.get('usage_complete') is True else None,
@@ -221,6 +227,7 @@ def run(directory, *, trial_profile='baseline'):
             server_thread.join(15)
         os.environ.pop('WOOFI_GROQ_API_KEY', None)
         os.environ.pop('WOOFI_LLM_GATEWAY_TOKEN', None)
+        os.environ.pop('WOOFI_LLM_PROMPT_VARIANT', None)
         status.update(key_present=False, operator_process_closed=True)
         if not (directory / 'live-attempt-started.json').exists():
             status['state'] = 'closed_without_live_attempt'
@@ -234,9 +241,17 @@ def main():
     parser.add_argument('--trial-directory', type=Path, required=True)
     parser.add_argument('--trial-profile', choices=('baseline', 'trial3-completion'), default='baseline',
         help='Opt in to an exact separately approved budget; default remains the original trial')
+    parser.add_argument('--prompt-variant', choices=PROMPT_VARIANTS, default='default')
+    parser.add_argument('--enable-rejected-draft-diagnostics', action='store_true')
+    parser.add_argument('--diagnostics-directory', type=Path)
     args = parser.parse_args()
     try:
-        return run(args.trial_directory, trial_profile=args.trial_profile)
+        if args.enable_rejected_draft_diagnostics != (args.diagnostics_directory is not None):
+            raise EvaluationStopped('explicit_diagnostic_opt_in_required')
+        options = dict(trial_profile=args.trial_profile)
+        if args.prompt_variant != 'default': options['prompt_variant'] = args.prompt_variant
+        if args.diagnostics_directory is not None: options['diagnostics_directory'] = args.diagnostics_directory
+        return run(args.trial_directory, **options)
     except KeyboardInterrupt:
         return 0
     except Exception:

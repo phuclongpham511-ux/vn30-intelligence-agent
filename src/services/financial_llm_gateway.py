@@ -199,8 +199,9 @@ class GatewayProcessLock:
 
 class RealLLMGateway:
     """Validates only V5.15-pinned development contexts before provider egress."""
-    def __init__(self, config, caller_token, state_path, provider_transport=None):
+    def __init__(self, config, caller_token, state_path, provider_transport=None, *, prompt_variant='default'):
         self.config = LiveEvaluationConfig.model_validate(config).model_copy(deep=True)
+        self.prompt_variant = prompt_variant
         self._token = caller_token
         self._check_config()
         self.ledger = GatewayUsageLedger(self.config, state_path)
@@ -225,7 +226,7 @@ class RealLLMGateway:
             raise EvaluationStopped('gateway_input_overhead_too_small')
         if (c.approval.classification != 'synthetic_non_sensitive' or
                 c.approval.dataset_sha256 != DATASET_HASHES['development'] or
-                c.approval.prompt_sha256 != prompt_digest() or
+                c.approval.prompt_sha256 != prompt_digest(self.prompt_variant) or
                 c.approval.expires_at.tzinfo is None or
                 c.approval.expires_at <= datetime.now(timezone.utc)):
             raise EvaluationStopped('gateway_approval_invalid')
@@ -249,7 +250,7 @@ class RealLLMGateway:
                 raise ValueError
             if request['contract'] != self.config.contract or request['model'] != self.config.model:
                 raise ValueError
-            if request['prompt'] != prompt_contract():
+            if request['prompt'] != prompt_contract(self.prompt_variant):
                 raise ValueError
             if type(request['max_input_tokens']) is not int or type(request['max_output_tokens']) is not int:
                 raise ValueError

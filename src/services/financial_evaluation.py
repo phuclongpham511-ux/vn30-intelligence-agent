@@ -164,7 +164,9 @@ def _mean(values):
     return sum(values) / len(values) if values else None
 
 
-def evaluate(dataset, *, model=None, real=False, output_tokens=16384, request_interval_seconds=0):
+def evaluate(dataset, *, model=None, real=False, output_tokens=16384, request_interval_seconds=0,
+        prompt_variant='default', diagnostics=None):
+    selected_prompt_hash = prompt_digest(prompt_variant)
     if (type(request_interval_seconds) not in (int, float) or not math.isfinite(request_interval_seconds) or
             not 0 <= request_interval_seconds <= 3600 or (not real and request_interval_seconds != 0)):
         raise EvaluationStopped('invalid_real_request_interval')
@@ -173,6 +175,13 @@ def evaluate(dataset, *, model=None, real=False, output_tokens=16384, request_in
     if not real and model is not None and model.external_io is not False:
         raise EvaluationStopped('mock_mode_forbids_external_adapter')
     model = model if model is not None else DeterministicFinancialModel()
+    if real and getattr(model, 'prompt_variant', 'default') != prompt_variant:
+        raise EvaluationStopped('evaluation_prompt_variant_mismatch')
+    if diagnostics is not None:
+        from src.services.financial_draft_diagnostics import SyntheticDraftDiagnostics
+        if type(diagnostics) is not SyntheticDraftDiagnostics:
+            raise EvaluationStopped('synthetic_diagnostic_store_required')
+        diagnostics.check_dataset(dataset, prompt_variant)
     outcomes, drafts, stopped = [], [], None
     input_bounds = output_bounds = 0
     last_request_start = None
@@ -218,6 +227,8 @@ def evaluate(dataset, *, model=None, real=False, output_tokens=16384, request_in
             except Exception:
                 raw = None
             assessment = assess_draft(raw, prepared)
+            if diagnostics is not None and not assessment['accepted']:
+                diagnostics.record_rejection(case['id'], raw)
             outcome.update(assessment)
             outcome['status'] = 'ANSWERED' if assessment['accepted'] else 'SAFE_FALLBACK'
             # Do not log rejected text or raw replies. The local verifier always
@@ -251,9 +262,9 @@ def evaluate(dataset, *, model=None, real=False, output_tokens=16384, request_in
         and (clean_metrics['accepted_draft_rate'] or 0) >= ACCEPTANCE_THRESHOLDS['minimum_accepted_draft_rate']
         and all(r['verified_delivery'] for r in drafts)
         and all(r['latency_ms'] <= ACCEPTANCE_THRESHOLDS['maximum_request_latency_ms'] for r in outcomes))
-    return dict(contract='woofi-llm-evaluation-report-v1', mode='real_gateway' if real else 'deterministic_mock',
+    report = dict(contract='woofi-llm-evaluation-report-v1', mode='real_gateway' if real else 'deterministic_mock',
         real_llm_test_status='RUN' if real else 'NOT RUN', split=dataset.split, dataset_sha256=dataset.sha256,
-        prompt_sha256=prompt_digest(), thresholds=ACCEPTANCE_THRESHOLDS,
+        prompt_sha256=selected_prompt_hash, thresholds=ACCEPTANCE_THRESHOLDS,
         model_configuration=dict(provider=model.config.provider, model=model.config.model,
             input_usd_per_million=str(model.config.input_usd_per_million),
             output_usd_per_million=str(model.config.output_usd_per_million),
@@ -274,3 +285,7 @@ def evaluate(dataset, *, model=None, real=False, output_tokens=16384, request_in
             estimated_cost_ceiling_usd='0', actual_input_tokens=None, actual_output_tokens=None),
         end_to_end_latency_ms=round((time.perf_counter() - start_run) * 1000, 3),
         acceptance_pass=bool(passed), outcomes=outcomes)
+    if diagnostics is not None:
+        report['diagnostics'] = dict(artifacts_written=diagnostics.artifacts_written,
+            retention_seconds=diagnostics.retention_seconds)
+    return report

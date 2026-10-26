@@ -35,7 +35,8 @@ def run(*, on_ready=None):
         key_path = os.environ['WOOFI_LLM_GATEWAY_TLS_KEY']
         config = LiveEvaluationConfig.model_validate_json(config_path.read_bytes())
         token = os.environ.get('WOOFI_LLM_GATEWAY_TOKEN', '')
-        gateway = RealLLMGateway(config, token, state_path)
+        gateway = RealLLMGateway(config, token, state_path,
+            prompt_variant=os.environ.get('WOOFI_LLM_PROMPT_VARIANT', 'default'))
         port = configured_port(config.endpoint)
         class Handler(BaseHTTPRequestHandler):
             server_version = 'WoofiGateway/1'
