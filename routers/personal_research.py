@@ -3,6 +3,8 @@ import os
 import sqlite3
 from fastapi import APIRouter, HTTPException, Request, Query, Path, Depends
 from typing import Literal
+from pydantic import Field
+from routers.watchlists import MonitoringRequest
 from src.services.personal_financials import configured_research_packet, personal_projection
 
 def require_personal_request(request: Request):
@@ -15,6 +17,22 @@ def require_personal_request(request: Request):
 
 router = APIRouter(prefix='/personal-research', include_in_schema=False,
     dependencies=[Depends(require_personal_request)])
+
+
+class FinancialWatchlistRequest(MonitoringRequest):
+    symbols: list[str] = Field(max_length=5)
+
+
+@router.post('/watchlist-financials')
+def watchlist_financials(body: FinancialWatchlistRequest):
+    if (os.getenv('WOOFI_WATCHLIST_FINANCIALS') != '1' or
+            os.getenv('WOOFI_PERSONAL_FINANCIAL_READS') != 'sqlite'):
+        raise HTTPException(404)
+    from fastapi.responses import JSONResponse
+    from src.services.watchlist_intelligence import financial_updates
+    return JSONResponse(dict(contract='private-watchlist-financial-v1',
+        stocks=[dict(symbol=symbol, financial=financial_updates(symbol)) for symbol in body.symbols]),
+        headers={'Cache-Control':'private, no-store','X-Robots-Tag':'noindex, nofollow'})
 
 
 @router.get('/financials/{symbol}')

@@ -19,6 +19,54 @@ from src.models.technical_eod import TechnicalEODJob
 SCAN_LIMIT = 300
 
 
+def financial_updates(symbol):
+    """One saved annual revenue comparison. Called only by the private router."""
+    import os
+    import sqlite3
+    from src.services.personal_financials import configured_research_packet, saved_financial_insights
+    from src.services.financial_journal import MetricJournal
+
+    def page(status, reasons, items=None):
+        return dict(status=status, reasons=reasons, items=items or [], has_more=False, truncated=False)
+    try:
+        packet, digest = configured_research_packet(os.environ.get('WOOFI_PERSONAL_CAPTURES', ''),
+            symbol, frequency='annual', evidence='preferred')
+        journal_path = os.environ['WOOFI_PERSONAL_SQLITE']
+        candidates = [c for c in MetricJournal(journal_path, readonly=True).captures(ticker=symbol, source=packet.source)
+            if c['capture_sha256'] == digest]
+        if len(candidates) != 1:
+            raise ValueError('Ambiguous financial revision')
+        result = saved_financial_insights(journal_path, candidates[0]['capture_id'],
+            metrics=['revenue'], frequency='annual', comparison='yoy',
+            authorization_reference='private-watchlist-financial-v1')
+        if result.ticker != symbol or result.is_fixture:
+            raise ValueError('Invalid saved issuer')
+        insight = result.insights[0]
+        observed = {o.period:o.fields.get('revenue') for o in packet.reports['income'].observations
+                    if o.frequency == 'annual'}
+        if observed.get(insight.current_period) is None or observed.get(insight.comparison_period) is None:
+            return page('MISSING_DATA', insight.missing_information)
+        if insight.qualification_status != 'COMPARABLE':
+            return page('INSUFFICIENT_COMPARISON', insight.missing_information)
+        if not insight.attention_reason.noteworthy:
+            return page('READY', insight.missing_information)
+        evidence = dict(source=result.source, frequency=result.frequency, comparison=result.comparison,
+            capture_id=result.capture_id, capture_sha256=result.capture_sha256,
+            packet_sha256=result.packet_sha256, limitations=result.limitations,
+            insight=insight.model_dump(mode='json'))
+        entity = revision(dict(symbol=symbol, source=result.source, frequency=result.frequency,
+            metric=insight.metric, current_period=insight.current_period,
+            comparison_period=insight.comparison_period))
+        return page('READY', insight.missing_information, [dict(id='financial:'+entity,
+            entity_id=entity, revision=revision(evidence), kind='financial',
+            title=f'{symbol} · revenue · {insight.current_period} / {insight.comparison_period}',
+            url='/stocks/'+symbol+'#stock-fundamentals', evidence=evidence)])
+    except FileNotFoundError:
+        return page('MISSING_DATA', ['saved_financial_coverage_unavailable'])
+    except (KeyError, ValueError, TypeError, OSError, sqlite3.DatabaseError):
+        return page('UNAVAILABLE', ['saved_financial_evidence_invalid_or_ambiguous'])
+
+
 def revision(value):
     return sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
                             separators=(',', ':'), default=str).encode()).hexdigest()
