@@ -301,10 +301,32 @@ def test_complete_json_at_token_cap_counts_reasoning_in_total_without_exposing_i
     gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(mutation=mutate))
     reply = json.loads(call(gateway))
     assert reply['output_tokens'] == gateway.ledger.state['output_actual'] == 1280
+    assert gateway.ledger.state['provider_receipt'] == {
+        'http_status': 200, 'finish_reason': 'stop', 'reasoning_tokens': 256}
     assert Decimal(reply['actual_cost_usd']) == Decimal('.00095925')
     assert not gateway.ledger.state['stopped'] and not gateway.ledger.state['in_flight']
     assert 'synthetic reasoning' not in json_text(reply)
     assert 'synthetic reasoning' not in (tmp_path / 'usage.json').read_text()
+    assert len(http.requests) == 1
+
+
+def test_success_receipt_does_not_invent_missing_reasoning_count(tmp_path, monkeypatch):
+    gateway, _, _ = setup(tmp_path, monkeypatch)
+    call(gateway)
+    assert gateway.ledger.state['provider_receipt'] == {
+        'http_status': 200, 'finish_reason': 'stop', 'reasoning_tokens': None}
+
+
+@pytest.mark.parametrize('count', [True, -1, 501, 'secret-provider-text'])
+def test_invalid_reasoning_receipt_stops_without_persisting_untrusted_fields(tmp_path, monkeypatch, count):
+    def mutate(value):
+        value['usage']['completion_tokens_details'] = {'reasoning_tokens': count}
+    gateway, http, _ = setup(tmp_path, monkeypatch, http=FakeGroqHTTP(mutation=mutate))
+    with pytest.raises(EvaluationStopped, match='provider_failed_run_stopped'):
+        call(gateway)
+    assert gateway.ledger.state['stopped'] and gateway.ledger.state['in_flight']
+    assert 'provider_receipt' not in gateway.ledger.state
+    assert 'secret-provider-text' not in (tmp_path / 'usage.json').read_text()
     assert len(http.requests) == 1
 
 

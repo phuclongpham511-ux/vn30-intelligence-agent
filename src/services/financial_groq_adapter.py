@@ -69,6 +69,18 @@ def validate_failure_diagnostics(value):
         'rate_limit_indicated', 'usage_received')}
 
 
+def validate_success_receipt(value, output_tokens):
+    """Only safe response metadata; reasoning text and arbitrary fields are excluded."""
+    if (type(value) is not dict or set(value) != {'http_status', 'finish_reason', 'reasoning_tokens'} or
+            type(value['http_status']) is not int or value['http_status'] != 200 or
+            value['finish_reason'] != 'stop'):
+        raise ValueError('invalid_groq_receipt')
+    count = value['reasoning_tokens']
+    if count is not None and (type(count) is not int or not 0 <= count <= output_tokens):
+        raise ValueError('invalid_groq_receipt')
+    return dict(value)
+
+
 class GroqProviderFailure(EvaluationStopped):
     """Stable failure code plus strictly allowlisted diagnostic metadata."""
     def __init__(self, code, diagnostics):
@@ -306,9 +318,13 @@ class GroqChatTransport:
             # Completion usage includes generated reasoning. Do not count only visible JSON.
             metadata = _diagnostics(status=status, category='provider_response',
                 rate_limited=rate_limited, usage_received=True)
+            details = usage.get('completion_tokens_details')
+            reasoning_tokens = details.get('reasoning_tokens') if isinstance(details, dict) else None
+            receipt = validate_success_receipt(dict(http_status=status,
+                finish_reason=choices[0]['finish_reason'], reasoning_tokens=reasoning_tokens), tokens[1])
             return json_text(dict(status='completed', model=GROQ_MODEL,
                 output=[dict(type='message', content=[dict(type='output_text', text=message['content'])])],
                 usage=dict(input_tokens=tokens[0], output_tokens=tokens[1]),
-                diagnostics=metadata)).encode()
+                diagnostics=metadata, provider_receipt=receipt)).encode()
         finally:
             connection.close()

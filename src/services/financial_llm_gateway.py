@@ -13,7 +13,7 @@ from src.services.financial_model_adapter import EvaluationStopped, config_diges
 from src.services.financial_evaluation import DATASET_HASHES
 from src.services.financial_groq_adapter import (
     GROQ_FAILURE_CODES, GROQ_MODELS, GroqChatTransport, GroqProviderFailure,
-    validate_failure_diagnostics,
+    validate_failure_diagnostics, validate_success_receipt,
 )
 
 
@@ -101,6 +101,8 @@ class GatewayUsageLedger:
                     raise ValueError
                 self.state.update(saved['state'])
                 b, s = config.budget, self.state
+                if 'provider_receipt' in s:
+                    validate_success_receipt(s['provider_receipt'], s['output_actual'])
                 if (config.provider == 'groq' and 'failure_code' in s and
                         (type(s['failure_code']) is not str or s['failure_code'] not in GROQ_FAILURE_CODES)):
                     raise ValueError
@@ -280,6 +282,7 @@ class RealLLMGateway:
             limits = self.provider.preflight() if c.provider == 'groq' else None
             reserved = self.ledger.reserve(limits)
             provider_diagnostics = None
+            provider_receipt = None
             try:
                 provider_payload = {'model': c.model, 'store': False,
                     'reasoning': {'effort': 'none'},
@@ -308,6 +311,8 @@ class RealLLMGateway:
                         input_tokens < 0 or output_tokens < 0 or
                         input_tokens > b.per_request_input_tokens or output_tokens > b.per_request_output_tokens):
                     raise ValueError
+                if c.provider == 'groq' and 'provider_receipt' in provider_reply:
+                    provider_receipt = validate_success_receipt(provider_reply['provider_receipt'], output_tokens)
                 if provider_reply.get('status') != 'completed':
                     raise ValueError
                 texts = [item.get('text') for item in provider_reply.get('output', [])
@@ -327,6 +332,8 @@ class RealLLMGateway:
                     Decimal(self.ledger.state['actual_cost_usd']) + actual_cost)
                 self.ledger.state['last_latency_ms'] = round((time.perf_counter() - started) * 1000, 3)
                 self.ledger.state['in_flight'] = False
+                if provider_receipt is not None:
+                    self.ledger.state['provider_receipt'] = provider_receipt
                 self.ledger.save()
                 return reply.model_dump_json().encode()
             except Exception as error:

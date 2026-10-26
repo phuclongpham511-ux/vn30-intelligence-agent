@@ -56,17 +56,22 @@ def evaluator_environment(environment, token, ca_file):
     return result
 
 
-def load_approved_config(path):
+def load_approved_config(path, *, trial_profile='baseline'):
     raw = path.read_bytes()
     if len(raw) > 16384:
         raise EvaluationStopped('configuration_too_large')
     config = LiveEvaluationConfig.model_validate_json(raw)
     b = config.budget
+    profiles = {'baseline': (6656, 1280, '0.0017664'),
+        'trial3-completion': (5888, 2048, '0.002112')}
+    if trial_profile not in profiles:
+        raise EvaluationStopped('one_request_trial_limits_required')
+    input_cap, output_cap, cost_cap = profiles[trial_profile]
     if (config.provider != 'groq' or config.model != 'openai/gpt-oss-120b' or
             config.endpoint != ENDPOINT or config.input_token_overhead != 2048 or
-            b.max_requests != 1 or b.max_input_tokens != 6656 or b.max_output_tokens != 1280 or
-            b.per_request_input_tokens != 6656 or b.per_request_output_tokens != 1280 or
-            str(b.max_cost_usd) != '0.0017664'):
+            b.max_requests != 1 or b.max_input_tokens != input_cap or b.max_output_tokens != output_cap or
+            b.per_request_input_tokens != input_cap or b.per_request_output_tokens != output_cap or
+            str(b.max_cost_usd) != cost_cap):
         raise EvaluationStopped('one_request_trial_limits_required')
     # Reuse all original dataset, prompt, expiry and destination gates. No send.
     SyntheticGatewayModel(config, SyntheticEgressGate(load_dataset()),
@@ -124,7 +129,7 @@ def evaluate_once(directory, config, nonce):
     return result.returncode, report
 
 
-def run(directory):
+def run(directory, *, trial_profile='baseline'):
     directory = directory.resolve(strict=True)
     if directory == ROOT or ROOT in directory.parents:
         raise EvaluationStopped('private_directory_outside_git_required')
@@ -166,7 +171,7 @@ def run(directory):
             if command.get('operation') == 'shutdown':
                 return 0
             try:
-                config = load_approved_config(config_path)
+                config = load_approved_config(config_path, trial_profile=trial_profile)
                 GroqChatTransport.from_environment(config).preflight()  # No provider request.
                 if command.get('operation') == 'serve_only':
                     approve_command(command, config, live=False)
@@ -227,9 +232,11 @@ def run(directory):
 def main():
     parser = argparse.ArgumentParser(description='Hidden-key host for one separately approved Groq trial')
     parser.add_argument('--trial-directory', type=Path, required=True)
+    parser.add_argument('--trial-profile', choices=('baseline', 'trial3-completion'), default='baseline',
+        help='Opt in to an exact separately approved budget; default remains the original trial')
     args = parser.parse_args()
     try:
-        return run(args.trial_directory)
+        return run(args.trial_directory, trial_profile=args.trial_profile)
     except KeyboardInterrupt:
         return 0
     except Exception:
