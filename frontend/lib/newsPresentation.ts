@@ -1,6 +1,26 @@
 import type {LiveItem} from './live-market.ts';
 import type {TickerAssociation} from './news.ts';
 
+// Preserve the paginated backend order; discussions never enter editorial rows.
+export function editorialStories<T extends {story:{id:string};research_category?:string|null}>(rows:T[]):T[] {
+  const seen=new Set<string>();
+  return rows.filter(row=>{
+    if(!row.story?.id||!['COMPANY','INDUSTRY','MARKET_BRIEF'].includes(row.research_category||'')||seen.has(row.story.id))return false;
+    seen.add(row.story.id);return true;
+  });
+}
+type DatedArticle={published_at:string|null;first_seen_at:string};
+export function newsArticleTime(article:DatedArticle):{kind:'Published'|'First seen';value:string|null} {
+  if(article.published_at&&Number.isFinite(Date.parse(article.published_at)))return {kind:'Published',value:article.published_at};
+  return {kind:'First seen',value:Number.isFinite(Date.parse(article.first_seen_at))?article.first_seen_at:null};
+}
+// Same clock as the archive: latest publication, or first seen when unavailable.
+// last_seen_at is a source recheck, never a new publication.
+export function latestReporting(item:{representative_article:DatedArticle;articles:DatedArticle[]}) {
+  return [item.representative_article,...item.articles].map(newsArticleTime).reduce((latest,next)=>
+    next.value&&(!latest.value||Date.parse(next.value)>Date.parse(latest.value))?next:latest,newsArticleTime(item.representative_article));
+}
+
 type Article={id:string;title:string;tickers:string[];url?:string};
 type Story={representative_article:Article;ticker_associations?:TickerAssociation[]};
 export function qualifiedAssociations(article:Article,associations:TickerAssociation[]=[]){

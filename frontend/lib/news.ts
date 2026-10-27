@@ -17,21 +17,17 @@ export type NewsSource = {
 };
 export type NewsFilters = { ticker: string; sector: string; country: string; source: string; topic: string };
 export const emptyNewsFilters: NewsFilters = { ticker: "", sector: "", country: "", source: "", topic: "" };
-export type NewsView = "company" | "industry" | "briefing" | "community";
-export const newsSectionLabels = {industry: 'Industry', company: 'Company', briefing: 'Market', community: 'Community Pulse'};
+export type NewsView = "company" | "industry" | "briefing";
+export const newsSectionLabels = {industry: 'Industry', company: 'Company', briefing: 'Market'};
 export function readNewsView(search: string): { view: NewsView } {
   const value = new URLSearchParams(search).get("view");
-  const view = value === 'company' || value === 'briefing' || value === 'community' ? value : 'industry';
+  const view = value === 'company' || value === 'briefing' ? value : 'industry';
   return { view };
 }
-export function readCommunityWindow(search: string): 'today' | 'last24h' {
-  return new URLSearchParams(search).get('window') === 'last24h' ? 'last24h' : 'today';
-}
-export function newsViewQuery(filters: NewsFilters, view: NewsView, communityWindow: 'today' | 'last24h' = 'today'): string {
+export function newsViewQuery(filters: NewsFilters, view: NewsView): string {
   const params = new URLSearchParams(newsQuery(filters));
   const canonical = readNewsView(`view=${view}`).view;
   if (canonical !== 'industry') params.set("view", canonical);
-  if (canonical === 'community' && communityWindow === 'last24h') params.set('window', communityWindow);
   return params.toString();
 }
 export function readNewsFilters(search: string): NewsFilters {

@@ -2,7 +2,7 @@
 import {useLocale} from "@/lib/i18n";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import {emptyNewsFilters,newsViewQuery} from '@/lib/news';
+import {communityHref} from '@/lib/community';
 import {collectionLabels} from "@/lib/collectionStatus";
 import {safeExternalUrl} from "@/lib/presentation";
 import { loadCommunity } from "@/lib/community";
@@ -30,7 +30,7 @@ export default function CommunityPulse({ ticker, topic, attempt, compact=false, 
   }, [selectedTicker, attempt, retry, window]);
   const selectWindow=(next:"today"|"last24h")=>{setWindow(next);onWindowChange?.(next);};
   const selectTicker=(value:string)=>{const next=value.trim().toUpperCase();setDraftTicker(next);setSelectedTicker(next);onTickerChange?.(next);};
-  const discussionHref=(ticker="")=>"/news?"+newsViewQuery({...emptyNewsFilters,ticker},"community",window);
+  const discussionHref=(ticker="")=>communityHref(ticker,window);
   // News topics are publisher taxonomy, separate from Community extraction.
   void topic;
   if(compact)return <section aria-label={ui('Investor Attention')}>

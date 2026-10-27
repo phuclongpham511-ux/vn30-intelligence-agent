@@ -1,5 +1,21 @@
 import { safeExternalUrl } from "./presentation.ts";
 
+export function readCommunityWindow(search: string): 'today' | 'last24h' {
+  return new URLSearchParams(search).get('window') === 'last24h' ? 'last24h' : 'today';
+}
+export function communityHref(ticker = '', window: 'today' | 'last24h' = 'today'): string {
+  const params = new URLSearchParams();
+  if (ticker.trim()) params.set('ticker', ticker.trim().toUpperCase());
+  if (window === 'last24h') params.set('window', window);
+  return '/community' + (params.size ? '?' + params : '');
+}
+// Preserve old bookmarks without carrying publisher filters into discussions.
+export function legacyCommunityHref(search: string): string | null {
+  const params = new URLSearchParams(search);
+  return params.get('view') === 'community'
+    ? communityHref(params.get('ticker') || '', readCommunityWindow(search)) : null;
+}
+
 export type CommunitySource = {
   source_id: string; name: string; url: string; enabled: boolean; qualification: string; reason: string | null; items_received: number | null;
   status: "healthy" | "stale" | "error" | "not_attempted" | "disabled";

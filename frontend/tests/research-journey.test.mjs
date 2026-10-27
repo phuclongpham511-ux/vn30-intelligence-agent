@@ -7,7 +7,7 @@ import React from 'react';
 import {transformSync} from 'next/dist/build/swc/index.js';
 import {localeTools} from '../lib/i18n.ts';
 import {readWatchlist,watchlistStorageKey} from '../lib/watchlist.ts';
-import {readNewsFilters,readNewsView,readCommunityWindow} from '../lib/news.ts';
+import {readCommunityWindow} from '../lib/community.ts';
 const require=createRequire(import.meta.url);
 const nodes=value=>Array.isArray(value)?value.flatMap(nodes):!value||typeof value!=='object'?[]:[value,...nodes(value.props?.children)];
 function component(file,mocks={},language='en'){
@@ -38,47 +38,30 @@ test('an already followed stock can be removed when metadata is missing, preserv
  }finally{globalThis.localStorage=oldStorage;globalThis.window=oldWindow;}
 });
 
-for(const language of ['en','vi'])test('Community ticker changes retain URL/filter context and reload in '+language,()=>{
- const oldWindow=globalThis.window,oldFetch=globalThis.fetch;
- const listeners=new Map();
- globalThis.window={location:{search:'?view=community&ticker=ABC&source=publisher&country=VN&window=last24h'},history:{replaceState(_s,_t,url){globalThis.window.location.search=new URL(url,'http://localhost').search;}},addEventListener(name,fn){listeners.set(name,fn);},removeEventListener(){}};
- globalThis.fetch=async()=>({ok:true,json:async()=>[]});
- const mocks={'../components/mascot/Mascot':{MascotState:'state'},'../components/ui/button':{Button:'button'},
-  '../components/news/SourceCoverage':{__esModule:true,default:'sources'},'../components/news/TopStory':{__esModule:true,default:'story'},
-  '../components/stock/LivePrice':{LivePrices:'quotes'},'@/lib/useNewsArchive':{useNewsArchive:()=>({page:null,loading:false,error:false,loadMore(){}})},
-  '../components/news/CommunityPulse':{__esModule:true,default:'pulse'}};
+for(const language of ['en','vi'])test('independent Community ticker and window survive reload in '+language,()=>{
+ const oldWindow=globalThis.window;
+ globalThis.window={location:{search:'?ticker=ABC&window=last24h'},history:{replaceState(_s,_t,url){globalThis.window.location.search=new URL(url,'http://localhost').search;}},addEventListener(){},removeEventListener(){}};
+ const mocks={'../components/ui/button':{Button:'button'},'../components/news/CommunityPulse':{__esModule:true,default:'pulse'}};
  try{
-  const page=component('../app/news/page.tsx',mocks,language);
+  const page=component('../app/community/page.tsx',mocks,language);
   page.render();page.flush();let tree=page.render();page.flush();
   const props=nodes(tree).find(n=>n.type==='pulse').props;
-  assert.equal(typeof props.onTickerChange,'function');
   const pulse=component('../app/components/news/CommunityPulse.tsx',{'next/link':{__esModule:true,default:'a'},'../stock/StockCommunity':{CommunityDiscussions:'discussions'},'@/lib/community':{loadCommunity(){throw Error('No acquisition in interaction test');}}},language);
   let controls=pulse.render(props);
   nodes(controls).find(n=>n.type==='input').props.onChange({target:{value:' xyz '}});
   controls=pulse.render(props);
   nodes(controls).find(n=>n.type==='form').props.onSubmit({preventDefault(){}});
   tree=page.render();page.flush();
-  assert.equal(readNewsFilters(window.location.search).ticker,'XYZ');
-  assert.equal(readNewsFilters(window.location.search).source,'publisher');
-  assert.equal(readNewsFilters(window.location.search).country,'VN');
-  assert.equal(readNewsView(window.location.search).view,'community');
+  assert.equal(new URLSearchParams(window.location.search).get('ticker'),'XYZ');
   assert.equal(readCommunityWindow(window.location.search),'last24h');
-  nodes(tree).find(n=>n.type==='button'&&n.props.children===localeTools(language).t('Company')).props.onClick();
-  tree=page.render();page.flush();
-  assert.equal(readNewsView(window.location.search).view,'company');
-  assert.equal(readNewsFilters(window.location.search).ticker,'XYZ');
-  nodes(tree).find(n=>n.type==='button'&&n.props.children===localeTools(language).t('Community Pulse')).props.onClick();
-  page.render();page.flush();
-  assert.equal(readCommunityWindow(window.location.search),'last24h');
-  const restored=component('../app/news/page.tsx',mocks,language);restored.render();restored.flush();
-  const restoredProps=nodes(restored.render()).find(n=>n.type==='pulse').props;
-  assert.equal(restoredProps.ticker,'XYZ');
+  const restored=component('../app/community/page.tsx',mocks,language);restored.render();restored.flush();
+  assert.equal(nodes(restored.render()).find(n=>n.type==='pulse').props.ticker,'XYZ');
   const selected=pulse.render({...props,ticker:'XYZ'});
   nodes(selected).find(n=>n.type==='button'&&n.props.children===localeTools(language).t('Clear discussion filter')).props.onClick();
   page.render();page.flush();
-  assert.equal(readNewsFilters(window.location.search).ticker,'');
-  assert.equal(readNewsFilters(window.location.search).source,'publisher');
- }finally{globalThis.window=oldWindow;globalThis.fetch=oldFetch;}
+  assert.equal(new URLSearchParams(window.location.search).has('ticker'),false);
+  assert.equal(readCommunityWindow(window.location.search),'last24h');
+ }finally{globalThis.window=oldWindow;}
 });
 
 test('search selection navigates to the exact ticker in EN/VI; unavailable results never navigate',()=>{
@@ -115,4 +98,33 @@ test('a stale Following button cannot re-add an unavailable stock after another 
   stored='{corrupt';button.props.onClick();assert.equal(writes,0);assert.equal(stored,'{corrupt');
   assert.ok(nodes(view.render({ticker:'ABC',available:false})).some(n=>n.props?.role==='alert'));
  }finally{globalThis.localStorage=oldStorage;globalThis.window=oldWindow;}
+});
+
+
+test('legacy Community bookmarks redirect before any editorial request or News source read',()=>{
+ const prior={window:globalThis.window,fetch:globalThis.fetch};const redirects=[],queries=[];
+ globalThis.window={location:{search:'?view=community&ticker=xyz&window=last24h&source=publisher',replace:url=>redirects.push(url)}};
+ globalThis.fetch=()=>{throw Error('A legacy discussion URL must not read editorial sources');};
+ try{
+  const page=component('../app/news/page.tsx',{'../components/mascot/Mascot':{MascotState:'state'},'../components/ui/button':{Button:'button'},'../components/news/SourceCoverage':{__esModule:true,default:'sources'},'../components/news/TopStory':{__esModule:true,default:'story'},'../components/stock/LivePrice':{LivePrices:'quotes'},'@/lib/useNewsArchive':{useNewsArchive:query=>{queries.push(query);return {page:null,loading:false,error:false,loadMore(){}};}}});
+  page.render();page.flush();page.render();page.flush();
+  assert.deepEqual(redirects,['/community?ticker=XYZ&window=last24h']);assert.ok(queries.every(query=>query===null));
+ }finally{Object.assign(globalThis,prior);}
+});
+
+for(const language of ['en','vi'])test('editorial category switches retain ticker and publisher filters in '+language,()=>{
+ const prior={window:globalThis.window,fetch:globalThis.fetch};const queries=[];
+ globalThis.window={location:{search:'?ticker=XYZ&source=publisher&country=VN'},history:{replaceState(_s,_t,url){window.location.search=new URL(url,'http://localhost').search;}},addEventListener(){},removeEventListener(){}};
+ globalThis.fetch=async url=>{assert.equal(url,'/api/news/sources');return {ok:true,json:async()=>[]};};
+ try{
+  const page=component('../app/news/page.tsx',{'../components/mascot/Mascot':{MascotState:'state'},'../components/ui/button':{Button:'button'},'../components/news/SourceCoverage':{__esModule:true,default:'sources'},'../components/news/TopStory':{__esModule:true,default:'story'},'../components/stock/LivePrice':{LivePrices:'quotes'},'@/lib/useNewsArchive':{useNewsArchive:query=>{queries.push(query);return {page:null,loading:false,error:false,loadMore(){}};}}},language);
+  page.render();page.flush();let tree=page.render();page.flush();
+  for(const [label,category] of [['Company','COMPANY'],['Market','MARKET_BRIEF'],['Industry','INDUSTRY']]){
+   nodes(tree).find(n=>n.type==='button'&&n.props.children===localeTools(language).t(label)).props.onClick();
+   tree=page.render();page.flush();
+   const q=new URLSearchParams(queries.at(-1));
+   assert.equal(q.get('research_category'),category);assert.equal(q.get('ticker'),'XYZ');assert.equal(q.get('source'),'publisher');assert.equal(q.get('country'),'VN');
+   const url=new URLSearchParams(window.location.search);assert.equal(url.get('ticker'),'XYZ');assert.equal(url.get('source'),'publisher');assert.equal(url.has('window'),false);
+  }
+ }finally{Object.assign(globalThis,prior);}
 });

@@ -33,11 +33,14 @@ test("Community monitoring isolates ticker request failures without fabricating 
   assert.equal(result[0].data.source.status,'stale');
   assert.equal(result[1].data,null);
 });
-import { readNewsView, newsViewQuery, emptyNewsFilters } from "../lib/news.ts";
+import {communityHref,legacyCommunityHref,readCommunityWindow} from "../lib/community.ts";
 
-test("community is directly reachable through a separate News view", () => {
-  const query = newsViewQuery(emptyNewsFilters, "community");
-  assert.equal(readNewsView(query).view, "community");
+test("Community has an independent URL and legacy links preserve only discussion context", () => {
+  assert.equal(communityHref(' xyz ', 'last24h'), '/community?ticker=XYZ&window=last24h');
+  assert.equal(communityHref(), '/community');
+  assert.equal(legacyCommunityHref('?view=community&ticker=xyz&window=last24h&source=publisher&topic=Rates'), '/community?ticker=XYZ&window=last24h');
+  assert.equal(legacyCommunityHref('?view=company&ticker=XYZ'), null);
+  assert.equal(readCommunityWindow('window=unknown'), 'today');
 });
 
 test("community query is separate from publisher filtering and failures remain unknown", async () => {

@@ -14,6 +14,7 @@ import QuoteMap from '../components/stock/QuoteMap';
 import {reviewBriefingItem} from '@/lib/dailyBriefing';
 import {safeExternalUrl} from '@/lib/presentation';
 import {emptyNewsFilters,newsViewQuery,type NewsArticle} from '@/lib/news';
+import {communityHref} from '@/lib/community';
 import type {CommunityItem} from '@/lib/community';
 import {collectionLabels} from '@/lib/collectionStatus';
 import {emptyWatchlist,readWatchlist,followStock,unfollowStock,watchlistStorageKey,loadIntelligence,isUnread,reviewUpdates,baselineLegacyReviews,uniqueUpdates,technicalCountKnown,type WatchlistState,type Intelligence,type AttentionUpdate,type UpdatePage} from '@/lib/watchlist';
@@ -156,7 +157,7 @@ export default function WatchlistPage() {
                   {technical.waiting_for_gate||technical.awaiting_source_check?<div className="text-sm text-muted-foreground"><p>{t(technical.waiting_for_gate?'Technical data pending the delayed EOD gate':'Delayed EOD gate elapsed; awaiting source check')}</p><p className="mt-1 text-xs">{t('Next source check due')}: {date(technical.next_check_due_at,true)}</p><p className="mt-1 text-xs">{t('Source checked')}: {date(technical.last_checked_at,true)}</p></div>
                     :<TechnicalInsightsView sectionId={'watchlist-technical-'+symbol} ticker={symbol} data={technical.data} loading={false} error={false} retry={refresh}/>}
                 </details>}
-                  <div className="mt-3 flex flex-wrap gap-4 text-muted-foreground"><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'company')}>{t('News mentioning {ticker}',{ticker:symbol})}</Link><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'community')}>{t('Community Pulse')}</Link><button className="underline" aria-label={t('Remove {ticker} from Watchlist',{ticker:symbol})} disabled={storageError} onClick={()=>persist(current=>unfollowStock(current,symbol))}>{t('Remove')}</button></div>
+                  <div className="mt-3 flex flex-wrap gap-4 text-muted-foreground"><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'company')}>{t('News mentioning {ticker}',{ticker:symbol})}</Link><Link className="text-primary hover:underline" href={communityHref(symbol)}>{t('Community Pulse')}</Link><button className="underline" aria-label={t('Remove {ticker} from Watchlist',{ticker:symbol})} disabled={storageError} onClick={()=>persist(current=>unfollowStock(current,symbol))}>{t('Remove')}</button></div>
                   {state.reviewedAt?.[symbol]&&<p className="mt-2 text-muted-foreground">{t('Last reviewed')}: {date(state.reviewedAt[symbol],true)}</p>}
                 </details>
               </>}

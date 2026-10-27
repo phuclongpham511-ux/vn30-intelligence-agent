@@ -170,7 +170,7 @@ try {
   await expect(page.getByRole('link',{name:'Synthetic market story 0',exact:true})).toHaveCount(1);
   await page.getByRole('button',{name:'Industry',exact:true}).click();await expect(page.getByRole('link',{name:'Synthetic market story 1',exact:true})).toHaveCount(1);
   await page.getByRole('button',{name:'Market',exact:true}).click();await expect(page.getByRole('link',{name:'Synthetic market story 2',exact:true})).toHaveCount(1);
-  await page.goto(base);await community.getByRole('link',{name:'All discussions ↗',exact:true}).click();await expect(page).toHaveURL(/\/news\?view=community$/);
+  await page.goto(base);await community.getByRole('link',{name:'All discussions ↗',exact:true}).click();await expect(page).toHaveURL(/\/community$/);
   await expect(page.getByText('Synthetic discussion theme',{exact:true})).toBeVisible();
   await page.goto(base);await hero.getByRole('link',{name:/VN-Index/}).click();await expect(page).toHaveURL(/\/indices\/VNINDEX$/);await expect(page.getByRole('heading',{name:'VN-Index research',exact:true})).toBeVisible();
   emptyUniverse=true;await page.goto(base);await expect(stocks.getByText('Equity metadata has not been acquired yet.',{exact:true})).toBeVisible();

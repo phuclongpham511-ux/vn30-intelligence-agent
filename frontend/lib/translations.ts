@@ -1167,6 +1167,13 @@ export const vietnamese = {
   "Historical chart periods require the same reporting basis.": "Các kỳ trên biểu đồ lịch sử cần cùng cơ sở báo cáo.",
   "Source metadata is evidence, not filing verification or display permission.": "Metadata nguồn là bằng chứng; chưa xác minh hồ sơ công bố hoặc quyền hiển thị.",
   "Financial source display rights are not qualified": "Quyền hiển thị dữ liệu tài chính chưa được xác nhận",
+  "Latest reporting": "Tin mới nhất trong nhóm",
+  "Sources and timestamps": "Nguồn và thời điểm",
+  "{count} independent publishers": "{count} nhà xuất bản độc lập",
+  "Latest reporting first": "Tin mới nhất trước",
+  "Feed snapshot": "Ảnh chụp luồng tin lúc",
+  "Times in Vietnam (UTC+7).": "Giờ Việt Nam (UTC+7).",
+  "First seen is when Woofi first recorded a report, not its publication time. Rechecking a source does not make a story new.": "Ghi nhận lần đầu là lúc Woofi lần đầu lưu tin, không phải giờ xuất bản. Kiểm tra lại nguồn không làm tin trở thành tin mới.",
 } as const;
 export type TranslationKey = keyof typeof vietnamese;
 export type Language = "en" | "vi";
