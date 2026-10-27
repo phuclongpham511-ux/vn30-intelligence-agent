@@ -31,9 +31,10 @@
 .news-header-actions>details{padding:5px 9px;width:min(310px,42vw);background:var(--card);font-size:11px}
 .news-header-actions>details>summary{line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .news-header-actions>details[open]{position:relative;z-index:2;max-height:45vh;overflow:auto}
-.news-section-nav{display:flex;gap:4px;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:thin}
-.news-section-nav button{flex:none;min-height:38px;padding:7px 11px;border-bottom:2px solid transparent;color:var(--muted-foreground);font-size:12px;white-space:nowrap}
-.news-section-nav button[aria-pressed=true]{border-color:var(--primary);color:var(--primary);font-weight:600}
+.news-section-nav{display:flex;gap:6px;overflow-x:auto;border-bottom:1px solid var(--border);scrollbar-width:thin}
+.news-section-nav button{flex:none;min-height:46px;padding:9px 15px;border-bottom:2px solid transparent;color:var(--muted-foreground);font-size:14px;font-weight:600;white-space:nowrap}
+.news-section-nav button[aria-pressed=true]{border-color:var(--primary);color:var(--primary);font-weight:700}
+.news-section-nav button:focus-visible{outline:2px solid var(--primary);outline-offset:2px}
 .news-filter-toolbar{display:flex;align-items:end;gap:8px 10px;flex-wrap:wrap;padding:9px 10px;border:1px solid var(--border);border-radius:8px;background:var(--card)}
 .news-filter-toolbar>label{display:flex;align-items:center;gap:6px;color:var(--muted-foreground);font-size:11px;white-space:nowrap}
 .news-filter-toolbar input,.news-filter-toolbar select{height:32px!important;margin-top:0!important;min-width:112px;padding:0 8px!important;border-radius:5px;font-size:12px!important;color:var(--foreground)}
@@ -81,7 +82,7 @@
   .news-header-actions>details{width:auto;max-width:46vw;padding:4px 6px}
   .news-header-actions>button{min-height:34px;padding:5px 9px;font-size:12px}
   .news-section-nav{margin-inline:-2px}
-  .news-section-nav button{min-height:42px;padding-inline:9px;font-size:12px}
+  .news-section-nav button{min-height:44px;padding:8px 12px;font-size:14px}
   .news-filter-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;padding:8px}
   .news-filter-toolbar>label{display:grid;gap:3px;font-size:10px}
   .news-filter-toolbar input,.news-filter-toolbar select{width:100%;min-width:0;max-width:none;height:34px!important;font-size:13px!important}

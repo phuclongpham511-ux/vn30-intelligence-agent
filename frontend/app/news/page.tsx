@@ -58,7 +58,7 @@ export default function NewsPage(){
     {data&&<section aria-label={view?ui(newsSectionLabels[view]):t('All news')} aria-busy={loading}>
       {!items.length&&!error&&<MascotState state="noMatches">{t('No qualifying recent reporting matches this view. Coverage may be incomplete.')}</MascotState>}
       <ol className="news-results news-feed" aria-label={t(query?'Relevant reporting first':'Latest reporting first')}>
-        {items.map(item=><li key={item.story.id}><TopStory item={item} compact textOnly showThumbnail showSources reserveThumbnailSpace/></li>)}
+        {items.map(item=><li key={item.story.id}><TopStory item={item} compact textOnly showThumbnail reserveThumbnailSpace/></li>)}
       </ol>
       <div className="mt-6 flex flex-col items-center gap-2">
         {data.has_more&&<Button variant="outline" disabled={loading} onClick={archive.loadMore}>{t(loading?'Loading more…':'Show more')}</Button>}

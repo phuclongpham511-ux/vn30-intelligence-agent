@@ -15,22 +15,21 @@ const render=(Component,props,language='en')=>renderToStaticMarkup(React.createE
 const article={id:'original',title:'Original publisher headline',url:'https://publisher.example/original',source_name:'Publisher A',published_at:'2026-10-06T05:00:00Z',first_seen_at:'2026-10-06T06:00:00Z',last_seen_at:'2026-10-09T05:00:00Z',tickers:[],topics:[],sectors:[]};
 const item={story:{id:'one',source_count:2},research_category:'INDUSTRY',representative_article:article,articles:[article,{...article,id:'later',title:'Other publisher headline',source_name:'Publisher B',url:'https://publisher.example/later',published_at:null,first_seen_at:'2026-10-07T05:00:00Z'}]};
 
-test('feed source disclosure preserves original evidence and distinguishes publication from first observation in EN/VI',()=>{
+test('news cards retain primary story details but omit expandable provenance in EN/VI',()=>{
  const Thumbnail=component('../app/components/news/NewsThumbnail.tsx');
  const Card=component('../app/components/news/TopStory.tsx',{'./NewsThumbnail':Thumbnail,'../stock/LivePrice':{TickerMovement:()=>null}});
  for(const language of ['en','vi']){
-  const html=render(Card,{item,compact:true,showSources:true,reserveThumbnailSpace:true},language);
-  const t=localeTools(language).t;
-  assert.match(html,/Original publisher headline/);assert.match(html,/Other publisher headline/);
-  assert.ok(html.includes(t('Latest reporting')));assert.ok(html.includes(t('Sources and timestamps')));
-  assert.ok(html.includes(t('Published')));assert.ok(html.includes(t('First seen')));
-  assert.ok(html.includes(t('{count} independent publishers',{count:2})));
-  assert.match(html,/dateTime="2026-10-07T05:00:00Z"/);
+  const before=JSON.stringify(item);
+  const html=render(Card,{item,compact:true,reserveThumbnailSpace:true},language);
+  assert.equal((html.match(/Original publisher headline/g)||[]).length,1);
+  assert.doesNotMatch(html,/Other publisher headline|independent publishers|news\/stories\/one|<details/);
+  assert.match(html,/Publisher A/);
   assert.match(html,/dateTime="2026-10-06T05:00:00Z"/);
-  assert.doesNotMatch(html,/dateTime="2026-10-09T05:00:00Z"/);
-  assert.match(html,/href="\/news\/stories\/one"/);
+  assert.doesNotMatch(html,/dateTime="2026-10-07T05:00:00Z"|dateTime="2026-10-09T05:00:00Z"/);
+  assert.doesNotMatch(html,/Latest reporting|Sources and timestamps|First seen|View source archive|Nguồn và thời điểm|Ghi nhận lần đầu|Xem kho tin nguồn/i);
   assert.match(html,/data-thumbnail-status="unavailable"/);
-  assert.doesNotMatch(render(Card,{item:{...item,articles:[{...article,url:'javascript:alert(1)'}]},showSources:true},language),/href="javascript:/);
+  assert.equal(JSON.stringify(item),before);
+  assert.doesNotMatch(render(Card,{item:{...item,representative_article:{...article,url:'javascript:alert(1)'}},reserveThumbnailSpace:true},language),/href="javascript:/);
  }
 });
 
@@ -40,14 +39,14 @@ test('News renders one chronological list with editorial rows only, and distinct
   '../components/mascot/Mascot':{MascotState:({children,role})=>React.createElement('div',{role},children)},
   '../components/ui/button':{Button:props=>React.createElement('button',props)},
   '../components/news/SourceCoverage':()=>null,
-  '../components/news/TopStory':({item,showSources})=>React.createElement('article',{'data-sources':showSources},item.representative_article.title),
+  '../components/news/TopStory':({item,showSources})=>React.createElement('article',{'data-sources':String(Boolean(showSources))},item.representative_article.title),
   '../components/stock/LivePrice':{LivePrices:({children})=>children},
   '@/lib/useNewsArchive':{useNewsArchive:()=>state}});
  for(const language of ['en','vi']){
   const t=localeTools(language).t;
   let html=render(News,{},language);
   assert.equal((html.match(/<article/g)||[]).length,1);
-  assert.match(html,/<ol class="news-results news-feed"/);assert.match(html,/data-sources="true"/);
+  assert.match(html,/<ol class="news-results news-feed"/);assert.match(html,/data-sources="false"/);
   assert.ok(html.includes(t('Latest reporting first')));assert.ok(html.includes(t('Feed snapshot')));
   assert.match(html,/role="search"/);assert.doesNotMatch(html,/<select|news-filter-toolbar|Apply filters|Clear all/);
   if(language==='vi')assert.match(html,/Tìm mã cổ phiếu, doanh nghiệp, ngành, tin tức/);
