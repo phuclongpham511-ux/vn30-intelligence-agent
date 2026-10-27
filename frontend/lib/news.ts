@@ -43,6 +43,20 @@ export function newsQuery(filters: NewsFilters): string {
   return params.toString();
 }
 // Promotion deduplicates only its own list; category archives keep their stories.
+export function readNewsSearch(search:string):{query:string;view:NewsView|null} {
+  const params=new URLSearchParams(search);
+  const query=(params.get('q')||params.get('ticker')||params.get('topic')||params.get('sector')||'').trim().slice(0,120);
+  const raw=params.get('view');
+  const view=raw==='company'||raw==='briefing'||raw==='industry'?raw:query?null:'industry';
+  return {query,view};
+}
+export function newsSearchQuery(query:string,view:NewsView|null):string {
+  const params=new URLSearchParams();const text=query.trim().slice(0,120);
+  if(text)params.set('q',text);
+  if(view&&(view!=='industry'||text))params.set('view',view);
+  return params.toString();
+}
+
 export function uniqueHotTopics<T extends {story:{id:string}}>(rows:T[]):T[] {
   const seen=new Set<string>();
   return rows.filter(row=>{if(seen.has(row.story.id))return false;seen.add(row.story.id);return true;});

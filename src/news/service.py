@@ -8,6 +8,7 @@ from src.news.models import NewsArticle, NewsStory, NewsSourceState
 from src.news.matching import LexicalStoryMatcher
 from src.news.normalization import canonical_url, cafef_article_suffix, clean_title, digest, normalized, utc
 from src.news.tagging import Tagger
+from src.news.registry import load_company_aliases
 from src.services.ingestion_owner import collector_owned
 
 
@@ -52,7 +53,7 @@ def _persist_cycle(session: Session, sources, *, fetch=acquire, now=None, force=
             stories = None
             added = 0
             if incoming and tagger is None:
-                tagger = Tagger(discovery_metadata(session))
+                tagger = Tagger(discovery_metadata(session), company_aliases=load_company_aliases())
             for item in incoming:
                 title = clean_title(item.title)
                 if not title:
@@ -285,7 +286,7 @@ def vietnam_article(article):
 
 def equity_tagger(session):
     from src.services.universe import listed_equities
-    return Tagger(listed_equities(session))
+    return Tagger(listed_equities(session), company_aliases=load_company_aliases())
 
 
 def relevant_article(article, tagger):

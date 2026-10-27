@@ -49,6 +49,8 @@ test('News renders one chronological list with editorial rows only, and distinct
   assert.equal((html.match(/<article/g)||[]).length,1);
   assert.match(html,/<ol class="news-results news-feed"/);assert.match(html,/data-sources="true"/);
   assert.ok(html.includes(t('Latest reporting first')));assert.ok(html.includes(t('Feed snapshot')));
+  assert.match(html,/role="search"/);assert.doesNotMatch(html,/<select|news-filter-toolbar|Apply filters|Clear all/);
+  if(language==='vi')assert.match(html,/Tìm mã cổ phiếu, doanh nghiệp, ngành, tin tức/);
   assert.doesNotMatch(html,/Community Pulse|Discussion must stay out|news-card-featured|news-results-grid/);
   assert.ok(html.includes(t('Show more')));
   const loaded=state.page;state={...state,error:true};html=render(News,{},language);

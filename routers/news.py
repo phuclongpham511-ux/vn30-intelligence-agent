@@ -155,15 +155,17 @@ def topics(session: DB, options: dict = Depends(filters)):
 
 
 @router.get('/feed', response_model=list[StoryResponse])
-def feed(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] = 'COMPANY',
+def feed(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF', 'ALL'] = 'COMPANY',
          ranking: Literal['recency', 'attention'] = 'recency',
+         q: str = Query(default='', max_length=120),
          offset: int = Query(default=0, ge=0, le=10000),
          options: dict = Depends(filters)):
-    return research_rows(session, options, research_category, attention=ranking == 'attention', offset=offset, now=datetime.now(timezone.utc))
+    return research_rows(session, {**options, 'q': q}, None if research_category == 'ALL' else research_category, attention=ranking == 'attention', offset=offset, now=datetime.now(timezone.utc))
 
 
 @router.get('/feed/page', response_model=FeedPageResponse)
-def feed_page(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF'] = 'COMPANY',
+def feed_page(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MARKET_BRIEF', 'ALL'] = 'COMPANY',
+              q: str = Query(default='', max_length=120),
               offset: int = Query(default=0, ge=0, le=10000),
               as_of: datetime | None = None, options: dict = Depends(filters)):
     now = datetime.now(timezone.utc)
@@ -172,7 +174,7 @@ def feed_page(session: DB, research_category: Literal['COMPANY', 'INDUSTRY', 'MA
     cutoff = as_of or now
     size = options['limit']
     size = min(size, 12)
-    rows = research_rows(session, {**options, 'limit': size+1}, research_category, offset=offset, now=cutoff)
+    rows = research_rows(session, {**options, 'q': q, 'limit': size+1}, None if research_category == 'ALL' else research_category, offset=offset, now=cutoff)
     has_more = len(rows) > size and offset+size <= 10000
     return FeedPageResponse(items=rows[:size], as_of=cutoff, has_more=has_more,
         next_offset=offset+size if has_more else None)

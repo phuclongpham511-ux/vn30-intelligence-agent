@@ -29,3 +29,19 @@ def load_sources(path: str | None = None) -> list[Source]:
     if len({s.source_id for s in sources}) != len(sources):
         raise ValueError('Duplicate source_id')
     return sources
+
+
+class CompanyAliases(BaseModel):
+    symbol: str = Field(pattern=r'^[A-Z0-9]{1,20}$')
+    aliases: list[str] = Field(min_length=1)
+    source_url: HttpUrl
+    verified_at: str
+
+
+def load_company_aliases() -> dict[str, list[str]]:
+    """Reviewed issuer identities, admitted only for members of the live universe."""
+    rows = [CompanyAliases.model_validate(row) for row in json.loads(
+        Path(__file__).with_name('company_aliases.json').read_text(encoding='utf-8'))]
+    if len({row.symbol for row in rows}) != len(rows):
+        raise ValueError('Duplicate alias issuer')
+    return {row.symbol: [name.strip() for name in row.aliases if len(name.strip()) >= 3] for row in rows}

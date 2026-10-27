@@ -11,8 +11,8 @@ import {readCommunityWindow} from '../lib/community.ts';
 const require=createRequire(import.meta.url);
 const nodes=value=>Array.isArray(value)?value.flatMap(nodes):!value||typeof value!=='object'?[]:[value,...nodes(value.props?.children)];
 function component(file,mocks={},language='en'){
- const values=[],effects=[],pending=[];let cursor=0,effect=0;
- const react={...React,useId:()=> 'journey-search',useState(initial){const key=cursor++;if(!(key in values))values[key]=typeof initial==='function'?initial():initial;return [values[key],next=>{values[key]=typeof next==='function'?next(values[key]):next;}];},useEffect(fn,deps){const key=effect++,old=effects[key];if(!old||deps.some((v,i)=>v!==old[i])){effects[key]=deps;pending.push(fn);}}};
+ const values=[],effects=[],pending=[],cleanups=[];let cursor=0,effect=0;
+ const react={...React,useId:()=> 'journey-search',useState(initial){const key=cursor++;if(!(key in values))values[key]=typeof initial==='function'?initial():initial;return [values[key],next=>{values[key]=typeof next==='function'?next(values[key]):next;}];},useEffect(fn,deps){const key=effect++,old=effects[key];if(!old||deps.some((v,i)=>v!==old[i])){effects[key]=deps;pending.push(()=>{cleanups[key]?.();cleanups[key]=fn();});}}};
  const exports={},code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{filename:file,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
  new Function('require','exports',code)(id=>id==='react'?react:id==='@/lib/i18n'?{useLocale:()=>localeTools(language)}:mocks[id]||require(id.startsWith('@/lib/')?'../lib/'+id.slice(6)+'.ts':id),exports);
  return {render(props={}){cursor=effect=0;return exports.default(props);},flush(){while(pending.length)pending.shift()();},values};
@@ -112,19 +112,25 @@ test('legacy Community bookmarks redirect before any editorial request or News s
  }finally{Object.assign(globalThis,prior);}
 });
 
-for(const language of ['en','vi'])test('editorial category switches retain ticker and publisher filters in '+language,()=>{
- const prior={window:globalThis.window,fetch:globalThis.fetch};const queries=[];
- globalThis.window={location:{search:'?ticker=XYZ&source=publisher&country=VN'},history:{replaceState(_s,_t,url){window.location.search=new URL(url,'http://localhost').search;}},addEventListener(){},removeEventListener(){}};
- globalThis.fetch=async url=>{assert.equal(url,'/api/news/sources');return {ok:true,json:async()=>[]};};
+for(const language of ['en','vi'])test('unified News search debounces, preserves category and restores URL history in '+language,()=>{
+ const prior={window:globalThis.window,fetch:globalThis.fetch,setTimeout:globalThis.setTimeout,clearTimeout:globalThis.clearTimeout};const queries=[],listeners={},timers=new Map();let nextTimer=0;
+ const write=(_s,_t,url)=>{window.location.search=new URL(url,'http://localhost').search;};
+ globalThis.window={location:{search:'?ticker=ABC&view=company&country=VN'},history:{replaceState:write,pushState:write},addEventListener:(key,fn)=>listeners[key]=fn,removeEventListener(){}};
+ globalThis.fetch=()=>{throw Error('Search must not read sources or providers');};
+ globalThis.setTimeout=(fn,delay)=>{assert.equal(delay,300);timers.set(++nextTimer,fn);return nextTimer;};globalThis.clearTimeout=id=>timers.delete(id);
+ const mocks={'../components/mascot/Mascot':{MascotState:'state'},'../components/ui/button':{Button:'button'},'../components/news/TopStory':{__esModule:true,default:'story'},'@/lib/useNewsArchive':{useNewsArchive:query=>{queries.push(query);return {page:null,loading:false,error:false,loadMore(){}};}}};
  try{
-  const page=component('../app/news/page.tsx',{'../components/mascot/Mascot':{MascotState:'state'},'../components/ui/button':{Button:'button'},'../components/news/SourceCoverage':{__esModule:true,default:'sources'},'../components/news/TopStory':{__esModule:true,default:'story'},'../components/stock/LivePrice':{LivePrices:'quotes'},'@/lib/useNewsArchive':{useNewsArchive:query=>{queries.push(query);return {page:null,loading:false,error:false,loadMore(){}};}}},language);
-  page.render();page.flush();let tree=page.render();page.flush();
-  for(const [label,category] of [['Company','COMPANY'],['Market','MARKET_BRIEF'],['Industry','INDUSTRY']]){
-   nodes(tree).find(n=>n.type==='button'&&n.props.children===localeTools(language).t(label)).props.onClick();
-   tree=page.render();page.flush();
-   const q=new URLSearchParams(queries.at(-1));
-   assert.equal(q.get('research_category'),category);assert.equal(q.get('ticker'),'XYZ');assert.equal(q.get('source'),'publisher');assert.equal(q.get('country'),'VN');
-   const url=new URLSearchParams(window.location.search);assert.equal(url.get('ticker'),'XYZ');assert.equal(url.get('source'),'publisher');assert.equal(url.has('window'),false);
-  }
+  const page=component('../app/news/page.tsx',mocks,language);page.render();page.flush();let tree=page.render();page.flush();
+  assert.equal(nodes(tree).find(n=>n.type==='input').props.value,'ABC');
+  assert.equal(new URLSearchParams(queries.at(-1)).get('q'),'ABC');assert.equal(new URLSearchParams(window.location.search).has('country'),false);
+  for(const text of ['x','XYZ']){nodes(tree).find(n=>n.type==='input').props.onChange({target:{value:text}});tree=page.render();page.flush();assert.equal(nodes(tree).find(n=>n.type==='input').props.value,text);assert.equal(queries.at(-1),null);}
+  assert.equal(timers.size,1);const [id,commit]=[...timers][0];timers.delete(id);commit();tree=page.render();page.flush();
+  let q=new URLSearchParams(queries.at(-1));assert.equal(q.get('research_category'),'ALL');assert.equal(q.get('q'),'XYZ');
+  nodes(tree).find(n=>n.type==='button'&&n.props.children===localeTools(language).t('Industry')).props.onClick();tree=page.render();page.flush();
+  q=new URLSearchParams(queries.at(-1));assert.equal(q.get('research_category'),'INDUSTRY');assert.equal(q.get('q'),'XYZ');
+  const saved=window.location.search,originalPop=listeners.popstate;const reload=component('../app/news/page.tsx',mocks,language);reload.render();reload.flush();assert.equal(nodes(reload.render()).find(n=>n.type==='input').props.value,'XYZ');listeners.popstate=originalPop;
+  window.location.search='?q=ABC&view=company';listeners.popstate();tree=page.render();page.flush();assert.equal(nodes(tree).find(n=>n.type==='input').props.value,'ABC');
+  window.location.search=saved;listeners.popstate();tree=page.render();page.flush();assert.equal(nodes(tree).find(n=>n.type==='input').props.value,'XYZ');
+  nodes(tree).find(n=>n.props?.['aria-label']===localeTools(language).t('Clear search')).props.onClick();tree=page.render();page.flush();assert.equal(window.location.search,'');assert.equal(nodes(tree).find(n=>n.type==='input').props.value,'');
  }finally{Object.assign(globalThis,prior);}
 });

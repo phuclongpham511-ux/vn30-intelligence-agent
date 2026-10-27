@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {newsSymbols,relatedTickers,quoteStatus} from '../lib/newsPresentation.ts';
+import {newsSymbols,relatedTickers,allRelatedTickers,quoteStatus} from '../lib/newsPresentation.ts';
 import {movement} from '../lib/live-market.ts';
 import {cacheRefresh} from '../lib/cacheRefresh.ts';
 import {editorialStories,latestReporting,newsArticleTime} from '../lib/newsPresentation.ts';
@@ -24,6 +24,17 @@ test('news requests one bounded union of evidenced, visible tickers, never inven
  assert.deepEqual(relatedTickers(stories[0]),['AAA','BBB','CCC']);assert.deepEqual(newsSymbols(stories),['AAA','BBB','CCC','EEE']);
  assert.deepEqual(newsSymbols([story([])]),[]);
  assert.equal(newsSymbols(Array.from({length:60},(_,n)=>story(['X'+n]))).length,50);
+});
+
+test('all editorial categories expose companies proved in any current Story member, not just the representative',()=>{
+ const a={id:'a',title:'VN-Index và cổ phiếu ABC',url:'https://publisher.example/a',tickers:['ABC']};
+ const b={id:'b',title:'Ngành thép: cổ phiếu XYZ và DEF',url:'https://publisher.example/b',tickers:['XYZ','DEF']};
+ const proof=(article,symbol)=>({symbol,article_id:article.id,article_title:article.title,article_url:article.url,kind:'explicit_stock',matched_text:symbol,policy:'issuer-context-v2'});
+ for(const category of ['MARKET_BRIEF','INDUSTRY','COMPANY']){
+  const item={research_category:category,representative_article:a,articles:[a,b],ticker_associations:[proof(a,'ABC'),proof(b,'XYZ'),proof(b,'DEF'),{...proof(b,'BAD'),article_title:'Wrong title'}]};
+  assert.deepEqual(allRelatedTickers(item),['ABC','XYZ','DEF']);
+  assert.deepEqual(allRelatedTickers({...item,representative_article:{...a,title:'Corrected title',tickers:[]}}),['XYZ','DEF']);
+ }
 });
 
 test('unverified legacy tags, stale-title proofs and other articles never create stock chips or SSI demand',()=>{

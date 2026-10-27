@@ -22,14 +22,18 @@ export function latestReporting(item:{representative_article:DatedArticle;articl
 }
 
 type Article={id:string;title:string;tickers:string[];url?:string};
-type Story={representative_article:Article;ticker_associations?:TickerAssociation[]};
+type Story={representative_article:Article;articles?:Article[];ticker_associations?:TickerAssociation[]};
 export function qualifiedAssociations(article:Article,associations:TickerAssociation[]=[]){
   return associations.filter(a=>a.policy==='issuer-context-v2'&&a.article_id===article.id&&a.article_title===article.title&&
     (!a.article_url||a.article_url===article.url)&&
     (a.evidence_origin!=='publisher_text'||!!(a.article_url&&a.text_receipt_id&&a.text_hash&&a.evidence_excerpt&&a.text_observed_at&&Number.isFinite(Date.parse(a.text_observed_at))))&&
     ['issuer_identity','explicit_stock','issuer_activity'].includes(a.kind)&&a.matched_text.trim()&&article.tickers.includes(a.symbol));
 }
-export const allRelatedTickers=(item:Story)=>[...new Set(qualifiedAssociations(item.representative_article,item.ticker_associations).map(a=>a.symbol))];
+export const allRelatedTickers=(item:Story)=>{
+  const members=new Map((item.articles||[]).map(article=>[article.id,article]));
+  members.set(item.representative_article.id,item.representative_article);
+  return [...new Set([...members.values()].flatMap(article=>qualifiedAssociations(article,item.ticker_associations).map(proof=>proof.symbol)))];
+};
 export const relatedTickers=(item:Story)=>allRelatedTickers(item).slice(0,3);
 // One page-scoped demand lease, never one quote request per article.
 export const newsSymbols=(items:Story[])=>[...new Set(items.flatMap(relatedTickers))].sort().slice(0,50);

@@ -1174,6 +1174,12 @@ export const vietnamese = {
   "Feed snapshot": "Ảnh chụp luồng tin lúc",
   "Times in Vietnam (UTC+7).": "Giờ Việt Nam (UTC+7).",
   "First seen is when Woofi first recorded a report, not its publication time. Rechecking a source does not make a story new.": "Ghi nhận lần đầu là lúc Woofi lần đầu lưu tin, không phải giờ xuất bản. Kiểm tra lại nguồn không làm tin trở thành tin mới.",
+  "Search news": "Tìm kiếm tin tức",
+  "Search stocks, companies, industries, news...": "Tìm mã cổ phiếu, doanh nghiệp, ngành, tin tức...",
+  "Relevant reporting first": "Ưu tiên tin liên quan",
+  "All news": "Tất cả tin tức",
+  "Source health": "Trạng thái nguồn tin",
+  "Search covers stored headlines and publisher-supplied text where available, not all full articles. New searches span all categories; tabs narrow the results.": "Tìm trong tiêu đề đã lưu và nội dung nhà xuất bản cung cấp nếu có, không phải toàn văn mọi bài. Tìm mới trên mọi nhóm; chọn tab để thu hẹp kết quả.",
 } as const;
 export type TranslationKey = keyof typeof vietnamese;
 export type Language = "en" | "vi";
