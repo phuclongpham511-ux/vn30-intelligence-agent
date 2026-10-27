@@ -5,7 +5,20 @@ import {privateFinancialRequest,attachFinancialUpdates} from '../lib/watchlist-f
 import {readFileSync} from 'node:fs';
 import {transformSync} from 'next/dist/build/swc/index.js';
 import {createRequire} from 'node:module';
+import {parseFinancialPage} from '../lib/watchlist-financial.ts';
 const require=createRequire(import.meta.url);
+
+test('non-revenue updates require the declared opt-in profile; identities and checks remain unique',()=>{
+ const item={id:'financial:'+'a'.repeat(64),entity_id:'a'.repeat(64),revision:'b'.repeat(64),kind:'financial',title:'Saved comparison',url:'/stocks/ABC#stock-fundamentals',evidence:{source:'issuer:synthetic',capture_id:'c'.repeat(64),capture_sha256:'d'.repeat(64),packet_sha256:'e'.repeat(64),limitations:[],insight:{ticker:'ABC',metric:'net_profit',unit:'VND',current_period:'2025',comparison_period:'2024',current_value:100,comparison_value:80,absolute_change:20,percentage_change:.25,qualification_status:'COMPARABLE',causal_explanation:null,missing_information:[],attention_reason:{policy:'financial-attention-v1',noteworthy:true,criteria:['RELATIVE_MOVEMENT'],thresholds:{relative_movement:.2}},evidence_references:[{period:'2025'}]}}};
+ const p={status:'READY',items:[item],reasons:[],has_more:false,truncated:false};
+ assert.throws(()=>parseFinancialPage(p,'ABC'));
+ const expanded={...p,profile:'qualified-v58',checks:[{metric:'net_profit',status:'READY',current_period:'2025',comparison_period:'2024',noteworthy:true,reasons:[]}]};
+ assert.equal(parseFinancialPage(expanded,'ABC').items[0].evidence.insight.metric,'net_profit');
+ assert.throws(()=>parseFinancialPage({...expanded,items:[item,item]},'ABC'));
+ const state=reviewUpdates(followStock(emptyWatchlist(),'ABC'),'ABC',[item],'2026-10-27T00:00:00Z');
+ assert.equal(isUnread(readWatchlist(JSON.stringify(state)),'ABC',item),false);
+ assert.equal(isUnread(state,'ABC',{...item,revision:'f'.repeat(64)}),true);
+});
 
 test('financial review uses existing receipts: reload, duplicate and correction behavior',()=>{
  const item={id:'financial:stable',entity_id:'stable',revision:'one',kind:'financial'};

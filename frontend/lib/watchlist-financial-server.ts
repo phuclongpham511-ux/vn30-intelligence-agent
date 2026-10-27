@@ -24,9 +24,11 @@ export async function attachFinancialUpdates(data:Intelligence,symbols:string[],
     body.stocks.some((r:{symbol:string},index:number)=>r.symbol!==selected[index]))throw Error('Invalid private response');
   rows=body.stocks;
  }catch{/* Preserve News/Community/Technical even when private evidence is unavailable. */}
+ const expanded=rows.some(r=>r.financial?.profile==='qualified-v58');
  return {...data,financial_scope:'private_research',stocks:data.stocks.map(row=>{
   let financial:FinancialPage={status:selected.includes(row.symbol)?'UNAVAILABLE':'NOT_CHECKED',items:[],
-   reasons:[selected.includes(row.symbol)?'private_financial_read_unavailable':'bounded_to_first_five_symbols'],has_more:false,truncated:false};
+   reasons:[selected.includes(row.symbol)?'private_financial_read_unavailable':'bounded_to_first_five_symbols'],has_more:false,truncated:false,
+   ...(expanded?{profile:'qualified-v58' as const,checks:[]}:{})};
   const candidate=rows.find(r=>r.symbol===row.symbol)?.financial;
   if(candidate)try{financial=parseFinancialPage({...candidate,items:candidate.items.map(item=>({...item,occurred_at:data.as_of}))},row.symbol);}catch{}
   return {...row,financial};

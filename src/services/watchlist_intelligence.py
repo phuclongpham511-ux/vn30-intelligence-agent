@@ -20,15 +20,22 @@ SCAN_LIMIT = 300
 
 
 def financial_updates(symbol):
-    """One saved annual revenue comparison. Called only by the private router."""
+    """Saved annual comparisons; the qualified V5.8 selection is a separate opt-in."""
     import os
     import sqlite3
     from src.services.personal_financials import configured_research_packet, saved_financial_insights
     from src.services.financial_journal import MetricJournal
 
+    profile = os.getenv('WOOFI_WATCHLIST_FINANCIAL_PROFILE', 'revenue-v1')
+    checks = []
     def page(status, reasons, items=None):
-        return dict(status=status, reasons=reasons, items=items or [], has_more=False, truncated=False)
+        result = dict(status=status, reasons=list(dict.fromkeys(reasons)), items=items or [], has_more=False, truncated=False)
+        if profile == 'qualified-v58':
+            result.update(profile=profile, checks=checks)
+        return result
     try:
+        if profile not in ('revenue-v1', 'qualified-v58'):
+            raise ValueError('Unknown financial profile')
         packet, digest = configured_research_packet(os.environ.get('WOOFI_PERSONAL_CAPTURES', ''),
             symbol, frequency='annual', evidence='preferred')
         journal_path = os.environ['WOOFI_PERSONAL_SQLITE']
@@ -36,31 +43,40 @@ def financial_updates(symbol):
             if c['capture_sha256'] == digest]
         if len(candidates) != 1:
             raise ValueError('Ambiguous financial revision')
+        metrics = ['revenue']
+        if profile == 'qualified-v58':
+            metrics = {'bank':['customer_loans'], 'non_financial':['revenue','net_profit']}.get(packet.profile, metrics)
         result = saved_financial_insights(journal_path, candidates[0]['capture_id'],
-            metrics=['revenue'], frequency='annual', comparison='yoy',
+            metrics=metrics, frequency='annual', comparison='yoy',
             authorization_reference='private-watchlist-financial-v1')
         if result.ticker != symbol or result.is_fixture:
             raise ValueError('Invalid saved issuer')
-        insight = result.insights[0]
-        observed = {o.period:o.fields.get('revenue') for o in packet.reports['income'].observations
-                    if o.frequency == 'annual'}
-        if observed.get(insight.current_period) is None or observed.get(insight.comparison_period) is None:
-            return page('MISSING_DATA', insight.missing_information)
-        if insight.qualification_status != 'COMPARABLE':
-            return page('INSUFFICIENT_COMPARISON', insight.missing_information)
-        if not insight.attention_reason.noteworthy:
-            return page('READY', insight.missing_information)
-        evidence = dict(source=result.source, frequency=result.frequency, comparison=result.comparison,
-            capture_id=result.capture_id, capture_sha256=result.capture_sha256,
-            packet_sha256=result.packet_sha256, limitations=result.limitations,
-            insight=insight.model_dump(mode='json'))
-        entity = revision(dict(symbol=symbol, source=result.source, frequency=result.frequency,
-            metric=insight.metric, current_period=insight.current_period,
-            comparison_period=insight.comparison_period))
-        return page('READY', insight.missing_information, [dict(id='financial:'+entity,
-            entity_id=entity, revision=revision(evidence), kind='financial',
-            title=f'{symbol} · revenue · {insight.current_period} / {insight.comparison_period}',
-            url='/stocks/'+symbol+'#stock-fundamentals', evidence=evidence)])
+        items, reasons = [], []
+        for insight in result.insights:
+            statement = 'balance' if insight.metric == 'customer_loans' else 'income'
+            observed = {o.period:o.fields.get(insight.metric) for o in packet.reports[statement].observations
+                        if o.frequency == 'annual'}
+            status = ('MISSING_DATA' if observed.get(insight.current_period) is None or observed.get(insight.comparison_period) is None
+                else 'INSUFFICIENT_COMPARISON' if insight.qualification_status != 'COMPARABLE' else 'READY')
+            checks.append(dict(metric=insight.metric, status=status, current_period=insight.current_period,
+                comparison_period=insight.comparison_period, noteworthy=insight.attention_reason.noteworthy,
+                reasons=insight.missing_information))
+            reasons.extend(insight.missing_information)
+            if status != 'READY' or not insight.attention_reason.noteworthy:
+                continue
+            evidence = dict(source=result.source, frequency=result.frequency, comparison=result.comparison,
+                capture_id=result.capture_id, capture_sha256=result.capture_sha256,
+                packet_sha256=result.packet_sha256, limitations=result.limitations,
+                insight=insight.model_dump(mode='json'))
+            entity = revision(dict(symbol=symbol, source=result.source, frequency=result.frequency,
+                metric=insight.metric, current_period=insight.current_period,
+                comparison_period=insight.comparison_period))
+            items.append(dict(id='financial:'+entity, entity_id=entity, revision=revision(evidence), kind='financial',
+                title=f'{symbol} · {insight.metric} · {insight.current_period} / {insight.comparison_period}',
+                url='/stocks/'+symbol+'#stock-fundamentals', evidence=evidence))
+        status = ('READY' if any(c['status'] == 'READY' for c in checks) else
+            'INSUFFICIENT_COMPARISON' if any(c['status'] == 'INSUFFICIENT_COMPARISON' for c in checks) else 'MISSING_DATA')
+        return page(status, reasons, items)
     except FileNotFoundError:
         return page('MISSING_DATA', ['saved_financial_coverage_unavailable'])
     except (KeyError, ValueError, TypeError, OSError, sqlite3.DatabaseError):

@@ -1,4 +1,12 @@
 export const vietnamese = {
+  "Net profit":"Lợi nhuận sau thuế",
+  "Saved annual comparisons. Historical evidence, not new filings, causal explanations or investment recommendations.":"So sánh năm đã lưu. Đây là bằng chứng lịch sử, không phải công bố mới, giải thích nguyên nhân hay khuyến nghị đầu tư.",
+  "No eligible noteworthy change in the selected saved metrics.":"Chưa có thay đổi đáng chú ý đủ điều kiện trong các chỉ tiêu đã lưu được chọn.",
+  "Selected saved metric observations are missing.":"Thiếu số liệu đã lưu của chỉ tiêu được chọn.",
+  "Selected saved periods are not sufficiently comparable.":"Các kỳ đã lưu được chọn chưa đủ điều kiện so sánh.",
+  "Saved metric checks":"Kiểm tra chỉ tiêu đã lưu",
+  "Meets the existing attention rule":"Đạt quy tắc chú ý hiện có",
+  "Comparable, below the existing attention rule":"Đủ điều kiện so sánh, chưa đạt quy tắc chú ý hiện có",
   "Financial changes (private experiment)":"Thay đổi tài chính (thử nghiệm riêng tư)",
   "Saved annual revenue only. Not a new publication, causal explanation or investment recommendation.":"Chỉ dùng doanh thu năm đã lưu. Không phải công bố mới, giải thích nguyên nhân hay khuyến nghị đầu tư.",
   "No eligible noteworthy annual revenue change.":"Không có thay đổi doanh thu năm đáng chú ý đủ điều kiện.",

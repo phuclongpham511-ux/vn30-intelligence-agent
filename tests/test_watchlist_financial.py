@@ -95,7 +95,9 @@ def test_duplicate_and_explicit_revision_preserve_identity(financial_store, tmp_
 
 @pytest.mark.parametrize('flag,value', [('WOOFI_WATCHLIST_FINANCIALS','0'),('WOOFI_PERSONAL_RESEARCH','0'),
     ('WOOFI_PERSONAL_BIND','0.0.0.0'),('APP_ENV','production'),('WOOFI_PERSONAL_FINANCIAL_READS','captures')])
-def test_default_off_and_production_access_are_denied(financial_store, monkeypatch, flag, value):
+@pytest.mark.parametrize('profile', ['revenue-v1','qualified-v58'])
+def test_default_off_and_production_access_are_denied(financial_store, monkeypatch, flag, value, profile):
+    monkeypatch.setenv('WOOFI_WATCHLIST_FINANCIAL_PROFILE',profile)
     monkeypatch.setenv(flag,value)
     assert private_client().post('/personal-research/watchlist-financials',json={'symbols':['ABC']}).status_code == 404
 
@@ -111,8 +113,26 @@ def test_socket_host_spoof_bounds_and_missing_coverage(financial_store):
     assert page['status']=='MISSING_DATA' and not page['items']
 
 
-def test_public_watchlist_never_invokes_private_financial_reader(financial_store, client, monkeypatch):
+@pytest.mark.parametrize('profile', ['revenue-v1','qualified-v58'])
+def test_public_watchlist_never_invokes_private_financial_reader(financial_store, client, monkeypatch, profile):
+    monkeypatch.setenv('WOOFI_WATCHLIST_FINANCIAL_PROFILE',profile)
     def forbidden(*a,**kw): pytest.fail('Public read must not touch private financials')
     monkeypatch.setattr('src.services.watchlist_intelligence.financial_updates',forbidden)
     body=client.post('/watchlists/intelligence',json={'symbols':['ABC']}).json()
     assert 'financial' not in body['stocks'][0]
+
+
+def test_qualified_profile_is_explicit_and_reuses_revenue_identity(financial_store, monkeypatch):
+    client = private_client()
+    read = lambda: client.post('/personal-research/watchlist-financials',json={'symbols':['ABC']}).json()['stocks'][0]['financial']
+    baseline = read()
+    assert [i['evidence']['insight']['metric'] for i in baseline['items']] == ['revenue']
+    monkeypatch.setenv('WOOFI_WATCHLIST_FINANCIAL_PROFILE','qualified-v58')
+    expanded = read()
+    assert expanded['profile'] == 'qualified-v58'
+    assert [i['evidence']['insight']['metric'] for i in expanded['items']] == ['revenue','net_profit']
+    assert expanded['items'][0] == baseline['items'][0]
+    assert len({i['id'] for i in expanded['items']}) == len(expanded['items'])
+    assert {c['metric'] for c in expanded['checks']} == {'revenue','net_profit'}
+    monkeypatch.delenv('WOOFI_WATCHLIST_FINANCIAL_PROFILE')
+    assert read() == baseline
