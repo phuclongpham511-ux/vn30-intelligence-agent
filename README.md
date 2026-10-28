@@ -113,6 +113,22 @@ Personalized Attention Budget are later directions.
 
 ## Run locally
 
+For routine development alongside the stable Woofi runtime, run **one command
+from the active worktree root**:
+
+```powershell
+node scripts/dev.mjs
+```
+
+Open **http://127.0.0.1:3102/news**. This starts the matching backend on 8102,
+uses isolated DEMO data, and hot-reloads frontend edits. It leaves stable ports
+3000/8000 and the collector alone. No commit, push or release cutover is needed
+to preview work. Stop with Ctrl+C; restart after Python/config/dependency changes.
+See [development versus stable workflow](docs/WOOFI_DEVELOPMENT_WORKFLOW.md).
+
+The older individual setup commands below are for a standalone installation.
+Do not run them on occupied stable ports or point development at the stable DB.
+
 Requirements: Python 3.12+, uv, Node.js 24+ and npm (Node 24.16 tested; frontend tests use native TypeScript support). From repository root:
 
 ```powershell
