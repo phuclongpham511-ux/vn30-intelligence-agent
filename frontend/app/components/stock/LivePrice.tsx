@@ -31,11 +31,12 @@ export function LivePrice({symbol,prominent=false,showSession=false,compact=fals
     {row&&<details className={`mt-0.5 text-[10px] leading-4 text-muted-foreground ${compact?'text-right':''}`}><summary className="cursor-pointer">{ui('Source & session')}</summary><p className="break-words">{row.source} · {ui('Trading date ·')} {date(row.trading_date)} · {ui('Reference price')} {format(row.reference_price)} VND</p>{showSession&&<TradingActivity row={row} status={status}/>}</details>}
   </div>;
 }
-export function TickerMovement({symbol,now=new Date()}:{symbol:string;now?:Date}) {
+export function TickerMovement({symbol,showLabel=false,now=new Date()}:{symbol:string;showLabel?:boolean;now?:Date}) {
   const {data,failed}=useContext(Context);const {ui,locale,date}=useLocale();
   const item=data?.items[symbol];const row=item?.snapshot?.ticker===symbol?item.snapshot:undefined;const status=quoteStatus(row?item:undefined,failed,now);
   const value=row?.change_percent;const state=resolvePriceState(symbol,row,status,now,failed);const direction={label:priceStateLabel[state],color:priceStateClass(state)};
   const valid=typeof value==='number'&&Number.isFinite(value);
   const label=valid?`${value>0?'▲ ':value<0?'▼ ':'＝ '}${value.toLocaleString(locale,{minimumFractionDigits:2,maximumFractionDigits:2,signDisplay:'exceptZero'})}%`:'—';
-  return <span className={direction.color} title={`${ui(direction.label)} · ${ui(status==='fresh'?'Current market':status==='stale'?'Stale market data':'Market data unavailable')}${row?' · '+date(row.trading_date)+' · '+row.source+' · '+ui('Reference price')+' '+row.reference_price:''}`}><span aria-hidden="true">{label}</span><span className="sr-only">{ui(direction.label)} {valid?label:''}; {ui(status==='fresh'?'Current market':status==='stale'?'Stale market data':'Market data unavailable')}</span>{status==='stale'&&valid&&<span className="ml-1 text-[9px] text-muted-foreground">{date(row!.trading_date)}</span>}</span>;
+  const visibleLabel=state==='REFERENCE'?'Unchanged':direction.label;
+  return <span className={direction.color} title={`${ui(direction.label)} · ${ui(status==='fresh'?'Current market':status==='stale'?'Stale market data':'Market data unavailable')}${row?' · '+date(row.trading_date)+' · '+row.source+' · '+ui('Reference price')+' '+row.reference_price:''}`}>{showLabel&&<span className="mr-1" aria-hidden="true">{ui(visibleLabel)}</span>}<span aria-hidden="true">{label}</span><span className="sr-only">{ui(showLabel?visibleLabel:direction.label)} {valid?label:''}; {ui(status==='fresh'?'Current market':status==='stale'?'Stale market data':'Market data unavailable')}</span>{status==='stale'&&valid&&<span className="ml-1 text-[9px] text-muted-foreground">{date(row!.trading_date)}</span>}</span>;
 }
