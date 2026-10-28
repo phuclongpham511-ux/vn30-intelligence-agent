@@ -118,7 +118,7 @@ for(const language of ['en','vi'])test('unified News search debounces, preserves
  globalThis.window={location:{search:'?ticker=ABC&view=company&country=VN'},history:{replaceState:write,pushState:write},addEventListener:(key,fn)=>listeners[key]=fn,removeEventListener(){}};
  globalThis.fetch=()=>{throw Error('Search must not read sources or providers');};
  globalThis.setTimeout=(fn,delay)=>{assert.equal(delay,300);timers.set(++nextTimer,fn);return nextTimer;};globalThis.clearTimeout=id=>timers.delete(id);
- const mocks={'../components/mascot/Mascot':{MascotState:'state'},'../components/ui/button':{Button:'button'},'../components/news/TopStory':{__esModule:true,default:'story'},'@/lib/useNewsArchive':{useNewsArchive:query=>{queries.push(query);return {page:null,loading:false,error:false,loadMore(){}};}}};
+ const mocks={'../components/stock/LivePrice':{LivePrices:'live-prices'},'../components/mascot/Mascot':{MascotState:'state'},'../components/ui/button':{Button:'button'},'../components/news/TopStory':{__esModule:true,default:'story'},'@/lib/useNewsArchive':{useNewsArchive:query=>{queries.push(query);return {page:null,loading:false,error:false,loadMore(){}};}}};
  try{
   const page=component('../app/news/page.tsx',mocks,language);page.render();page.flush();let tree=page.render();page.flush();
   assert.equal(nodes(tree).find(n=>n.type==='input').props.value,'ABC');

@@ -4,11 +4,12 @@ import Link from 'next/link';
 import {useLocale} from '@/lib/i18n';
 import {legacyCommunityHref} from '@/lib/community';
 import {readNewsSearch,newsSearchQuery,newsSectionLabels,type NewsView} from '@/lib/news';
-import {editorialStories} from '@/lib/newsPresentation';
+import {editorialStories,newsSymbols} from '@/lib/newsPresentation';
 import {useNewsArchive} from '@/lib/useNewsArchive';
 import {MascotState} from '../components/mascot/Mascot';
 import {Button} from '../components/ui/button';
 import TopStory from '../components/news/TopStory';
+import {LivePrices} from '../components/stock/LivePrice';
 
 export default function NewsPage(){
   const {t,ui,date}=useLocale();
@@ -57,9 +58,11 @@ export default function NewsPage(){
     {loading&&!data&&<MascotState state="loading" role="status">{t('Loading news…')}</MascotState>}
     {data&&<section aria-label={view?ui(newsSectionLabels[view]):t('All news')} aria-busy={loading}>
       {!items.length&&!error&&<MascotState state="noMatches">{t('No qualifying recent reporting matches this view. Coverage may be incomplete.')}</MascotState>}
-      <ol className="news-results news-feed" aria-label={t(query?'Relevant reporting first':'Latest reporting first')}>
-        {items.map(item=><li key={item.story.id}><TopStory item={item} compact textOnly showThumbnail reserveThumbnailSpace/></li>)}
-      </ol>
+      <LivePrices symbols={newsSymbols(items)} interval={30000}>
+        <ol className="news-results news-feed" aria-label={t(query?'Relevant reporting first':'Latest reporting first')}>
+          {items.map(item=><li key={item.story.id}><TopStory item={item} compact textOnly showMovement showThumbnail reserveThumbnailSpace/></li>)}
+        </ol>
+      </LivePrices>
       <div className="mt-6 flex flex-col items-center gap-2">
         {data.has_more&&<Button variant="outline" disabled={loading} onClick={archive.loadMore}>{t(loading?'Loading more…':'Show more')}</Button>}
         <details className="text-xs text-muted-foreground"><summary>{ui('About this feed')}</summary>
