@@ -4,13 +4,12 @@ import Link from 'next/link';
 import {useLocale} from '@/lib/i18n';
 import {cacheRefresh} from '@/lib/cacheRefresh';
 import {marketFocusItems} from '@/lib/marketFocus';
-import {safeExternalUrl} from '@/lib/presentation';
 import {newsSymbols} from '@/lib/newsPresentation';
 import {LivePrices} from '../stock/LivePrice';
 import TopStory,{type TopStoryData} from './TopStory';
 
 export default function MarketFocus({compact=false,embedded=false,active=true}:{compact?:boolean;embedded?:boolean;active?:boolean}){
-  const {t,date}=useLocale();const [rows,setRows]=useState<TopStoryData[]|null>(null);const [error,setError]=useState(false);const [attempt,setAttempt]=useState(0);
+  const {t}=useLocale();const [rows,setRows]=useState<TopStoryData[]|null>(null);const [error,setError]=useState(false);const [attempt,setAttempt]=useState(0);
   useEffect(()=>{
     if(!active)return;
     const controller=new AbortController();let busy=false;
@@ -26,7 +25,9 @@ export default function MarketFocus({compact=false,embedded=false,active=true}:{
     {!rows&&!error&&<p role="status" className="text-sm text-muted-foreground">{t('Loading publisher reporting…')}</p>}
     {rows&&!rows.length&&!error&&<p className="text-sm text-muted-foreground">{t('No qualified recent market highlights.')}</p>}
     {error&&!!rows?.length&&<p className="mt-2 text-xs text-muted-foreground">{t('Previously loaded headlines are shown below.')}</p>}
-    {compact?<div className="market-focus-stories">{rows?.map(item=>{const article=item.representative_article,url=safeExternalUrl(article.url),published=article.published_at||article.first_seen_at;return <article key={item.story.id} data-story-id={item.story.id}><h3>{url?<a href={url} target="_blank" rel="noopener noreferrer">{article.title} ↗</a>:article.title}</h3><p>{article.source_name} · {!article.published_at&&t('First seen')+' '}<time dateTime={published}>{date(published,true)}</time> · {t(item.research_category==='MARKET_BRIEF'?'Market':'Company')}</p></article>;})}</div>:<LivePrices symbols={newsSymbols(rows||[])} interval={30000}>{rows?.map(item=><TopStory key={item.story.id} item={item} compact/>)}</LivePrices>}
+    <LivePrices symbols={active?newsSymbols(rows||[]):[]} interval={30000}>
+      {compact?<div className="market-focus-stories">{rows?.map(item=><TopStory key={item.story.id} item={item} compact textOnly showMovement showThumbnail={false}/>)}</div>:rows?.map(item=><TopStory key={item.story.id} item={item} compact/>)}
+    </LivePrices>
     <details className="mt-3 text-[11px] text-muted-foreground"><summary className="cursor-pointer">{t('About these highlights')}</summary><p className="mt-2">{t('Recent Vietnam market reporting and companies identified in publisher evidence. Ordered by publication; coverage is partial. No sentiment or investment-quality score.')}</p>{compact&&<p>{t('Last 24 hours · publisher evidence, not a cause of price movement.')}</p>}<Link href="/community" className="mt-2 inline-block text-primary hover:underline">{t('All discussions ↗')}</Link></details>
   </section>;
 }

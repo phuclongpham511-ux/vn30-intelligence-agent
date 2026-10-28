@@ -4,10 +4,12 @@ import Link from 'next/link';
 import {useLocale} from '@/lib/i18n';
 import {uniqueHotTopics} from '@/lib/news';
 import {cacheRefresh} from '@/lib/cacheRefresh';
+import {newsSymbols} from '@/lib/newsPresentation';
+import {LivePrices} from '../stock/LivePrice';
 import TopStory,{type TopStoryData} from './TopStory';
 
-type ViewProps={stories:TopStoryData[]|null;error:boolean;retry:()=>void;expanded:boolean;toggle:()=>void;embedded?:boolean};
-export function HotTopicsView({stories,error,retry,expanded,toggle,embedded=false}:ViewProps){
+type ViewProps={stories:TopStoryData[]|null;error:boolean;retry:()=>void;expanded:boolean;toggle:()=>void;embedded?:boolean;active?:boolean};
+export function HotTopicsView({stories,error,retry,expanded,toggle,embedded=false,active=true}:ViewProps){
   const {t}=useLocale();
   const rows=stories?uniqueHotTopics(stories):null;
   return <section aria-label={t('Hot Topics')} className="hot-topics">
@@ -17,9 +19,11 @@ export function HotTopicsView({stories,error,retry,expanded,toggle,embedded=fals
     {!rows&&!error&&<p role="status" className="market-news-state">{t('Loading publisher reporting…')}</p>}
     {rows&&!rows.length&&!error&&<p role="status" className="market-news-state">{t('No stories with independent publisher coverage qualify yet.')}</p>}
     {error&&!!rows?.length&&<p className="market-news-state">{t('Previously loaded headlines are shown below.')}</p>}
-    <div className="hot-topics-stories" data-expanded={expanded}>
-      {rows?.map((item,index)=><div key={item.story.id} className={index>=3?'hot-topic-extra':index===2?'hot-topic-third':undefined}><TopStory item={item} compact textOnly showThumbnail/></div>)}
-    </div>
+    <LivePrices symbols={active?newsSymbols(rows||[]):[]} interval={30000}>
+      <div className="hot-topics-stories" data-expanded={expanded}>
+        {rows?.map((item,index)=><div key={item.story.id} className={index>=3?'hot-topic-extra':index===2?'hot-topic-third':undefined}><TopStory item={item} compact textOnly showMovement showThumbnail/></div>)}
+      </div>
+    </LivePrices>
     {rows&&rows.length>2&&<button type="button" className={'hot-topics-expand'+(rows.length===3?' hot-topics-expand-mobile':'')} onClick={toggle} aria-expanded={expanded}>{t(expanded?'Show fewer headlines':'More headlines')}</button>}
     <details className="market-news-method"><summary>{t('About these headlines')}</summary><p>{t('At least two independent publisher groups within 72 hours. Existing publisher-coverage ranking; not sentiment or an investment signal.')}</p></details>
   </section>;
@@ -39,5 +43,5 @@ export default function HotTopics({active=true,embedded=false}:{active?:boolean;
     void load();const stop=cacheRefresh(()=>{void load();});
     return()=>{controller.abort();stop();};
   },[active,attempt]);
-  return <HotTopicsView stories={stories} error={error} retry={()=>setAttempt(n=>n+1)} expanded={expanded} toggle={()=>setExpanded(value=>!value)} embedded={embedded}/>;
+  return <HotTopicsView stories={stories} error={error} retry={()=>setAttempt(n=>n+1)} expanded={expanded} toggle={()=>setExpanded(value=>!value)} embedded={embedded} active={active}/>;
 }

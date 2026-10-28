@@ -13,8 +13,8 @@ function load(file,overrides={}){
 }
 const render=(Component,props={},language='en')=>renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:localeTools(language)},React.createElement(Component,props)));
 const Thumbnail=load('../app/components/news/NewsThumbnail.tsx').default;
-const TopStory=load('../app/components/news/TopStory.tsx',{'./NewsThumbnail':Thumbnail,'../stock/LivePrice':{TickerMovement:()=>{throw Error('No additional quote consumer');}}}).default;
-const hot=load('../app/components/news/HotTopics.tsx',{'./TopStory':TopStory});
+const TopStory=load('../app/components/news/TopStory.tsx',{'./NewsThumbnail':Thumbnail,'../stock/LivePrice':{TickerMovement:()=>null}}).default;
+const hot=load('../app/components/news/HotTopics.tsx',{'./TopStory':TopStory,'../stock/LivePrice':{LivePrices:({children})=>children}});
 const item=id=>{const article={id:'article-'+id,title:'Original headline '+id+' rất dài '.repeat(12),source_name:'Original Publisher',url:'https://publisher.example/'+id,published_at:'2026-10-19T02:10:00Z',first_seen_at:'2026-10-19T02:15:00Z',tickers:[],topics:[],sectors:[]};return {story:{id,source_count:2},representative_article:article,articles:[article]};};
 const stories=['rank-1','rank-2','rank-3','rank-4'].map(item);
 
@@ -82,7 +82,7 @@ const flush=()=>new Promise(resolve=>setImmediate(resolve));
 async function hotHarness(run,{focus=false}={}){
  const before=globalThis.fetch,values=[],effects=[],requests=[];let cursor=0,props={active:true,compact:true},view,refresh,stops=0;
  const react={useState(initial){const key=cursor++;if(!(key in values))values[key]=initial;return [values[key],next=>values[key]=typeof next==='function'?next(values[key]):next];},useEffect(fn,deps){const key=cursor++,old=effects[key];if(!old||deps.some((v,i)=>v!==old.deps[i]))effects[key]={fn,deps,pending:true,cleanup:old?.cleanup};}};
- const Hot=load(focus?'../app/components/news/MarketFocus.tsx':'../app/components/news/HotTopics.tsx',{react,'@/lib/i18n':{useLocale:()=>localeTools('en')},'../stock/LivePrice':{LivePrices:passthrough},'./TopStory':()=>null,'@/lib/cacheRefresh':{cacheRefresh(fn){refresh=fn;return()=>{stops++;};}}}).default;
+ const Hot=load(focus?'../app/components/news/MarketFocus.tsx':'../app/components/news/HotTopics.tsx',{react,'@/lib/i18n':{useLocale:()=>localeTools('en')},'../stock/LivePrice':{LivePrices:passthrough},'./TopStory':({item})=>React.createElement('article',{'data-story-id':item.story.id},item.representative_article.title),'@/lib/cacheRefresh':{cacheRefresh(fn){refresh=fn;return()=>{stops++;};}}}).default;
  globalThis.fetch=(url,options)=>new Promise((resolve,reject)=>requests.push({url,options,resolve,reject}));
  const render=(next={})=>{props={...props,...next};cursor=0;view=Hot(props);for(const e of effects.filter(Boolean))if(e.pending){e.cleanup?.();e.pending=false;e.cleanup=e.fn();}return view;};
  const cleanup=()=>effects.filter(Boolean).forEach(e=>e.cleanup?.());
