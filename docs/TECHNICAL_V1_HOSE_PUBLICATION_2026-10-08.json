@@ -1,0 +1,16 @@
+{
+  "attached_pdf": "https://staticfile.hsx.vn/Uploads/UploadDocuments/2503043/20261008%20Tong%20hop%20thong%20tin%20giao%20dich.pdf",
+  "attached_pdf_last_modified": "2026-10-08T09:34:42+00:00",
+  "content_sha256": "5ebe406bd2cce959f92ca7ee49dc4d9b59b123f8f917498f96c371ca726865f8",
+  "evidence_kind": "official_post_session_bulletin",
+  "observed_at": "2026-10-09T06:54:40.113918Z",
+  "published_at": "2026-10-08T16:34:41+07:00",
+  "schema_version": "hose-publication-qualification-v1",
+  "session": "2026-10-08",
+  "source_ref": "https://www.hsx.vn/vi/tin-tuc/hose-diem-tin-giao-dich-ngay-08-10-2026/2503043",
+  "ssi_bar_publication_at": null,
+  "ssi_finality_evidence": false,
+  "timezone_basis": "HOSE page wall time 16:34:41; official PDF Last-Modified 09:34:42 UTC; official HOSE RSS +0700",
+  "venue": "HOSE",
+  "verified_at": "2026-10-09T06:54:40.113918Z"
+}

@@ -1,0 +1,147 @@
+"""Bounded publisher feed metadata. No article-page requests or HTML execution."""
+from dataclasses import dataclass
+from datetime import datetime
+import xml.etree.ElementTree as ET
+from zoneinfo import ZoneInfo
+from urllib.request import Request, urlopen
+from urllib.parse import urljoin
+from bs4 import BeautifulSoup
+import gzip
+import io
+import ssl
+import re
+import truststore
+from src.news.normalization import canonical_url, clean_title, parse_time
+from src.news.registry import Source
+
+MAX_FEED_BYTES = 3_000_000
+
+
+@dataclass(frozen=True)
+class ArticleInput:
+    title: str
+    url: str
+    published_at: datetime | None
+    thumbnail_url: str | None = None
+    thumbnail_provenance: str | None = None
+    text: str | None = None
+    text_provenance: str | None = None
+
+
+def feed_text(node):
+    # Prefer supplied article content to the shorter summary. Scripts, related
+    # links and navigation cannot become issuer evidence. No page scraping.
+    for field, origin in [('{http://purl.org/rss/1.0/modules/content/}encoded', 'rss:content'),
+            ('{http://www.w3.org/2005/Atom}content', 'atom:content'),
+            ('description', 'rss:description'),
+            ('{http://www.w3.org/2005/Atom}summary', 'atom:summary')]:
+        value = node.findtext(field)
+        if not value:
+            continue
+        soup = BeautifulSoup(value[:100000], 'html.parser')
+        for element in soup.select('script,style,nav,footer,aside'):
+            element.decompose()
+        for element in list(soup.find_all(True)):
+            if element.attrs is None:
+                continue
+            labels = ' '.join([element.get('id', ''), *element.get('class', [])])
+            if re.search(r'(?:^|[\s_-])(?:related|recommended|recommendation|read[-_]more|tin[-_]lien[-_]quan|suggested)(?:$|[\s_-])', labels, re.I):
+                element.decompose()
+        text = ' '.join(soup.get_text(' ', strip=True).split())[:12000]
+        if text:
+            return text, origin
+    return None, None
+
+
+def feed_image(node, base_url=''):
+    media = '{http://search.yahoo.com/mrss/}'
+    candidates = [(n.get('url'), 'media:thumbnail') for n in node.iter(media + 'thumbnail')]
+    candidates += [(n.get('url'), 'media:content') for n in node.iter(media + 'content')
+                   if n.get('medium') == 'image' or n.get('type', '').startswith('image/')]
+    candidates += [(n.get('url'), 'enclosure') for n in node.findall('enclosure') if n.get('type', '').startswith('image/')]
+    atom = '{http://www.w3.org/2005/Atom}'
+    candidates += [(n.get('href'), 'atom:enclosure') for n in node.findall(atom + 'link')
+                   if n.get('rel') == 'enclosure' and n.get('type', '').startswith('image/')]
+    for field, provenance in [('description', 'rss:description:image'),
+            ('{http://purl.org/rss/1.0/modules/content/}encoded', 'rss:content:image'),
+            (atom+'summary', 'atom:summary:image')]:
+        fragment=node.findtext(field)
+        if fragment:
+            for image in BeautifulSoup(fragment[:100000], 'html.parser').select('img[src]'):
+                if image.get('width') == '1' or image.get('height') == '1':
+                    continue
+                candidates.append((urljoin(base_url,image['src']), provenance))
+    for url, provenance in candidates:
+        try:
+            if url:
+                return canonical_url(url), provenance
+        except ValueError:
+            pass
+    return None, None
+
+
+def fetch_feed(source: Source, *, timeout_seconds=20) -> bytes:
+    request = Request(str(source.endpoint), headers={'User-Agent': 'VN30News/1.0 (public RSS metadata reader)', 'Accept': 'application/rss+xml, application/atom+xml, application/xml, text/xml'})
+    with urlopen(request, timeout=timeout_seconds, context=truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)) as response:
+        data = response.read(MAX_FEED_BYTES + 1)
+    if len(data) > MAX_FEED_BYTES:
+        raise ValueError('Feed exceeds size limit')
+    if data.startswith(b'\x1f\x8b'):
+        with gzip.GzipFile(fileobj=io.BytesIO(data)) as expanded:
+            data=expanded.read(MAX_FEED_BYTES+1)
+        if len(data)>MAX_FEED_BYTES:
+            raise ValueError('Expanded feed exceeds size limit')
+    return data
+
+
+def parse_feed(data: bytes, source: Source) -> list[ArticleInput]:
+    if len(data) > MAX_FEED_BYTES or b'<!DOCTYPE' in data.upper() or b'<!ENTITY' in data.upper():
+        raise ValueError('Unsafe or oversized feed')
+    # VietnamBiz declares UTF-16 but delivers UTF-8 bytes.
+    if source.source_id == 'vietnambiz':
+        data = data.decode('utf-8-sig').replace('encoding="utf-16"', 'encoding="utf-8"', 1).encode()
+    root = ET.fromstring(data.strip())
+    atom = '{http://www.w3.org/2005/Atom}'
+    if root.tag not in ('rss', atom + 'feed', '{http://www.w3.org/1999/02/22-rdf-syntax-ns#}RDF'):
+        raise ValueError('Expected RSS or Atom, not an HTML challenge')
+    nodes = root.findall('./channel/item') + root.findall(atom + 'entry') + root.findall('{http://purl.org/rss/1.0/}item')
+    items = []
+    for node in nodes[:500]:
+        def value(name):
+            return node.findtext(name) or node.findtext(atom + name) or node.findtext('{http://purl.org/rss/1.0/}' + name)
+        title = clean_title(value('title') or '')
+        link = value('link')
+        if node.tag == atom + 'entry':
+            link = next((n.get('href') for n in node.findall(atom + 'link') if n.get('rel', 'alternate') == 'alternate'), None)
+        if not title or not link:
+            continue
+        try:
+            url = canonical_url(link)
+        except ValueError:
+            continue
+        date = value('pubDate') or value('published') or node.findtext('{http://purl.org/dc/elements/1.1/}date')
+        # Atom updated is not necessarily the original publication time.
+        if source.source_id in ('tuoitre', 'baochinhphu') and date:
+            try:
+                published = datetime.strptime(' '.join(date.split()), '%m/%d/%Y %I:%M:%S %p').replace(tzinfo=ZoneInfo(source.timezone))
+            except ValueError:
+                published = parse_time(date, source.timezone)
+        else:
+            if source.source_id == 'vietnambiz' and date:
+                date = date.replace('GMT+7', '+0700')
+            published = parse_time(date, source.timezone)
+        image, provenance = feed_image(node, url)
+        text, text_provenance = feed_text(node)
+        items.append(ArticleInput(title, url, published, image, provenance, text, text_provenance))
+    return items
+
+
+ADAPTERS = {'RSS': lambda source: parse_feed(fetch_feed(source), source)}
+
+
+def acquire(source: Source, *, timeout_seconds=20) -> list[ArticleInput]:
+    if source.method not in ADAPTERS:
+        raise ValueError('No adapter registered for source method')
+    if source.method == 'RSS':
+        return parse_feed(fetch_feed(source, timeout_seconds=timeout_seconds), source)
+    return ADAPTERS[source.method](source)

@@ -1,0 +1,11 @@
+{
+  "priority_minutes": 30,
+  "standard_minutes": 120,
+  "off_hours_minutes": 240,
+  "weekend_minutes": 360,
+  "max_concurrent": 2,
+  "max_sources_per_cycle": 6,
+  "timeout_seconds": 20,
+  "failure_backoff_minutes": 30,
+  "stale_refresh_min_minutes": 5
+}

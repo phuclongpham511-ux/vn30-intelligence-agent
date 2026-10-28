@@ -1,0 +1,11 @@
+{
+  "schema_version": "technical-supervised-pilot-v1",
+  "ticker": "FPT",
+  "database_file": "data/technical_eod/pilot.db",
+  "calendar_seed": "docs/TECHNICAL_V1_HOSE_SESSION_INDEX_2026-07-01_2026-10-08.tsv",
+  "calendar_seed_sha256": "88b288afa760f13e09522624f17b9fa6dce481047bf2bbfee839d13ebec9bd49",
+  "qualified_publication_anchor": "docs/TECHNICAL_V1_HOSE_PUBLICATION_2026-10-08.json",
+  "qualified_publication_anchor_sha256": "416f1fbc0e4cb0f95c2db1174858997b0bfe485480b706fca45d235f4413ad8e",
+  "security_receipt": "docs/TECHNICAL_V1_FPT_SECURITY_RECEIPT_2026-10-09.json",
+  "security_receipt_sha256": "6446ad20e1ab1ff692ae8b3a7799f213d5a46c85fb33bfc3ddf1cd87ccc4f20d"
+}

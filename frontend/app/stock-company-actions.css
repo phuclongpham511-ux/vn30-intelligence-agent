@@ -1,0 +1,25 @@
+/* Stock Detail V1: reuse the existing panels and financial theme tokens. */
+.stock-company-identity{display:flex;align-items:center;gap:14px;min-width:0}
+.stock-symbol-mark{display:flex;width:54px;min-height:54px;flex-shrink:0;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:10px;background:var(--muted);color:var(--primary);padding:5px;font-size:12px;font-weight:600;overflow-wrap:anywhere;word-break:break-all}
+.stock-company-heading{display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-width:0}
+.stock-company-heading h1{font-size:30px;line-height:1.15;overflow-wrap:anywhere}
+.stock-exchange{border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:12px;color:var(--muted-foreground)}
+.stock-company-name{font-size:15px;line-height:1.5;margin-top:5px;overflow-wrap:anywhere}
+.company-overview{padding:16px;min-width:0}
+.company-overview-heading{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:7px}
+.company-facts{margin-top:12px;gap:7px}.company-facts>div{gap:12px}.company-facts dd{overflow-wrap:anywhere}
+.company-description,.company-financials{border-top:1px solid var(--border);margin-top:12px;padding-top:10px}
+.company-description h3,.company-financials h3{font-size:12px}.company-description p,.company-financials p{font-size:12px;color:var(--muted-foreground);margin-top:4px;line-height:1.5}
+.company-financials a{display:inline-block;font-size:12px;color:var(--primary);padding:7px 0;min-height:32px}
+.company-classification{font-size:12px;margin-top:10px}.company-classification dt{color:var(--muted-foreground)}.company-classification dd{margin-top:2px}
+.company-source{font-size:11px;line-height:1.6;margin-top:10px;color:var(--muted-foreground);overflow-wrap:anywhere}.company-source summary{color:var(--primary);min-height:28px;line-height:28px}.company-source p{margin-top:5px}
+.action-history-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;padding:5px 0}
+.action-history-toolbar label{display:flex;align-items:center;gap:10px}.action-history-toolbar select{min-height:36px;max-width:100%;border:1px solid var(--border);border-radius:5px;background:var(--card);padding:5px 8px;color:var(--foreground)}
+.action-history-toolbar>span,.action-history-note{color:var(--muted-foreground)}.action-history-note{margin:6px 0 12px}
+.action-history{list-style:none;display:grid;gap:10px;margin:0;padding:0}.action-history>li{min-width:0}
+.action-record{border:1px solid var(--border);border-radius:7px;padding:12px 14px;min-width:0}
+.action-record-heading{display:flex;justify-content:space-between;align-items:start;gap:10px}.action-record-heading h3{font-size:14px}.action-record-heading p{font-size:11px;color:var(--muted-foreground);margin-top:2px;overflow-wrap:anywhere}
+.action-record-status{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:55%}.action-record-status .stock-badge{font-size:11px;white-space:normal;text-align:right}.action-demo{font-size:11px;color:var(--muted-foreground)}
+.action-terms,.action-dates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;font-size:12px;margin-top:10px}.action-terms:empty{display:none}.action-terms dt,.action-dates dt{color:var(--muted-foreground);line-height:1.4}.action-terms dd,.action-dates dd{font-variant-numeric:tabular-nums;overflow-wrap:anywhere;margin-top:3px}.action-terms dd{font-size:16px;font-weight:600}.action-unqualified{font-size:11px;color:var(--muted-foreground);margin-top:8px;line-height:1.5}
+.action-record .stock-action-evidence{padding:8px 0 0;margin-top:10px}.action-record .stock-action-evidence summary{min-height:28px;line-height:1.5;display:list-item}.action-record .stock-action-evidence a{min-height:32px;padding:5px 0}
+@media(max-width:639px){.stock-company-heading h1{font-size:26px}.stock-company-name{font-size:14px}.stock-symbol-mark{width:44px;min-height:44px}.stock-company-identity{gap:10px}.company-overview{padding:14px}.action-history-toolbar{align-items:start}.action-history-toolbar label{display:grid;gap:4px;width:100%}.action-history-toolbar select{width:100%}.action-record{padding:11px}.action-record-heading{flex-wrap:wrap}.action-record-status{max-width:100%;justify-content:flex-start}.action-record-status .stock-badge{text-align:left}.action-terms{grid-template-columns:repeat(2,minmax(0,1fr))}.action-dates{grid-template-columns:1fr;gap:7px}.action-dates>div{display:flex;justify-content:space-between;align-items:baseline;gap:12px}.action-dates dd{text-align:right;margin:0}.action-dates dt{min-width:0}.action-record .stock-action-evidence summary{font-size:12px}.stock-header-actions{min-width:0}}

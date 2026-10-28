@@ -1,0 +1,11 @@
+{
+  "exchange": "HOSE",
+  "instrument_type": "Stock",
+  "raw_historical_ohlcv_persisted": false,
+  "received_at": "2026-10-09T07:00:27.506277+00:00",
+  "request_started_at": "2026-10-09T07:00:21.729966+00:00",
+  "schema_version": "ssi-security-receipt-v1",
+  "source": "SSI:FastConnect",
+  "symbol": "FPT",
+  "universe_count": 1522
+}

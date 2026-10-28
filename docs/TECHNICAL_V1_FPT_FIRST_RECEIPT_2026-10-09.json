@@ -1,0 +1,22 @@
+{
+  "adjustment_semantics": "adjusted",
+  "cache_bypassed": true,
+  "canonical_observations_sha256": "4bdfe85b7b7c7bdb8dc9c13c520887922fcf54660bd1a3b47099617676536a22",
+  "is_fixture": false,
+  "observation_count": 69,
+  "observation_mode": "current_reconstruction",
+  "policy_version": "provisional-operational-eod-v1",
+  "price_unit": "VND",
+  "range_end": "2026-10-08",
+  "range_start": "2026-07-01",
+  "raw_ohlcv_persisted": false,
+  "received_at": "2026-10-09T06:48:04.755945+00:00",
+  "request_started_at": "2026-10-09T06:48:02.096934+00:00",
+  "schema_version": "ssi-provisional-receipt-v1",
+  "source": "SSI:FastConnect",
+  "source_observed_at": "2026-10-09T06:48:04.748385+00:00",
+  "target_present": true,
+  "ticker": "FPT",
+  "transport": "ssi-sdk-authenticated-raw",
+  "volume_unit": "shares"
+}

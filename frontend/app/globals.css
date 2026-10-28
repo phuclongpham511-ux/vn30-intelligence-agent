@@ -1,0 +1,114 @@
+@import "tailwindcss";
+@import "./price-state.css";
+@import "./market-workspace.css";
+@import "./stock-company-actions.css";
+
+/* Stock research: one chart, compact context, progressive disclosure. */
+.stock-detail { min-width: 0; }
+.stock-header { padding: 4px 0 0; }
+.stock-header-actions { display: flex; align-items: center; gap: 24px; }
+.stock-follow { text-align: right; flex-shrink: 0; }
+.stock-tabs { display: flex; overflow-x: auto; border-bottom: 1px solid var(--border); gap: 24px; scrollbar-width: thin; }
+.stock-tabs [role="tab"] { white-space: nowrap; padding: 12px 0; border-bottom: 2px solid transparent; color: var(--muted-foreground); font-size: 13px; cursor: pointer; }
+.stock-tabs [aria-selected="true"] { border-color: var(--primary); color: var(--foreground); font-weight: 600; }
+.stock-tabs [role="tab"]:focus-visible { outline: 2px solid var(--primary); outline-offset: -2px; }
+.stock-chart-layout { display: grid; grid-template-columns: minmax(0,1fr) 310px; gap: 20px; align-items: start; }
+.stock-chart-layout[hidden], .stock-research-sidebar[hidden] { display: none; }
+.stock-chart-layout:has(.stock-research-sidebar[hidden]) { grid-template-columns: minmax(0,1fr); }
+.stock-chart-main, .stock-research-sidebar { min-width: 0; display: grid; gap: 20px; }
+.stock-price-chart { width: 100%; height: 420px; }
+.stock-technical-chart { width: 100%; height: 520px; }
+.stock-eyebrow { color: var(--muted-foreground); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+.stock-note { font-size: 11px; color: var(--muted-foreground); line-height: 1.65; margin: 12px 0; }
+.stock-profile { display: grid; gap: 10px; margin-top: 20px; font-size: 12px; }
+.stock-profile > div { display: flex; justify-content: space-between; gap: 16px; }
+.stock-profile dt { color: var(--muted-foreground); }
+.stock-profile dd { font-weight: 500; text-align: right; }
+.stock-badge { font-size: 10px; padding: 4px 8px; background: var(--muted); border-radius: 4px; color: var(--muted-foreground); }
+.stock-empty { margin-top: 24px; padding: 32px 20px; border: 1px dashed var(--border); border-radius: 8px; }
+.stock-empty p { font-size: 12px; color: var(--muted-foreground); margin-top: 8px; }
+.stock-action-table { max-height: 420px; }
+.stock-action-table th { font-weight: 500; }
+.stock-action-table th[scope="row"] { position: static; }
+.stock-action-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; }
+.stock-action-timeline { border-left: 2px solid var(--border); padding-left: 16px; }
+.stock-action-evidence { border-top: 1px solid var(--border); padding: 12px 0; overflow-wrap: anywhere; }
+.stock-action-evidence summary { cursor: pointer; font-size: 11px; color: var(--muted-foreground); }
+@media (max-width: 1023px) {
+  .stock-chart-layout { grid-template-columns: minmax(0,1fr); }
+  .stock-research-sidebar { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 639px) {
+  .stock-header-actions { justify-content: space-between; align-items: flex-end; gap: 12px; }
+  .stock-header-actions [data-live-symbol] { text-align: left; }
+  .stock-header-actions [data-live-symbol] > .flex { justify-content: flex-start; }
+  .stock-follow { max-width: 150px; }
+  .stock-tabs { gap: 22px; }
+  .stock-research-sidebar { grid-template-columns: minmax(0,1fr); }
+  .stock-price-chart { height: 320px; }
+  .stock-technical-chart { height: 440px; }
+}
+@custom-variant dark (&:is(.dark *));
+@theme inline {
+  --color-background: var(--background); --color-foreground: var(--foreground);
+  --color-card: var(--card); --color-card-foreground: var(--foreground);
+  --color-popover: var(--card); --color-popover-foreground: var(--foreground);
+  --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border); --color-input: var(--border); --color-ring: var(--primary);
+  --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--muted); --color-secondary-foreground: var(--foreground);
+  --color-accent: var(--muted); --color-accent-foreground: var(--foreground);
+  --color-destructive: var(--negative); --color-positive: var(--positive); --color-negative: var(--negative);
+  --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+}
+:root {
+  --chart-secondary: #517990;
+  --ma20: #a86c12; --ma50: #2376bb; --rsi: #506b82;
+  --background: #edf1f5; --foreground: #17283d; --card: #ffffff; --muted: #e1e8f0;
+  --muted-foreground: #506176; --border: #c6d1de; --primary: #215b9c; --primary-foreground: #ffffff;
+  --positive: #087a51; --negative: #bd3547; --unchanged: #866200; --sidebar: #f5f7fa; --chart: #397ab8;
+}
+.dark {
+  --chart-secondary: #94b4c7;
+  --ma20: #d6b16c; --ma50: #7bb5e3; --rsi: #a8bacb;
+  --background: #0b0f14; --foreground: #e8edf5; --card: #11171f; --muted: #1c2632;
+  --muted-foreground: #98a5b6; --border: #26313e; --primary: #79adf4; --primary-foreground: #0c1c30;
+  --positive: #53c795; --negative: #ed8290; --unchanged: #f3d466; --sidebar: #0e141c; --chart: #659acc;
+}
+* { box-sizing: border-box; border-color: var(--border); }
+body { margin: 0; background: var(--background); color: var(--foreground); font-family: Inter, "Segoe UI", Arial, sans-serif; font-size: 14px; line-height: 1.5; }
+button, input { font: inherit; }
+button:not(:disabled), summary { cursor: pointer; }
+a { text-decoration: none; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 4px; }
+h1, h2, h3 { font-weight: 600; letter-spacing: -.025em; }
+h1 { font-size: 30px; } h2 { font-size: 16px; } h3 { font-size: 14px; }
+.financial { font-variant-numeric: tabular-nums; }
+.eyebrow { font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--muted-foreground); }
+.panel { border: 1px solid var(--border); border-radius: 12px; background: var(--card); }
+.research-entry { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--card); }
+.research-entry:hover { background: var(--muted); border-color: var(--primary); }
+:root:not(.dark) [aria-pressed="true"] { background: #e0ebf8; border-color: var(--primary); color: var(--primary); }
+:root:not(.dark) [aria-current="page"] { background: #dfeaf7; color: var(--primary); }
+.page-stack { display: flex; flex-direction: column; gap: 24px; }
+.muted { color: var(--muted-foreground); }
+.positive { color: var(--positive); } .negative { color: var(--negative); }
+.unchanged { color: var(--unchanged); }
+.news-card { padding: 18px 0; border-bottom: 1px solid var(--border); }
+.news-card:last-child { border-bottom: 0; }
+.ticker-chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; font-size: 11px; font-variant-numeric: tabular-nums; background: var(--card); }
+.ticker-chip:hover { border-color: var(--primary); }
+.attention-bar { height: 5px; background: var(--primary); border-radius: 4px; min-width: 3px; }
+.table-scroll { overflow-x: auto; max-height: 340px; }
+table { width: 100%; text-align: right; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+th, td { padding: 12px 16px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+th { font-size: 11px; color: var(--muted-foreground); font-weight: 500; position: sticky; top: 0; background: var(--card); }
+td:first-child, th:first-child { text-align: left; }
+.fundamental-table-scroll { overflow: auto; max-height: 420px; border: 1px solid var(--border); border-radius: 6px; }
+.fundamental-table { min-width: 560px; background: var(--card); }
+.fundamental-table th, .fundamental-table td { padding: 11px 14px; }
+.fundamental-table th:first-child { position: sticky; left: 0; min-width: 160px; max-width: 200px; white-space: normal; z-index: 2; }
+.fundamental-table tbody th { top: auto; color: var(--foreground); }
+.fundamental-table thead th { z-index: 1; }
+.fundamental-table thead th:first-child { z-index: 3; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }

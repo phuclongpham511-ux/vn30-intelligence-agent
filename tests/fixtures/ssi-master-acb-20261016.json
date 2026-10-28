@@ -1,0 +1,39 @@
+{
+  "evidence_kind": "SAVED_ACTUAL_PROVIDER_RESPONSE_NOT_CURRENT_SESSION",
+  "evidence_sha256": "7daa4ee90df0e8241749e3004326ccd4d6035d1df2725789d67ee6a40d62202b",
+  "request_label": "master-oct16-page1",
+  "received_at": "2026-10-17T13:26:47.910511+00:00",
+  "record": {
+    "board": "HOSE",
+    "symbol": "ACB",
+    "tradingDate": "2026/10/16",
+    "ceiling": 22000,
+    "floor": 19200,
+    "refPrice": 20600
+  },
+  "security": {
+    "record": {
+      "symbol": "ACB",
+      "symbolNameVi": "Ngân hàng Thương mại Cổ phần Á Châu",
+      "symbolNameEn": "Asia Commercial Joint Stock Bank",
+      "board": "HOSE",
+      "lotSize": "100",
+      "maturityDate": "",
+      "firstTradingDate": "",
+      "lastTradingDate": "",
+      "cwUnderlyingSymbol": null,
+      "cwExercisePrice": "0",
+      "cwExecutionRatio": "0",
+      "listedShare": "5804421957",
+      "icbCode": "8355",
+      "icbName": "Ngân hàng",
+      "iIndex": null,
+      "iNav": null,
+      "openInterest": null,
+      "settlementPrice": null,
+      "stockType": "Stock"
+    },
+    "received_at": "2026-10-17T13:26:45.003761+00:00",
+    "request_label": "info-vn30"
+  }
+}

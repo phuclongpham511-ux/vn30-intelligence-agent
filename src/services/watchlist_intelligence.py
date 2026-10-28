@@ -1,0 +1,197 @@
+"""Bounded persisted Watchlist projection; never acquire or score in HTTP."""
+from datetime import datetime, timedelta, timezone
+from hashlib import sha256
+import json
+
+from sqlalchemy import func, or_
+from sqlmodel import select
+
+from src.models import Stock, Security
+from src.news.models import NewsArticle, NewsReadCache
+from src.news.normalization import utc, normalized
+from src.news.registry import load_sources
+from src.news.research import research_category
+from src.community.models import CommunityEvidenceItem
+from src.community.daily import source_statuses
+from src.services.technical_eod_store import read_latest_operational_packet
+from src.models.technical_eod import TechnicalEODJob
+
+SCAN_LIMIT = 300
+
+
+def revision(value):
+    return sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
+                            separators=(',', ':'), default=str).encode()).hexdigest()
+
+
+def ticker_membership(session, column, symbol):
+    values = (func.json_each(column) if session.get_bind().dialect.name == 'sqlite'
+              else func.json_array_elements_text(column)).table_valued('value')
+    if session.get_bind().dialect.name == 'postgresql':
+        values = values.render_derived()
+    return select(values.c.value).where(values.c.value == symbol).exists()
+
+
+def news_page(session, symbol, identity, now, offset, size, source_ids, body_evidence=None):
+    body_evidence = body_evidence or {}
+    def proofs(article):
+        return [p for p in body_evidence.get(article.id, [])
+                if p.article_title == article.title and p.article_url == article.canonical_url]
+    def relevant(article):
+        return bool(proofs(article)) or research_category(article, [identity]) == 'COMPANY'
+    def version(article):
+        fields = [normalized(article.title), article.canonical_url,
+                  utc(article.published_at).isoformat() if article.published_at else None]
+        # Text corrections reopen only associations admitted through body evidence.
+        if proofs(article) and research_category(article, [identity]) != 'COMPANY':
+            fields.append(sorted((p.symbol, p.matched_text, p.text_hash) for p in proofs(article)))
+        return revision(fields)
+    membership = lambda: or_(ticker_membership(session, NewsArticle.tickers, symbol), NewsArticle.id.in_(list(body_evidence)))
+    rows = session.exec(select(NewsArticle).where(
+        NewsArticle.first_seen_at >= now-timedelta(hours=72),
+        NewsArticle.first_seen_at <= now,
+        NewsArticle.country == 'VN', NewsArticle.category == 'VN',
+        NewsArticle.source_id.in_(source_ids),
+        membership())
+        .order_by(NewsArticle.first_seen_at.desc(), NewsArticle.id).limit(SCAN_LIMIT+1)).all()
+    truncated = len(rows) > SCAN_LIMIT
+    grouped = {}
+    for article in rows[:SCAN_LIMIT]:
+        if article.published_at and utc(article.published_at) > now:
+            continue
+        if not relevant(article):
+            continue
+        grouped.setdefault(article.story_id, []).append(article)
+    ids = sorted(grouped, key=lambda key: (max(utc(a.first_seen_at) for a in grouped[key]), key), reverse=True)
+    selected = ids[offset:offset+size]
+    # A stable archive anchor avoids renewing the same Story when its earliest
+    # source ages out of the discovery window. Bound evidence per selected Story.
+    ranked = select(NewsArticle.id.label('article_id'), func.row_number().over(
+        partition_by=NewsArticle.story_id, order_by=(NewsArticle.first_seen_at, NewsArticle.id)).label('position')).where(
+            NewsArticle.story_id.in_(selected), NewsArticle.first_seen_at <= now,
+            NewsArticle.source_id.in_(source_ids), NewsArticle.country=='VN', NewsArticle.category=='VN',
+            membership()).subquery()
+    anchors = session.exec(select(NewsArticle).join(ranked, NewsArticle.id==ranked.c.article_id)
+        .where(ranked.c.position <= 100).order_by(NewsArticle.first_seen_at,NewsArticle.id)
+        .limit(size*100)).all() if selected else []
+    archived = {}
+    for article in anchors:
+        if (not article.published_at or utc(article.published_at)<=now) and relevant(article):
+            archived.setdefault(article.story_id,[]).append(article)
+    events = []
+    for story_id in selected:
+        evidence = archived.get(story_id) or grouped[story_id]
+        # Earliest matching source represents the story; another publisher is
+        # evidence breadth, never another unread story or a content revision.
+        evidence.sort(key=lambda a: (utc(a.first_seen_at), a.id))
+        chosen = evidence[0]
+        events.append(dict(id='news:'+story_id, entity_id=story_id, revision=version(chosen),
+            kind='news', title=chosen.title, occurred_at=min(utc(a.first_seen_at) for a in evidence),
+            url=chosen.url,
+            revision_members={a.id:version(a) for a in evidence},
+            source_count=len({a.publisher_group for a in evidence}),
+            evidence=[a.model_copy(update={'tickers':sorted(set(a.tickers) | {p.symbol for p in proofs(a)})}).model_dump(mode='json') for a in evidence[:5]],
+            ticker_associations=[p.model_dump(mode='json') for a in evidence[:5] for p in proofs(a)],
+            evidence_truncated=len(evidence)>5))
+    return dict(items=events, has_more=len(ids)>offset+size,
+                truncated=truncated, window_start=now-timedelta(hours=72))
+
+
+def community_page(session, symbol, now, offset, size, source_ids, *, group_copies=False):
+    from src.community.themes import deduplicate
+    rows = session.exec(select(CommunityEvidenceItem).where(
+        CommunityEvidenceItem.published_at >= now-timedelta(hours=24),
+        CommunityEvidenceItem.published_at <= now,
+        CommunityEvidenceItem.first_seen_at <= now,
+        CommunityEvidenceItem.source_id.in_(source_ids),
+        ticker_membership(session, CommunityEvidenceItem.tickers, symbol))
+        .order_by(CommunityEvidenceItem.published_at.desc(), CommunityEvidenceItem.id)
+        .offset(offset).limit(size+1)).all()
+    items = []
+    for row in rows[:size]:
+        # Native revisions include engagement; attention changes only with
+        # actual bounded evidence, attribution or ticker association.
+        version = revision([row.title, row.excerpt, row.context_text, row.author,
+                            row.url, utc(row.published_at).isoformat(), sorted(row.tickers)])
+        items.append(dict(id='community:'+row.id, entity_id=row.id, revision=version,
+            kind='community', title=row.title or row.excerpt[:100],
+            occurred_at=utc(row.published_at), url=row.url,
+            evidence={**row.model_dump(mode='json'),
+                'published_at':utc(row.published_at).isoformat(),
+                'first_seen_at':utc(row.first_seen_at).isoformat(),
+                'last_seen_at':utc(row.last_seen_at).isoformat()}))
+    # Reuse Pulse copy grouping only as display metadata. Native item IDs,
+    # revisions, pagination and Watchlist unread semantics remain unchanged.
+    grouped = dict(display_groups=[[row['id'] for row in group] for group in deduplicate([item['evidence'] for item in items])]) if group_copies else {}
+    return dict(items=items, **grouped, has_more=len(rows)>size, truncated=False,
+                window_start=now-timedelta(hours=24))
+
+
+def technical_updates(session, symbol, now):
+    try:
+        result = read_latest_operational_packet(session, symbol, now).model_dump(mode='json')
+    except (ValueError, TypeError, AttributeError):
+        result = dict(kind='diagnostic', ticker=symbol, requested_session=None,
+            readiness_status='INCOMPLETE_EVIDENCE', reason_codes=['invalid_persisted_eod_evidence'],
+            safe_to_display_as_verified=False)
+    items = []
+    if result['kind'] == 'provisional_packet':
+        for event in result['packet']['top_insights']:
+            items.append(dict(id='technical:'+event['event_id'], entity_id=event['event_id'],
+                revision=revision(event), kind='technical', title=event['event_type'],
+                occurred_at=result['persisted_at'], url='/stocks/'+symbol+'#stock-technical-insights',
+                evidence=event))
+    job = session.exec(select(TechnicalEODJob).where(TechnicalEODJob.ticker == symbol)
+        .order_by((TechnicalEODJob.version > 0).desc(), TechnicalEODJob.trading_session.desc())
+        .limit(1)).first()
+    scheduled = bool(result['kind']=='diagnostic' and job and job.status=='WAITING_FOR_TIME'
+        and result.get('operational_state') in (
+            'WAITING_PUBLICATION_GATE', 'WAITING_SECOND_READ', 'PENDING_EVIDENCE'))
+    waiting = bool(scheduled and utc(job.next_due_at)>now)
+    return dict(items=items, data=result, has_more=False, truncated=False,
+        waiting_for_gate=waiting, awaiting_source_check=scheduled and not waiting,
+        next_check_due_at=utc(job.next_due_at) if scheduled else None,
+        last_checked_at=utc(job.last_checked_at) if job and job.last_checked_at else None)
+
+
+def intelligence(session, symbols, *, now=None, offset=0, size=12, community_groups=False):
+    now = utc(now or datetime.now(timezone.utc))
+    if not symbols:
+        return dict(as_of=now, offset=offset, page_size=size, stocks=[], news_sources=[], community_sources=[])
+    # Reuse qualified worker proofs once per bounded Watchlist request. HTTP does
+    # not read article text, resolve entities, fetch sources or rebuild the cache.
+    from src.news.read import StoryResponse
+    body_evidence = {symbol:{} for symbol in symbols}
+    cache = session.get(NewsReadCache, 'research')
+    for entry in cache.rows if cache else []:
+        row = StoryResponse.model_validate(entry['row'])
+        for proof in row.ticker_associations:
+            if proof.symbol in body_evidence and proof.evidence_origin == 'publisher_text' and utc(proof.text_observed_at) <= now:
+                body_evidence[proof.symbol].setdefault(proof.article_id, []).append(proof)
+    stocks = {s.symbol:s for s in session.exec(select(Stock).where(
+        Stock.symbol.in_(symbols), Stock.is_active == True)).all()}
+    securities = {s.symbol:s for s in session.exec(select(Security).where(
+        Security.symbol.in_(symbols), Security.is_active == True, Security.instrument_type == 'Stock')).all()}
+    # These status reads disclose actual acquisition times, not this response time.
+    from routers.news import sources as news_source_statuses
+    news_sources = news_source_statuses(session)
+    community_sources = source_statuses(session, now=now)
+    news_ids = [s.source_id for s in load_sources() if s.enabled and s.country=='VN' and s.category=='VN']
+    community_ids = [s['source_id'] for s in community_sources if s['enabled']]
+    output = []
+    for symbol in symbols:
+        identity = securities.get(symbol) or stocks.get(symbol)
+        if identity and symbol in stocks:
+            identity = identity.model_copy(update={
+                'company_name':identity.company_name or stocks[symbol].company_name,
+                'display_name_en':identity.display_name_en or stocks[symbol].display_name_en})
+        row = dict(symbol=symbol, status='ready' if identity else 'unavailable',
+            company_name=identity.company_name if identity else None,
+            display_name_en=identity.display_name_en if identity else None,
+            exchange=identity.exchange if identity else None)
+        row['news'] = news_page(session,symbol,identity,now,offset,size,news_ids,body_evidence[symbol]) if identity else None
+        row['community'] = community_page(session,symbol,now,offset,size,community_ids,group_copies=community_groups) if identity else None
+        row['technical'] = technical_updates(session,symbol,now) if identity else None
+        output.append(row)
+    return dict(as_of=now, offset=offset, page_size=size, stocks=output,
+                news_sources=news_sources, community_sources=community_sources)

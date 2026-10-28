@@ -1,0 +1,98 @@
+"""Canonical single ingestion worker, separate from the HTTP process."""
+import argparse
+import json
+import signal
+from threading import Event
+from sqlmodel import Session
+from src.db.session import create_tables, get_engine
+from src.config.settings import get_settings
+from src.news.registry import load_sources
+from src.news.service import ingest_cycle
+from src.community.daily import ingest_cycle as ingest_community
+from src.services.universe import sync_universe, sync_index_groups
+from src.services.technical_eod_store import run_technical_eod_cycle
+from src.services.technical_eod_supervision import run_configured_technical_eod_cycle
+from src.services.ingestion_owner import collector_owned, collector_owner
+
+
+@collector_owned
+def run_cycle(engine, *, registry=None, force_news=False, include_news=True, technical_pilot=False):
+    results = {}
+    # Separate sessions/transactions: a failed domain cannot poison the other.
+    for domain in ('universe', 'groups', 'news', 'community', 'technical_eod'):
+        if domain == 'news' and not include_news:
+            continue
+        try:
+            with Session(engine) as session:
+                results[domain] = (sync_universe(session) if domain == 'universe' else
+                    sync_index_groups(session) if domain == 'groups' else
+                    ingest_cycle(session, load_sources(registry), force=force_news)
+                    if domain == 'news' else ingest_community(engine) if domain=='community'
+                    else run_configured_technical_eod_cycle(engine) if technical_pilot
+                    else run_technical_eod_cycle(engine))
+        except Exception as exc:
+            results[domain] = {'status': 'error', 'error': type(exc).__name__}
+    return results
+
+
+def failed(results):
+    if results.get('status') == 'collector_busy':
+        return True
+    return any(domain.get('status') in ('error','STOPPED','HALTED','UNCONFIGURED','INCOMPLETE_EVIDENCE','LEASE_LOST') or any(
+        isinstance(row, dict) and row.get('status') == 'error' for row in domain.values()
+    ) for domain in results.values())
+
+
+def run(engine, *, watch=False, registry=None, force_news=False, stop=None, technical_pilot=False):
+    with collector_owner(engine) as owned:
+        if not owned:
+            print(json.dumps({'status': 'collector_busy'}), flush=True)
+            return 1
+        return _run_owned(engine, watch=watch, registry=registry, force_news=force_news, stop=stop,
+            technical_pilot=technical_pilot)
+
+
+def _run_owned(engine, *, watch=False, registry=None, force_news=False, stop=None, technical_pilot=False):
+    stop = stop if stop is not None else Event()
+    while not stop.is_set():
+        options = {'technical_pilot': True} if technical_pilot else {}
+        result = run_cycle(engine, registry=registry, force_news=force_news, **options)
+        print(json.dumps({'event': 'ingestion_cycle', **result}), flush=True)
+        if not watch:
+            return int(failed(result))
+        stop.wait(60)  # interruptible; persisted domain cadence decides due work
+    return 0
+
+
+def main():
+    import logging
+    logging.basicConfig(level=logging.INFO, format='%(message)s')
+    parser = argparse.ArgumentParser(description='SSI universe + News + Community metadata worker')
+    parser.add_argument('--watch', action='store_true')
+    parser.add_argument('--registry', help='Alternate News source registry JSON path')
+    parser.add_argument('--force-news', action='store_true', help='One-off News cadence override; Community cadence remains intact')
+    parser.add_argument('--technical-pilot', action='store_true',
+        help='Explicit opt-in to the existing configured single-ticker EOD supervisor in this database; no bootstrap')
+    args = parser.parse_args()
+    if args.watch and args.force_news:
+        parser.error('--force-news cannot be combined with --watch')
+    technical_pilot = args.technical_pilot or get_settings().technical_eod_pilot
+    engine = get_engine()
+    with collector_owner(engine) as owned:
+        if not owned:
+            print(json.dumps({'status': 'collector_busy'}), flush=True)
+            return 1
+        create_tables()
+        stop = Event()
+        previous = signal.signal(signal.SIGTERM, lambda *_: stop.set())
+        try:
+            return run(engine, watch=args.watch, registry=args.registry,
+                force_news=args.force_news, stop=stop, technical_pilot=technical_pilot)
+        except KeyboardInterrupt:
+            return 0
+        finally:
+            signal.signal(signal.SIGTERM, previous)
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
