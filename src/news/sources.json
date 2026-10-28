@@ -318,5 +318,37 @@
     "verified_at": "2026-10-08T06:21:44.073540+00:00",
     "representative_priority": 100,
     "scheduling_priority": "priority"
+  },
+  {
+    "source_id": "vietstock_business",
+    "name": "Vietstock · Hoạt động kinh doanh",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://vietstock.vn/737/doanh-nghiep/hoat-dong-kinh-doanh.rss",
+    "enabled": true,
+    "poll_interval_minutes": 30,
+    "category": "VN",
+    "publisher_group": "vietstock",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-27T11:32:13.049361+00:00",
+    "representative_priority": 30,
+    "scheduling_priority": "standard"
+  },
+  {
+    "source_id": "vietstock_dividends",
+    "name": "Vietstock · Cổ tức",
+    "country": "VN",
+    "language": "vi",
+    "method": "RSS",
+    "endpoint": "https://vietstock.vn/738/doanh-nghiep/co-tuc.rss",
+    "enabled": true,
+    "poll_interval_minutes": 30,
+    "category": "VN",
+    "publisher_group": "vietstock",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "verified_at": "2026-10-27T11:32:13.121284+00:00",
+    "representative_priority": 30,
+    "scheduling_priority": "standard"
   }
 ]

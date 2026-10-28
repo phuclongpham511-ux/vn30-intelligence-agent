@@ -51,5 +51,8 @@ export function useNewsArchive(query:string|null,attempt:number) {
     const stop=cacheRefresh(()=>{void load();});
     return()=>{controller.abort();stop();};
   },[query,attempt]);
-  return {page,loading,error,loadMore:()=>more.current()};
+  // Effects clear/replace results after render. Never flash the previous search
+  // or category during that interval, including back/forward navigation.
+  const aligned=saved.current.query===query;
+  return {page:aligned?page:null,loading:aligned?loading:query!==null,error:aligned&&error,loadMore:()=>more.current()};
 }

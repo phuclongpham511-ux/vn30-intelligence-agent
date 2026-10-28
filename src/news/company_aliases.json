@@ -1,0 +1,14 @@
+[
+  {
+    "symbol": "TCB",
+    "aliases": ["Techcombank"],
+    "source_url": "https://techcombank.com/nha-dau-tu/cong-bo-thong-tin/thong-tin-khac",
+    "verified_at": "2026-10-27"
+  },
+  {
+    "symbol": "HPG",
+    "aliases": ["Tập đoàn Hòa Phát", "Hoa Phat Group"],
+    "source_url": "https://www.hoaphat.com.vn/introduce",
+    "verified_at": "2026-10-27"
+  }
+]

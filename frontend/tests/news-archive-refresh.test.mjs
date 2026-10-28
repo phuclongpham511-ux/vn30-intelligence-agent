@@ -4,6 +4,13 @@ import {readFileSync} from 'node:fs';
 import {createRequire} from 'node:module';
 import {transformSync} from 'next/dist/build/swc/index.js';
 const require=createRequire(import.meta.url);
+test('a changed search never exposes the previous query results before its effect runs',()=>{
+ const old={items:[{story:{id:'previous'}}]},values=[old,false,false];let ref=0,state=0;
+ const code=transformSync(readFileSync(new URL('../lib/useNewsArchive.ts',import.meta.url),'utf8'),{filename:'useNewsArchive.ts',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript'}}}).code;
+ const exports={};new Function('require','exports',code)(name=>name==='react'?{useEffect(){},useRef:()=>ref++===0?{current:()=>{}}:{current:{query:'q=old',page:old}},useState:()=>[values[state++],()=>{}]}:require(name==='./cacheRefresh.ts'?'../lib/cacheRefresh.ts':name),exports);
+ const next=exports.useNewsArchive('q=new',0);
+ assert.equal(next.page,null);assert.equal(next.loading,true);assert.equal(next.error,false);
+});
 test('archive incorporates changed persisted pages without restart, preserving revealed depth and snapshot pagination',async()=>{
  const prior={fetch:globalThis.fetch,document:globalThis.document,window:globalThis.window,setInterval:globalThis.setInterval,clearInterval:globalThis.clearInterval};
  let effect,tick,version=0;const states=[],requests=[];

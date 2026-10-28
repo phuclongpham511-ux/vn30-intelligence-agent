@@ -109,7 +109,7 @@ def build_research_rows(session, options, category=None, *, hot=False, offset=0,
         proofs = ticker_associations(tagger, [article], receipts)
         copy = article.model_copy(update={'tickers': sorted({p.symbol for p in proofs}),
             'sectors': sorted(set(article.sectors) | set(tags.sectors))})
-        kind = research_category(copy, [eligible[symbol] for symbol in copy.tickers])
+        kind = research_category(copy, [eligible[symbol] for symbol in copy.tickers], tagger.company_aliases)
         # Body evidence grants relevance, not headline-subject inference. Market
         # and Industry framing keep precedence; otherwise an explicit stock
         # in publisher text can make a finance article discoverable as Company.

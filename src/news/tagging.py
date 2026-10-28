@@ -44,7 +44,7 @@ ENTITY_POLICY = 'issuer-context-v2'
 # Language meanings, independent of the equity universe. These terms can still
 # identify a security through explicit stock notation or its unique legal name.
 AMBIGUOUS_LANGUAGE = frozenset(('it all are can for has his how new now one our out the who why you '
-    'ceo cfo coo cto cio cpo cmo tp hcm vtv '
+    'ceo cfo coo cto cio cpo cmo tp hcm vtv ai gas oil '
     'usd vnd eur gbp jpy cny aud cad chf hkd sgd krw ndt').split())
 # Positive issuer evidence, not a list of allowed/forbidden securities. Generic
 # price rises, currency amounts, job titles and acronym tokens are insufficient.
@@ -77,7 +77,7 @@ class Tagger:
         self.identity_owners = owners
         symbols = '|'.join(re.escape(normalized(s.symbol)) for s in self.stocks)
         self.stock_context = re.compile(r'\b(?:co phieu|ma co phieu|ma chung khoan|ticker|stock|hose|hnx|upcom)\s*'
-            r'(?:(?:' + symbols + r')\s+(?:va|and)\s*)*$')
+            r'(?:(?:' + symbols + r')\b\s*(?:(?:va|and)\s*)?)*$')
         self.symbol_pattern = re.compile(r'(?<!\w)(' + '|'.join(re.escape(stock.symbol) for stock in self.stocks) + r')(?!\w)') if self.stocks else None
 
     def resolve(self, title: str, *, body: str | None = None) -> list[dict]:
@@ -93,7 +93,7 @@ class Tagger:
             folded_prefix = normalized(prefix)
             # A shared explicit stock list ("cổ phiếu ABC và XYZ") remains evidence
             # for each member; prose after the list cannot inherit that context.
-            explicit = bool(self.stock_context.search(folded_prefix))
+            explicit = bool(self.stock_context.search(normalized(title[:match.start()])))
             currency_amount = bool(re.search(r'(?:\d[\d.,]*|ty phu|trieu phu|billionaire|millionaire|trieu|ty|ti|nghin|million|billion)\s*$', folded_prefix))
             location = bool(re.search(r'(?:TP|T\.P)\.\s*$', prefix, re.I))
             broadcaster = bool(re.search(r'(?:roi|dai|kenh)\s*$', folded_prefix))
@@ -101,6 +101,18 @@ class Tagger:
             role = match[0] in {'CEO','CFO','COO','CTO','CIO','CPO','CMO'} and following and following[1] in self.identities
             tail = normalized(title[match.end():])
             activity = ISSUER_ACTIVITY.search(tail)
+            # Market/industry prose can enumerate actual ticker tokens without
+            # repeating "cổ phiếu". Currency, role and ordinary-language tokens
+            # still need explicit security notation. A brand extension is not
+            # evidence that its listed parent was the company being discussed.
+            market_context = re.search(r'\b(?:vn index|vnindex|hnx index|upcom index|thi truong chung khoan|stock market|nganh|industry|sector)\b', text)
+            brand_extension = re.match(r'\s+[A-Z][a-z]+\b', title[match.end():])
+            contextual = (market_context and len(match[0]) >= 3
+                and normalized(match[0]) not in AMBIGUOUS_LANGUAGE
+                and not (currency_amount or location or broadcaster or role or brand_extension))
+            explicit = explicit or bool(contextual)
+            if brand_extension and not activity:
+                explicit = False
             # Bare mã can describe a currency or product; accent folding also
             # conflates it with the conjunction mà. Require corroborating equity
             # activity, or qualified stock wording above. Cashtags are explicit

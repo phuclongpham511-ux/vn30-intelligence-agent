@@ -83,16 +83,16 @@ test('stock search and unavailable states render natural Vietnamese without tran
   const {StockError}=component('../app/components/stock/StockStates.tsx',{'../mascot/Mascot':{MascotIllustration:()=>null},'../ui/button':{Button:button},'../ui/skeleton':{Skeleton:()=>null}});
   assert.match(render(StockError,{ticker:'XYZ',message:'The data provider is temporarily unavailable. Please try again.',retry(){}}),/Nguồn dữ liệu tạm thời chưa khả dụng/);
 });
-test('News navigation translates all four ordered tabs and does not repeat category headings',()=>{
+test('News navigation translates all three editorial tabs and does not repeat category headings',()=>{
   const {default:News}=component('../app/news/page.tsx',{
     '../components/mascot/Mascot':{MascotState:passthrough},'../components/ui/button':{Button:button},
     '../components/news/SourceCoverage':()=>null,'../components/news/TopStory':()=>null,'../components/news/CommunityPulse':()=>null});
   for(const language of ['en','vi']) {
     const html=render(News,{},language);
-    const labels=language==='vi'?['Ngành','Doanh nghiệp','Thị trường','Cộng đồng']:['Industry','Company','Market','Community Pulse'];
+    const labels=language==='vi'?['Ngành','Doanh nghiệp','Thị trường']:['Industry','Company','Market'];
     let previous=-1;
     for(const label of labels){const index=html.indexOf(`>${label}</button>`);assert.ok(index>previous);previous=index;}
-    assert.doesNotMatch(html,/<h2|Market Brief|Broad Vietnam market/);
+    assert.doesNotMatch(html,/<h2|Market Brief|Broad Vietnam market|>Community Pulse<|>Cộng đồng<|Discussion window/);
   }
 });
 test('Woofi shell uses local supplied logo, compact language control and no Daily data header label',()=>{
