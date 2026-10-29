@@ -1,4 +1,21 @@
 # VN30 Intelligence Agent — Frontend Design Contract
+## Stock Research overview — 29 October 2026
+
+While Bronze clarification and Vnstock v5 migration are paused, the company
+overview starts with a compact financial picture before price context and stored
+company developments. Reuse the existing validated financial display projection,
+metric qualification, period, unit and evidence disclosures. Overview and the
+financial analysis tab retain one loader, cache and frequency selection; switching
+presentation does not create a second financial consumer. Other research tabs
+remain lazy. Unknown values stay unavailable, source-reported personal data stays
+within its existing server-authorized scope, and DEMO remains visibly labelled.
+
+Use the existing theme tokens, three financial groups on desktop and stacked
+groups on mobile. Loading, transport failure, missing coverage and absent display
+qualification remain distinct. This is frontend source work; release activation
+and real-data acceptance are separate from offline preview checks.
+
+
 
 ## Owner correction — full-row market fills (19 October 2026)
 

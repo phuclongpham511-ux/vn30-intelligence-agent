@@ -53,6 +53,7 @@ export default function Explore({ticker}:{ticker:string}) {
       }}>{t(labels[section])}</button>)}
     </div>
     {!security?<div aria-busy="true" role="status"><p className="stock-note">{t('Loading stock identity…')}</p><Skeleton className="h-96"/></div>:<>
+      <div role={tab==='fundamentals'?'tabpanel':undefined} id="stock-panel-fundamentals" aria-labelledby={tab==='fundamentals'?'stock-tab-fundamentals':undefined} tabIndex={tab==='fundamentals'?0:undefined} hidden={tab!=='overview'&&tab!=='fundamentals'}>{(visited.has('overview')||visited.has('fundamentals'))&&<FundamentalTrends ticker={ticker} visible={tab==='overview'||tab==='fundamentals'} summary={tab!=='fundamentals'} onOpen={()=>navigate('fundamentals')}/>}</div>
       <div className="stock-chart-layout" hidden={tab!=='overview'&&tab!=='technical'}>
         <div className="stock-chart-main" role="tabpanel" id="stock-panel-price" aria-labelledby={`stock-tab-${tab==='technical'?'technical':'overview'}`} tabIndex={0}>
           {tab==='technical'&&<><p className="stock-note">{t('Chart indicators describe completed observations. Accepted Technical evidence has separate assurance; no trading recommendation.')}</p><TechnicalInsights ticker={ticker}/></>}
@@ -64,7 +65,6 @@ export default function Explore({ticker}:{ticker:string}) {
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
       </div>
-      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} visible={tab==='fundamentals'}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker}/>}</div>
       <div role={tab==='news'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'?'stock-tab-news':undefined} tabIndex={tab==='news'?0:undefined} hidden={tab!=='news'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab!=='news'}/>}</div>
     </>}

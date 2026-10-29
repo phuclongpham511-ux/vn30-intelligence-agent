@@ -2,6 +2,7 @@
 @import "./price-state.css";
 @import "./market-workspace.css";
 @import "./stock-company-actions.css";
+@import "./stock-overview.css";
 
 /* Stock research: one chart, compact context, progressive disclosure. */
 .stock-detail { min-width: 0; }
