@@ -3,8 +3,9 @@ import assert from 'node:assert/strict';
 import {stockSection,stockIdentity,stockRead,actionStatus,trustedAction,actionUrl} from '../lib/stock-detail.ts';
 import {readWatchlist,followStock} from '../lib/watchlist.ts';
 
-test('stock sections accept research deep links and reject unknown fragments',()=>{
-  assert.equal(stockSection('#stock-actions'),'actions');
+test('retired actions and news deep links land on Overview; active research tabs remain addressable',()=>{
+  assert.equal(stockSection('#stock-actions'),'overview');
+  assert.equal(stockSection('#stock-news'),'overview');
   assert.equal(stockSection('#stock-fundamentals'),'fundamentals');
   assert.equal(stockSection('#untrusted'),'overview');
 });

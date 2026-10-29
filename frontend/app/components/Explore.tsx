@@ -10,7 +10,6 @@ import FundamentalTrends from './stock/FundamentalTrends';
 import TechnicalInsights from './stock/TechnicalInsights';
 import RawDataTable from './stock/RawDataTable';
 import StockIntelligence from './stock/StockIntelligence';
-import StockActions from './stock/StockActions';
 import CompanyOverview from './stock/CompanyOverview';
 import {useStockRead} from './stock/useStockRead';
 import {StockError} from './stock/StockStates';
@@ -18,7 +17,7 @@ import {Skeleton} from './ui/skeleton';
 import {Button} from './ui/button';
 import WorkspaceNav from './market/WorkspaceNav';
 
-const labels={overview:'Overview',fundamentals:'Fundamental analysis',technical:'Technical analysis',actions:'Dividends & corporate actions',news:'Company news'} as const;
+const labels={overview:'Overview',fundamentals:'Fundamental analysis',technical:'Technical analysis'} as const;
 
 function DailyContext({ticker}:{ticker:string}) {
   const {t}=useLocale();
@@ -65,8 +64,7 @@ export default function Explore({ticker}:{ticker:string}) {
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
       </div>
-      <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker}/>}</div>
-      <div role={tab==='news'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'?'stock-tab-news':undefined} tabIndex={tab==='news'?0:undefined} hidden={tab!=='news'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab!=='news'}/>}</div>
+      <div id="stock-panel-news" hidden={tab!=='overview'}>{visited.has('overview')&&<StockIntelligence key={ticker} ticker={ticker} preview/>}</div>
     </>}
   </div>;
 }

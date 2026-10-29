@@ -7,10 +7,11 @@ import {stockResearch,type ResearchEntry} from '@/lib/stock-intelligence';
 import {collectionLabels} from '@/lib/collectionStatus';
 import {newsViewQuery,emptyNewsFilters} from '@/lib/news';
 import {actionUrl} from '@/lib/stock-detail';
+import StockActions from './StockActions';
 
-export function StockIntelligenceView({ticker,data,state,error=false,storageError=false,retry,review,preview=false}:{
+export function StockIntelligenceView({ticker,data,state,error=false,storageError=false,retry,review,preview=false,focus='all'}:{
   ticker:string;data:Intelligence|null;state:WatchlistState|null;error?:boolean;storageError?:boolean;
-  retry:()=>void;review:(item:AttentionUpdate)=>void;preview?:boolean;
+  retry:()=>void;review:(item:AttentionUpdate)=>void;preview?:boolean;focus?:'all'|'community';
 }){
   const {t,ui,date,number}=useLocale();
   const [expanded,setExpanded]=useState(false),[earnings,setEarnings]=useState(false);
@@ -39,9 +40,20 @@ export function StockIntelligenceView({ticker,data,state,error=false,storageErro
   </li>;
   const news=research?.news.filter(entry=>!earnings||entry.topics.includes('Earnings'))||[];
   const shown=preview?news.slice(0,3):expanded?news:news.slice(0,6);
+  if(preview)return <section className="panel min-w-0 p-4 sm:p-5" aria-label={t('Company activity')}>
+    <header><h2 className="text-base font-semibold">{t('Company activity')}</h2></header>
+    <div className="mt-3">
+    <header className="flex items-center justify-between gap-3"><h3 className="text-sm font-semibold">{t('Company news')}</h3><span className="text-xs text-muted-foreground">{countsKnown?t('{count} new',{count:research!.news.filter(entry=>entry.unread).length}):t('{count} stories',{count:news.length})}</span></header>
+    {error?<p role="status" className="stock-note">{t('Company news is unavailable.')}</p>:!data?<p role="status" className="stock-note">{t('Loading company news…')}</p>:research?.unavailable?<p className="stock-note">{t('Company news is unavailable.')}</p>:shown.length?<ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{shown.map(entry=>{const image=actionUrl(entry.articles[0]?.thumbnail_url);return <li key={entry.item.id} data-stock-update={entry.item.id} className="min-w-0"><a href={entry.url} target="_blank" rel="noopener noreferrer" className="group block h-full overflow-hidden rounded-md border border-border hover:border-primary focus-visible:outline-2">{image&&<img src={image} alt="" width="480" height="240" loading="lazy" className="aspect-[2/1] w-full object-cover"/>}<span className="block p-3"><span className="text-xs text-muted-foreground">{entry.source}</span><span className="mt-1 line-clamp-2 block text-sm font-medium group-hover:text-primary">{entry.item.title}</span></span></a></li>;})}</ul>:<p className="stock-note">{t('No company news available.')}</p>}
+    </div>
+    <details className="mt-4 border-t pt-3">
+      <summary className="cursor-pointer text-sm font-semibold">{t('Dividends & corporate actions')}</summary>
+      <div className="pt-3"><StockActions ticker={ticker} compact/></div>
+    </details>
+  </section>;
   return <section className="panel min-w-0 p-4 sm:p-5" aria-label={t('Company research updates')}>
     <header className="flex flex-wrap items-start justify-between gap-2"><div><h2>{t('Company research updates')} · {ticker}</h2><p className="stock-note">{t('Unreviewed first, then publication time. Coverage is not financial materiality.')}</p></div><button type="button" onClick={retry} className="text-xs text-primary underline">{t('Refresh stored evidence')}</button></header>
-    <nav className="mt-2 flex flex-wrap gap-4 text-xs" aria-label={t('Related company research')}><a className="text-primary underline" href="#stock-fundamentals">{t('Fundamental analysis')}</a><a className="text-primary underline" href="#stock-actions">{t('Dividends & corporate actions')}</a><a className="text-primary underline" href="#stock-news">{t('Company news')}</a><a className="text-primary underline" href="/watchlist">{t('Watchlist')}</a></nav>
+    <nav className="mt-2 flex flex-wrap gap-4 text-xs" aria-label={t('Related company research')}><a className="text-primary underline" href="#stock-fundamentals">{t('Fundamental analysis')}</a><a className="text-primary underline" href="#stock-actions">{t('Dividends & corporate actions')}</a><a className="text-primary underline" href="#stock-news">{t('Company news')}</a><a className="text-primary underline" href="#stock-community">{t('Community context')}</a><a className="text-primary underline" href="/watchlist">{t('Watchlist')}</a></nav>
     {error||data&&!research?<p className="stock-note" role="alert">{t('Company research is unavailable. Unread counts are unknown.')}</p>:!data?<p className="stock-note" role="status">{t('Loading company research…')}</p>:research?.unavailable?<p className="stock-note" role="status">{t('Stored research identity is unavailable; coverage is unknown.')}</p>:research&&<>
       <div className="mt-3 border-y py-3 text-xs"><p>{t('Evidence evaluated')}: <time dateTime={data.as_of}>{date(data.as_of,true)}</time> ICT</p>
         {countsKnown?<p className="mt-1">{t('{count} unreviewed loaded stories',{count:research.news.filter(entry=>entry.unread).length})} · {t('{count} unreviewed loaded discussions',{count:research.community.filter(entry=>entry.unread).length})}</p>:<p className="mt-1">{t(storageError?'Review state unavailable. Unread counts are unknown.':!state?'Loading saved review state…':'Follow this stock to use its saved Watchlist review context.')}</p>}
@@ -49,12 +61,14 @@ export function StockIntelligenceView({ticker,data,state,error=false,storageErro
         <p className="mt-1 text-muted-foreground">{t('Opening a report never marks it reviewed. Reviews affect only the selected story or discussion.')}</p>
       </div>
       {(coverageUnknown||research.incomplete)&&<p role="status" className="stock-note">{t('Coverage incomplete; source checks may be stale or unavailable. Counts describe the loaded sample only.')}</p>}
+      <div hidden={focus==='community'} data-stock-research="news">
       <div className="mt-4 flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold">{t('Company news')} · {t('72-hour window')}</h3><label className="text-xs"><input className="mr-2" type="checkbox" checked={earnings} onChange={event=>setEarnings(event.target.checked)}/>{t('Financial results · existing Earnings tags')}</label></div>
       <p className="stock-note">{t('The window uses existing acquisition rules; publication may be older. News does not confirm financial metrics or corporate actions.')}</p>
       {shown.length?<ul className="mt-3 divide-y">{shown.map(renderEntry)}</ul>:<p className="stock-note">{t(earnings?'No loaded stories have the existing Earnings tag.':'No matching stored stories in this window. This does not establish that no development occurred.')}</p>}
       {!preview&&news.length>6&&<button type="button" className="mt-2 text-xs text-primary underline" aria-expanded={expanded} onClick={()=>setExpanded(value=>!value)}>{t(expanded?'Show fewer updates':'Show all {count} loaded updates',{count:news.length})}</button>}
       {preview&&<a className="mt-2 inline-block text-xs text-primary underline" href="#stock-news">{t('Open company research')}</a>}
-      <details className="mt-4 border-t pt-3"><summary className="cursor-pointer text-sm font-semibold">{t('Community context')} · {t('24-hour window')} · {research.community.length}</summary><p className="stock-note">{t('Investor discussion is unverified. Engagement is attention, not sentiment or corroboration.')}</p>
+      </div>
+      <details open={focus==='community'?true:undefined} data-stock-research="community" className="mt-4 border-t pt-3"><summary className="cursor-pointer text-sm font-semibold">{t('Community context')} · {t('24-hour window')} · {research.community.length}</summary><p className="stock-note">{t('Investor discussion is unverified. Engagement is attention, not sentiment or corroboration.')}</p>
         <p className="stock-note">{t('Repeated copies share a display group; each source item keeps its own review state.')}</p>
         {research.community.length?<ul className="mt-3 divide-y">{(preview?research.communityGroups.slice(0,3):research.communityGroups).map(group=><li key={group[0].item.id} className="py-3"><ul>{renderEntry(group[0])}</ul>{group.length>1&&<details className="mt-2 text-xs"><summary className="cursor-pointer">{t('Additional source copies ({count})',{count:group.length-1})}</summary><ul>{group.slice(1).map(renderEntry)}</ul></details>}</li>)}</ul>:<p className="stock-note">{t('No matching stored discussions in this window. Coverage may be incomplete.')}</p>}
       </details>
@@ -65,8 +79,7 @@ export function StockIntelligenceView({ticker,data,state,error=false,storageErro
     </>}
   </section>;
 }
-
-export default function StockIntelligence({ticker,preview=false}:{ticker:string;preview?:boolean}){
+export default function StockIntelligence({ticker,preview=false,focus='all'}:{ticker:string;preview?:boolean;focus?:'all'|'community'}){
   const [data,setData]=useState<Intelligence|null>(null),[state,setState]=useState<WatchlistState|null>(null);
   const [error,setError]=useState(false),[storageError,setStorageError]=useState(false),[attempt,setAttempt]=useState(0);
   const publish=(next:WatchlistState,current:WatchlistState)=>{
@@ -94,5 +107,5 @@ export default function StockIntelligence({ticker,preview=false}:{ticker:string;
     try{const current=readWatchlist(localStorage.getItem(watchlistStorageKey));publish(reviewBriefingItem(current,state,{references:[{symbol:ticker,item}]}),current);}catch{setState(null);setStorageError(true);}
   };
   const matches=data?.stocks.length===1&&data.stocks[0].symbol===ticker;
-  return <StockIntelligenceView ticker={ticker} data={matches?data:null} state={state} error={error} storageError={storageError} retry={()=>setAttempt(value=>value+1)} review={review} preview={preview}/>;
+  return <StockIntelligenceView ticker={ticker} data={matches?data:null} state={state} error={error} storageError={storageError} retry={()=>setAttempt(value=>value+1)} review={review} preview={preview} focus={focus}/>;
 }

@@ -9,7 +9,10 @@ import {LanguageContext,localeTools} from '../lib/i18n.ts';
 import {packet,saved,news,discussion,forum} from './fixtures/stock-intelligence.mjs';
 const require=createRequire(import.meta.url),exports={};
 const code=transformSync(readFileSync(new URL('../app/components/stock/StockIntelligence.tsx',import.meta.url),'utf8'),{filename:'StockIntelligence.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
-new Function('require','exports',code)(name=>require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
+new Function('require','exports',code)(name=>{
+ if(name==='./StockActions')return {__esModule:true,default:props=>React.createElement('div',{'data-stock-actions':props.compact?'compact':'full'})};
+ return require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name);
+},exports);
 function render(props={},language='en'){
  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:localeTools(language)},React.createElement(exports.StockIntelligenceView,{ticker:'AAA',data:packet(),state:saved(),retry(){},review(){},...props})));
 }
@@ -46,7 +49,6 @@ test('overview preview is bounded and both languages retain coherent research na
  const many=Array.from({length:9},(_,index)=>({...news,id:'news:story'+index,entity_id:'story'+index}));
  assert.equal((render({preview:true,data:packet(many,[])}).match(/data-stock-update="news:/g)||[]).length,3);
  assert.equal((render({data:packet(many,[])}).match(/data-stock-update="news:/g)||[]).length,6);
- const vi=render({},'vi');assert.match(vi,/Cập nhật nghiên cứu doanh nghiệp/);assert.match(vi,/AAA reports earnings/);
- for(const href of ['#stock-fundamentals','#stock-actions','#stock-news','/watchlist'])assert.ok(vi.includes(`href="${href}"`));
- assert.match(vi,/72 giờ/);assert.match(vi,/24 giờ/);
+ const vi=render({preview:true,data:packet(many,[])},'vi');assert.match(vi,/Tin doanh nghiệp/);assert.match(vi,/AAA reports earnings/);assert.doesNotMatch(vi,/Cập nhật nghiên cứu doanh nghiệp|Bằng chứng được đọc lúc/);
+ assert.match(vi,/Tin tức &amp; sự kiện doanh nghiệp/);assert.match(vi,/<summary[^>]*>Cổ tức &amp; sự kiện doanh nghiệp<\/summary>/);assert.match(vi,/data-stock-actions="compact"/);
 });

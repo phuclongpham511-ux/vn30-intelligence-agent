@@ -13,7 +13,7 @@ const react={...React,useState(initial){
   if(value instanceof Set)return [new Set(visited),()=>{}];
   return React.useState(initial);
 }};
-const marker=name=>({visible=true})=>visible?React.createElement('div',{'data-component':name}):null;
+const marker=name=>({visible=true,preview})=>visible?React.createElement('div',{'data-component':name,'data-preview':preview===undefined?undefined:String(preview)}):null;
 const exports={};
 const compiled=transformSync(readFileSync(new URL('../app/components/Explore.tsx',import.meta.url),'utf8'),{filename:'Explore.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 new Function('require','exports',compiled)(name=>{
@@ -31,12 +31,11 @@ function render(tab,seen=[tab],symbol='ABC') {
   identity={items:[{symbol,exchange:'HOSE',company_name:'Original company name',source:'SSI:FastConnect'}],last_synced_at:'2026-10-12T10:00:00Z'};
   return renderToStaticMarkup(React.createElement(exports.default,{ticker:'ABC'}));
 }
-test('direct action deep link reads identity and action evidence without loading market/history or finances',()=>{
-  const html=render('actions');
-  assert.match(html,/data-component="StockActions"/);
-  assert.doesNotMatch(html,/data-component="TechnicalChart|data-component="FundamentalTrends/);
-  assert.deepEqual(reads,['/api/stocks/universe?symbols=ABC&limit=1']);
-  assert.match(html,/id="stock-tab-actions"[^>]*aria-selected="true"/);
+test('overview replaces separate actions and news tabs with its company activity preview',()=>{
+  const html=render('overview',['overview']);
+  assert.match(html,/data-component="StockIntelligence" data-preview="true"/);
+  assert.doesNotMatch(html,/id="stock-tab-actions"|id="stock-tab-news"|Company research updates/);
+  assert.match(html,/id="stock-tab-overview"[^>]*aria-selected="true"/);
 });
 test('research tabs share one retained chart and defer unvisited annual financials',()=>{
   const html=render('technical',['overview','technical']);
@@ -49,11 +48,11 @@ test('a wrong ticker identity cannot render research for the prior company',()=>
   const html=render('overview',['overview'],'OTHER');
   assert.match(html,/Identity error/);assert.doesNotMatch(html,/Original company name|TechnicalChart/);
 });
-test('one research integration replaces separate news/community loaders without changing primary tabs',()=>{
- for(const section of ['overview','news']){
+test('overview retains one company activity loader without adding financial or news tabs',()=>{
+ for(const section of ['overview']){
   const html=render(section);
   assert.equal((html.match(/data-component="StockIntelligence"/g)||[]).length,1);
   assert.doesNotMatch(html,/data-component="StockNews|data-component="StockCommunity/);
-  assert.match(html,/id="stock-tab-fundamentals"/);assert.match(html,/id="stock-tab-actions"/);
+  assert.match(html,/id="stock-tab-fundamentals"/);assert.doesNotMatch(html,/id="stock-tab-actions"|id="stock-tab-news"/);
  }
 });

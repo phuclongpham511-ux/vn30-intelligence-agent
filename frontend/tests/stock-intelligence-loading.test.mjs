@@ -18,7 +18,7 @@ async function harness(run,{raw=JSON.stringify(saved()),broken=false}={}){
   globalThis.setInterval=()=>{throw Error('No new polling permitted');};
   const exports={};
   const react={useState(initial){const key=cursor++;if(!(key in values))values[key]=initial;return [values[key],next=>{values[key]=typeof next==='function'?next(values[key]):next;}];},useEffect(fn,deps){const key=cursor++,old=effects[key];if(!old||deps.some((value,index)=>value!==old.deps[index]))effects[key]={fn,deps,pending:true,cleanup:old?.cleanup};}};
-  new Function('require','exports',code)(name=>name==='react'?react:name==='@/lib/watchlist'?{...watchlist,loadIntelligence(symbols,offset,signal,request,options){return new Promise((resolve,reject)=>requests.push({symbols,offset,signal,options,resolve,reject}));}}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
+  new Function('require','exports',code)(name=>name==='react'?react:name==='./StockActions'?{__esModule:true,default:()=>null}:name==='@/lib/watchlist'?{...watchlist,loadIntelligence(symbols,offset,signal,request,options){return new Promise((resolve,reject)=>requests.push({symbols,offset,signal,options,resolve,reject}));}}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
   const render=(next={})=>{props={...props,...next};cursor=0;view=exports.default(props);for(const effect of effects.filter(Boolean))if(effect.pending){effect.cleanup?.();effect.pending=false;effect.cleanup=effect.fn();}return view;};
   const cleanup=()=>{for(const effect of effects.filter(Boolean))effect.cleanup?.();};
   render();
