@@ -34,7 +34,16 @@ export function readCanonicalFinancialRatios(ticker,frequency){
  if(!canonicalFinancialEnabled())throw Error('Canonical private boundary unavailable');
  const selected=readSnapshotConfiguration();
  if(!selected||!selected.config.tickers.includes(ticker)||!['annual','quarterly'].includes(frequency))return null;
- const {ratio_index:ratioPath,ratio_index_sha256:expected}=selected.config;
+ let {ratio_index:ratioPath,ratio_index_sha256:expected}=selected.config;
+ const pointerPath=selected.config.ratio_pointer;
+ if(typeof pointerPath==='string'&&existsSync(pointerPath)){
+  try{
+   const pointer=JSON.parse(readFileSync(pointerPath,'utf8'));
+   const target=resolve(dirname(pointerPath),'snapshots',pointer.sha256,'index.json');
+   if(pointer.contract!=='vnstock-ratio-active-v1'||!/^[a-f0-9]{64}$/.test(pointer.sha256)||resolve(pointer.index)!==target||digest(readFileSync(target))!==pointer.sha256)throw Error('Invalid active ratio snapshot');
+   ratioPath=target;expected=pointer.sha256;
+  }catch{/* Keep the immutable release snapshot available if publication is invalid. */}
+ }
  if(typeof ratioPath!=='string'||!/^([a-f0-9]{64})$/.test(expected||''))return null;
  const bytes=readFileSync(ratioPath);
  if(digest(bytes)!==expected)throw Error('Financial ratio index changed');
