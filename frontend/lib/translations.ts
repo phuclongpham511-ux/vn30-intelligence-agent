@@ -475,6 +475,8 @@ export const vietnamese = {
   'Business performance':'Kết quả kinh doanh',
   'Financial statements':'Báo cáo tài chính',
   'Financial ratios':'Tỷ số tài chính',
+  'Vnstock financial indicators':'Chỉ số tài chính Vnstock',
+  'Financial indicator':'Chỉ số tài chính',
   'Income statement':'Báo cáo kết quả kinh doanh',
   'Balance sheet':'Bảng cân đối kế toán',
   'Cash flow statement':'Báo cáo lưu chuyển tiền tệ',

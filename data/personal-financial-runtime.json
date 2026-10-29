@@ -104,5 +104,7 @@
     "VTP"
   ],
   "index": "C:\\Users\\PC\\WoofiRuntime\\data\\financial\\stock-research-final-20261029\\index.json",
-  "index_sha256": "ed55c030e6c2549958b4c5bdbaefd777169ebadaac5963afbdca078bf2e9c175"
+  "index_sha256": "ed55c030e6c2549958b4c5bdbaefd777169ebadaac5963afbdca078bf2e9c175",
+  "ratio_index": "C:\\Users\\PC\\WoofiRuntime\\data\\financial\\vnstock-ratios-v100-20261029\\index.json",
+  "ratio_index_sha256": "2154ba36c193021c90a6cbf39a8b95e0b496accc1ebec55c18c72bedd79e8e64"
 }
