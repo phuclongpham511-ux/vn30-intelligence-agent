@@ -10,11 +10,22 @@ import {FINANCIAL_LABELS} from '../lib/fundamental-data.ts';
 import {financialEngineData} from '../lib/financial-engine-data.ts';
 const require=createRequire(import.meta.url),exports={};
 const code=transformSync(readFileSync(new URL('../app/components/stock/FundamentalTrends.tsx',import.meta.url),'utf8'),{filename:'FundamentalTrends.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
-new Function('require','exports',code)(name=>['./FinancialStatementTable','./FinancialResearchCharts','../ui/button','../ui/skeleton'].includes(name)?{}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
+new Function('require','exports',code)(name=>['./FinancialStatementTable','./FinancialResearchCharts','./FinancialAnalysisPanel','../ui/button','../ui/skeleton'].includes(name)?{}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
 
 import {fixture} from './fixtures/fundamental-summary.mjs';
 test('missing or malformed reporting frequency metadata is rejected before the view can dereference it',()=>{
  for(const available_period_types of [undefined,null,'annual',{},['unrecognized'],[null]])assert.throws(()=>financialEngineData({...fixture(),available_period_types},'ABC','annual',true),/frequency metadata/);
+});
+test('independent blockers stay inspectable without enabling values; malformed evidence is rejected',()=>{
+ const data=fixture(),metric=data.fundamental_summary.metrics.find(m=>m.key==='pe');
+ metric.blockers=['Reporting basis is not qualified','Financial source display rights are not qualified'];
+ assert.equal(financialEngineData(data,'ABC','annual',true).fundamental_summary.metrics.find(m=>m.key==='pe').value,null);
+ const html=render(data);
+ for(const reason of metric.blockers)assert.ok(html.includes(reason));
+ for(const blockers of [null,'rights',[{}],Array(17).fill('rights')]){
+  metric.blockers=blockers;
+  assert.throws(()=>financialEngineData(data,'ABC','annual',true),/qualification blockers/);
+ }
 });
 function render(data=fixture(),unit='billions',language='en'){
  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:localeTools(language)},React.createElement(exports.FundamentalOverview,{data,unit})));
@@ -57,4 +68,14 @@ test('standalone consolidation is separate reporting, never a standalone-quarter
  const data=fixture();data.fundamental_summary.consolidation='standalone';
  assert.match(render(data,'billions','vi'),/Báo cáo riêng/);
  assert.doesNotMatch(render(data,'billions','vi'),/Riêng quý/);
+});
+
+test('field-owned consolidation supports independent qualified metrics without certifying mixed-basis ratios',()=>{
+ const data=fixture();data.fundamental_summary.consolidation=null;
+ for(const item of data.fundamental_summary.metrics)if(item.status==='QUALIFIED')item.consolidation='consolidated';
+ assert.doesNotThrow(()=>financialEngineData(data,'ABC','annual',true));
+ assert.match(render(data),/1,500 VND\/share/);
+ data.fundamental_summary.metrics[0].consolidation=null;
+ assert.throws(()=>financialEngineData(data,'ABC','annual',true),/qualification/);
+ assert.doesNotMatch(render(data),/1,500 VND\/share/);
 });

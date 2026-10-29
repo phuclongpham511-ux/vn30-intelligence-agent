@@ -1,0 +1,39 @@
+"use client";
+import {useState} from 'react';
+import {ResponsiveContainer,ComposedChart,Bar,Line,XAxis,YAxis,CartesianGrid,Tooltip,ReferenceLine} from 'recharts';
+import {useLocale} from '@/lib/i18n';
+import type {FinancialPanel} from '@/lib/types';
+import {panelTitles} from '@/lib/financial-panels';
+import {unitDivisor,unitLabels,type AmountUnit} from '@/lib/fundamental-research';
+import {formatFinancialAmount} from '@/lib/financial-format';
+import {useChartMotion} from '@/lib/chart-motion';
+
+const colors=['var(--chart)','var(--chart-secondary)','var(--ma20)','var(--ma50)'];
+const axis={fill:'var(--muted-foreground)',fontSize:11};
+
+/** Only the backend-qualified projection enters a chart. Null stays a gap. */
+export default function FinancialAnalysisPanel({panel,kind,unit,visible=true,isFixture=false,personalResearch=false,onSources}:{panel?:FinancialPanel;kind:FinancialPanel['key'];unit:AmountUnit;visible?:boolean;isFixture?:boolean;personalResearch?:boolean;onSources?:()=>void}){
+ const {t,ui,number,percent}=useLocale();
+ const animate=useChartMotion();
+ const [hidden,setHidden]=useState<Set<string>>(()=>new Set());
+ const series=panel?.series||[],selected=series.filter(s=>!hidden.has(s.key));
+ const title=kind==='growth'&&series.some(s=>s.key==='operating_income')?'Operating income and profit trends':panelTitles[kind];
+ const safeRows=panel?.rows.map(r=>({...r,values:Object.fromEntries(series.map(s=>{const value=r.values[s.key],status=r.statuses[s.key];const allowed=status==='SOURCE_REPORTED'&&personalResearch&&!isFixture&&panel?.status==='SOURCE_REPORTED'||status==='PARTIALLY_VERIFIED'&&personalResearch&&!isFixture&&panel?.key==='bank_growth'&&panel?.status==='PARTIALLY_VERIFIED'||status==='QUALIFIED'&&!isFixture&&['consolidated','standalone'].includes(r.bases[s.key]||'')||status==='DEMO'&&isFixture;return [s.key,allowed&&typeof value==='number'&&Number.isFinite(value)?value:null];}))}));
+ const hasValues=safeRows?.some(r=>selected.some(s=>r.values[s.key]!==null));
+ const format=(value:unknown,metricUnit:string)=>typeof value!=='number'||!Number.isFinite(value)?'—':metricUnit==='fraction'?percent(value):metricUnit==='multiple'?number(value)+'×':formatFinancialAmount(value,unitDivisor[unit],unit==='vnd'?0:2,number);
+ const points=safeRows?.map(row=>({period:row.period,...row.values}));
+ const selectedHasRatio=selected.some(s=>s.unit!=='VND');
+ const rateUnit=selected.find(s=>s.unit!=='VND')?.unit||'fraction';
+ const selectedHasAmount=selected.some(s=>s.unit==='VND');
+ return <article className="financial-analysis-panel" aria-label={ui(title)} data-financial-panel={kind} data-chart-availability={hasValues?'available':'unavailable'}>
+  <header className="flex flex-wrap items-start justify-between gap-2"><div><h3 className="text-sm font-semibold">{ui(title)}</h3><p className="mt-1 text-[11px] text-muted-foreground">{kind==='pe'||kind==='pb'?t('Multiple (×)'):selectedHasRatio&&!selectedHasAmount?(rateUnit==='multiple'?ui('Multiple (×)'):'%'):ui(unitLabels[unit])}{selectedHasRatio&&selectedHasAmount?' · '+(rateUnit==='multiple'?'×':'%'):''} · {panel?ui(panel.frequency==='annual'?'Annual':panel.frequency==='quarterly'?'Quarterly':'TTM'):'—'}</p></div></header>
+  <div className="financial-chart-legend mb-3 flex flex-wrap gap-2" role="group" aria-label={t('Chart series')}>{series.map((s,i)=><button type="button" key={s.key} aria-pressed={!hidden.has(s.key)} onClick={()=>setHidden(before=>{const next=new Set(before);if(next.has(s.key))next.delete(s.key);else next.add(s.key);return next;})} className={`inline-flex min-h-7 items-center gap-2 rounded-md border px-2 py-1 text-[11px] focus-visible:outline-2 focus-visible:outline-ring ${hidden.has(s.key)?'opacity-50':''}`}><span className="h-2 w-2 shrink-0 rounded-sm" aria-hidden="true" style={{background:colors[i%colors.length]}}/>{ui(s.label)}{s.unit==='fraction'?' · %':s.unit==='multiple'?' · ×':''}</button>)}</div>
+  {!visible?null:!hasValues?<div className="financial-chart-unavailable" role="note">{t(selected.length||!series.length?'Unavailable':'Select a series to view the chart.')}</div>:<div className="financial-chart-canvas min-w-0" data-financial-chart={panel?.chart}><ResponsiveContainer width="100%" height="100%" minWidth={0}><ComposedChart data={points} margin={{top:14,right:selectedHasRatio&&selectedHasAmount?4:12,left:4,bottom:8}} accessibilityLayer>
+   <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5"/><XAxis dataKey="period" tick={axis} axisLine={false} tickLine={false} minTickGap={12} tickMargin={9}/>{selectedHasAmount&&<YAxis yAxisId="amount" tick={axis} width={64} tickFormatter={v=>format(v,'VND')} axisLine={false} tickLine={false}/>} {selectedHasRatio&&<YAxis yAxisId="rate" orientation={selectedHasAmount?'right':'left'} tick={axis} width={52} tickFormatter={v=>format(v,rateUnit)} axisLine={false} tickLine={false}/>}
+   <Tooltip cursor={{fill:'var(--muted)',fillOpacity:.3}} filterNull content={({active,payload,label})=>{if(!active||!payload?.length)return null;return <div className="financial-chart-tooltip" role="status" aria-live="polite"><p className="mb-1 font-semibold">{String(label)}</p>{payload.map((entry,index)=>{const s=series.find(item=>item.key===String(entry.dataKey));return <p className="flex items-center justify-between gap-4" key={`${String(entry.dataKey)}-${index}`}><span>{String(entry.name)}</span><strong className="font-semibold">{format(entry.value,s?.unit||'VND')}{s?.unit==='VND'?' '+ui(unitLabels[unit]):''}</strong></p>;})}</div>}}/>
+   <ReferenceLine yAxisId={selectedHasAmount?'amount':'rate'} y={0} stroke="var(--border)" strokeDasharray="3 4"/>
+   {selected.map(s=>{const color=colors[series.indexOf(s)%colors.length];return s.unit!=='VND'?<Line key={s.key} yAxisId="rate" dataKey={s.key} name={ui(s.label)} stroke={color} strokeWidth={2.5} dot={{r:2.5,strokeWidth:0}} activeDot={{r:5,stroke:'var(--card)',strokeWidth:2}} connectNulls={false} isAnimationActive={animate} animationDuration={560} animationEasing="ease-out"/>:<Bar key={s.key} yAxisId="amount" stackId={panel?.chart==='stacked'?'components':undefined} dataKey={s.key} name={ui(s.label)} fill={color} maxBarSize={48} radius={[3,3,0,0]} isAnimationActive={animate} animationDuration={560} animationEasing="ease-out"/>;})}
+  </ComposedChart></ResponsiveContainer></div>}
+  {panel&&<footer className="mt-3 border-t pt-2 text-[11px] text-muted-foreground">{panel.rows[0]?.period||'—'}–{panel.rows.at(-1)?.period||'—'}<details className="mt-2"><summary className="cursor-pointer">{t('Chart observations')}</summary><div className="fundamental-table-scroll mt-2" tabIndex={0} role="region" aria-label={t('Chart observations')}><table className="fundamental-table text-xs"><caption className="sr-only">{ui(title)}</caption><thead><tr><th scope="col">{t('Reporting period')}</th>{series.map(s=><th scope="col" key={s.key}>{ui(s.label)}</th>)}</tr></thead><tbody>{safeRows?.map(r=><tr key={r.period}><th scope="row">{r.period}</th>{series.map(s=><td key={s.key}>{format(r.values[s.key],s.unit)}</td>)}</tr>)}</tbody></table></div></details></footer>}
+ </article>;
+}

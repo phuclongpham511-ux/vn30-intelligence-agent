@@ -27,7 +27,7 @@ test('research snapshot retains reported zero, period, basis and historical fres
   const html=renderToStaticMarkup(tree);
   assert.match(html,/2025/);assert.match(html,/Synthetic:VCI/);assert.match(html,/0 /);
   assert.ok(html.includes(localeTools(language).t('Read at')));
-  assert.ok(html.includes(localeTools(language).t('Qualification applies to the reported period; current freshness is not certified. Inspect each metric for its definition and limitations.')));
+  assert.ok(!html.includes(localeTools(language).t('Qualification applies to the reported period; current freshness is not certified. Inspect each metric for its definition and limitations.')));
   descendants(tree).find(n=>n.type==='button').props.onClick();assert.equal(opened,1);
  }
 });

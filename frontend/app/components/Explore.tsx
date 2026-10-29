@@ -19,13 +19,13 @@ import WorkspaceNav from './market/WorkspaceNav';
 
 const labels={overview:'Overview',fundamentals:'Fundamental analysis',technical:'Technical analysis'} as const;
 
-function DailyContext({ticker}:{ticker:string}) {
+function DailyContext({ticker,personalResearch=false,personalFinancials=personalResearch}:{ticker:string;personalResearch?:boolean;personalFinancials?:boolean}) {
   const {t}=useLocale();
   const {data,error,retry}=useStockRead<Market>(`/api/stocks/${encodeURIComponent(ticker)}/market`);
   return data&&data.ticker===ticker?<MarketSnapshot market={data} compact/>:<section className="panel p-5"><h2>{t('Market context')}</h2>{error?<p className="stock-note" role="alert">{t('Daily analytics unavailable. The latest quote is shown separately.')} <Button size="sm" variant="outline" onClick={retry}>{t('Retry')}</Button></p>:<Skeleton className="mt-4 h-40"/>}</section>;
 }
 
-export default function Explore({ticker}:{ticker:string}) {
+export default function Explore({ticker,personalResearch=false,personalFinancials=personalResearch}:{ticker:string;personalResearch?:boolean;personalFinancials?:boolean}) {
   const {t}=useLocale();
   const identity=useStockRead<{items:Security[];last_synced_at:string|null}>(`/api/stocks/universe?symbols=${encodeURIComponent(ticker)}&limit=1`);
   let security:Security|null=null;
@@ -52,7 +52,7 @@ export default function Explore({ticker}:{ticker:string}) {
       }}>{t(labels[section])}</button>)}
     </div>
     {!security?<div aria-busy="true" role="status"><p className="stock-note">{t('Loading stock identity…')}</p><Skeleton className="h-96"/></div>:<>
-      <div role={tab==='fundamentals'?'tabpanel':undefined} id="stock-panel-fundamentals" aria-labelledby={tab==='fundamentals'?'stock-tab-fundamentals':undefined} tabIndex={tab==='fundamentals'?0:undefined} hidden={tab!=='overview'&&tab!=='fundamentals'}>{(visited.has('overview')||visited.has('fundamentals'))&&<FundamentalTrends ticker={ticker} visible={tab==='overview'||tab==='fundamentals'} summary={tab!=='fundamentals'} onOpen={()=>navigate('fundamentals')}/>}</div>
+      <div role={tab==='fundamentals'?'tabpanel':undefined} id="stock-panel-fundamentals" aria-labelledby={tab==='fundamentals'?'stock-tab-fundamentals':undefined} tabIndex={tab==='fundamentals'?0:undefined} hidden={tab!=='overview'&&tab!=='fundamentals'}>{(visited.has('overview')||visited.has('fundamentals'))&&<FundamentalTrends ticker={ticker} personalResearch={personalFinancials} visible={tab==='overview'||tab==='fundamentals'} summary={tab!=='fundamentals'} onOpen={()=>navigate('fundamentals')}/>}</div>
       <div className="stock-chart-layout" hidden={tab!=='overview'&&tab!=='technical'}>
         <div className="stock-chart-main" role="tabpanel" id="stock-panel-price" aria-labelledby={`stock-tab-${tab==='technical'?'technical':'overview'}`} tabIndex={0}>
           {tab==='technical'&&<><p className="stock-note">{t('Chart indicators describe completed observations. Accepted Technical evidence has separate assurance; no trading recommendation.')}</p><TechnicalInsights ticker={ticker}/></>}
