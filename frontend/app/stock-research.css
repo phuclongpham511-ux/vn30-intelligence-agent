@@ -1,4 +1,23 @@
 /* Stock Research V3: scoped to Stock Detail; shared News/Board styles stay intact. */
+.stock-detail .research-financial-snapshot{padding:20px;min-width:0}
+.research-snapshot-heading{display:flex;align-items:start;justify-content:space-between;gap:16px}
+.research-snapshot-heading h2{font-size:20px;font-weight:600;margin-top:4px}
+.research-detail-link{color:var(--primary);font-size:12px;min-height:40px;padding:8px 0;flex-shrink:0;text-decoration:underline;text-underline-offset:4px}
+.research-detail-link:focus-visible,.research-snapshot-source summary:focus-visible{outline:2px solid var(--ring);outline-offset:4px}
+.research-snapshot-meta{display:flex;flex-wrap:wrap;gap:6px 16px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:12px;font-size:12px;color:var(--muted-foreground)}
+.research-snapshot-meta>span:first-child{font-weight:600;color:var(--foreground)}
+.research-financial-snapshot [aria-label]>div.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.research-snapshot-source{margin-top:16px;border-top:1px solid var(--border);padding-top:8px;font-size:12px;color:var(--muted-foreground);line-height:1.7;overflow-wrap:anywhere}
+.research-snapshot-source summary{cursor:pointer;min-height:36px;line-height:36px;color:var(--primary)}
+.research-snapshot-loading{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.research-snapshot-loading>p{grid-column:1/-1}
+.research-snapshot-state{padding:16px 0;font-size:13px;color:var(--muted-foreground);display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+@media(max-width:767px){
+ .stock-detail .research-financial-snapshot{padding:16px}
+ .research-snapshot-heading{flex-direction:column;gap:0}
+ .research-financial-snapshot [aria-label]>div.grid,.research-snapshot-loading{grid-template-columns:1fr;gap:12px}
+ .research-snapshot-source summary{line-height:1.5;padding:8px 0}
+}
 .stock-detail .stock-header>div{gap:12px}
 .stock-detail .stock-tabs{flex-wrap:wrap;gap:4px 18px;overflow:visible}
 .stock-detail .stock-tabs [role=tab]{padding:9px 0}

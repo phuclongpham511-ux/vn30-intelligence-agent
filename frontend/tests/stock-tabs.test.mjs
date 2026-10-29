@@ -13,7 +13,7 @@ const react={...React,useState(initial){
   if(value instanceof Set)return [new Set(visited),()=>{}];
   return React.useState(initial);
 }};
-const marker=name=>({visible=true,focus})=>visible?React.createElement('div',{'data-component':name,'data-focus':focus}):null;
+const marker=name=>({visible=true,focus,summary})=>visible?React.createElement('div',{'data-component':name,'data-focus':focus,'data-summary':summary===undefined?undefined:String(summary)}):null;
 const exports={};
 const compiled=transformSync(readFileSync(new URL('../app/components/Explore.tsx',import.meta.url),'utf8'),{filename:'Explore.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 new Function('require','exports',compiled)(name=>{
@@ -44,6 +44,14 @@ test('research tabs share one retained chart and defer unvisited annual financia
   assert.doesNotMatch(html,/data-component="FundamentalTrends/);
   assert.match(html,/aria-controls="stock-panel-price"/);
   assert.match(html,/separate assurance; no trading recommendation/);
+});
+test('overview and financial analysis share one financial loader with the right presentation',()=>{
+ for(const tab of ['overview','fundamentals']){
+  const html=render(tab,['overview','fundamentals']);
+  assert.equal((html.match(/data-component="FundamentalTrends"/g)||[]).length,1);
+  assert.match(html,new RegExp('data-component="FundamentalTrends" data-summary="'+String(tab==='overview')+'"'));
+  assert.equal((html.match(/id="stock-panel-fundamentals"/g)||[]).length,1);
+ }
 });
 test('a wrong ticker identity cannot render research for the prior company',()=>{
   const html=render('overview',['overview'],'OTHER');

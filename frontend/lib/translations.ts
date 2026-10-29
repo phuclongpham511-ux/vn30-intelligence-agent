@@ -1,4 +1,13 @@
 export const vietnamese = {
+  "Company research":"Nghiên cứu doanh nghiệp",
+  "Financial picture":"Bức tranh tài chính",
+  "Reported performance, profitability and cash flow in one place.":"Kết quả kinh doanh, khả năng sinh lời và dòng tiền từ dữ liệu báo cáo.",
+  "Explore financial analysis":"Xem phân tích tài chính",
+  "Loading financial overview…":"Đang tải tổng quan tài chính…",
+  "No saved financial coverage is available for this company.":"Chưa có dữ liệu tài chính đã lưu cho doanh nghiệp này.",
+  "Financial overview could not be loaded.":"Chưa tải được tổng quan tài chính.",
+  "Period, source and limitations":"Kỳ báo cáo, nguồn và giới hạn dữ liệu",
+  "Select a metric to inspect its definition and missing evidence.":"Chọn một chỉ tiêu để xem định nghĩa và bằng chứng còn thiếu.",
   "Net profit":"Lợi nhuận sau thuế",
   "Saved annual comparisons. Historical evidence, not new filings, causal explanations or investment recommendations.":"So sánh năm đã lưu. Đây là bằng chứng lịch sử, không phải công bố mới, giải thích nguyên nhân hay khuyến nghị đầu tư.",
   "No eligible noteworthy change in the selected saved metrics.":"Chưa có thay đổi đáng chú ý đủ điều kiện trong các chỉ tiêu đã lưu được chọn.",

@@ -54,7 +54,7 @@ function ChangeSummary({data,unit}:{data:FundamentalResearch;unit:AmountUnit}){
   </section>;
 }
 
-export function FundamentalOverview({data,unit,groups}:{data:FundamentalResearch;unit:AmountUnit;groups?:readonly string[]}){
+export function FundamentalOverview({data,unit,groups,metricKeys}:{data:FundamentalResearch;unit:AmountUnit;groups?:readonly string[];metricKeys?:readonly string[]}){
   const {t,ui,number,percent}=useLocale();
   const summary=data.fundamental_summary;
   if(!summary)return <p className="stock-note">{t('Financial display qualification is unavailable.')}</p>;
@@ -66,7 +66,7 @@ export function FundamentalOverview({data,unit,groups}:{data:FundamentalResearch
     <div className="grid min-w-0 gap-x-6 gap-y-5 lg:grid-cols-2">{(Object.keys(labels) as (keyof typeof labels)[]).filter(group=>!groups||groups.includes(group)).map(group=><section key={group} className="min-w-0 border-t pt-3" aria-label={ui(labels[group])}>
       <h3 className="text-sm font-semibold">{ui(labels[group])}</h3>
       {group==='valuation'&&<p className="mt-1 text-[11px] text-muted-foreground">{t('Reported EPS is not a valuation ratio. Compatible price and share bases are required for valuation.')}</p>}
-      <dl className="mt-2 divide-y">{summary.metrics.filter(metric=>metric.group===group).map(metric=>{
+      <dl className="mt-2 divide-y">{summary.metrics.filter(metric=>metric.group===group&&(!metricKeys||metricKeys.includes(metric.key))).map(metric=>{
         const basis=metric.consolidation===undefined?summary.consolidation:metric.consolidation;
         const allowed=metric.status==='SOURCE_REPORTED'&&data.display_scope==='personal_research'&&metric.data_confidence==='SOURCE_REPORTED'||metric.status==='QUALIFIED'&&data.is_fixture===false&&['consolidated','standalone'].includes(basis||'')||metric.status==='DEMO'&&data.is_fixture===true;
         const value=allowed?metric.value:null;
@@ -77,7 +77,19 @@ export function FundamentalOverview({data,unit,groups}:{data:FundamentalResearch
   </section>;
 }
 
-export default function FundamentalTrends({ticker,visible=true,personalResearch=false,onActions}:{ticker:string;visible?:boolean;personalResearch?:boolean;onActions?:()=>void}){
+export function FinancialResearchSnapshot({data,loading,error,missingCoverage=false,retry,onOpen,unit='billions',frequency='annual'}:{data:FundamentalResearch|null;loading:boolean;error:boolean;missingCoverage?:boolean;retry:()=>void;onOpen?:()=>void;unit?:AmountUnit;frequency?:FinancialFrequency}){
+  const {t,ui,date}=useLocale();
+  return <section className="panel research-financial-snapshot" aria-label={t('Financial picture')} aria-busy={loading}>
+    <header className="research-snapshot-heading"><div><p className="eyebrow">{t('Company research')}</p><h2>{t('Financial picture')}</h2><p className="stock-note">{t('Reported performance, profitability and cash flow in one place.')}</p></div><button type="button" className="research-detail-link" onClick={onOpen}>{t('Explore financial analysis')} <span aria-hidden="true">↗</span></button></header>
+    {loading?<div className="research-snapshot-loading" role="status"><p className="stock-note">{t('Loading financial overview…')}</p><Skeleton className="h-28"/><Skeleton className="h-28"/><Skeleton className="h-28"/></div>:error?<div role="alert" className="research-snapshot-state"><p>{t(missingCoverage?'No saved financial coverage is available for this company.':'Financial overview could not be loaded.')}</p><Button variant="outline" size="sm" onClick={retry}>{t('Retry')}</Button></div>:!data?.fundamental_summary?<p className="research-snapshot-state">{t('Financial display qualification is unavailable.')}</p>:<>
+      <div className="research-snapshot-meta"><span>{ui(frequency==='annual'?'Annual':frequency==='quarterly'?'Quarterly':'TTM')} · {data.fundamental_summary.period||t('Unavailable')}</span><span>{ui(unitLabels[unit])}</span><span>{data.source}</span>{data.is_fixture&&<strong>DEMO · {t('Fixture')}</strong>}</div>
+      <FundamentalOverview data={data} unit={unit} groups={['performance','profitability','health']} metricKeys={['revenue','operating_income','net_profit','roe','roa','total_assets','cash_operating','liabilities_assets']}/>
+      <details className="research-snapshot-source"><summary>{t('Period, source and limitations')}</summary><p>{t('Report basis')}: {ui(consolidationLabel(data.fundamental_summary.consolidation))}</p><p>{t('Read at')}: {date(data.read_at,true)} ICT · {t(data.display_scope==='personal_research'?'Saved personal research; not current data.':data.display_scope==='internal_research'?'Saved filing review; not current market data.':'Provider or process cache; not a publication timestamp.')}</p><p>{t('Select a metric to inspect its definition and missing evidence.')}</p></details>
+    </>}
+  </section>;
+}
+
+export default function FundamentalTrends({ticker,visible=true,personalResearch=false,onActions,summary=false,onOpen}:{ticker:string;visible?:boolean;personalResearch?:boolean;onActions?:()=>void;summary?:boolean;onOpen?:()=>void}){
   const [data,setData]=useState<FundamentalResearch|null>(null),[loading,setLoading]=useState(true),[error,setError]=useState<boolean|'missing'>(false),[attempt,setAttempt]=useState(0),[frequency,setFrequency]=useState<FinancialFrequency>('annual');
   const [sourcePreference,setSourcePreference]=useState<'preferred'|'provider'>('preferred');
   const recent=useRef(new Map<string,{data:FundamentalResearch;at:number}>());
@@ -103,12 +115,13 @@ export default function FundamentalTrends({ticker,visible=true,personalResearch=
     return()=>{disposed=true;clearTimeout(timeout);controller.abort();};
   },[ticker,attempt,frequency,personalResearch,sourcePreference]);
   const matches=data?.ticker===ticker&&data?.period_type===frequency;
-  return <FundamentalTrendsView data={matches?data:null} loading={loading||(!matches&&!error)} error={!!error} missingCoverage={error==='missing'} retry={()=>{recent.current.delete(`${personalResearch}:${ticker}:${frequency}:${sourcePreference}`);setAttempt(value=>value+1);}} visible={visible} frequency={frequency} onFrequency={setFrequency} sourcePreference={personalResearch?sourcePreference:undefined} onSourcePreference={setSourcePreference} onActions={onActions}/>;
+  return <FundamentalTrendsView data={matches?data:null} loading={loading||(!matches&&!error)} error={!!error} missingCoverage={error==='missing'} retry={()=>{recent.current.delete(`${personalResearch}:${ticker}:${frequency}:${sourcePreference}`);setAttempt(value=>value+1);}} visible={visible} frequency={frequency} onFrequency={setFrequency} sourcePreference={personalResearch?sourcePreference:undefined} onSourcePreference={setSourcePreference} onActions={onActions} summary={summary} onOpen={onOpen}/>;
 }
 
-export function FundamentalTrendsView({data,loading,error,missingCoverage=false,retry,visible=true,frequency='annual',onFrequency=()=>{},sourcePreference,onSourcePreference,onActions,initialSection='overview'}:{data:FundamentalResearch|null;loading:boolean;error:boolean;missingCoverage?:boolean;retry:()=>void;visible?:boolean;frequency?:FinancialFrequency;onFrequency?:(value:FinancialFrequency)=>void;sourcePreference?:'preferred'|'provider';onSourcePreference?:(value:'preferred'|'provider')=>void;onActions?:()=>void;initialSection?:ResearchSection}){
+export function FundamentalTrendsView({data,loading,error,missingCoverage=false,retry,visible=true,frequency='annual',onFrequency=()=>{},sourcePreference,onSourcePreference,onActions,initialSection='overview',summary=false,onOpen}:{data:FundamentalResearch|null;loading:boolean;error:boolean;missingCoverage?:boolean;retry:()=>void;visible?:boolean;frequency?:FinancialFrequency;onFrequency?:(value:FinancialFrequency)=>void;sourcePreference?:'preferred'|'provider';onSourcePreference?:(value:'preferred'|'provider')=>void;onActions?:()=>void;initialSection?:ResearchSection;summary?:boolean;onOpen?:()=>void}){
   const {t,ui,number,percent,date}=useLocale();
   const [section,setSection]=useState<ResearchSection>(initialSection),[unit,setUnit]=useState<AmountUnit>('billions'),[count,setCount]=useState(0),[statement,setStatement]=useState<keyof typeof statementLabels>('income');
+  if(summary)return visible?<FinancialResearchSnapshot data={data} loading={loading} error={error} missingCoverage={missingCoverage} retry={retry} onOpen={onOpen} unit={unit} frequency={frequency}/>:null;
   const rows=count?data?.rows.slice(-count)||[]:data?.rows||[];
   const latest=rows.at(-1);
   const availableSections=availableFinancialSections(data,rows);

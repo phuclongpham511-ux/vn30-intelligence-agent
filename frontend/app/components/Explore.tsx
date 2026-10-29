@@ -57,6 +57,7 @@ export default function Explore({ticker,personalResearch=false}:{ticker:string;p
     </div>
     {!security&&!savedSection?<div aria-busy="true" role="status"><p className="stock-note">{t('Loading stock identity…')}</p><Skeleton className="h-96"/></div>:<>
       {!security&&<p className="stock-note" role="status">{t('Market data unavailable')} · {t('Personal Research')}</p>}
+      <div role={tab==='fundamentals'?'tabpanel':undefined} id="stock-panel-fundamentals" aria-labelledby={tab==='fundamentals'?'stock-tab-fundamentals':undefined} tabIndex={tab==='fundamentals'?0:undefined} hidden={tab!=='overview'&&tab!=='fundamentals'}>{(visited.has('overview')||visited.has('fundamentals'))&&<FundamentalTrends ticker={ticker} personalResearch={personalResearch} visible={tab==='overview'||tab==='fundamentals'} summary={tab!=='fundamentals'} onOpen={()=>navigate('fundamentals')} onActions={()=>navigate('actions')}/>}</div>
       {security&&<div className="stock-chart-layout" hidden={tab!=='overview'&&tab!=='technical'}>
         <div className="stock-chart-main" role="tabpanel" id="stock-panel-price" aria-labelledby={`stock-tab-${tab==='technical'?'technical':'overview'}`} tabIndex={0}>
           {tab==='technical'&&<><p className="stock-note">{t('Chart indicators describe completed observations. Accepted Technical evidence has separate assurance; no trading recommendation.')}</p><TechnicalInsights ticker={ticker}/></>}
@@ -68,7 +69,6 @@ export default function Explore({ticker,personalResearch=false}:{ticker:string;p
           {visited.has('overview')&&<DailyContext ticker={ticker}/>}
         </aside>
       </div>}
-      <div role="tabpanel" id="stock-panel-fundamentals" aria-labelledby="stock-tab-fundamentals" tabIndex={0} hidden={tab!=='fundamentals'}>{visited.has('fundamentals')&&<FundamentalTrends ticker={ticker} personalResearch={personalResearch} visible={tab==='fundamentals'} onActions={()=>navigate('actions')}/>}</div>
       <div role="tabpanel" id="stock-panel-actions" aria-labelledby="stock-tab-actions" tabIndex={0} hidden={tab!=='actions'}>{visited.has('actions')&&<StockActions ticker={ticker} personalResearch={personalResearch}/>}</div>
       <div role={tab==='news'||tab==='community'?'tabpanel':undefined} id="stock-panel-news" aria-labelledby={tab==='news'||tab==='community'?`stock-tab-${tab}`:undefined} tabIndex={tab==='news'||tab==='community'?0:undefined} hidden={tab!=='news'&&tab!=='community'&&tab!=='overview'}>{(visited.has('overview')||visited.has('news')||visited.has('community'))&&<StockIntelligence key={ticker} ticker={ticker} preview={tab==='overview'} focus={tab==='community'?'community':'all'}/>}</div>
     </>}
