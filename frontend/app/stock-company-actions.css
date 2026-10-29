@@ -1,4 +1,12 @@
 /* Stock Detail V1: reuse the existing panels and financial theme tokens. */
+.action-entitlement-guide{margin:12px 0;border-block:1px solid var(--border);padding:8px 0;font-size:12px}
+.action-entitlement-guide summary,.action-version summary{cursor:pointer;min-height:36px;padding:8px 0;color:var(--primary)}
+.action-entitlement-guide dl{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));padding:8px 0}
+.action-entitlement-guide dt{font-weight:600}.action-entitlement-guide dd{margin-top:4px;line-height:1.6;color:var(--muted-foreground)}
+.action-announcement,.action-version{font-size:12px;line-height:1.6;color:var(--muted-foreground);margin-top:8px;overflow-wrap:anywhere}
+.action-version dl{display:grid;gap:8px;margin:8px 0}.action-version dd{color:var(--foreground)}
+.action-revision-warning{border-left:3px solid var(--primary);padding:8px 12px;margin-top:10px;font-size:12px;line-height:1.6}
+.action-entitlement-guide summary:focus-visible,.action-version summary:focus-visible{outline:2px solid var(--ring);outline-offset:2px}
 .stock-company-identity{display:flex;align-items:center;gap:14px;min-width:0}
 .stock-symbol-mark{display:flex;width:54px;min-height:54px;flex-shrink:0;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:10px;background:var(--muted);color:var(--primary);padding:5px;font-size:12px;font-weight:600;overflow-wrap:anywhere;word-break:break-all}
 .stock-company-heading{display:flex;flex-wrap:wrap;align-items:center;gap:10px;min-width:0}

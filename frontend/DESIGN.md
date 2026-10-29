@@ -1,4 +1,16 @@
 # VN30 Intelligence Agent — Frontend Design Contract
+## Corporate actions clarity — development, 29 October 2026
+
+Reuse the existing StockActions read and trust gates. Explain ex-rights, record
+and announced payment dates in one optional guide. Declared cash/share terms do
+not establish personal net proceeds, eligibility, payment completion, credited
+shares or tradability. Show announcement precision separately from observation
+time. Surface explicit withdrawal/unresolved-correction warnings without parsing
+source prose. The version disclosure identifies the latest stored observation;
+the current endpoint does not expose earlier revisions or a field-change diff.
+Keep original evidence inspectable, unknown dates/terms unavailable, EN/VI and
+theme tokens. This increment adds no acquisition, calculations or backend changes.
+
 ## Stock Research overview — 29 October 2026
 
 While Bronze clarification and Vnstock v5 migration are paused, the company

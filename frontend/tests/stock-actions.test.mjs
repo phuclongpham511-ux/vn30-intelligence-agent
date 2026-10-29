@@ -113,3 +113,20 @@ test('reviewed HFC registration cannot promote custody dates, aggregate shares o
  assert.doesNotMatch(html,/26 Sept 2023|2,000,000 \/ 1|10,000 VND/);
  assert.equal((html.match(/<dd>Unavailable<\/dd>/g)||[]).length,3);
 });
+
+test('date guide and source version distinguish entitlements from confirmed outcomes in EN/VI',()=>{
+ for(const language of ['en','vi']){
+  const html=render([{...row,payment_date:'2020-01-01'}],{},language);
+  for(const label of ['Understanding your entitlements','Announced payment date','Latest stored version','Earlier revisions are not included in this view.','Payment completion is not verified.'])assert.ok(html.includes(localeTools(language).t(label)),label);
+  assert.match(html,/data-action-version/);assert.match(html,/revision-2/);
+  assert.doesNotMatch(html,/data-payment-status="paid"/);
+ }
+});
+
+test('withdrawal and unresolved revision explain why terms are withheld without inventing a revision history',()=>{
+ for(const [patch,message] of [[{withdrawn:true},'This notice was withdrawn; do not use it to establish an entitlement.'],[{verification_note:'Unresolved correction: conflicting terms'},'A correction remains unresolved; dates and terms are withheld.']]){
+  const html=render([{...row,...patch}]);assert.ok(html.includes(message));assert.doesNotMatch(html,/1,500 VND/);assert.match(html,/Preserved source wording/);
+ }
+ const html=render([{...row,source_revision:null,announced_on:null,announced_at:null}]);
+ assert.match(html,/Latest stored version/);assert.doesNotMatch(html,/Revision 1|First version/);
+});
