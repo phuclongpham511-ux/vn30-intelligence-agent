@@ -1,5 +1,6 @@
 export type IndexSnapshot = {index:string;level:number;change:number|null;change_percent:number|null;total_volume:number|null;total_value:number|null;trading_date:string;source:string;fetched_at:string};
 import {movement} from './live-market.ts';
+import type {MascotUiState} from './mascot.ts';
 export function indexMovement(data:IndexSnapshot|null) {
   const change=data?.change;
   return {...movement(change),label:change==null||!Number.isFinite(change)?'Direction unavailable':movement(change).label,mascot:change==null||!Number.isFinite(change)?'marketUncertain':change>0?'marketUp':change<0?'marketDown':'marketNeutral'};
@@ -17,4 +18,12 @@ export function indexDisplayStatus(data:import('./live-market').LiveIndex|null,f
   // A browser left open cannot keep labelling an old active-session snapshot fresh.
   if((data.session==='active'||data.session==='unknown')&&now.getTime()-updated>120000)return 'stale';
   return 'fresh';
+}
+
+// The artwork describes a known observation or a UI state, never a forecast.
+export function indexUiState(data:import('./live-market').LiveIndex|null,failed=false,now=new Date()):MascotUiState {
+  if(!data&&!failed)return 'loading';
+  if(!data?.snapshot||data.status==='unavailable')return failed?'dataUnavailable':'noMatches';
+  if(indexDisplayStatus(data,failed,now)!=='fresh')return 'marketUncertain';
+  return indexMovement(data.snapshot).mascot as MascotUiState;
 }

@@ -112,6 +112,31 @@ def test_quarter_and_ttm_flows_point_balances_and_eps_are_distinct():
     assert broken['revenue'] is None and broken['net_profit'] is None
 
 
+def test_engine_accepts_full_vci_quarterly_capture_window():
+    result=financial_engine(packet(),frequency='quarterly',limit=34)
+    assert len(result.rows)==12
+    assert result.rows[0]['period']=='2023-Q1'
+    assert result.rows[-1]['period']=='2025-Q4'
+    with pytest.raises(ValueError):financial_engine(packet(),frequency='quarterly',limit=41)
+
+
+def test_vci_statement_units_follow_explicit_per_share_and_share_volume_labels():
+    metadata,reports=fixture()
+    metadata.extend([
+        dict(field_name='isa24',report_name=SECTIONS['income'],en_name='EPS diluted (VND)',name='Lãi trên cổ phiếu pha loãng'),
+        dict(field_name='nos360',report_name=SECTIONS['balance'],en_name='Outstanding Shares (Volume)',name='Khối lượng cổ phiếu lưu hành'),
+    ])
+    for raw in reports['income']['years']+reports['income']['quarters']:
+        raw['isa24']=1.25
+    for raw in reports['balance']['years']+reports['balance']['quarters']:
+        raw['nos360']=123456
+    income=normalize_statement('ABC','vnstock:VCI','income',reports['income'],metadata,'non_financial')
+    balance=normalize_statement('ABC','vnstock:VCI','balance',reports['balance'],metadata,'financial_other')
+    assert next(line for line in income.observations[-1].items if line.code=='isa24').unit=='VND/share'
+    volume=next(line for line in balance.observations[-1].items if line.code=='nos360')
+    assert volume.unit=='shares' and volume.value==123456
+
+
 def test_explicit_ytd_requires_previous_same_year_and_comparable_basis():
     meta,reports=fixture()
     for kind in ('income','cash'):
@@ -195,7 +220,9 @@ def test_unknown_flow_basis_and_incompatible_statements_fail_closed():
     reports['income']['years'][-1]['consolidation']='consolidated'
     reports['balance']['years'][-1]['consolidation']='standalone'
     changed=financial_engine(packet(meta,reports)).rows[-1]
-    assert changed['roe'] is None and changed['net_margin'] is None and changed['revenue_growth_yoy'] is None
+    assert changed['roe'] is None, 'cross-statement inputs still reject conflicting consolidation'
+    assert changed['net_margin'] == .1, 'income-only margin does not depend on balance basis'
+    assert changed['revenue_growth_yoy'] is None, 'income itself changed consolidation between years'
 
 
 def test_annual_quarter_difference_is_inspectable_without_overwriting_annual():
@@ -221,28 +248,15 @@ def test_finite_source_inputs_cannot_create_nonfinite_growth_or_ttm_outputs():
     assert 'Infinity' not in ttm.model_dump_json()
 
 
-def test_provider_packet_reads_once_per_section_with_finite_timeouts_and_shared_cache(monkeypatch):
-    from types import SimpleNamespace
+def test_provider_packet_cache_reuses_normalized_sdk_packet(monkeypatch):
     from src.providers.vnstock import VnstockFundamentalDataProvider
-    from src.providers.vnstock.financial_packet import fetch_packet
-    import vnstock.core.utils.client as transport
     meta,reports=fixture()
-    rawmeta={section:[dict(field=item['field_name'],titleEn=item['en_name'],titleVi=item['name'],parent=None)
-        for item in meta if item['report_name']==section] for section in SECTIONS.values()}
     calls=[]
-    def request(**kwargs):
-        calls.append(kwargs)
-        assert kwargs['timeout']==15 and kwargs['request_mode']=='direct' and kwargs['method']=='GET'
-        if kwargs['url'].endswith('/metrics'):return {'data':rawmeta}
-        kind=next(key for key,value in SECTIONS.items() if value==kwargs['params']['section'])
-        if kind=='cash':raise TimeoutError('synthetic transport failure')
-        return {'data':reports[kind]}
-    monkeypatch.setattr(transport,'send_request',request)
-    fake=SimpleNamespace(Finance=lambda **kwargs:SimpleNamespace(provider=SimpleNamespace(base_url='https://example.test',headers={},com_type_code='CT')))
+    saved=packet(meta,reports)
     provider=VnstockFundamentalDataProvider()
-    monkeypatch.setattr('src.providers.vnstock.financial_packet.fetch_packet',lambda symbol,sdk:fetch_packet(symbol,lambda:fake))
+    monkeypatch.setattr('src.providers.vnstock.financial_packet.fetch_packet',lambda symbol,sdk:(calls.append(symbol) or saved))
     first=provider.get_reports('ABC');second=provider.get_reports('ABC')
-    assert len(calls)==4 and first.reports['cash'].status=='error' and first.reports['income'].status=='healthy'
-    assert second.reports['cash'].status=='error'
+    assert calls==['ABC'] and first.reports['cash'].status=='healthy'
+    assert second.reports['income'].status=='healthy'
     second.reports['income'].observations.clear()
     assert provider.get_reports('ABC').reports['income'].observations

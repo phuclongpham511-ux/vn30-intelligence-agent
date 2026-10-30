@@ -30,12 +30,12 @@ def publisher_company_context(proofs):
         for p in proofs)
 
 
-def primary_issuers(title, equities):
+def primary_issuers(title, equities, company_aliases=None):
     """Conservative headline-subject identity, never a name-shaped organization guess."""
     text = normalized(title)
     result = set()
     for equity in equities:
-        names = [equity.symbol, equity.company_name, getattr(equity, 'display_name_en', None)]
+        names = [equity.symbol, equity.company_name, getattr(equity, 'display_name_en', None), *(company_aliases or {}).get(equity.symbol, [])]
         for name in filter(None, names):
             match = re.search(r'(?<!\w)' + re.escape(normalized(name)) + r'(?!\w)', text)
             if not match or not re.fullmatch(ISSUER_PREFIX, text[:match.start()]):
@@ -60,9 +60,9 @@ def vietnam_relevance(title, primary=()):
     return not foreign or bool(primary) or any(contains(text, term) for term in VIETNAM_CONTEXT)
 
 
-def research_category(article, equities=()):
+def research_category(article, equities=(), company_aliases=None):
     text = normalized(article.title)
-    primary = primary_issuers(article.title, equities)
+    primary = primary_issuers(article.title, equities, company_aliases)
     if not vietnam_relevance(article.title, primary):
         return None
     # A named analyst before a colon is attribution, not the market subject.

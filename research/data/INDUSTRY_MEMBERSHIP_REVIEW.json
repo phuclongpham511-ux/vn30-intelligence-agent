@@ -1,0 +1,51 @@
+{
+  "contract": "industry-membership-review-v1",
+  "review_reference": "task:financial-real-data-activation-v1:archived-ssi-review",
+  "source": "SSI:FastConnect:v3:SecuritiesInfo",
+  "receipt": {
+    "fetched_at": "2026-10-17T13:26:47.008268+00:00",
+    "document_sha256": "7daa4ee90df0e8241749e3004326ccd4d6035d1df2725789d67ee6a40d62202b",
+    "request_label": "info-hose",
+    "source_path": "/api/v3/data/securitiesByBoard",
+    "source_params": {
+      "board": "HOSE"
+    }
+  },
+  "basis": "observed_provider_snapshot",
+  "public_display_eligible": false,
+  "taxonomy_eligible": false,
+  "coverage": {
+    "HOSE": {
+      "sampled": 406,
+      "paired": 406
+    },
+    "HNX": {
+      "sampled": 0,
+      "paired": 0
+    },
+    "UPCOM": {
+      "sampled": 0,
+      "paired": 0
+    }
+  },
+  "excluded_nonordinary_rows": 379,
+  "duplicate_rows": 0,
+  "invalid_rows": [],
+  "missing_evidence": [
+    "vendor_taxonomy_version_and_level",
+    "classification_effective_dates",
+    "applicable_taxonomy_display_rights",
+    "reviewed_financial_model_mapping"
+  ],
+  "limitations": [
+    "Observation time is not a membership effective date.",
+    "Exact provider codes and labels do not establish a hierarchy.",
+    "This review dataset cannot be loaded as an IndustryTaxonomy."
+  ],
+  "verification_counts": {
+    "PARTIALLY_VERIFIED": 406
+  },
+  "distinct_observed_codes": 61,
+  "provider_requests": 0,
+  "private_dataset_sha256": "55d6eb2856028b0fa4eea492ff841c514c90b081c8ac3d59afd9658687d9eacf"
+}

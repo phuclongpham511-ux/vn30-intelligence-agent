@@ -1,0 +1,2023 @@
+{
+  "contract": "real-financial-activation-validation-v1",
+  "observed_at": "2026-10-20T19:01:53.177978+00:00",
+  "status": "PASS",
+  "transport": "in-process ASGI; no runtime listener or browser",
+  "runtime_status": "PENDING",
+  "provider_requests": 0,
+  "auth_requests": 0,
+  "application_database_access": false,
+  "period_limit": 8,
+  "issuers": [
+    {
+      "ticker": "FPT",
+      "capture_sha256": "fdcf9bc60642157ce6a9fced8e405ea3b2a4637a7d2a72cdc0ae30c778ccdb0f",
+      "source": "vnstock:VCI",
+      "source_version": "unknown",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "HPG",
+      "capture_sha256": "acf971412e5731df3acb19f409ed7147c0277ed0744e1fcfc36aaad54b1a74d8",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "MWG",
+      "capture_sha256": "79461eb3bccf0580d8f29eada87af96544d72e09a0baa09fc332ab8a2932aa4e",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "PNJ",
+      "capture_sha256": "18e0642234faf1c5d10f855506bc081869094f9f80b44d98ab7af7fb2748c0a6",
+      "source": "vnstock:VCI",
+      "source_version": "unknown",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "REE",
+      "capture_sha256": "9d8e5767cfc33d18cc82fa3cf1a18f94ee03dce4295fa9d540599436d74a0b13",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "SSI",
+      "capture_sha256": "836a5c85c431582b6b6ea94f9085260cbcf78e985e7851ff40ddfbf72913975e",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "financial_other",
+      "company_type": "CK",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "TCB",
+      "capture_sha256": "32a95d4849b4968cfc28f8eac66014efcb1a47aeb4297ee34cd3bf185d7d77c8",
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "profile": "bank",
+      "company_type": "NH",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "VCB",
+      "capture_sha256": "9c608fea54f2d744dc416cef420be4ccd3d0c8331cfd69682f00fe39e608cb00",
+      "source": "vnstock:VCI",
+      "source_version": "unknown",
+      "profile": "bank",
+      "company_type": "NH",
+      "statement_observations": 126,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    },
+    {
+      "ticker": "VHM",
+      "capture_sha256": "5ad1d2256a36e53304cb409fee068a1b56273e862318c3cd194fa2622676f40c",
+      "source": "CafeF:annual-summary",
+      "source_version": "cafef-saved-annual-v1",
+      "profile": "non_financial",
+      "company_type": "CT",
+      "statement_observations": 8,
+      "qualified_scope": 0,
+      "original_units": 0,
+      "publication_qualified": 0
+    }
+  ],
+  "projections": [
+    {
+      "ticker": "FPT",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "FPT",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 11
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "FPT",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "cash_equivalents",
+        "current_assets",
+        "current_liabilities",
+        "equity",
+        "inventory",
+        "long_debt",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "HPG",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "HPG",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 11
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "HPG",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "cash_equivalents",
+        "current_assets",
+        "current_liabilities",
+        "equity",
+        "inventory",
+        "long_debt",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "MWG",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "MWG",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 11
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "MWG",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "cash_equivalents",
+        "current_assets",
+        "current_liabilities",
+        "equity",
+        "inventory",
+        "long_debt",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "PNJ",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "PNJ",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 48,
+        "UNAVAILABLE": 12
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "PNJ",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "cash_equivalents",
+        "current_assets",
+        "current_liabilities",
+        "equity",
+        "inventory",
+        "long_debt",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "REE",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "REE",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_equivalents",
+        "cash_financing",
+        "cash_investing",
+        "cash_net_change",
+        "cash_operating",
+        "current_assets",
+        "current_liabilities",
+        "eps_reported",
+        "equity",
+        "gross_profit",
+        "inventory",
+        "long_debt",
+        "net_profit",
+        "profit_parent",
+        "revenue",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 49,
+        "UNAVAILABLE": 11
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "REE",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "cash_equivalents",
+        "current_assets",
+        "current_liabilities",
+        "equity",
+        "inventory",
+        "long_debt",
+        "short_debt",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 46,
+        "UNAVAILABLE": 14
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "SSI",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_financing",
+        "cash_investing",
+        "cash_operating",
+        "eps_reported",
+        "equity",
+        "net_profit",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 21,
+        "UNAVAILABLE": 39
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "SSI",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_financing",
+        "cash_investing",
+        "cash_operating",
+        "eps_reported",
+        "equity",
+        "net_profit",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 23,
+        "UNAVAILABLE": 37
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 24,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "SSI",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "equity",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 20,
+        "UNAVAILABLE": 40
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "TCB",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_investing",
+        "cash_operating",
+        "customer_deposits",
+        "customer_loans",
+        "eps_reported",
+        "equity",
+        "net_interest_income",
+        "net_profit",
+        "operating_income",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 28,
+        "UNAVAILABLE": 32
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "customer_loans",
+            "customer_deposits",
+            "loan_deposit_ratio"
+          ]
+        }
+      }
+    },
+    {
+      "ticker": "TCB",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_investing",
+        "cash_operating",
+        "customer_deposits",
+        "customer_loans",
+        "eps_reported",
+        "equity",
+        "net_interest_income",
+        "net_profit",
+        "operating_income",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 33,
+        "UNAVAILABLE": 27
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "customer_loans",
+            "customer_deposits",
+            "loan_deposit_ratio"
+          ]
+        }
+      }
+    },
+    {
+      "ticker": "TCB",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "customer_deposits",
+        "customer_loans",
+        "equity",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 30,
+        "UNAVAILABLE": 30
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "customer_loans",
+            "customer_deposits",
+            "loan_deposit_ratio"
+          ]
+        }
+      }
+    },
+    {
+      "ticker": "VCB",
+      "frequency": "annual",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_investing",
+        "cash_operating",
+        "customer_deposits",
+        "customer_loans",
+        "eps_reported",
+        "equity",
+        "net_interest_income",
+        "net_profit",
+        "operating_income",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 28,
+        "UNAVAILABLE": 32
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "customer_loans",
+            "customer_deposits",
+            "loan_deposit_ratio"
+          ]
+        }
+      }
+    },
+    {
+      "ticker": "VCB",
+      "frequency": "quarterly",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "capex_signed",
+        "cash_beginning",
+        "cash_ending",
+        "cash_investing",
+        "cash_operating",
+        "customer_deposits",
+        "customer_loans",
+        "eps_reported",
+        "equity",
+        "net_interest_income",
+        "net_profit",
+        "operating_income",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 33,
+        "UNAVAILABLE": 27
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "customer_loans",
+            "customer_deposits",
+            "loan_deposit_ratio"
+          ]
+        }
+      }
+    },
+    {
+      "ticker": "VCB",
+      "frequency": "ttm",
+      "source": "vnstock:VCI",
+      "periods": [
+        "2024-Q3",
+        "2024-Q4",
+        "2025-Q1",
+        "2025-Q2",
+        "2025-Q3",
+        "2025-Q4",
+        "2026-Q1",
+        "2026-Q2"
+      ],
+      "displayed_metric_ids": [
+        "customer_deposits",
+        "customer_loans",
+        "equity",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 30,
+        "UNAVAILABLE": 30
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        },
+        "bank_funding": {
+          "status": "SOURCE_REPORTED",
+          "points": 16,
+          "series": [
+            "customer_loans",
+            "customer_deposits",
+            "loan_deposit_ratio"
+          ]
+        }
+      }
+    },
+    {
+      "ticker": "VHM",
+      "frequency": "annual",
+      "source": "CafeF:annual-summary",
+      "periods": [
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "displayed_metric_ids": [
+        "current_assets",
+        "current_liabilities",
+        "equity",
+        "gross_profit",
+        "net_profit",
+        "profit_parent",
+        "total_assets",
+        "total_liabilities"
+      ],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 19,
+        "UNAVAILABLE": 41
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNQUALIFIED",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "VHM",
+      "frequency": "quarterly",
+      "source": "CafeF:annual-summary",
+      "periods": [],
+      "displayed_metric_ids": [],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 0,
+        "UNAVAILABLE": 0
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    },
+    {
+      "ticker": "VHM",
+      "frequency": "ttm",
+      "source": "CafeF:annual-summary",
+      "periods": [],
+      "displayed_metric_ids": [],
+      "verification_counts": {
+        "VERIFIED": 0,
+        "PARTIALLY_VERIFIED": 0,
+        "UNAVAILABLE": 0
+      },
+      "public_visible_values": 0,
+      "panels": {
+        "cashflow": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": [
+            "cash_operating",
+            "cash_investing",
+            "cash_financing",
+            "free_cash_flow"
+          ]
+        },
+        "profitability": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": [
+            "roe",
+            "roa",
+            "gross_margin",
+            "net_margin"
+          ]
+        },
+        "liquidity": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": [
+            "current_ratio",
+            "quick_ratio",
+            "debt_equity"
+          ]
+        },
+        "bank_funding": {
+          "status": "UNAVAILABLE",
+          "points": 0,
+          "series": []
+        }
+      }
+    }
+  ],
+  "matrix_counts": {
+    "PARTIALLY_VERIFIED": 7575,
+    "UNAVAILABLE": 4185
+  },
+  "public_qualified_observations": 0,
+  "limitations": [
+    "Saved source observations are not current provider freshness.",
+    "Original transport is not independently reconstructed from canonical-only captures.",
+    "API and contract checks are not browser or post-restart runtime acceptance."
+  ]
+}

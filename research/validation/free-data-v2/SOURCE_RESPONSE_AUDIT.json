@@ -1,0 +1,186 @@
+{
+  "contract": "free-source-response-audit-v2",
+  "responses": [
+    {
+      "name": "cafef-fpt-balance",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 2,
+        "Symbol": "FPT",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "bytes": 2080,
+      "sha256": "be68d7ce31d7a3adec56d57ae4d3b19ebf6d27d5296b2a22e21701b2bdba0442",
+      "observed_at": "2026-10-20T18:35:16.603656+00:00"
+    },
+    {
+      "name": "cafef-fpt-income",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 1,
+        "Symbol": "FPT",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "bytes": 2967,
+      "sha256": "389ddf7b9324d4a84b710323e49d809a7aa2a07d448526d81066b40caf9b2714",
+      "observed_at": "2026-10-20T18:28:59.863953+00:00"
+    },
+    {
+      "name": "cafef-ssi-income",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 1,
+        "Symbol": "SSI",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "bytes": 2354,
+      "sha256": "8ad068776098cb40861ce3b4f0e312ad1c6137dceccf1577871c0a62cff9b2eb",
+      "observed_at": "2026-10-20T18:35:17.039751+00:00"
+    },
+    {
+      "name": "cafef-tcb-income",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 1,
+        "Symbol": "TCB",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "bytes": 1645,
+      "sha256": "bbab1707227da4b1fba21d399f2f0802b13edbd062581a58c5b03f9e29527375",
+      "observed_at": "2026-10-20T18:35:16.814705+00:00"
+    },
+    {
+      "name": "cafef-vhm-balance",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 2,
+        "Symbol": "VHM",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "bytes": 2081,
+      "sha256": "b56f51b56bc60e2d70932d695a5232bbb30680ec4dc66765f26ce546df55863b",
+      "observed_at": "2026-10-20T18:35:17.404017+00:00"
+    },
+    {
+      "name": "cafef-vhm-income",
+      "url": "https://cafef.vn/du-lieu/Ajax/PageNew/FinanceReport.ashx",
+      "params": {
+        "Type": 1,
+        "Symbol": "VHM",
+        "TotalRow": 4,
+        "EndDate": "2026",
+        "ReportType": "NAM",
+        "Sort": "DESC"
+      },
+      "status": 200,
+      "bytes": 2970,
+      "sha256": "c3fa7c96b0a0ffbd5ad9861498a8cbcc84f23ea74ce1571c97076f70a94c9499",
+      "observed_at": "2026-10-20T18:35:17.230073+00:00"
+    },
+    {
+      "name": "hpg-q4-2025.pdf",
+      "url": "https://file.hoaphat.com.vn/hoaphat-com-vn/2026/01/20260130-hpg-bao-cao-tai-chinh-hop-nhat-va-giai-trinh-q4-2025.pdf",
+      "params": null,
+      "status": 200,
+      "bytes": 7135524,
+      "sha256": "e6689e18fc46f8eac61ee76e24d582923cecd66654c0d7b4324d7325ac5684e3",
+      "observed_at": "2026-10-20T18:29:00.050629+00:00"
+    },
+    {
+      "name": "kbs-fpt-income-year",
+      "url": "https://kbbuddywts.kbsec.com.vn/iis-server/investment/stock/finance-info/FPT",
+      "params": {
+        "page": 1,
+        "pageSize": 4,
+        "type": "KQKD",
+        "unit": 1000,
+        "termtype": 1,
+        "languageid": 1
+      },
+      "status": 400,
+      "bytes": 154,
+      "sha256": "61232743a1a887eee2d4d2ff8df6f2477097a7ed3b6df5ffa7bef01a062a4d65",
+      "observed_at": "2026-10-20T18:27:28.962933+00:00"
+    },
+    {
+      "name": "kbs-robots",
+      "url": "https://kbbuddywts.kbsec.com.vn/robots.txt",
+      "params": null,
+      "status": 400,
+      "bytes": 154,
+      "sha256": "61232743a1a887eee2d4d2ff8df6f2477097a7ed3b6df5ffa7bef01a062a4d65",
+      "observed_at": "2026-10-20T18:27:28.689950+00:00"
+    },
+    {
+      "name": "tcb-annual-2025.pdf",
+      "url": "https://techcombank.com/content/dam/techcombank/public-site/documents/techcombank-bao-cao-thuong-nien-2025-vie.pdf",
+      "params": null,
+      "status": 200,
+      "bytes": 31023262,
+      "sha256": "4369e240b46d42c99c2541f9c25a7497ed22e60e17dd9fb9158429596bf01d39",
+      "observed_at": "2026-10-20T18:29:01.807476+00:00"
+    },
+    {
+      "name": "vndirect-fpt-income",
+      "url": "https://api-finfo.vndirect.com.vn/v4/financial_statements",
+      "params": {
+        "q": "code:FPT~reportType:ANNUAL~modelType:2",
+        "sort": "fiscalDate:desc",
+        "size": 100
+      },
+      "status": 403,
+      "bytes": 13,
+      "sha256": "d134ca025a6c63b2555200885d71cb6e61f8097cdfd7ecf13675b3df0c721797",
+      "observed_at": "2026-10-20T18:28:59.409825+00:00"
+    },
+    {
+      "name": "vsdc-fpt-183589",
+      "url": "https://vsdc.vn/vi/ad/183589",
+      "status": 200,
+      "bytes": 71740,
+      "sha256": "5640f1ef41526b87961ccae36caec71b2aa8a116bfbdf17ecc7ea49d901b5cc4",
+      "observed_at": "2026-10-20T18:49:22.850761+00:00"
+    },
+    {
+      "name": "vsdc-fpt-189195",
+      "url": "https://vsdc.vn/vi/ad/189195",
+      "status": 200,
+      "bytes": 71772,
+      "sha256": "603091ea2ea948cce41a43a8e719102db385ba001126e271bacc9913717c5cbd",
+      "observed_at": "2026-10-20T18:50:13.487644+00:00"
+    },
+    {
+      "name": "vsdc-fpt-195957",
+      "url": "https://vsdc.vn/vi/ad/195957",
+      "status": 200,
+      "bytes": 72240,
+      "sha256": "323236eefdb071d425a9907aa11b7cfc62baa9067745b2b5671f3bc01e43f48e",
+      "observed_at": "2026-10-20T18:50:13.886687+00:00"
+    }
+  ],
+  "provider_packages_installed_or_upgraded": false,
+  "paid_services_used": false,
+  "automatic_provider_fallback": false,
+  "restrictions_bypassed": false,
+  "financial_bodies_committed": false
+}

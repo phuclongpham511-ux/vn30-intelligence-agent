@@ -1,0 +1,537 @@
+{
+  "base_checkpoint": "62a4f11618d46f4b06668b32ff4b62d6465f38e8",
+  "observed_at": "2026-10-18T08:47:21.448Z",
+  "new_provider_requests": 0,
+  "production_access": false,
+  "ssi_receipts": [
+    {
+      "file": "FINAL_REPORT.md",
+      "sha256": "266d2b2d406d02648952251a5be225ed1a4a3c669be3ff5ee2fc5093fcd477bf",
+      "matches_existing_receipt": true
+    },
+    {
+      "file": "evidence.json",
+      "sha256": "7daa4ee90df0e8241749e3004326ccd4d6035d1df2725789d67ee6a40d62202b",
+      "matches_existing_receipt": true
+    },
+    {
+      "file": "analysis.json",
+      "sha256": "e880006deb48e3d6465ff0327590885f84e7eef8b7bc30ae429d1c3d474710b5",
+      "matches_existing_receipt": true
+    },
+    {
+      "file": "alignment-checks.json",
+      "sha256": "9bc67bae274745a6c59c52b7a6be94204112fc95541d38c92dc2969404281341",
+      "matches_existing_receipt": true
+    }
+  ],
+  "financial_receipts": [
+    {
+      "file": "FPT-annual-saved-replay.json",
+      "sha256": "4db6a787446da1b122984ee66c6c07740c3360f037f1d6ffc106040f3c8b0928",
+      "ticker": "FPT",
+      "frequency": "annual",
+      "period": "2025",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.674292Z",
+          "content_sha256": "520211b22ae2266d32c9bb0a4cbd40155c661db7311af0cd3ca1025894f78fc9",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.709825Z",
+          "content_sha256": "1efc2e2c99bbf77d4e7f97756d7d10cd6660454bc43d8b9d1b52273852cfa85f",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.687302Z",
+          "content_sha256": "0d46a8b58e6562b6badce9b26dd110e94555921e4700fedcefeb888ef3fada09",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 4,
+        "UNQUALIFIED": 15
+      },
+      "original_input_sha256": "a8c233b9d927e753f5379be405c056f002b526b4f02ac79251d4476a2ce5a595",
+      "original_input_hash_match": "FPT-annual-engine.json"
+    },
+    {
+      "file": "FPT-quarterly-saved-replay.json",
+      "sha256": "f6a46356f336e3af9fe785ea7c568f1e632d82a85049e0164824afdb15e2c565",
+      "ticker": "FPT",
+      "frequency": "quarterly",
+      "period": "2026-Q2",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.674292Z",
+          "content_sha256": "520211b22ae2266d32c9bb0a4cbd40155c661db7311af0cd3ca1025894f78fc9",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.709825Z",
+          "content_sha256": "1efc2e2c99bbf77d4e7f97756d7d10cd6660454bc43d8b9d1b52273852cfa85f",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.687302Z",
+          "content_sha256": "0d46a8b58e6562b6badce9b26dd110e94555921e4700fedcefeb888ef3fada09",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 4,
+        "UNQUALIFIED": 15
+      },
+      "original_input_sha256": "5749193821c88c3cc91ee1c59090623f54d47c05daef8149a7b0f56f0e0fd8a2",
+      "original_input_hash_match": "FPT-quarterly-engine.json"
+    },
+    {
+      "file": "FPT-ttm-saved-replay.json",
+      "sha256": "53acf64d13330f257226c906a47a18c790fb505902e428c9c23c1b87037d01aa",
+      "ticker": "FPT",
+      "frequency": "ttm",
+      "period": "2026-Q2",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.674292Z",
+          "content_sha256": "520211b22ae2266d32c9bb0a4cbd40155c661db7311af0cd3ca1025894f78fc9",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.709825Z",
+          "content_sha256": "1efc2e2c99bbf77d4e7f97756d7d10cd6660454bc43d8b9d1b52273852cfa85f",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:40.687302Z",
+          "content_sha256": "0d46a8b58e6562b6badce9b26dd110e94555921e4700fedcefeb888ef3fada09",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/FPT/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 5,
+        "UNQUALIFIED": 14
+      },
+      "original_input_sha256": "37d8bcb37fc38b5ede88f6e08b469e1c18aa6a5d9dddd826b77c74a8315955be",
+      "original_input_hash_match": "FPT-ttm-engine.json"
+    },
+    {
+      "file": "PNJ-annual-saved-replay.json",
+      "sha256": "9549633cbd263844882ee1ae8ace1e99ea6c89a209795ed69090e86cdedc3d0b",
+      "ticker": "PNJ",
+      "frequency": "annual",
+      "period": "2025",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.741334Z",
+          "content_sha256": "f85389503015bf94ea9b880fc90ed550f34f35c79d7e229710c8d796e3c6b71e",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.852609Z",
+          "content_sha256": "7be7bb5d5ac48521e33950909d3de9d6005d344436797b47927b52d4cb1bc8a1",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.812803Z",
+          "content_sha256": "d6f1c14d2284389bce784f68eebccd9715dd0ef022726b266766bd4862d64e44",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 4,
+        "UNQUALIFIED": 15
+      },
+      "original_input_sha256": "428b108a41d60605e58edc5a89c1c6ce722bcc95ab965db488e1362f67992a44",
+      "original_input_hash_match": "PNJ-annual-engine.json"
+    },
+    {
+      "file": "PNJ-quarterly-saved-replay.json",
+      "sha256": "14a47747293bf5d18ca1929f3222dd695d338599bbd0253d3469d273b118a7c6",
+      "ticker": "PNJ",
+      "frequency": "quarterly",
+      "period": "2026-Q2",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.741334Z",
+          "content_sha256": "f85389503015bf94ea9b880fc90ed550f34f35c79d7e229710c8d796e3c6b71e",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.852609Z",
+          "content_sha256": "7be7bb5d5ac48521e33950909d3de9d6005d344436797b47927b52d4cb1bc8a1",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.812803Z",
+          "content_sha256": "d6f1c14d2284389bce784f68eebccd9715dd0ef022726b266766bd4862d64e44",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 4,
+        "UNQUALIFIED": 15
+      },
+      "original_input_sha256": "2614e59b691f63a7b40559b5d4f5acd5ae276db44c275e2ccb8b4ef9bad99ff9",
+      "original_input_hash_match": "PNJ-quarterly-engine.json"
+    },
+    {
+      "file": "PNJ-ttm-saved-replay.json",
+      "sha256": "84b76eff3a17e0ecd4a9923510eb1a11f4016f3d0ddc067077d4c2fa19416cf0",
+      "ticker": "PNJ",
+      "frequency": "ttm",
+      "period": "2026-Q2",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.741334Z",
+          "content_sha256": "f85389503015bf94ea9b880fc90ed550f34f35c79d7e229710c8d796e3c6b71e",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.852609Z",
+          "content_sha256": "7be7bb5d5ac48521e33950909d3de9d6005d344436797b47927b52d4cb1bc8a1",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:42.812803Z",
+          "content_sha256": "d6f1c14d2284389bce784f68eebccd9715dd0ef022726b266766bd4862d64e44",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/PNJ/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 5,
+        "UNQUALIFIED": 14
+      },
+      "original_input_sha256": "773f5aa933ae95dde9505d4a0e80453e6c6d22722c71fed59dc3c53661bc78b5",
+      "original_input_hash_match": "PNJ-ttm-engine.json"
+    },
+    {
+      "file": "VCB-annual-saved-replay.json",
+      "sha256": "162447faa45062d3d8f3f85927973e4157eb54991e0f43a57866fb3766a650a1",
+      "ticker": "VCB",
+      "frequency": "annual",
+      "period": "2025",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.249220Z",
+          "content_sha256": "54b79e13de735bdf5d3c875e149da2b4823f9785078fff21313b8c43cdf17587",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.292588Z",
+          "content_sha256": "6483229b720118ad60c2acdd5b701ec5e19578150dd7087388cd8f9162de46fe",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.189107Z",
+          "content_sha256": "3412546c722b9f092992fa3f75ff1ebb1f6882754dfa30ff1adcaf335f8c4698",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 8,
+        "UNQUALIFIED": 11
+      },
+      "original_input_sha256": "de353103c5ab08d88ba86acabc2d8986d648c612271f1bbb2a7a6c4850f23e7f",
+      "original_input_hash_match": "VCB-annual-engine.json"
+    },
+    {
+      "file": "VCB-quarterly-saved-replay.json",
+      "sha256": "8f3ed2637f547d238f1c6ea1d99a2ef0bbe72e5b01239aadf5cb7634bb6baa2e",
+      "ticker": "VCB",
+      "frequency": "quarterly",
+      "period": "2026-Q2",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.249220Z",
+          "content_sha256": "54b79e13de735bdf5d3c875e149da2b4823f9785078fff21313b8c43cdf17587",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.292588Z",
+          "content_sha256": "6483229b720118ad60c2acdd5b701ec5e19578150dd7087388cd8f9162de46fe",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.189107Z",
+          "content_sha256": "3412546c722b9f092992fa3f75ff1ebb1f6882754dfa30ff1adcaf335f8c4698",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 8,
+        "UNQUALIFIED": 11
+      },
+      "original_input_sha256": "613edfa63436bbc4cfbe81931e3cb989f07997e4f12473de4026edb1fb2d76c0",
+      "original_input_hash_match": "VCB-quarterly-engine.json"
+    },
+    {
+      "file": "VCB-ttm-saved-replay.json",
+      "sha256": "d6d43ae5b24c2df935c1f7200cbecc1ff3126ac6a0663092c6bf5298709765d5",
+      "ticker": "VCB",
+      "frequency": "ttm",
+      "period": "2026-Q2",
+      "consolidation": null,
+      "publication_date": null,
+      "source": "vnstock:VCI",
+      "source_version": "4.0.2",
+      "source_receipts": [
+        {
+          "statement": "income",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.249220Z",
+          "content_sha256": "54b79e13de735bdf5d3c875e149da2b4823f9785078fff21313b8c43cdf17587",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=INCOME_STATEMENT"
+        },
+        {
+          "statement": "balance",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.292588Z",
+          "content_sha256": "6483229b720118ad60c2acdd5b701ec5e19578150dd7087388cd8f9162de46fe",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=BALANCE_SHEET"
+        },
+        {
+          "statement": "cash",
+          "status": "healthy",
+          "observed_at": "2026-10-13T16:37:45.189107Z",
+          "content_sha256": "3412546c722b9f092992fa3f75ff1ebb1f6882754dfa30ff1adcaf335f8c4698",
+          "source_url": "https://iq.vietcap.com.vn/api/iq-insight-service/v1/company/VCB/financial-statement?section=CASH_FLOW"
+        }
+      ],
+      "qualification_counts": {
+        "UNAVAILABLE": 9,
+        "UNQUALIFIED": 10
+      },
+      "original_input_sha256": "ecd3f4d348294fcf127cce0b631e9c99dd9f4ff4b4c880624ddaabccdd68485c",
+      "original_input_hash_match": "VCB-ttm-engine.json"
+    }
+  ],
+  "ssi_coverage": {
+    "info-vn30": {
+      "returned": 30,
+      "ordinary_stocks": 30,
+      "paired_ordinary": 30,
+      "paired_all": 30,
+      "distinct_ordinary_codes": 13,
+      "boards": [
+        "HOSE"
+      ]
+    },
+    "info-vn100": {
+      "returned": 100,
+      "ordinary_stocks": 100,
+      "paired_ordinary": 100,
+      "paired_all": 100,
+      "distinct_ordinary_codes": 28,
+      "boards": [
+        "HOSE"
+      ]
+    },
+    "info-hose": {
+      "returned": 785,
+      "ordinary_stocks": 406,
+      "paired_ordinary": 406,
+      "paired_all": 431,
+      "distinct_ordinary_codes": 61,
+      "boards": [
+        "HOSE"
+      ]
+    }
+  },
+  "masterdata": {
+    "returned": 1000,
+    "total": 1979,
+    "pages": 2,
+    "vn30_present": 15,
+    "ordered_positive": 15,
+    "acb": {
+      "board": "HOSE",
+      "symbol": "ACB",
+      "tradingDate": "2026/10/16",
+      "ceiling": 22000,
+      "floor": 19200,
+      "refPrice": 20600
+    }
+  },
+  "summary": {
+    "symbol": "ACB",
+    "tradingDate": "2026/10/16",
+    "priceChange": "0",
+    "priceChangePercentage": "0.00",
+    "open": "20700",
+    "high": "20750",
+    "low": "20550",
+    "close": "20600",
+    "average": "20636",
+    "totalMatch": "5160300",
+    "totalMatchValue": "106488260000",
+    "totalBuy": "3414",
+    "totalTradeBuy": "8504255",
+    "totalSell": "5198",
+    "totalTradeSell": "12367453",
+    "totalForeignBuy": "2194600",
+    "totalForeignBuyValue": "45304897500",
+    "totalForeignSell": "3462029",
+    "totalForeignSellValue": "71419062800",
+    "remainForeignRoom": "394704190",
+    "totalForeignRoom": "1741326587",
+    "totalDeal": null,
+    "totalDealValue": null,
+    "openInterest": null,
+    "settlementPrice": null
+  },
+  "artifact_kind": "READ_ONLY_READINESS_AUDIT_NOT_RUNTIME_AUTHORIZATION",
+  "artifact_roots": {
+    "ssi": "C:/Users/PC/.codex/visualizations/2026/10/17/01a14811-87da-7ee2-8499-7835dd010da3/ssi-qualification",
+    "financial_display": "C:/Users/PC/.codex/visualizations/2026/10/17/01a14811-87da-7ee2-8499-7835dd010da3/fundamental-analysis-v1-increment",
+    "financial_original": "C:/Users/PC/.codex/tmp/woofi-fundamental-engine-v1-20261013"
+  },
+  "financial_totals": {
+    "UNAVAILABLE": 51,
+    "UNQUALIFIED": 120
+  },
+  "source_hashes": {
+    "src/providers/ssi/__init__.py": "b87e0e18534cfcc3511ecb06896641d71d3dedaec689634afb7d3badd66e089c",
+    "src/providers/ssi/live.py": "255ae9e95a8526808db094d9a030cf14cba9e7eca1033ce5943f090b447093c1",
+    "src/services/universe.py": "b8ccb473b9b5b08fe29f64cb17fbee559ad24c462afae31b1231f681337ee95f",
+    "src/services/market_summary.py": "3b6d8e676d9768f9d58c2d0156e03ad7c0dde31136c24b3ce9d1107792a87a67",
+    "src/services/financial_presentation.py": "04119daf8249c8c62ffedf56559dc6dceb9a463858316aa3d850164db7a0df5e",
+    "src/providers/vnstock/financial_statements.py": "3d7cda67b3117ecb8a5edc387c00458d52911e60645c645cba99143332389a82",
+    "src/providers/vnstock/financial_packet.py": "73147874d525d64739f5285e2617ff9c193ba05a9d0fe3667ad602cf3e7827d7",
+    "src/models/__init__.py": "75a9085a53ca37cbd8118a81c892e1c3ab39930bf4dfe9b7eda90b3dc21883c2",
+    "src/schemas/stocks.py": "50e98f0829a0add4230b8eba5675a1b482cc776f72e136e2a2d7685b10b8bf0b",
+    "src/schemas/data.py": "376f9f94dd0ad2ce1c0ae9ac5d14e450b3746885c485e2b8d63f9abb9ce5d587",
+    "routers/stocks.py": "37428f3b6401527bd0cccb48df5fbed191a838f865561254f3af953c0c944cff",
+    "frontend/lib/priceState.ts": "19d0eaea99da027cb0432c9becf3eaacc643129b2747926a2384e5b04440a304",
+    "frontend/lib/live-market.ts": "84e3ba8867c20f354c625af93f5c12921e78d4f255c4690fd1a8d66bca919847",
+    "frontend/lib/newsPresentation.ts": "df0105a08e3f37184b4f5ac3a1785ee7023386549a37fdf9214228aabfa3003f",
+    "frontend/app/api/stocks/[[...path]]/route.ts": "f87b07839abbff539166b271f7d2b49f13cf26e7151567e78efa9f33a154c863",
+    "research/provenance/technical_data_readiness_v1/SOURCE_DECISION.md": "84b2075e1ab298c26ce11b2e5b9d30db3c75a0958ac13b20bd44a692b39ccff4",
+    "docs/TECHNICAL_EOD_PERSISTENCE_V1.md": "7d93de8c6f9e5eee808e7a0cd04927b7c8dcb498f15f5f3dd21b1ceefeddb198",
+    "docs/FUNDAMENTAL_DATA_ENGINE_V1.md": "2c0aab77ac9679ee86bdab3736f79394ebabe105f6a0b91c1b99c249c6f39699",
+    "docs/FUNDAMENTAL_ANALYSIS_V1_INCREMENT.md": "66d8b99632097f3d93d8a11e78f30052b044a44591bb892dbdc71f2c335ca03c"
+  },
+  "decisions": {
+    "readiness": "PARTIAL",
+    "additional_live_activation": false,
+    "current_session_acceptance": "NOT_PERFORMED",
+    "offline_acceptance": "PREVIOUS_PASS_NOT_REPEATED",
+    "qualified_existing_product_contracts": [
+      "Ordinary equity identity",
+      "Current last-price presentation",
+      "Quote source-time validation",
+      "Current adjusted daily OHLC for product charts/indicators"
+    ],
+    "not_qualified_by_existing_approval": [
+      "New MasterData limit/reference bundle",
+      "Summary matched volume/value temporal and unit contract",
+      "ICB taxonomy and intended display scope",
+      "VCI financial basis/rights",
+      "Compatible valuation inputs"
+    ],
+    "rights": {
+      "existing_product": "Recorded prior product approval, owner-supplied SSI confirmation",
+      "historical_storage": "Owner-reported SSI authorization recorded 2026-10-10; former blanket blocker resolved",
+      "new_families": "Applicable scope not established in saved field qualification; do not infer from success or general SDK license",
+      "financial": "Separate VCI content-rights evidence required"
+    },
+    "candidate_first_slice": [
+      "Cached ordinary equity identifiers/name/exchange",
+      "Existing last price",
+      "Original source/trading date/observation time",
+      "Explicit freshness/session and missing states"
+    ],
+    "runtime_caveats": [
+      "Offline snapshot API handlers are rewritten; changing BACKEND_URL does not make it live",
+      "GET stock/history/market may onboard and commit through require_stock",
+      "GET live may initiate existing demand acquisition; not a no-acquisition diagnostic"
+    ],
+    "code_changes": false,
+    "new_tests_run": 0,
+    "new_build": false,
+    "production_changes": false,
+    "push": false,
+    "deployment": false
+  }
+}

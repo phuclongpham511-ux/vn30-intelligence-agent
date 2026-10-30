@@ -1,0 +1,313 @@
+{
+  "stored_revisions": 23040,
+  "contract": "financial-intelligence-ingestion-v1",
+  "provider_requests": 0,
+  "database_scope": "dedicated offline journal",
+  "tickers": [
+    "FPT",
+    "HPG",
+    "MWG",
+    "PNJ",
+    "REE",
+    "SSI",
+    "TCB",
+    "VCB"
+  ],
+  "inserted_revisions": 0,
+  "period_limit_per_projection": 20,
+  "coverage": [
+    {
+      "ticker": "FPT",
+      "profile": "non_financial",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 386,
+        "UNAVAILABLE": 94
+      },
+      "capture_sha256": "fdcf9bc60642157ce6a9fced8e405ea3b2a4637a7d2a72cdc0ae30c778ccdb0f"
+    },
+    {
+      "ticker": "FPT",
+      "profile": "non_financial",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1060,
+        "UNAVAILABLE": 140
+      },
+      "capture_sha256": "fdcf9bc60642157ce6a9fced8e405ea3b2a4637a7d2a72cdc0ae30c778ccdb0f"
+    },
+    {
+      "ticker": "FPT",
+      "profile": "non_financial",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1000,
+        "UNAVAILABLE": 200
+      },
+      "capture_sha256": "fdcf9bc60642157ce6a9fced8e405ea3b2a4637a7d2a72cdc0ae30c778ccdb0f"
+    },
+    {
+      "ticker": "HPG",
+      "profile": "non_financial",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 386,
+        "UNAVAILABLE": 94
+      },
+      "capture_sha256": "acf971412e5731df3acb19f409ed7147c0277ed0744e1fcfc36aaad54b1a74d8"
+    },
+    {
+      "ticker": "HPG",
+      "profile": "non_financial",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1050,
+        "UNAVAILABLE": 150
+      },
+      "capture_sha256": "acf971412e5731df3acb19f409ed7147c0277ed0744e1fcfc36aaad54b1a74d8"
+    },
+    {
+      "ticker": "HPG",
+      "profile": "non_financial",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 995,
+        "UNAVAILABLE": 205
+      },
+      "capture_sha256": "acf971412e5731df3acb19f409ed7147c0277ed0744e1fcfc36aaad54b1a74d8"
+    },
+    {
+      "ticker": "MWG",
+      "profile": "non_financial",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 386,
+        "UNAVAILABLE": 94
+      },
+      "capture_sha256": "79461eb3bccf0580d8f29eada87af96544d72e09a0baa09fc332ab8a2932aa4e"
+    },
+    {
+      "ticker": "MWG",
+      "profile": "non_financial",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1058,
+        "UNAVAILABLE": 142
+      },
+      "capture_sha256": "79461eb3bccf0580d8f29eada87af96544d72e09a0baa09fc332ab8a2932aa4e"
+    },
+    {
+      "ticker": "MWG",
+      "profile": "non_financial",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1000,
+        "UNAVAILABLE": 200
+      },
+      "capture_sha256": "79461eb3bccf0580d8f29eada87af96544d72e09a0baa09fc332ab8a2932aa4e"
+    },
+    {
+      "ticker": "PNJ",
+      "profile": "non_financial",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 386,
+        "UNAVAILABLE": 94
+      },
+      "capture_sha256": "18e0642234faf1c5d10f855506bc081869094f9f80b44d98ab7af7fb2748c0a6"
+    },
+    {
+      "ticker": "PNJ",
+      "profile": "non_financial",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1054,
+        "UNAVAILABLE": 146
+      },
+      "capture_sha256": "18e0642234faf1c5d10f855506bc081869094f9f80b44d98ab7af7fb2748c0a6"
+    },
+    {
+      "ticker": "PNJ",
+      "profile": "non_financial",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1000,
+        "UNAVAILABLE": 200
+      },
+      "capture_sha256": "18e0642234faf1c5d10f855506bc081869094f9f80b44d98ab7af7fb2748c0a6"
+    },
+    {
+      "ticker": "REE",
+      "profile": "non_financial",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 386,
+        "UNAVAILABLE": 94
+      },
+      "capture_sha256": "9d8e5767cfc33d18cc82fa3cf1a18f94ee03dce4295fa9d540599436d74a0b13"
+    },
+    {
+      "ticker": "REE",
+      "profile": "non_financial",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1060,
+        "UNAVAILABLE": 140
+      },
+      "capture_sha256": "9d8e5767cfc33d18cc82fa3cf1a18f94ee03dce4295fa9d540599436d74a0b13"
+    },
+    {
+      "ticker": "REE",
+      "profile": "non_financial",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 1000,
+        "UNAVAILABLE": 200
+      },
+      "capture_sha256": "9d8e5767cfc33d18cc82fa3cf1a18f94ee03dce4295fa9d540599436d74a0b13"
+    },
+    {
+      "ticker": "VCB",
+      "profile": "bank",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 293,
+        "UNAVAILABLE": 187
+      },
+      "capture_sha256": "9c608fea54f2d744dc416cef420be4ccd3d0c8331cfd69682f00fe39e608cb00"
+    },
+    {
+      "ticker": "VCB",
+      "profile": "bank",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 860,
+        "UNAVAILABLE": 340
+      },
+      "capture_sha256": "9c608fea54f2d744dc416cef420be4ccd3d0c8331cfd69682f00fe39e608cb00"
+    },
+    {
+      "ticker": "VCB",
+      "profile": "bank",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 800,
+        "UNAVAILABLE": 400
+      },
+      "capture_sha256": "9c608fea54f2d744dc416cef420be4ccd3d0c8331cfd69682f00fe39e608cb00"
+    },
+    {
+      "ticker": "TCB",
+      "profile": "bank",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 293,
+        "UNAVAILABLE": 187
+      },
+      "capture_sha256": "32a95d4849b4968cfc28f8eac66014efcb1a47aeb4297ee34cd3bf185d7d77c8"
+    },
+    {
+      "ticker": "TCB",
+      "profile": "bank",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 860,
+        "UNAVAILABLE": 340
+      },
+      "capture_sha256": "32a95d4849b4968cfc28f8eac66014efcb1a47aeb4297ee34cd3bf185d7d77c8"
+    },
+    {
+      "ticker": "TCB",
+      "profile": "bank",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 800,
+        "UNAVAILABLE": 400
+      },
+      "capture_sha256": "32a95d4849b4968cfc28f8eac66014efcb1a47aeb4297ee34cd3bf185d7d77c8"
+    },
+    {
+      "ticker": "SSI",
+      "profile": "financial_other",
+      "frequency": "annual",
+      "periods": 8,
+      "observations": 480,
+      "status_counts": {
+        "UNQUALIFIED": 264,
+        "UNAVAILABLE": 216
+      },
+      "capture_sha256": "836a5c85c431582b6b6ea94f9085260cbcf78e985e7851ff40ddfbf72913975e"
+    },
+    {
+      "ticker": "SSI",
+      "profile": "financial_other",
+      "frequency": "quarterly",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 720,
+        "UNAVAILABLE": 480
+      },
+      "capture_sha256": "836a5c85c431582b6b6ea94f9085260cbcf78e985e7851ff40ddfbf72913975e"
+    },
+    {
+      "ticker": "SSI",
+      "profile": "financial_other",
+      "frequency": "ttm",
+      "periods": 20,
+      "observations": 1200,
+      "status_counts": {
+        "UNQUALIFIED": 660,
+        "UNAVAILABLE": 540
+      },
+      "capture_sha256": "836a5c85c431582b6b6ea94f9085260cbcf78e985e7851ff40ddfbf72913975e"
+    }
+  ],
+  "limitations": [
+    "Raw coverage denominator is the captured sample only, not the listed market.",
+    "Journal retains the most recent 20 periods per frequency per imported capture.",
+    "Unknown scope and publication metadata remain unknown; no public permissions are added."
+  ]
+}

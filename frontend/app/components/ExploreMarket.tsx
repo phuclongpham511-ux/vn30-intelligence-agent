@@ -4,13 +4,9 @@ import {useEffect,useState} from 'react';
 import Link from 'next/link';
 import {useLiveIndex} from '@/lib/useLiveMarket';
 import {indexMascot} from '@/lib/live-market';
-import {MascotIllustration,MascotState} from './mascot/Mascot';
-import TopStory,{type TopStoryData} from './news/TopStory';
+import {MascotIllustration} from './mascot/Mascot';
+import HotTopics from './news/HotTopics';
 import { indexMovement, signedIndex as signed, indexAggregate,indexDisplayStatus } from '@/lib/marketIndex';
-import {uniqueHotTopics} from '@/lib/news';
-import {LivePrices} from './stock/LivePrice';
-import {newsSymbols} from '@/lib/newsPresentation';
-import {cacheRefresh} from '@/lib/cacheRefresh';
 import MarketFocus from './news/MarketFocus';
 export default function ExploreMarket(){
   const {t,ui,locale,date:localDate}=useLocale();
@@ -18,11 +14,6 @@ export default function ExploreMarket(){
   const [,setClock]=useState(0);
   useEffect(()=>{const timer=setInterval(()=>setClock(value=>value+1),30000);return()=>clearInterval(timer);},[]);
   const freshness=indexDisplayStatus(live.data,indexError);
-  const [stories,setStories]=useState<TopStoryData[]|null>(null);const [newsError,setNewsError]=useState(false);const [attempt,setAttempt]=useState(0);
-  useEffect(()=>{const controller=new AbortController();let busy=false;
-    const loadNews=async()=>{if(busy)return;busy=true;try{const r=await fetch('/api/news/hot?limit=4',{signal:controller.signal,cache:'no-store'});if(!r.ok)throw Error();const rows:TopStoryData[]=await r.json();if(!controller.signal.aborted){setStories(uniqueHotTopics(rows));setNewsError(false);}}catch{if(!controller.signal.aborted)setNewsError(true);}finally{busy=false;}};
-    void loadNews();const stop=cacheRefresh(()=>{void loadNews();});return()=>{controller.abort();stop();};
-  },[attempt]);
   const movement=indexMovement(index);
   return <>
     <header className="flex flex-col gap-5">
@@ -43,14 +34,7 @@ export default function ExploreMarket(){
       </div>
     </header>
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] xl:gap-8">
-    <section aria-labelledby="hot-topics" className="min-w-0"><div className="flex items-center justify-between gap-3"><h2 id="hot-topics" className="scroll-mt-32">{t("Hot Topics")}</h2><Link href="/news" className="text-xs text-primary hover:underline">{t('All news ↗')}</Link></div>
-      {newsError&&<p role="alert" className="mt-3 text-sm">{t("Hot Topics is temporarily unavailable.")} <button onClick={()=>setAttempt(v=>v+1)} className="text-primary underline">{t("Retry")}</button></p>}
-      {!stories&&!newsError&&<MascotState state="loading" role="status">{t("Loading publisher reporting…")}</MascotState>}
-      {stories&&!stories.length&&!newsError&&<MascotState state="noMatches">{t("No stories with independent publisher coverage qualify yet.")}</MascotState>}
-      {newsError&&stories&&stories.length>0&&<p className="mt-2 text-xs text-muted-foreground">{t('Previously loaded headlines are shown below.')}</p>}
-      <LivePrices symbols={newsSymbols(stories||[])} interval={30000}><div className="mt-3">{stories?.map(item=><TopStory key={item.story.id} item={item} requireImage compact/>)}</div></LivePrices>
-
-    </section>
+    <div id="hot-topics" className="min-w-0"><HotTopics/></div>
     <MarketFocus/>
     </div>
   </>;

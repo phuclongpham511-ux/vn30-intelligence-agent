@@ -9,7 +9,7 @@ import {readLanguage,translate} from '../lib/translations.ts';
 import {LanguageContext,localeTools} from '../lib/i18n.ts';
 const require=createRequire(import.meta.url);
 function component(file,overrides={}) {
-  overrides={'./LivePrice':{LivePrices:({children})=>children},'../components/stock/LivePrice':{LivePrices:({children})=>children},'../stock/LivePrice':{TickerMovement:()=>null},...overrides};
+  overrides={'./TradingActivity':{__esModule:true,default:()=>null},'./LivePrice':{LivePrices:({children})=>children},'../components/stock/LivePrice':{LivePrices:({children})=>children},'../stock/LivePrice':{TickerMovement:()=>null},...overrides};
   const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{
     filename:file,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
   const exports={};
@@ -83,16 +83,16 @@ test('stock search and unavailable states render natural Vietnamese without tran
   const {StockError}=component('../app/components/stock/StockStates.tsx',{'../mascot/Mascot':{MascotIllustration:()=>null},'../ui/button':{Button:button},'../ui/skeleton':{Skeleton:()=>null}});
   assert.match(render(StockError,{ticker:'XYZ',message:'The data provider is temporarily unavailable. Please try again.',retry(){}}),/Nguồn dữ liệu tạm thời chưa khả dụng/);
 });
-test('News navigation translates all four ordered tabs and does not repeat category headings',()=>{
+test('News navigation translates all three editorial tabs and does not repeat category headings',()=>{
   const {default:News}=component('../app/news/page.tsx',{
     '../components/mascot/Mascot':{MascotState:passthrough},'../components/ui/button':{Button:button},
     '../components/news/SourceCoverage':()=>null,'../components/news/TopStory':()=>null,'../components/news/CommunityPulse':()=>null});
   for(const language of ['en','vi']) {
     const html=render(News,{},language);
-    const labels=language==='vi'?['Ngành','Doanh nghiệp','Thị trường','Cộng đồng']:['Industry','Company','Market','Community Pulse'];
+    const labels=language==='vi'?['Ngành','Doanh nghiệp','Thị trường']:['Industry','Company','Market'];
     let previous=-1;
     for(const label of labels){const index=html.indexOf(`>${label}</button>`);assert.ok(index>previous);previous=index;}
-    assert.doesNotMatch(html,/<h2|Market Brief|Broad Vietnam market/);
+    assert.doesNotMatch(html,/<h2|Market Brief|Broad Vietnam market|>Community Pulse<|>Cộng đồng<|Discussion window/);
   }
 });
 test('Woofi shell uses local supplied logo, compact language control and no Daily data header label',()=>{
@@ -100,6 +100,7 @@ test('Woofi shell uses local supplied logo, compact language control and no Dail
     'next/navigation':{usePathname:()=>'/news'},'next-themes':{ThemeProvider:passthrough,useTheme:()=>({resolvedTheme:'dark',setTheme(){}})},
     '@/lib/i18n':{useLocale:()=>({...localeTools('vi'),setLanguage(){}}),LanguageProvider:passthrough},
     '../stock/TickerSearch':()=>React.createElement('input',{'aria-label':'search'}),'../stock/StockUniverse':{StockUniverse:passthrough},
+    '../market/MarketSearch':{MarketSearchProvider:passthrough,useMarketSearch:()=>({query:'',setQuery(){}})},
     '../ui/button':{Button:button},'../ui/sheet':{Sheet:passthrough,SheetTrigger:()=>null,SheetContent:()=>null,SheetTitle:passthrough,SheetDescription:passthrough}});
   const html=render(Shell,{children:'content'});
   assert.match(html,/src="\/assets\/woofi-logo.png"/);assert.match(html,/alt="Woofi"/);
@@ -107,12 +108,28 @@ test('Woofi shell uses local supplied logo, compact language control and no Dail
   assert.doesNotMatch(html,/Daily data|VN30 Intelligence|Vietnam Equity Intelligence/);
 });
 
-test('real ticker renderer uses yellow zero, neutral missing, and exposes the stale reference session',()=>{
+test('real ticker renderer keeps stale zero neutral, missing neutral, and exposes the stale reference session',()=>{
  const snapshot={ticker:'XYZ',last_price:10000,reference_price:10000,change:0,change_percent:0,trading_date:'2026-10-09',updated_at:'2026-10-09T07:45:00Z',source:'Fixture:test',session:'closed'};
  const {LivePrices,LivePrice,TickerMovement}=component('../app/components/stock/LivePrice.tsx',{'@/lib/useLiveMarket':{useLiveMarket:()=>({data:{items:{XYZ:{status:'stale',snapshot}},session:'closed'},failed:false})}});
  const tree=React.createElement(LivePrices,{symbols:['XYZ'],interval:30000},React.createElement(React.Fragment,null,React.createElement(LivePrice,{symbol:'XYZ'}),React.createElement(TickerMovement,{symbol:'XYZ'}),React.createElement(TickerMovement,{symbol:'MISSING'})));
  const html=render(()=>tree,{},'en');
- assert.match(html,/class="unchanged"/);assert.match(html,/0.00%/);assert.match(html,/Stale market data/);assert.match(html,/9 Oct 2026/);assert.match(html,/class="text-muted-foreground"/);assert.match(html,/Market data unavailable/);
+ assert.match(html,/price-stale text-muted-foreground/);assert.doesNotMatch(html,/price-reference|class="unchanged"/);assert.match(html,/0.00%/);assert.match(html,/Stale market data/);assert.match(html,/9 Oct 2026/);assert.match(html,/price-unavailable text-muted-foreground/);assert.match(html,/Market data unavailable/);
+});
+test('shared real ticker rendering uses yellow for a fresh exact reference observation',()=>{
+ const now=new Date('2026-10-16T07:45:00Z');
+ const snapshot={ticker:'DEMO01',last_price:10000,reference_price:10000,change:0,change_percent:0,trading_date:'2026-10-16',updated_at:now.toISOString(),source:'DEMO',session:'closed',price_unit:'VND'};
+ const {LivePrices,LivePrice,TickerMovement}=component('../app/components/stock/LivePrice.tsx',{'@/lib/useLiveMarket':{useLiveMarket:()=>({data:{items:{DEMO01:{status:'fresh',snapshot}},session:'closed'},failed:false})}});
+ const html=render(()=>React.createElement(LivePrices,{symbols:['DEMO01'],interval:30000},React.createElement(React.Fragment,null,React.createElement(LivePrice,{symbol:'DEMO01',now}),React.createElement(TickerMovement,{symbol:'DEMO01',now}))),{},'en');
+ assert.equal((html.match(/price-reference unchanged/g)||[]).length,3);
+ assert.match(html,/0.00%/);assert.doesNotMatch(html,/price-stale/);
+});
+test('shared price renderers never display another instrument under the requested ticker',()=>{
+ const now=new Date('2026-10-16T07:45:00Z');
+ const snapshot={ticker:'OTHER',last_price:12345,reference_price:10000,change:2345,change_percent:23.45,trading_date:'2026-10-16',updated_at:now.toISOString(),source:'DEMO',session:'closed'};
+ const {LivePrices,LivePrice,TickerMovement}=component('../app/components/stock/LivePrice.tsx',{'@/lib/useLiveMarket':{useLiveMarket:()=>({data:{items:{DEMO01:{status:'fresh',snapshot}}},failed:false})}});
+ const html=render(()=>React.createElement(LivePrices,{symbols:['DEMO01'],interval:30000},React.createElement(React.Fragment,null,React.createElement(LivePrice,{symbol:'DEMO01',now}),React.createElement(TickerMovement,{symbol:'DEMO01',now}))),{},'en');
+ assert.doesNotMatch(html,/12,345|23.45|OTHER|price-advancing/);
+ assert.match(html,/price-unavailable/);
 });
 test('raw source evidence stays inspectable when its thumbnail is missing',()=>{
  const {default:Thumbnail}=component('../app/components/news/NewsThumbnail.tsx');

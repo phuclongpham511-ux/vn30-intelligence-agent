@@ -9,10 +9,12 @@ import {LivePrices,LivePrice} from '../components/stock/LivePrice';
 import {TechnicalInsightsView} from '../components/stock/TechnicalInsights';
 import ArticleRow from '../components/news/ArticleRow';
 import WatchlistBriefing from '../components/WatchlistBriefing';
+import WatchlistFinancial from '../components/WatchlistFinancial';
 import QuoteMap from '../components/stock/QuoteMap';
 import {reviewBriefingItem} from '@/lib/dailyBriefing';
 import {safeExternalUrl} from '@/lib/presentation';
 import {emptyNewsFilters,newsViewQuery,type NewsArticle} from '@/lib/news';
+import {communityHref} from '@/lib/community';
 import type {CommunityItem} from '@/lib/community';
 import {collectionLabels} from '@/lib/collectionStatus';
 import {emptyWatchlist,readWatchlist,followStock,unfollowStock,watchlistStorageKey,loadIntelligence,isUnread,reviewUpdates,baselineLegacyReviews,uniqueUpdates,technicalCountKnown,type WatchlistState,type Intelligence,type AttentionUpdate,type UpdatePage} from '@/lib/watchlist';
@@ -101,7 +103,7 @@ export default function WatchlistPage() {
     return()=>{disposed=true;current?.abort();window.clearInterval(timer);window.removeEventListener('focus',visible);document.removeEventListener('visibilitychange',visible);};
   },[ready,symbolsKey,offset,attempt]);
   const refresh=()=>{setOffset(0);setAttempt(n=>n+1);};
-  const activityCount=(symbol:string)=>{const row=data?.stocks.find(stock=>stock.symbol===symbol);return [...(row?.news?.items||[]),...(row?.community?.items||[]),...(row?.technical?.items||[])].filter(item=>isUnread(state,symbol,item)).length;};
+  const activityCount=(symbol:string)=>{const row=data?.stocks.find(stock=>stock.symbol===symbol);return [...(row?.news?.items||[]),...(row?.community?.items||[]),...(row?.technical?.items||[]),...(row?.financial?.items||[])].filter(item=>isUnread(state,symbol,item)).length;};
   const orderedSymbols=[...state.symbols].sort((a,b)=>activityCount(b)-activityCount(a)||state.symbols.indexOf(a)-state.symbols.indexOf(b));
   const more=data?.stocks.some(row=>row.news?.has_more||row.community?.has_more);
   const coverageIncomplete=data?.stocks.some(row=>row.status==='unavailable'||row.news?.truncated||!technicalCountKnown(row.technical))||data?.news_sources.some(s=>s.enabled&&s.status!=='healthy')||data?.community_sources.some(s=>s.enabled&&s.status!=='healthy');
@@ -133,13 +135,14 @@ export default function WatchlistPage() {
         <section id="watched-stocks" className="panel divide-y scroll-mt-20" aria-label={t('Watched stocks')}>{orderedSymbols.map(symbol=>{
           const row=data?.stocks.find(stock=>stock.symbol===symbol);
           const news=row?.news,community=row?.community,technical=row?.technical;
-          const newItems=[...(news?.items||[]),...(community?.items||[]),...(technical?.items||[])].filter(item=>isUnread(state,symbol,item));
+          const newItems=[...(news?.items||[]),...(community?.items||[]),...(technical?.items||[]),...(row?.financial?.items||[])].filter(item=>isUnread(state,symbol,item));
           const review=(items:AttentionUpdate[])=>persist(current=>reviewUpdates(current,symbol,items));
           return <article key={symbol} aria-label={t('{ticker} monitoring',{ticker:symbol})} className="grid gap-4 p-4 sm:p-5 md:grid-cols-[170px_minmax(0,1fr)]">
             <div><Link href={'/stocks/'+encodeURIComponent(symbol)} className="text-lg font-semibold text-primary hover:underline">{symbol}</Link><p className="mt-1 break-words text-xs text-muted-foreground">{(language==='vi'?row?.company_name:row?.display_name_en)||row?.company_name||t('Equity metadata unavailable')}</p>
               <div className="mt-3"><LivePrice symbol={symbol}/></div>
               </div>
             <div className="min-w-0 space-y-4">
+              {!loading&&!error&&row?.financial&&<WatchlistFinancial page={row.financial} symbol={symbol} state={state} disabled={storageError} review={review}/>}
               {loading?<p className="text-sm text-muted-foreground">{t('Checking recent developments…')}</p>:error?<p className="text-sm text-muted-foreground">{t('Development count unavailable.')}</p>:row?.status==='unavailable'?<p className="text-sm">{t('Stock data is unavailable. This is not a no-change result.')}</p>:row&&<>
                 <div className="flex flex-wrap items-center justify-between gap-2"><p className="text-sm font-medium">{storageError?t('Review state unavailable. Unread counts are unknown.'):newItems.length?t('{count} unreviewed on this page',{count:newItems.length}):t('No unreviewed items on this page')}</p>
                   </div>
@@ -154,7 +157,7 @@ export default function WatchlistPage() {
                   {technical.waiting_for_gate||technical.awaiting_source_check?<div className="text-sm text-muted-foreground"><p>{t(technical.waiting_for_gate?'Technical data pending the delayed EOD gate':'Delayed EOD gate elapsed; awaiting source check')}</p><p className="mt-1 text-xs">{t('Next source check due')}: {date(technical.next_check_due_at,true)}</p><p className="mt-1 text-xs">{t('Source checked')}: {date(technical.last_checked_at,true)}</p></div>
                     :<TechnicalInsightsView sectionId={'watchlist-technical-'+symbol} ticker={symbol} data={technical.data} loading={false} error={false} retry={refresh}/>}
                 </details>}
-                  <div className="mt-3 flex flex-wrap gap-4 text-muted-foreground"><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'company')}>{t('News mentioning {ticker}',{ticker:symbol})}</Link><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'community')}>{t('Community Pulse')}</Link><button className="underline" aria-label={t('Remove {ticker} from Watchlist',{ticker:symbol})} disabled={storageError} onClick={()=>persist(current=>unfollowStock(current,symbol))}>{t('Remove')}</button></div>
+                  <div className="mt-3 flex flex-wrap gap-4 text-muted-foreground"><Link className="text-primary hover:underline" href={'/news?'+newsViewQuery({...emptyNewsFilters,ticker:symbol},'company')}>{t('News mentioning {ticker}',{ticker:symbol})}</Link><Link className="text-primary hover:underline" href={communityHref(symbol)}>{t('Community Pulse')}</Link><button className="underline" aria-label={t('Remove {ticker} from Watchlist',{ticker:symbol})} disabled={storageError} onClick={()=>persist(current=>unfollowStock(current,symbol))}>{t('Remove')}</button></div>
                   {state.reviewedAt?.[symbol]&&<p className="mt-2 text-muted-foreground">{t('Last reviewed')}: {date(state.reviewedAt[symbol],true)}</p>}
                 </details>
               </>}

@@ -14,12 +14,13 @@ const react={...React,useState(initial){if(initial==='overview')return [section,
 function load(file){
  const exports={};
  const compiled=transformSync(readFileSync(new URL(`../app/components/stock/${file}.tsx`,import.meta.url),'utf8'),{filename:`${file}.tsx`,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
- new Function('require','exports',compiled)(name=>name==='react'?react:name==='./FinancialStatementTable'?load('FinancialStatementTable'):name==='./FinancialResearchCharts'?{__esModule:true,default:()=>null}:name==='../ui/button'?{Button:({variant,size,...props})=>React.createElement('button',props)}:name==='../ui/skeleton'?{Skeleton:props=>React.createElement('div',props)}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
+ new Function('require','exports',compiled)(name=>name==='react'?react:name==='./FinancialStatementTable'?load('FinancialStatementTable'):name==='./FinancialAnalysisPanel'?load('FinancialAnalysisPanel'):name==='./FinancialResearchCharts'?{__esModule:true,default:()=>null}:name==='../ui/button'?{Button:({variant,size,...props})=>React.createElement('button',props)}:name==='../ui/skeleton'?{Skeleton:props=>React.createElement('div',props)}:require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name),exports);
  return exports;
 }
 const view=load('FundamentalTrends').FundamentalTrendsView;
 const row=period=>({ticker:'ABC',period,frequency:period.includes('Q')?'quarterly':'annual',source:'Fixture:VCI',currency:'VND',...Object.fromEntries(Object.keys(FINANCIAL_LABELS).map(key=>[key,null])),revenue:0,net_profit:12,equity:80,roe:.15,calculations:{roe:{formula:'total profit / average total equity',inputs:[{code:'isa20',value:12}],reason:null}},is_fixture:true});
 const data={data_engine:'financial-engine-v1',ticker:'ABC',source:'Fixture:VCI',currency:'VND',period_type:'annual',profile:'non_financial',financial_identity_guard:false,rows:[row('2025')],chart_rows:[row('2025')],changes:[],statements:{income:{status:'healthy',basis:'reported',periods:[{ticker:'ABC',source:'Fixture:VCI',currency:'VND',period:'2025',basis:'annual',consolidation:null,source_dates:{publicDate:'2026-02-01T00:00:00'},diagnostics:[],items:[{code:'isa3',name_en:'Net sales',name_vi:'Doanh thu thuần',parent:null,unit:'VND',value:0,raw_value:0,semantic_status:'reported'}]}]}},source_receipts:[],available_period_types:['annual','quarterly','ttm'],is_fixture:true,read_at:'2026-10-13T10:00:00Z',sector:null,industry:null};
+data.fundamental_summary={contract:'fundamental-display-v1',period:'2025',frequency:'annual',consolidation:null,publication_date:null,metrics:[{key:'revenue',group:'performance',label:'Revenue',unit:'VND',status:'DEMO',value:0,formula:'reported',reason:'Synthetic financial evidence'}]};
 function render(props={},language='en',tab='overview',kind='income'){
  section=tab;statement=kind;
  return renderToStaticMarkup(React.createElement(LanguageContext.Provider,{value:{...localeTools(language),setLanguage(){}}},React.createElement(view,{data,loading:false,error:false,retry(){},...props})));
@@ -29,7 +30,7 @@ test('engine contract checks currency, ownership, period frequency and chart/sou
  for(const mutation of [{currency:'USD'},{ticker:'OTHER'},{period_type:'quarterly'},{rows:[{...row('2025'),roe:Infinity}]},{chart_rows:[{...row('2025'),revenue:10}]},{statements:{income:{periods:[{...data.statements.income.periods[0],ticker:'OTHER'}]}}}])assert.throws(()=>financialEngineData({...data,...mutation},'ABC','annual'));
 });
 test('quarterly/TTM presentation accepts qualified periods without frontend financial calculations',()=>{
- const quarter={...data,period_type:'quarterly',rows:[row('2026-Q2')],chart_rows:[row('2026-Q2')],statements:{},changes:[]};
+ const quarter={...data,period_type:'quarterly',rows:[row('2026-Q2')],chart_rows:[row('2026-Q2')],statements:{},changes:[],fundamental_summary:{...data.fundamental_summary,period:'2026-Q2',frequency:'quarterly'}};
  assert.equal(financialEngineData(quarter,'ABC','quarterly').rows[0].net_profit,12);
  assert.match(render({data:quarter,frequency:'quarterly'}),/not annualized/);
  assert.match(render({data:{...quarter,period_type:'ttm'},frequency:'ttm'}),/four contiguous qualified quarters/);
@@ -40,15 +41,15 @@ test('display projection accepts historical facts without duplicated calculation
  const latest=row('2025');
  const projected={...data,rows:[prior,latest],chart_rows:[prior,{...latest,calculations:undefined}]};
  assert.equal(financialEngineData(projected,'ABC','annual').rows.at(-1).calculations.roe.inputs[0].code,'isa20');
- const html=render({data:projected});
+ const html=render({data:projected},'en','sources');
  assert.match(html,/Calculation evidence/);assert.match(html,/total profit \/ average total equity/);
  assert.match(html,/isa20/);assert.match(html,/2024/);
 });
-test('existing four sections, frequency and units remain visible; source fixtures and missing values are honest',()=>{
+test('financial task sections, frequency and units remain visible; source fixtures and missing values are honest',()=>{
  const html=render();
- for(const label of ['Financial overview','Business performance','Financial statements','Financial ratios','Annual','Quarterly','TTM','VND bn','Fixture data'])assert.match(html,new RegExp(label));
- assert.match(html,/ROE uses total profit/);assert.match(html,/Calculation evidence/);assert.match(html,/>0<\/dd>/);
- assert.match(render({},'vi'),/Bằng chứng tính toán/);assert.match(render({loading:true}),/Loading financial statements/);
+ for(const label of ['Financial overview','Revenue, earnings','Balance sheet','Profitability','Documents and sources','Financial statements','Financial ratios','Annual','Quarterly','TTM','VND bn','Fixture data'])assert.match(html,new RegExp(label));
+ assert.match(render({},'en','sources'),/ROE uses total profit/);assert.match(render({},'en','sources'),/Calculation evidence/);assert.match(render({},'en','performance'),/>0 VND bn<\/dd>/);
+ assert.match(render({},'vi','sources'),/Bằng chứng tính toán/);assert.match(render({loading:true}),/Loading financial statements/);
  assert.match(render({error:true}),/temporarily unavailable/);assert.match(render({data:{...data,rows:[]}}),/No financial observations/);
 });
 test('source statement table preserves original labels, per-share units and unqualified conflict disclosure',()=>{
@@ -64,9 +65,27 @@ test('source statement table preserves original labels, per-share units and unqu
 });
 test('bank rendering presents operating income, excludes generic revenue and liquidity, and keeps valuation unavailable',()=>{
  const bank={...data,profile:'bank',financial_identity_guard:true,rows:[{...row('2025'),revenue:null,operating_income:100,operating_income_growth_yoy:.1}],chart_rows:[{...row('2025'),revenue:null,operating_income:100,operating_income_growth_yoy:.1}],statements:{}};
+ bank.fundamental_summary={...data.fundamental_summary,metrics:[{...data.fundamental_summary.metrics[0],key:'operating_income',label:'Operating income',value:100}]};
  assert.doesNotThrow(()=>financialEngineData(bank,'ABC','annual'));
- assert.match(render({data:bank}),/Operating income/);
- const html=render({data:bank},'en','ratios');
+ assert.match(render({data:bank},'en','performance'),/Operating income/);
+ const html=render({data:bank},'en','overview');
  assert.doesNotMatch(html,/<th[^>]*>Revenue|<th[^>]*>Current ratio|<th[^>]*>Quick ratio/);
- assert.match(html,/Valuation, NIM, NPL and CASA/);
+ assert.match(html,/Financial issuer metrics/);
+});
+
+test('statement provenance remains inspectable in EN/VI without promoting source metadata',()=>{
+ const evidence={...data,source_receipts:[{statement:'income',status:'healthy',observed_at:'2026-10-13T10:00:00Z',source_url:'https://example.test/source',content_sha256:'a'.repeat(64),periods:[{period:'2025',basis:'annual',source_dates:{publicDate:'2026-01-01'},diagnostics:[],source_context:{fiscal_year:2025,original_unit:null,restatement_status:'unknown',display_rights:'unreviewed',record_sha256:'b'.repeat(64)}}]}]};
+ const html=render({data:evidence},'en','sources');
+ assert.match(html,/Statement provenance/);assert.match(html,/not filing verification or display permission/);
+ assert.match(html,/unreviewed/);assert.match(html,/original_unit/);assert.match(html,/&quot;unknown&quot;/);
+ assert.match(render({data:evidence},'vi','sources'),/Nguồn gốc báo cáo/);
+});
+
+test('empty observations preserve section shells and never fabricate valuation history',()=>{
+ const empty={...data,rows:[],chart_rows:[],statements:{},fundamental_summary:null};
+ const business=render({data:empty});
+ assert.match(business,/No financial observations/);assert.match(business,/Asset composition/);assert.match(business,/Funding composition/);
+ const valuation=render({data:empty},'en','valuation');
+ assert.match(valuation,/No price or market-cap comparison/);assert.doesNotMatch(valuation,/data-financial-panel="(?:pe|pb)"/);assert.doesNotMatch(valuation,/data-financial-chart=/);
+ assert.match(render({data:empty},'vi','performance'),/Kết quả kinh doanh quý/);
 });

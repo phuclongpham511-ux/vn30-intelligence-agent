@@ -1,0 +1,321 @@
+# Financial Data Intelligence V1
+
+## Financial Intelligence V4 — current, 2026-10-21
+
+V4 supersedes the historical checkpoints below: **341 source/accounting and
+reporting-metadata-qualified observations (216 reported, 125 derived), 70 supported
+definitions out of 77 canonical definitions, ten saved issuers**. Qualified original
+histories cover FPT 2022–24, TCB 2023–25, VCB 2024–25, HPG 2024–25 flows/2025 balance
+and MWG pre-audit 2024. VNM/SSI remain useful partial provider coverage.
+Original captures and revisions remain preserved; metric-level gaps stay visible.
+FPT dated ordinary BVPS is supported for 2023/24; P/E/P/B/earnings yield remain
+unavailable without matched prices, shares and corporate-action evidence.
+The bank comparison is **TCB/VCB, 2/22 observed banks, 15 FY2025 metrics**;
+observed-industry ranks/percentiles are suppressed. Historical sector totals stay
+disabled. No WiData or paid subscription is required.
+
+Supported private launchers and live HTTP checks PASS. Actual integrated-browser
+desktop checks PASS for exercised flows; mobile, tooltips, exhaustive retries and
+full live-market context remain PENDING. Backend **1,600 + 32 subtests**, frontend
+**334 passed + one existing skip**, typecheck/build and real contracts/static
+rendering PASS. PIT/public-rights/fully-verified counts remain separately zero.
+See [V4 delivery](../research/FINANCIAL_INTELLIGENCE_V4_DELIVERY.md),
+[feature comparison](../research/SSTOCK_FEATURE_COMPARISON_V4.md),
+[acceptance and manual checklist](../research/DASHBOARD_VERIFICATION_V4.md),
+[coverage](../research/validation/free-data-v4/VERIFIED_METRIC_COVERAGE.csv), and
+[valuation decisions](../research/VALUATION_EVIDENCE_AUDIT.md).
+
+Current reproduction: use the immutable `.local/free-data-v4-ready` bundle and commands in the V4 acceptance checklist. History manifests pin one whole original per period; derived inputs must share an original document binary. No public exposure or price multiple is enabled by source verification alone.
+
+## Historical context
+
+## V3 historical implementation and reproduction
+
+Continue with `.local/free-data-v3-final`, preserving previous bundles. The same
+original-report adapter now reads selected VCB annual statements and TCB notes.
+The canonical engine adds nine explicit bank note fields and five derived
+definitions (74 total catalogue outputs, 64 observed supported definitions).
+It does not guess extra VCI source mappings. REPORTING_METADATA_COMPLETE is an
+independent per-metric dimension alongside source/accounting/PIT/rights/full.
+The private `/personal-research/peers/{symbol}?period=2025&frequency=annual` and
+same-origin private proxy resolve only the observed exact SSI membership. Covered
+median/min/max and rank/percentile require at least two compatible qualified
+issuers; no sector sum or historical classification is inferred.
+
+Financial Analysis adds highlights and usable task navigation without empty
+valuation charts. Company-specific industry links retain reporting context; the
+dividend shortcut uses the existing stock action destination. Public/private
+boundaries and approved launcher configuration are unchanged.
+
+~~~powershell
+uv run python -m scripts.recover_financial_evidence --baseline .local/activation-captures --bundle .local/free-data-v3-final --output research/validation/free-data-v3
+uv run python -m scripts.validate_free_data --captures .local/free-data-v3-final --report research/validation/free-data-v3 --private .local/free-data-v3-api --probe-directory .local/free-source-probes
+uv run python -m scripts.validate_financial_v3 --bundle .local/free-data-v3-final --private .local/free-data-v3-api --report research/validation/free-data-v3
+~~~
+
+Backend/frontend/typecheck/build and real contract/rendering checks pass;
+interactive Woofi runtime/browser/mobile acceptance remains PENDING. See
+[V3 delivery](../research/FINANCIAL_INTELLIGENCE_V3_DELIVERY.md),
+[comparison](../research/SSTOCK_FEATURE_COMPARISON_V3.md), and
+[exact approved-operator checklist](../research/DASHBOARD_VERIFICATION_V3.md).
+
+## Prior bdc70ad activation
+
+SStock is the product/UI benchmark. WiData is not a required provider and there
+are no paid APIs/subscriptions. Existing SSI/VCI remain primary. Strict saved
+original-report, CafeF annual summary and VSDC notice adapters use the existing
+financial engine, models and UI. New provider acquisition is not triggered by
+browsing, a cache miss or missing metric.
+
+The prepared immutable private bundle is `.local/free-data-v2-final`. It retains
+all eight original capture files unchanged, two separately selectable original
+report manifests/assets, VHM summary amounts, the SSI observed-membership review
+and three official dividend notices. Source archives/PDFs/PNGs/private response
+values remain outside Git/static hosting. Original normalized journal is unchanged.
+
+`financial-verification-v1` adds SOURCE_VERIFIED, ACCOUNTING_VERIFIED,
+POINT_IN_TIME_VERIFIED, PUBLICATION_RIGHTS_APPROVED and FULLY_VERIFIED per metric.
+They are independent of display authorization. Current report views qualify 100
+source/accounting observations (63 reported, 37 derived); PIT/public rights are
+zero. An unrelated missing field cannot erase a supported reported amount.
+Contradictory statement checks block affected derivations while preserving source
+facts. Both English/Vietnamese disclosures retain original evidence text.
+
+Private APIs (same existing default-off, development, literal-loopback socket/Host
+guards, no proxy-header authorization, private/no-store/noindex responses):
+
+~~~text
+GET /personal-research/financials/HPG?frequency=annual&evidence=preferred
+GET /personal-research/financials/HPG?frequency=annual&evidence=provider
+GET /personal-research/industries
+GET /personal-research/industries/8355?period=2025&frequency=annual
+GET /personal-research/dividends/FPT
+~~~
+
+`preferred` chooses an entire reviewed annual report packet if available;
+quarterly/TTM and `provider` retain the original history. Corrupt evidence fails,
+without silent fallback or metadata/source splicing. CafeF fields remain partial
+and unsupported net revenue/ratios are withheld. Original-report unit scaling
+occurs once; TCB EPS stays VND/share rather than million VND.
+
+The existing `/industries` proxy switches to the private observed contracts only
+when the existing personal runtime guard is enabled. It shows all 61 categories,
+individual available observations and per-metric missing coverage. Rank requires
+at least two compatible accounting-qualified issuers; actual sample has none.
+Historical totals remain disabled. This snapshot does not satisfy the separate
+versioned/effective-dated taxonomy contract documented below.
+
+Reproduce offline checks from this worktree using the existing private bundle:
+
+~~~powershell
+uv run python -m scripts.recover_financial_evidence --baseline .local/activation-captures --bundle .local/free-data-v2-final --output research/validation/free-data-v2
+uv run python -m scripts.validate_free_data --captures .local/free-data-v2-final --report research/validation/free-data-v2 --private .local/free-data-v2-final-api --probe-directory .local/free-source-probes
+Set-Location frontend
+node scripts/validate-financial-activation.mjs ../.local/free-data-v2-final-api/preferred ../research/validation/free-data-v2/preferred/REAL_DATA_FRONTEND_VALIDATION.json
+node scripts/validate-financial-activation.mjs ../.local/free-data-v2-final-api/provider ../research/validation/free-data-v2/provider/REAL_DATA_FRONTEND_VALIDATION.json
+node scripts/validate-free-financial-data.mjs ../.local/free-data-v2-final-api ../research/validation/free-data-v2/FREE_DATA_FRONTEND_VALIDATION.json
+~~~
+
+For a future newly reviewed revision, `scripts.prepare_free_financial_bundle`
+accepts `--captures`, a new `--destination`, repeatable `--report`/`--summary`,
+`--memberships` and `--dividends`. Its generic contracts are
+`reviewed-report-v2`, `cafef-saved-annual-v1`, `industry-membership-review-v1`
+and `vsdc-cash-dividends-v1`. It validates source inputs before writing and rejects
+an existing destination, provider replacement or public/static output path.
+Do not overwrite the final bundle to change evidence; create a new private
+revision. These original documents are operator-reviewed selected fields, not
+an automatic general-purpose PDF extractor or a public data licence.
+
+54 real stock API projections, 61 industry responses and nine dividend responses
+pass in-process checks; frontend contracts/rendering and regressions/build pass.
+**Runtime/browser/mobile: PENDING** after the prior policy rejection. No launch
+workaround was attempted. The supported launchers and exact real-data manual
+checks are in [dashboard verification](../research/DASHBOARD_VERIFICATION.md).
+See [delivery](../research/FREE_DATA_DELIVERY_REPORT.md),
+[provider audit](../research/PROVIDER_METADATA_AUDIT.md) and
+[remaining blockers](../research/REMAINING_BLOCKERS.md).
+
+## Prior 86000d3 activation from 591f665
+
+From 591f665, the existing saved-data reader now supports its original raw captures
+and canonical-financial-packet-v1 entries in the same hash-pinned index. Canonical
+files are bounded to 32 MB and checked for mapped source amounts, labels, units,
+ownership, original dates, flow basis, model, duplicates and prohibited provenance
+promotion. Missing statements can remain missing without erasing other evidence.
+Strict JSON validation rejects booleans and numeric strings as financial numbers.
+Original canonical transport reconstruction is not claimed.
+
+The additive financial-verification-v1 response field separates VERIFIED,
+PARTIALLY_VERIFIED and UNAVAILABLE from display/public eligibility. Its per-metric
+missing-evidence list is visible in Financial Analysis. It grants no data rights
+and does not populate withheld values. Default/public behavior is unchanged.
+
+Prepare a new private bundle without modifying the original capture directory:
+
+~~~powershell
+uv run python -m scripts.prepare_financial_activation --captures C:\private\original-captures --destination .local\activation-captures --packet .local\provider-validation\TCB-packet.json --packet .local\provider-validation\SSI-packet.json
+uv run python -m scripts.validate_financial_activation --captures .local\activation-captures --report-dir research\validation --private-responses .local\activation-api
+node frontend/scripts/validate-financial-activation.mjs .local/activation-api research/validation/REAL_DATA_FRONTEND_VALIDATION.json
+~~~
+
+The first command reuses captures already present; it does not fetch TCB or SSI.
+An existing different bundle is rejected; use a new revision folder. Existing
+normalized journal ingestion also accepts the new index through the shared reader.
+Canonical/source bytes, original timestamps and hashes are retained; private
+responses and source archives remain outside Git and static hosting.
+
+scripts.review_industry_memberships rechecks a caller-pinned SSI archive, keeps
+the full observed pair dataset privately, and emits a counts/provenance report.
+Its distinct review contract cannot be loaded as IndustryTaxonomy. No effective
+dates, classification version, hierarchy or financial model are inferred.
+
+The measured private path has 25 distinct reported fields, 24 API/frontend
+projections and 2,816 eligible observations. It has zero fully verified/public
+metrics and no activated real industry cohort. Current-branch runtime/browser
+validation remains PENDING; offline API transport is not a server restart.
+See [activation report](../research/REAL_DATA_ACTIVATION_REPORT.md),
+[dashboard/operator procedure](../research/DASHBOARD_VERIFICATION.md) and
+[remaining blockers](../research/REMAINING_BLOCKERS.md).
+
+## Original V1 implementation
+
+This isolated increment adds normalized financial facts, an explicit offline
+revision journal, compatible industry arithmetic and four additional financial
+chart projections. It reuses the existing FinancialPacket and deterministic
+engine. SSI prices and the pinned vnstock provider remain unchanged.
+
+## Source and calculation boundaries
+
+MetricObservation preserves ticker, metric, finite value, VND currency/unit,
+fiscal labels and optional boundaries, report scope, source, publication/fetch
+times, revision hash, formula version, metric kind and quality reasons/input
+references. Unknown original dates and scope remain unknown. Source-reported,
+derived, estimated and unavailable have distinct kinds; estimates require the
+ESTIMATED status. No estimates are produced by this version.
+
+The engine has 60 outputs (49 baseline plus 11 additions). Additions are net
+working capital; average equity/assets/inventory; asset and inventory turnover;
+accounting customer loan/deposit ratio; and YoY/QoQ loans/deposits growth. Turnover
+is a period measure. Inventory COGS is independently defined as revenue minus
+gross profit, with nonnegative COGS and positive average inventory required.
+Bank loan/deposit comparison is not regulatory LDR. Existing YTD differencing,
+contiguous TTM, source/scope compatibility, averaged balances and share-count
+guards still apply. An additional normalized-fact gate rejects balance-dependent
+values when assets minus liabilities minus equity exceeds
+max(1 VND, abs(assets) * 1e-6). Original source evidence remains inspectable.
+
+Public normalized values use the existing reviewed-evidence display gates.
+The measured VCI sample produces zero qualified public financial metrics.
+No original metadata, public permission or publication date is inferred from a
+transport convention or successful provider response.
+
+## Explicit offline ingestion
+
+Run from the repository root, with an existing hash-pinned saved-capture index:
+
+~~~powershell
+uv sync --frozen
+uv run python -m scripts.ingest_financial_intelligence --captures C:\private\approved-captures --journal .local\financial-metrics.sqlite --report .local\coverage-report
+~~~
+
+The capture folder must satisfy the existing personal-saved-captures-v1
+index/hash contract. Optional repeatable --packet C:\private\canonical-packet.json
+arguments accept canonical FinancialPacket captures, each at most 32 MB.
+Inputs are validated before use; duplicate issuers in a run fail. There are no
+live requests, credentials, scheduled worker or implicit application DB migration.
+The CLI reports field-level raw coverage and most recent 20 periods per
+annual/quarterly/TTM projection; eight annual periods exist in this measured sample.
+
+Use a dedicated private SQLite file. The writer rejects unrelated database
+tables. Identical refetches preserve the earliest capture and insert no duplicate
+revision. An existing revision cannot be silently rewritten or backdated.
+The revision digest includes quality, lineage and fiscal-boundary metadata as well
+as calculation inputs. A gate change therefore creates a new normalized version.
+Blocked values retain reported/derived lineage while their display value is null.
+Different revisions with the same receipt time become CONFLICT on reads. Reads
+with as_of require a timezone and exclude unknown publication times and any
+publication/fetch after the cutoff. This conservatism does not establish
+historical membership vintages or full point-in-time accuracy.
+
+## Industry configuration and APIs
+
+Industry reads are opt-in. Set these only for the isolated backend intended to
+serve the explicitly reviewed evidence:
+
+~~~powershell
+$env:WOOFI_FINANCIAL_JOURNAL='C:\private\financial-metrics.sqlite'
+$env:WOOFI_FINANCIAL_TAXONOMY='C:\private\reviewed-taxonomy.json'
+~~~
+
+The taxonomy is an IndustryTaxonomy JSON document with:
+
+- contract "woofi-industry-taxonomy-v1", nonempty name, version and source reference;
+- industry definitions: id, English/Vietnamese names, and one model from
+  non_financial, bank, securities, insurance, real_estate;
+- memberships: ticker, industry_id, inclusive effective_from/effective_to and
+  source_reference. Duplicate definitions, unknown ids and overlapping membership
+  periods for a ticker are rejected.
+
+No real taxonomy is bundled or enabled. Do not turn the synthetic test/preview
+classification into a production membership file. An empty unconfigured directory
+is a deliberate unavailable state.
+
+Read-only endpoints:
+
+~~~text
+GET /stocks/FPT/financials/metrics?frequency=annual&limit=8
+GET /financial-intelligence/industries
+GET /financial-intelligence/industries/manufacturing?period=2025&frequency=annual&membership_on=2025-12-31
+GET /financial-intelligence/industries/banks?period=2025-Q4&frequency=quarterly&membership_on=2025-12-31&as_of=2026-03-01T00%3A00%3A00Z
+~~~
+
+The stock endpoint follows the existing packet/cache acquisition path. Industry
+endpoints only read the selected taxonomy/journal and never fetch providers.
+The frontend /industries page uses a read-only same-origin proxy, a 15-second
+timeout and private/no-store responses.
+
+Industry calculations require qualified, nonfixture facts with compatible issuer
+model, VND unit, known fiscal boundaries and report scope. Each ratio uses the same
+companies in numerator and denominator, with compatible per-issuer sources.
+Multiple provider observations for one issuer/metric are excluded. Amounts sum;
+ROE/ROA and margins divide matched sums, never average issuer ratios. Coverage and
+excluded tickers are per metric. Different cohort fiscal intervals are rejected.
+
+Rank 1 is the largest numerical value; ties use competition ranks. Percentile is
+(number below + 0.5 * ties) / included company count. This is a sample position,
+not investment merit. Contributions use observed additive totals only when
+positive and finite. Nonfinite aggregates and derived results stay unavailable.
+Industry P/E/P/B require a future matched capitalization/earnings or equity
+cohort and remain unavailable. Securities/insurance have common-model guards;
+unverified margin, trading, underwriting and actuarial fields are not fabricated.
+Real estate uses the nonfinancial base, without project forecasts.
+
+## Frontend and validation
+
+Four new projections reuse FinancialAnalysisPanel: cash flow, profitability,
+liquidity/leverage and bank funding. Multiple axes display ×, fractions display
+percentages and amount units remain selectable. The industry page shows coverage,
+peer rank/percentile/contributions, taxonomy version/date and method/source
+disclosures. VI/EN and existing stock navigation remain intact.
+
+For synthetic local UI validation, build/run with
+NEXT_PUBLIC_WOOFI_VALIDATION=replay and direct BACKEND_URL at an unused isolated
+port. /demo/financial-intelligence uses the actual components and visibly labelled
+synthetic fixtures. Normal builds generate a not-found page for this route.
+The standard app shell may attempt its existing refresh requests; never point a
+fixture preview at a production backend.
+
+~~~powershell
+uv run pytest -q
+Set-Location frontend
+npm ci --no-audit --no-fund
+npm test
+npm run typecheck
+npm run build -- --webpack
+~~~
+
+See [the delivery report](../research/FINAL_RESEARCH_REPORT.md), measured
+[coverage](../research/DATA_COVERAGE_REPORT.md), and actual
+[browser acceptance](../research/validation/BROWSER_ACCEPTANCE.md). Source tests,
+synthetic rendering and saved PNJ text reconciliation do not establish complete
+financial correctness, commercial data rights or public activation readiness.

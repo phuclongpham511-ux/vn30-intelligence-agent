@@ -7,8 +7,9 @@ from datetime import datetime, timezone
 import math
 from src.providers.vnstock.financial_statements import MAP
 from src.schemas.financials import FinancialEngineResponse
+from src.analytics.financial_catalog import NOTE_FIELDS
 
-GROWTH_FIELDS = ('revenue', 'operating_income', 'net_profit', 'profit_parent')
+GROWTH_FIELDS = ('revenue', 'operating_income', 'net_profit', 'profit_parent', 'customer_loans', 'customer_deposits')
 FLOW_FIELDS = set(MAP['income']) - {'eps_reported'} | (set(MAP['cash']) - {'cash_beginning', 'cash_ending'})
 
 
@@ -27,7 +28,15 @@ def previous(period, years=0, quarters=0):
 
 def compatible(*observations):
     present = [item for item in observations if item is not None]
-    return bool(present) and len({(item.ticker, item.source, item.currency, item.consolidation) for item in present}) == 1
+    return bool(present) and len({(item.ticker, item.source, item.currency, item.consolidation,
+        (item.source_context.original_metadata.get('binary_sha256') if item.source_context else None)) for item in present}) == 1
+
+
+def compatible_refs(refs):
+    # A saved history may contain independently reviewed vintages. Matching
+    # issuer/scope alone does not establish cross-document comparability.
+    return len({(r['source'],r['currency'],r['consolidation'],
+        (r.get('source_context') or {}).get('original_metadata',{}).get('binary_sha256')) for r in refs}) <= 1
 
 
 def finite_result(value):
@@ -35,7 +44,7 @@ def finite_result(value):
 
 
 def financial_engine(packet, *, frequency='annual', limit=8, sector=None, industry=None):
-    if frequency not in ('annual', 'quarterly', 'ttm') or not 1 <= limit <= 20:
+    if frequency not in ('annual', 'quarterly', 'ttm') or not 1 <= limit <= 40:
         raise ValueError('Unsupported financial projection')
     indexed = {}
     for kind, receipt in packet.reports.items():
@@ -55,10 +64,12 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
 
     def input_ref(obs, field):
         receipt = packet.reports[obs.statement]
+        meta=obs.source_context.original_metadata if obs.source_context else {}
         return dict(statement=obs.statement, period=obs.period, field=field,
             code=obs.field_codes.get(field), value=obs.fields.get(field), source=obs.source,
             currency=obs.currency, basis=obs.basis, consolidation=obs.consolidation,
-            content_sha256=receipt.content_sha256)
+            content_sha256=meta.get('original_receipt_sha256',receipt.content_sha256),
+            source_context=obs.source_context.model_dump(mode='json') if obs.source_context else None)
 
     def value_at(kind, period, field):
         obs = indexed[kind].get(period)
@@ -89,7 +100,8 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         observations = [indexed[kind].get(period) for kind in MAP]
         values, evidence, provenance = {}, {}, {}
         coherent = compatible(*observations)
-        for kind, fields in MAP.items():
+        for kind in MAP:
+            fields = (*MAP[kind], *NOTE_FIELDS.get(kind,{}))
             for field in fields:
                 value, refs, reason = value_at(kind, period, field)
                 if frequency == 'ttm' and field in FLOW_FIELDS:
@@ -115,13 +127,12 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
             args = [values.get(field) for field in fields]
             refs = [ref for field in fields for ref in provenance.get(field, [])]
             reason = ('not_applicable_to_issuer' if ordinary and packet.profile != 'non_financial' else
-                      'incompatible_statement_basis' if not coherent else
                       'missing_input' if any(arg is None for arg in args) else
                       'nonpositive_denominator' if any(values.get(field) is None or values[field] <= 0 for field in positive) else None)
             if extra:
                 refs += extra[1]
                 reason = reason or extra[2]
-            if len({(ref['source'],ref['currency'],ref['consolidation']) for ref in refs}) > 1:
+            if not compatible_refs(refs):
                 reason = 'incompatible_statement_basis'
             output = fn(*args) if reason is None else None
             if output is None and reason is None:
@@ -132,6 +143,8 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
             provenance[name] = refs
             evidence[name] = dict(formula=formula, inputs=refs, reason=reason)
 
+        calculate('bvps', 'ordinary shareholders capital and reserves / ordinary shares in circulation at the same reporting date; not a market valuation',
+            ['ordinary_equity','ordinary_shares'], lambda e,n:e/n if e>=0 and n==int(n) else None, positive=('ordinary_shares',))
         calculate('gross_margin', 'gross_profit / revenue', ['gross_profit', 'revenue'], lambda a,b:a/b, positive=('revenue',), ordinary=True)
         calculate('net_margin', 'total profit after tax / revenue', ['net_profit','revenue'], lambda a,b:a/b, positive=('revenue',), ordinary=True)
         calculate('total_debt', 'short_debt + long_debt', ['short_debt','long_debt'], lambda a,b:a+b if a>=0 and b>=0 else None, ordinary=True)
@@ -139,11 +152,24 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         calculate('liabilities_assets', 'total_liabilities / total_assets', ['total_liabilities','total_assets'], lambda a,b:a/b, positive=('total_assets',))
         calculate('current_ratio', 'current_assets / current_liabilities', ['current_assets','current_liabilities'], lambda a,b:a/b, positive=('current_liabilities',), ordinary=True)
         calculate('quick_ratio', '(current_assets - inventory) / current_liabilities', ['current_assets','inventory','current_liabilities'], lambda a,b,c:(a-b)/c, positive=('current_liabilities',), ordinary=True)
+        calculate('net_working_capital', 'current_assets - current_liabilities', ['current_assets','current_liabilities'], lambda a,b:a-b, ordinary=True)
+        calculate('loan_deposit_ratio', 'gross customer loans / customer deposits; accounting ratio, not regulatory LDR',
+            ['customer_loans','customer_deposits'], lambda a,b:a/b if a>=0 and packet.profile=='bank' else None, positive=('customer_deposits',))
+        calculate('demand_deposit_share', 'customer demand deposits / total customer deposits; accounting CASA-style share, not vendor CASA',
+            ['customer_demand_deposits','customer_deposits'], lambda a,b:a/b if 0<=a<=b and packet.profile=='bank' else None, positive=('customer_deposits',))
+        calculate('classified_nonperforming_loans', 'loan grades 3 + 4 + 5; excludes securities margin lending',
+            ['loan_grade_3','loan_grade_4','loan_grade_5'], lambda a,b,c:a+b+c if min(a,b,c)>=0 and packet.profile=='bank' else None)
+        calculate('classified_loan_allowance', 'general + specific allowance for classified customer loans; excludes margin allowance',
+            ['loan_allowance_general','loan_allowance_specific'], lambda a,b:a+b if min(a,b)>=0 and packet.profile=='bank' else None)
+        calculate('npl_classified_ratio', 'loan grades 3–5 / classified customer loans; excludes securities margin lending from both numerator and denominator',
+            ['classified_nonperforming_loans','classified_loans'], lambda a,b:a/b if 0<=a<=b else None, positive=('classified_loans',))
+        calculate('classified_loan_coverage', 'general and specific classified-loan allowance / grades 3–5 loans; excludes securities margin lending',
+            ['classified_loan_allowance','classified_nonperforming_loans'], lambda a,b:a/b, positive=('classified_nonperforming_loans',))
         calculate('cash_conversion', 'cash_operating / total profit after tax', ['cash_operating','net_profit'], lambda a,b:a/b, positive=('net_profit',), ordinary=True)
         calculate('capex_cash_outflow', '-capex_signed (only reported outflows)', ['capex_signed'], lambda a:-a if a<=0 else None, ordinary=True)
         calculate('free_cash_flow', 'cash_operating - capex_cash_outflow', ['cash_operating','capex_cash_outflow'], lambda a,b:a-b, ordinary=True)
         calculate('balance_residual', 'total_assets - total_liabilities - total equity', ['total_assets','total_liabilities','equity'], lambda a,b,c:a-b-c)
-        for metric, field in (('roe','equity'),('roa','total_assets')):
+        for metric, field in (('roe','equity'),('roa','total_assets'),('inventory_turnover','inventory')):
             prior_period = previous(period, years=1) if frequency != 'quarterly' else previous(period, quarters=1)
             prior_obs = indexed['balance'].get(prior_period)
             current_obs = indexed['balance'].get(period)
@@ -152,8 +178,19 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
                 prior_reason = prior_reason or 'nonpositive_prior_balance'
             if current_obs and prior_obs and not compatible(current_obs, prior_obs):
                 prior_reason = 'incompatible_prior_balance'
-            calculate(metric, f'total profit after tax / mean(current {field}, {prior_period} {field}); period return, not annualized',
-                ['net_profit',field], lambda p,b: p/((b+prior_value)/2), positive=(field,), extra=(prior_value,prior_refs,prior_reason))
+            average = {'equity':'average_equity','total_assets':'average_assets','inventory':'average_inventory'}[field]
+            calculate(average, f'mean(current {field}, {prior_period} {field})',
+                [field], lambda b:(b+prior_value)/2, positive=(field,), extra=(prior_value,prior_refs,prior_reason),
+                ordinary=field=='inventory')
+            if metric == 'inventory_turnover':
+                calculate(metric, '(revenue - gross_profit) / average_inventory; period turnover, not annualized',
+                    ['revenue','gross_profit',average], lambda r,g,b:(r-g)/b if r>=g else None,
+                    positive=(average,), ordinary=True)
+            else:
+                calculate(metric, f'total profit after tax / mean(current {field}, {prior_period} {field}); period return, not annualized',
+                    ['net_profit',field], lambda p,b: p/((b+prior_value)/2), positive=(field,), extra=(prior_value,prior_refs,prior_reason))
+        calculate('asset_turnover', 'revenue / average_assets; period turnover, not annualized',
+            ['revenue','average_assets'], lambda r,a:r/a if r>=0 else None, positive=('average_assets',), ordinary=True)
 
         for field in GROWTH_FIELDS:
             for suffix, prior_period in (('growth_yoy', previous(period, years=1)), ('growth_qoq', previous(period, quarters=1) if '-Q' in period else None)):
@@ -162,7 +199,7 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
                 before = prior_row[field] if prior_row else None
                 after = values.get(field)
                 all_refs = provenance[field] + (prior_row['calculations'][field]['inputs'] if prior_row else [])
-                comparable = prior_row and len({(ref['source'],ref['currency'],ref['consolidation']) for ref in all_refs}) <= 1
+                comparable = prior_row and compatible_refs(all_refs)
                 reason = 'missing_comparable_period' if before is None or after is None or not comparable else 'nonpositive_base' if before <= 0 else None
                 values[name] = finite_result((after-before)/before) if reason is None else None
                 if reason is None and values[name] is None:
@@ -174,7 +211,7 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         for field in ('gross_margin','net_margin','roe'):
             prior_row = results.get(previous(period, years=1))
             refs = provenance[field] + (prior_row['calculations'][field]['inputs'] if prior_row else [])
-            comparable = prior_row and len({(ref['source'],ref['currency'],ref['consolidation']) for ref in refs}) <= 1
+            comparable = prior_row and compatible_refs(refs)
             before = prior_row[field] if comparable else None
             values[field+'_change'] = finite_result(values[field]-before) if values[field] is not None and before is not None else None
             evidence[field+'_change'] = dict(formula='current ratio - exact prior-year ratio (fraction difference)',
@@ -196,7 +233,7 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         for field in (('operating_income','net_profit') if packet.profile == 'bank' else ('revenue','net_profit')):
             current = latest[field]
             comparable_refs = latest['calculations'][field]['inputs'] + (prior['calculations'][field]['inputs'] if prior else [])
-            before = prior[field] if prior and len({(ref['source'],ref['currency'],ref['consolidation']) for ref in comparable_refs}) <= 1 else None
+            before = prior[field] if prior and compatible_refs(comparable_refs) else None
             if current is not None:
                 changes.append(dict(metric=field,current_period=latest['period'],prior_period=prior_period,
                     current=current,previous=before,absolute_change=finite_result(current-before) if before is not None else None,
@@ -240,7 +277,8 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
         profile=packet.profile,rows=rows,chart_rows=chart_rows,changes=changes,statements=statements,
         available_period_types=period_types,available_statements=available,
         source_receipts=[dict(**receipt.model_dump(mode='json',exclude={'observations'}),
-            periods=[dict(period=o.period,basis=o.basis,source_dates=o.source_dates,diagnostics=o.diagnostics) for o in receipt.observations])
+            periods=[dict(period=o.period,basis=o.basis,source_dates=o.source_dates,diagnostics=o.diagnostics,
+                source_context=o.source_context.model_dump(mode='json') if o.source_context else None) for o in receipt.observations])
             for receipt in packet.reports.values()],source_version=packet.source_version,
         metadata_sha256=packet.metadata_sha256,financial_identity_guard=packet.profile!='non_financial',
         read_at=datetime.now(timezone.utc),sector=sector,industry=industry,is_fixture=packet.is_fixture,
@@ -249,5 +287,5 @@ def financial_engine(packet, *, frequency='annual', limit=8, sector=None, indust
             'Source publication dates are unqualified local strings; read time is not publication time.',
             'Consolidation is unknown unless explicitly supplied; matching unknown bases do not certify consolidation.',
             'Quarterly ROE/ROA are period returns, not annualized. TTM needs four contiguous qualified quarters.',
-            'Valuation, NIM, NPL and CASA lack qualified inputs and remain unavailable.',
+            'Valuation and NIM require additional qualified inputs. Loan quality and demand-deposit shares use only explicitly mapped note definitions, not vendor or regulatory equivalents.',
             'Annual and quarterly reports retain their independent source versions; differences are not reconciled by overwriting.'])

@@ -1,18 +1,543 @@
 # Woofi — Domain Context
 
-### Scoped price map V1 — 2026-10-16
+## Current project and workspace checkpoint — 2026-10-30
 
-Explore can switch between its default list and equal-sized quote tiles over the
-same loaded page; search, exchange/index filters and pagination retain their
-existing scope. Watchlist exposes the same presentation in a secondary closed
-disclosure over followed symbols, without changing Read first or review receipts.
-Both consume the existing page LivePrices context and source-computed price
-changes. There are no new leases, requests, providers, financial calculations,
-APIs, schema or acquisition changes. Stale/missing backgrounds are neutral and
-each valid tile retains its own timestamp, session and source disclosure. Tile
-area is not capitalization, money flow, strength or market-wide breadth.
-Research/methodology/feasibility: docs/DEEP_INTERACTIVE_PRODUCT_RESEARCH_V1.md.
-Automated rendering and actual production acceptance are recorded separately.
+The current product-development focus is Stock Research using existing,
+authorized data and the financial data and UI already available. Vnstock Bronze
+and a Vnstock v5 upgrade remain paused pending clarification on historical
+coverage, advanced metrics, and data-use rights. Do not make Bronze-dependent
+work or paid-source assumptions part of unrelated improvements.
+
+The development Git root is `C:\Users\PC\Projects\woofi-dev`; it contains the
+feature development checkout and currently registers seven Codex task worktrees.
+Treat every worktree as an independent line of work: inspect its branch, HEAD,
+and status before integration or cleanup. The separate checkout at
+`C:\Users\PC\Downloads\vn30-intelligence-agent` remains present and is
+referenced by the canonical runtime for SSI configuration. It is not safe to
+delete or consolidate based on folder name or commit ancestry alone. The
+canonical runtime, its release pin, services, data, and credentials are separate
+from this development checkout; source changes do not become live without the
+documented release workflow.
+
+The development tree contains owner work in progress. Before any Git operation,
+inspect the exact working-tree changes and preserve them unless the owner
+explicitly authorizes a scoped operation. Do not infer that uncommitted work is
+redundant or abandoned from its age, path, or worktree name.
+
+## Owner direction — Stock Research priority while Bronze is pending, 2026-10-29
+
+Pause new features that depend on Vnstock Bronze and any Vnstock v5 upgrade
+while awaiting clarification on historical financial statements, advanced
+metrics and applicable data-use rights. Continue Stock Research using existing
+authorized data, saved captures, APIs, deterministic Financial Engine and UI
+components. Existing private/public evidence and display gates still apply.
+
+Prioritize a coherent company-research experience: help users understand the
+business, inspect financial changes and supporting evidence, and see coverage,
+period and freshness limits. Reuse the current research destinations, charts,
+statements, News and corporate-action contracts. Develop small useful slices;
+new sources, numerical definitions, acquisition or deployment are separate scope.
+
+## Owner direction — budget-constrained data and intelligence priority, 2026-10-22
+
+The owner has no budget for purchasing the missing data at this stage. Work with
+existing captures and legitimately accessible free sources; do not introduce paid
+data subscriptions or new service costs without a subsequent explicit owner
+decision. Improve data gradually within available resources. Completing the
+VN30/VN100 matrix or every acquisition task is not a release prerequisite, and
+coverage targets must not drive forced collection or invented completeness.
+
+Finish a small, bounded pass on the usability and reliability of available data,
+then return the main product effort to Woofi's original purpose: turn evidence
+into useful information about what changed, why it deserves attention and what
+remains uncertain. Data collection can continue incrementally alongside this
+work. A useful, verified subset is sufficient to start; absent data stays visible
+and narrows the claims rather than blocking unrelated useful analysis.
+
+Build the intelligence layer on the existing deterministic analytics, with
+inspectable source evidence and a clear distinction between observed facts,
+computed comparisons and interpretations. AI may explain those outputs but must
+not invent or silently recalculate financial facts. Preserve the existing
+Materiality, public/private access and no BUY/SELL/HOLD boundaries.
+
+ML and tool-using agents are later extensions of this foundation. ML needs
+appropriate historical evidence, labels and evaluation; agents need bounded
+tools, traceable actions and explicit cost/write permissions. This direction does
+not resume the paused Technical Materiality calibration or authorize unattended
+collection, new training runs or agent deployment.
+
+## Financial collector V5.7 — controlled private pilot, 2026-10-22
+
+A bounded collector now consumes fingerprinted V5.6 P0 tasks and appends to the
+existing V5.5 journal. HDB/MSN/VJC add four annual and four quarterly periods each;
+an independently reviewed HDB original adds 24 source amounts. Coverage rises
+from 23 to 26 VN100 issuers, resolving 18 initial statement-family P0 gaps. Original
+document bytes, SDK captures, reviewed evidence, resumable acquisition state and
+before/after reports remain private. A directly reported HDB NIM is retained as
+unqualified page evidence and PARTIAL coverage; public rights are not promoted.
+Existing source revisions and longer histories remain unchanged. See
+`docs/FINANCIAL_COLLECTOR_V5_7.md` for source restrictions, commands and measured
+limits. APIs and the Financial Engine retain their existing behavior.
+
+## Financial coverage intelligence V5.6 — private offline planning, 2026-10-22
+
+Two dated HOSE membership snapshots (effective 2026-02-02 and 2026-08-03) now
+frame a read-only VN30/VN100 financial coverage inventory over the V5.5 SQLite
+journal. The July snapshot confirms 30 VN30 and 100 VN100 constituents; 20 and
+23 respectively have saved financial data. An internal service and CLI derive
+statement/metric/industry gaps and a prioritized machine-readable acquisition
+backlog without duplicating observations or changing HTTP contracts. Missing
+history stays unknown outside observed boundaries, proposed source availability
+remains untested, SSI industry labels stay provisional, and stored values retain
+their separate public-display gates. See `docs/FINANCIAL_COVERAGE_V5_6.md` and
+the per-ticker CSV for evidence and limits.
+
+## Financial SQLite foundation V5.5 — private offline storage, 2026-10-22
+
+The dedicated financial MetricJournal now supports explicit backed-up schema
+upgrades, immutable capture revisions, complete annual/quarterly statement
+observations and source/basis/scope-specific period selection. The existing
+23-issuer bundle and five reviewed alternatives are mirrored privately; all
+eight 34-quarter histories, source codes, hierarchies, nulls and provenance remain.
+Shorter saved candidates can add new periods without replacing older revisions.
+Persistence is independent of the unchanged engine/display response limits;
+the legacy metric importer now requests 40 rather than 20 periods and also keeps
+all base statements. Read-only parity tools reuse existing packet/projection
+contracts. APIs still read saved captures; no database serving, acquisition,
+production/configuration, frontend or rights changes were activated. See
+`docs/FINANCIAL_SQLITE_STORAGE_V5_5.md` for commands, coverage and rollback.
+
+## Financial Intelligence V5.4 — current, 2026-10-22
+
+The existing private banking dashboard now compares customer-loan and customer-
+deposit growth from saved VCI lines for TCB, VCB, ACB, BID, CTG, MBB and VPB.
+Exact period pairs use the canonical engine formula; VCI-derived rates remain
+`PARTIALLY_VERIFIED` with missing reporting scope, fiscal boundaries,
+publication timing, original-document review and public-use rights explicit.
+Those rates are visible only in the authorized personal-research view. Public
+consumers continue to withhold them. Source-reported amounts and derived growth
+remain distinct. No new provider, acquisition, or chart system was added.
+
+The FY2025 bank comparison contains seven observed loan/deposit growth values,
+but only TCB and VCB form a comparable two-company sample out of 22 observed
+banks; no sector ranking is asserted. Existing TCB original-note NPL, allowance
+coverage and accounting demand-deposit-share metrics remain limited to 2024–25.
+NIM and cost of funds remain unavailable for lack of matched bases. Visual
+acceptance is pending; preview services were not restarted. See
+`docs/FINANCIAL_BANKING_SPECIALIST_V5_4.md` for periods, rates, evidence gates,
+sample counts and metric limits.
+
+## Financial Intelligence V5.3 — historical, 2026-10-22
+
+The private VCI research projection now turns source-reported VND statement
+lines into reusable sibling-component charts and separate unparented-line
+history views. It reuses each saved VCI `FinancialLine` code, parent, source
+labels, units, values and period basis. Parent totals never enter their own
+child panels; root lines are grouped bars, not a claimed composition. Only
+non-negative balance-sheet sibling groups use stacks. Component availability
+is shown per observed source code and period; no residual, total, or coverage
+percentage is inferred. The personal-research gate remains in place and this
+does not approve public redistribution rights.
+
+All 21 saved packets with VCI hierarchy support expose component groups (12
+non-financial, seven banks, two securities); the two CafeF-only annual packets
+for VHM/VNM remain outside this VCI hierarchy projection. Per issuer, panels
+contain 183 source-line series for non-financial, 104 for banks and 345 for
+securities. FPT/HPG/MWG/PNJ/REE/SSI/TCB/VCB retain 34 quarterly periods; the
+other VCI packets provide four quarterly periods. Eight issuers provide eight
+annual periods; the remaining VCI packets provide four. See
+`docs/FINANCIAL_DATA_COMPONENTS_V5_3.md` for line groups, coverage and
+validation.
+
+## Financial Data Expansion V5.2 — historical, 2026-10-22
+
+The saved VCI capture bundle now has 23 issuers, up from ten in V5.1. A 13-company
+pilot used the installed `vnstock==4.0.2` public Finance methods for four quarterly
+and four annual periods per issuer. The batch is serial, resumable, hash-pinned,
+rate-paced, isolates issuer failures, and keeps immutable revisions; a shorter
+response cannot replace longer saved histories. The new bank sample includes
+ACB, BID, CTG, MBB and VPB; securities VCI; real estate VIC/VRE; manufacturing,
+retail and energy captures are also present. Existing V5.1 34-quarter histories
+remain unchanged. Current private API projections serve the new packets with
+income, balance and cash-flow statement families. Source labels/hierarchies are
+preserved; currency/unit, consolidation scope, exact fiscal boundaries and
+publication dates remain unknown when the SDK does not supply them. SSI-observed
+peer coverage has expanded, but taxonomy verification and peer rankings remain
+disabled. No paid provider, dependency upgrade, public-rights grant, UI redesign,
+preview restart or browser acceptance was added. Backend tests passed 1,618
+tests and 32 subtests; frontend 336 passed with one existing skip; typecheck and
+production build passed. The private API passed in-process checks for all 13 new
+issuers while FPT, TCB and VCB retained 34-quarter results. Visual/browser
+acceptance remains pending. See
+`docs/FINANCIAL_DATA_EXPANSION_V5_2.md` for per-company periods, line counts,
+industry sample sizes, API checks and regression results.
+
+## Financial Data Expansion V5.1 — historical, 2026-10-21
+
+The private VCI history path now exposes the existing 34 quarterly periods
+(2018-Q1–2026-Q2) for FPT, HPG, MWG, TCB, VCB and SSI. The previous eight-period
+request and twenty-period engine caps were presentation limits; saved source
+histories were already complete. VNM has four saved CafeF annual periods and no
+saved quarterly packet. VCI source lines retain their source field IDs and parent
+hierarchy in the existing statement table; direct values keep their reported
+standalone/YTD/period-end labels. Unknown financial units and conflicting lines
+remain withheld. No new provider, source permission, or public-display approval
+was added. See `docs/FINANCIAL_DATA_EXPANSION_V5_1.md` for measured V4 comparison,
+provider limits, and regression results.
+
+## Financial Intelligence V4 — current, 2026-10-21
+
+V4 supersedes the historical checkpoints below: **341 source/accounting and
+reporting-metadata-qualified observations (216 reported, 125 derived), 70 supported
+definitions out of 77 canonical definitions, ten saved issuers**. Qualified original
+histories cover FPT 2022–24, TCB 2023–25, VCB 2024–25, HPG 2024–25 flows/2025 balance
+and MWG pre-audit 2024. VNM/SSI remain useful partial provider coverage.
+Original captures and revisions remain preserved; metric-level gaps stay visible.
+FPT dated ordinary BVPS is supported for 2023/24; P/E/P/B/earnings yield remain
+unavailable without matched prices, shares and corporate-action evidence.
+The bank comparison is **TCB/VCB, 2/22 observed banks, 15 FY2025 metrics**;
+observed-industry ranks/percentiles are suppressed. Historical sector totals stay
+disabled. No WiData or paid subscription is required.
+
+Supported private launchers and live HTTP checks PASS. Actual integrated-browser
+desktop checks PASS for exercised flows; mobile, tooltips, exhaustive retries and
+full live-market context remain PENDING. Backend **1,600 + 32 subtests**, frontend
+**334 passed + one existing skip**, typecheck/build and real contracts/static
+rendering PASS. PIT/public-rights/fully-verified counts remain separately zero.
+See [V4 delivery](research/FINANCIAL_INTELLIGENCE_V4_DELIVERY.md),
+[feature comparison](research/SSTOCK_FEATURE_COMPARISON_V4.md),
+[acceptance and manual checklist](research/DASHBOARD_VERIFICATION_V4.md),
+[coverage](research/validation/free-data-v4/VERIFIED_METRIC_COVERAGE.csv), and
+[valuation decisions](research/VALUATION_EVIDENCE_AUDIT.md).
+
+## Historical context
+
+## Financial Intelligence V3 — historical checkpoint, 2026-10-21
+
+V3 deepens the same private engine/data path: original VCB 2025 audited
+statements and TCB deposit/loan-quality notes raise supported definitions from
+50 to 64 and source/accounting-verified metric-period observations from 100 to
+175 (113 reported, 62 derived). Reporting metadata is a separate verification
+dimension; current private displays still do not require historical PIT evidence.
+Nine saved issuers and original provider histories remain; no source splicing.
+TCB/VCB FY2025 now support 15 qualified peer metrics, ranks and covered medians
+within the existing 406/61 observed SSI snapshot. Financial highlights, dedicated
+balance/cash/profitability/health navigation, company-context industry links and
+a dividend shortcut reuse Woofi components. No WiData/paid service or dependency
+upgrade. Backend 1,591 + 32 subtests; frontend 331 + one existing skip; typecheck,
+build and real contracts/static rendering pass. Runtime/browser/mobile PENDING;
+prior policy denial not bypassed. See research/FINANCIAL_INTELLIGENCE_V3_DELIVERY.md.
+
+## Financial free-data activation — prior bdc70ad checkpoint
+
+SStock is the product/UI benchmark; WiData and paid providers are not required.
+Existing SSI/VCI histories remain primary and unchanged. Strict saved CafeF,
+original HPG/TCB PDF and VSDC adapters add a ninth issuer, supported annual
+calculations and three official dividend notices. The two original-report views
+contain 100 SOURCE_VERIFIED and ACCOUNTING_VERIFIED metric-period observations
+(63 reported, 37 derived), with independent PIT/public-rights counts still zero.
+The source selector preserves original provider histories without source splicing.
+The private observed SSI snapshot now powers 61 industry directories and useful
+individual company tables/coverage; no historical totals or unqualified ranks.
+Actual 54 stock + 61 industry + nine dividend API responses pass offline checks;
+browser/mobile runtime stays PENDING after the prior policy denial. No restart,
+production/main change, push or merge. See research/FREE_DATA_DELIVERY_REPORT.md,
+research/ACTIVATION_DECISION.md and the updated V1 runbook.
+
+## Financial real-data activation — prior 86000d3 checkpoint
+
+The existing local research path now reads eight pinned VCI issuers, including
+canonical TCB/SSI adapter captures. Source lines, units, ownership, dates and
+flow basis are checked; no public rights or original metadata are invented.
+An additive verification disclosure distinguishes VERIFIED/PARTIALLY_VERIFIED/
+UNAVAILABLE from access/visibility. Twenty-four actual private API and frontend
+contracts pass; 2,816 single reported observations are eligible locally, zero
+fully verified/public metrics. A private review preserves 406 archived SSI HOSE
+classification pairs without promoting receipt time to effective membership.
+New-code runtime/browser acceptance stays PENDING after the prior policy denial;
+no services were restarted or bypassed. See research/REAL_DATA_ACTIVATION_REPORT.md.
+
+## Financial Data Intelligence V1 — isolated source increment
+
+The canonical financial engine now has 60 outputs (49 existing, 11 added).
+Normalized facts retain provenance, scope, optional fiscal/publication dates,
+revision/formula version and explicit quality. An explicit offline ingestion CLI
+writes a dedicated revision journal; industry APIs only read that journal and a
+reviewed, versioned, effective-dated taxonomy. Matched-cohort sums/ratios, coverage,
+peer rank/percentile and contributions have model-specific guards. No real
+taxonomy is enabled and no unqualified VCI field is promoted to public evidence.
+Four chart projections and a coverage/peer comparison page reuse existing UI.
+SStock research covers eighteen issuers and industry interactions; WiData
+methodology is separate from vendor-formula verification. SSI, dependencies,
+production config and other checkouts are preserved. See
+docs/FINANCIAL_DATA_INTELLIGENCE_V1.md and research/FINAL_RESEARCH_REPORT.md.
+
+## Financial Analysis V6 — local personal research
+
+Owner-authorized personal use is separate from public redistribution permission.
+An explicit loopback-only development mode reads hash-pinned real VCI captures
+through the existing canonical financial engine. FPT/PNJ/VCB are reused; bounded
+HPG/MWG/REE reads extend the measured sample. SOURCE_REPORTED amounts populate
+annual/quarterly statements and historical amount charts; UNKNOWN reporting basis
+and absent original units stay explicit. Derived unknown-basis comparisons and
+public access remain guarded. Frontend 3431 uses core backend 8431 unchanged plus
+a read-only saved-evidence API on 8432. Existing 3430/8430 and production untouched.
+See `docs/FINANCIAL_PERSONAL_RESEARCH_V6.md` for scope, receipts and startup.
+
+## Financial Source-of-Truth V5.1 — evidence incomplete
+
+The exact official PNJ 2024 annual-report download returned HTTP 403; document
+reader screenshots returned text markers without image content. Binary SHA-256
+and original-page visual checks remain unverified. Decision C, not A/B. Existing
+ten saved-text facts replay successfully with balanced statements and scoped
+EN/VI HTML; public rights remain unresolved and public activation stays disabled.
+No application/runtime changes. See `docs/FINANCIAL_SOURCE_OF_TRUTH_V51.md` for
+field-level status, retrieval receipts and the exact rights question.
+
+## Financial Source-of-Truth V5 — independent internal evidence
+
+PNJ's official 2024 annual report supplies five fields for 2024/2023 with explicit
+consolidation, calendar year and VND units. Ten saved page-text facts normalize
+through the existing packet/engine/display pipeline; both balance identities and
+all ten saved VCI numeric comparisons pass. VCI basis/rights remain unqualified.
+The new reviewed-manifest boundary is offline, generic and limited to annual
+calendar-year monetary fields. Scoped EN/VI existing-component HTML renders show
+real values internally; ordinary public consumers reject internal payloads.
+Public rights, binary/page-image verification and browser acceptance remain open.
+No runtime provider wiring, acquisition, database, production or server changes.
+See `docs/FINANCIAL_SOURCE_OF_TRUTH_V5.md` for exact evidence and reproducibility.
+
+## Financial Data Activation V4 — partial, development only
+
+The owner attests lawful use of the financial data; this is not a provider-issued
+public redistribution license. The saved FPT/PNJ/VCB sample has 378 observations
+with no reporting-basis or original-unit fields. No new real metric is activated.
+Display projection now exposes independent blockers per metric; empty chart
+pairs share an inspectable disclosure while individually usable series remain.
+Existing calculations and guards are unchanged. See
+`docs/FINANCIAL_DATA_ACTIVATION_V4.md` for provider comparison, source hashes,
+rights distinction and the exact basis-evidence gate before activation.
+
+## SSI Summary No Content diagnosis — 2026-10-20
+
+Four saved Oct 20 Summary receipts are HTTP 200/business 204, not zero activity.
+SDK 3.2.1 current/historical methods share the dated endpoint; saved queries match
+the documented shape. Cause remains unproven; no application fix or activation.
+No new SSI/auth requests. Read-only production census found no runtime/listeners,
+with stale RUNNING intent; P1 and application pin unchanged. Recovery is separate.
+Twelve new offline boundary tests preserve raw envelopes and missing-data guards.
+See docs/SSI_SUMMARY_NO_CONTENT_DIAGNOSIS_V1.md for evidence and one bounded,
+separately authorized date-comparison experiment.
+
+## Financial Research experience V2 — local source, 2026-10-19
+
+Existing Financial Analysis now has Business picture, Growth drivers, Valuation,
+Statements and Documents/sources. Six guarded chart projections reuse existing
+Python outputs: partial asset/funding stacks, compatible ratio/YoY lines, quarterly
+results and explicit unavailable P/E/P/B shells. Source-parent statement collapse,
+per-period status tables and existing receipts remain inspectable. No chart may
+mix reporting bases, fill missing values or fall back to raw unqualified amounts.
+Banks retain separate supported groups. Nine saved VCI replays still enable zero
+new live metrics. No provider request/production change; actual Cloud Browser
+acceptance PENDING. See docs/FINANCIAL_RESEARCH_EXPERIENCE_V2.md.
+
+## Financial Analysis V2 foundation — local development, 2026-10-19
+
+Existing VCI financial packets now retain per-record original unit/currency,
+reported year/quarter, source hash and explicit unknown filing/audit/revision
+metadata. Display rights default unreviewed; nonfixture display requires applicable
+reviewed permission evidence, never a raw provider flag. Metrics use their actual
+input bases rather than unrelated statement coherence; mixed-basis ratios remain
+withheld. Same Stock Detail UI adds inspectable EN/VI statement provenance.
+Nine saved FPT/PNJ/VCB replays still have zero qualified metrics; real-data vertical
+slice remains PARTIAL. No provider requests or production change. See
+docs/FINANCIAL_ANALYSIS_V2_FOUNDATION.md for source matrix and narrow next gate.
+
+## SSI market integration V2 — offline evidence tools, 2026-10-19
+
+Market checked at 15:58:57 ICT, outside HOSE continuous trading; zero new SSI/auth
+requests. Reuse existing saved evidence and owner-reported SSI use/storage/
+redistribution/commercial authorization; new-family scope applicability remains
+separate. Pure helpers in market_summary compare canonical provisional snapshots
+without summation (decreases/source regressions retained for review) and audit raw
+ICB pairs/duplicates/conflicts with provenance. Saved coverage remains VN30 30/30,
+VN100 100/100, HOSE ordinary stocks 406/406; no HNX/UPCOM extrapolation or taxonomy
+inference. No new public activation, provider/cache/DB/UI wiring or production
+change. See docs/SSI_MARKET_INTEGRATION_V2.md for the field matrix and narrow gates.
+
+## Owner correction — full-row market fills (19 October 2026)
+
+Latest owner preference supersedes the muted pastel experiment: restore the original mint green/red/gold/purple/cyan row hues with dark semibold numeric text in both themes; compact 28px desktop rows, 36px mobile. Qualified advancing/declining rows use a continuous percentage shading scale, capped at 7 percentage points for presentation only (not an inferred exchange limit). The corrected ramp starts near-neutral, reaches the approved original hue at 3%, then deepens to the 7% visual cap. 1% and 2% must have at least a 30-channel RGB separation in the presentation regression; the earlier narrow ramp was too subtle. Missing/inconsistent percentages use the light base; stale/missing/unknown/error remain neutral. Explicit hover retains the row fill. Ceiling/floor/reference retain the original purple/cyan/gold hues. Heatmap, data qualification and trading semantics remain unchanged.
+
+The owner's third reference screenshot supersedes the V2 movement-cell-only instruction: fill the entire stock row in the Board and Overview mover tables, with a compact gap and rounded outer corners. Reuse the centralized price-state resolver and contrast-safe theme palette. Stale/missing/unknown/error rows stay neutral. Heatmap, sorting, source dialogs and data contracts are unchanged. This source correction requires new visual acceptance; existing running preview builds do not update automatically.
+
+### Market Workspace UI refinement V2 — local source, 2026-10-19
+
+Increment from 090abb0: compact desktop navigation collapse retains all links and
+accessible labels; mobile keeps visible destinations. Hot Topics restores existing
+same-Story thumbnails with fixed neutral fallback, without quote consumers or new
+acquisition. Overview emphasizes VN-Index/source freshness with approved mascot
+states; only movement cells receive resolver-qualified full backgrounds. Heatmap
+and the 72h Hot Topics / 24h Focus contracts are preserved. No backend, data, SSI
+qualification or production change. Cloud Browser unavailable; visual acceptance
+PENDING. See `docs/MARKET_WORKSPACE_UI_REFINEMENT_V2.md`.
+
+### Hot Topics and primary navigation V1 — local source, 2026-10-19
+
+Approved restoration reuses `/api/news/hot?limit=4`, its 72-hour independent-
+publisher ranking and original evidence. Overview now has one Hot Topics / Market
+Focus area; Focus retains its own 24-hour qualification/window. News remains
+available when equity metadata fails, with one stable mounted context. Public
+Market / News / Watchlist destinations stay labelled on mobile without a drawer.
+No provider, backend, Watchlist storage, acquisition or production change.
+Browser acceptance unavailable (Cloud Browser not exposed); do not substitute a
+local browser. See `docs/HOT_TOPICS_NAVIGATION_V1.md` for source tests and limits.
+
+### Provisional SSI engineering contract — local development, 2026-10-18
+
+Owner-approved conventions now normalize saved MasterData bands (VND/share ×1)
+and daily matched Summary pairs (shares/VND ×1) as PROVISIONAL_INTERNAL only.
+Exact identity/day/receipt/numeric/plausibility checks preserve raw evidence and
+never sum successive snapshots. A default-disabled development/replay/localhost
+route reuses the Board, with no ingestion shell, provider read or Watchlist change.
+Production/public guards remain; no SSI certification or public rights are implied.
+See `docs/SSI_PROVISIONAL_MARKET_CONTRACT_V1.md` for gates and passing validation.
+
+### Stock Intelligence integration V1 — local development, 2026-10-18
+
+Stock Detail now connects Overview/Company News to the existing persisted Watchlist
+intelligence read, original company stories, source-qualified ticker proofs and
+unverified community evidence. News retains the canonical 72-hour acquisition
+window; community explicitly uses its existing 24-hour publication window. One
+retained panel, no added polling/quotes/acquisition. Pulse copy grouping is optional
+display metadata; default Watchlist behavior and native review IDs remain intact.
+Reviews are explicit and browser-local, merge current state, preserve concurrent
+reviews and never auto-review opened content. Unknown source/review state remains
+unknown. Financial/corporate-action gates and all Market Workspace work are retained.
+Browser acceptance PENDING. See `docs/STOCK_INTELLIGENCE_INTEGRATION_V1.md`.
+
+### Fundamental Analysis V1 qualification increment — local development, 2026-10-18
+
+The existing Financial Analysis overview now groups valuation, business performance,
+profitability and financial health, reusing its engine/charts/statements. The display
+projection adds explicit QUALIFIED/UNAVAILABLE/UNQUALIFIED/DEMO metric contracts and
+withholds unknown/conflicting reporting bases from metrics, charts and comparisons.
+Original raw evidence and full engine math remain inspectable. Valuation is not
+inferred; reported EPS remains period-specific VND/share. Nine saved VCI responses
+have unknown consolidation and do not pass the live display gate. No new source
+read, provider change, worker or production mutation. Browser status PENDING.
+See `docs/FUNDAMENTAL_ANALYSIS_V1_INCREMENT.md` for the metric contract and limits.
+
+### Corporate-action original-source validation — local development, 2026-10-18
+
+Six saved components across five issuers were compared field by field with
+official depository notices and an issuer-authored mirrored PDF text. Terms and
+record dates are corroborated within the documented evidence limits; ex-rights
+dates remain original-unverified, with missing component-specific payment dates.
+No observed conflict in compared facts, no complete original-source acceptance.
+Source-marked verification is now explicitly record-level; incomplete details and
+unresolved corrections cannot read as fully confirmed. Recorded links/publication
+dates are not automatically labeled original issuer documents/announcements.
+Saved records, API, acquisition and production are unchanged. See
+`docs/CORPORATE_ACTION_VALIDATION_V1.md` for the field matrix and evidence limits.
+
+### Stock Detail company overview and distributions — local increment, 2026-10-18
+
+Existing Stock Detail now has a compact cached-identity company panel with explicit
+business-description/classification limitations, original metadata source/sync time
+and a link to its existing lazy financial analysis. Full issuer identity is preserved
+in the header. The existing corporate-action tab reuses the same stored-evidence
+read, with local category filters and one responsive source record per observation.
+Cash/share/rights terms remain type-specific; only explicitly verified, active,
+nonfixture source records may expose event dates/terms. Pending/withdrawn/DEMO,
+missing fields and incomplete coverage remain explicit. No provider or DB change.
+See `docs/STOCK_DETAIL_COMPANY_ACTIONS_V1.md`. V2.2 source is preserved; no preview
+process or permission troubleshooting is part of this increment. Browser acceptance
+remains BLOCKED and no live corporate-action acceptance is claimed.
+
+### V2.2 bounded implementation — local development, 2026-10-18
+
+The existing V2.1/Overview/Heatmap/KL-GT source is extended by a shared nine-state
+price resolver and theme tokens, a pure unqualified SecuritiesSummary pair normalizer,
+and optional replay-only synthetic industry grouping using the existing Board rows.
+`/demo/market` is not available in production-bound builds. Actual SSI qualification
+gates remain unchanged; no summary acquisition path or ICB activation was added.
+See `docs/MARKET_WORKSPACE_V22_INCREMENT.md` for focused validation and limits.
+This is source implementation, not a declaration of browser/live acceptance.
+
+### Market Workspace continuation and SSI qualification — 2026-10-18
+
+Resume `codex/woofi-market-board-correction` in the existing `woofi-visual-news-v1`
+worktree. Its latest committed Market Workspace source is
+`cb5979fa5e1717d4b634a98490cc391f6da50aa5`, containing Unified V2.1 and the
+Overview/Compact-Detailed Heatmap refinement. Newer uncommitted KL/GT presentation,
+numeric sorting, source inspection, qualified-limit color guards and tests extend
+that checkpoint. Preserve them; the earlier V1/V2.1 commits are ancestors, not
+alternative starting points. Isolated browser acceptance evidence already exists;
+the older preview-denial entries below describe historical stages.
+
+The five completed SSI reads on October 17 demonstrate paired SecuritiesSummary
+`totalMatch`/`totalMatchValue`, SecuritiesInfo `icbCode`/`icbName`, and MasterData
+`ceiling`/`floor`/`refPrice`. Do not repeat these reads merely to rediscover the
+fields. Successful access does not establish units, detailed trading scope,
+redistribution rights or current-session freshness. Summary and limits have trading
+dates without source observation timestamps; retrieval time cannot substitute.
+No data family is fully qualified for additional activation. KL/GT remain unavailable
+when unqualified, industry grouping remains inactive, and actual SSI limit colors
+remain gated. See `docs/SSI_MARKET_DATA_QUALIFICATION.md` for exact sample coverage,
+saved evidence receipts and the remaining narrow integration gates.
+
+Existing simulated/replay UI validation is not live data acceptance or final user
+product approval. This continuation makes no production, Supervisor, SQLite,
+acquisition, cooldown, Technical Pilot or FPT automation change; no push/deployment.
+
+### Targeted V2.1 Overview / Heatmap refinement — local development
+
+Overview compares only a known same-date/session cohort of fresh loaded quotes;
+largest advances/declines and sample distribution do not imply index breadth.
+Compact persisted-News context preserves original publisher/headline/time/URL and
+qualified category, without extra ticker-price acquisition or causation claims.
+Workspace Heatmap adds compact-default/detailed presentation; Watchlist retains
+its detailed default. Board layout stays unchanged, with explicit visible-sample
+coverage and unknown counts on failed transport. See
+`docs/MARKET_WORKSPACE_V21_REFINEMENT.md` for measured browser evidence and limits.
+This is neither production deployment nor final user product acceptance.
+
+### Approved Unified Market Workspace V2.1 — local development only
+
+The approved market design is implemented as Overview → ordinary Board / stock
+Heatmap → existing Stock Research. One global ticker search drives cached metadata
+discovery; the bounded loaded page shares the existing LivePrices lease across
+workspace modes. Ordinary numerical sorting remains default. Optional movement
+groups partition only that selected sample; stale/missing/unknown movements do not
+become current direction counts. Five percentage bins and equal-area stock cells
+make no sector, capitalization, breadth, sentiment or flow claim. Original source,
+time, session and reference values stay inspectable. Future-data dependencies are
+an informational disclosure only. Existing research, financial and News services
+remain in use. This is a development checkpoint, not a production release or live
+SSI qualification. See `docs/UNIFIED_MARKET_WORKSPACE_V21.md` for acceptance limits
+and the separately required integration, runtime, backup and release gates.
+
+### Market board correction — local source checkpoint, 2026-10-16
+
+The earlier ten-record oversized Price map failed the market-comparison task.
+Its replacement defaults Explore to cached SSI VN30 membership, one bounded
+30-symbol page in the existing LivePrices lease (existing provider max50), compact
+three-column quote tables and a separate equal-area heatmap. All equities remain
+available through search/filters and bounded pagination. Sorting uses existing
+source price/percentage fields, never a new return, sector, strength or flow metric.
+Pending requests are loading, not confirmed missing observations. Per-symbol time
+controls expose original issuer identity/source/date/session/reference evidence.
+Watchlist reuses the compact heatmap with its existing symbols and review state.
+No provider, API, acquisition loop, numerical formula, DB or Supervisor changes.
+
+Actual current-source evidence: all30 cached VN30 symbols had SSI closing-minute
+observations at14:45 ICT onOct16; no qualified session-volume/sector fields exist
+in this contract. Market-wide/index/sector performance is not inferred. New-code
+browser acceptance and deployment remain BLOCKED because automatic policy denied
+preview execution; no alternate launcher/port or canonical cutover is permitted
+as a workaround. Canonical1d7706a remains unchanged. See
+`docs/MARKET_BOARD_CORRECTION_V1.md` for evidence and remaining acceptance gates.
 
 ### Daily use V1 — local implementation checkpoint, 2026-10-16
 
@@ -350,10 +875,11 @@ AI explanation must remain grounded in inspectable evidence.
 
 ## Current architecture stage
 
-### Project checkpoint — 2026-10-05
+### Historical project checkpoint — 2026-10-05
 
-This is the canonical current project status. It supersedes earlier phase-status
-summaries; historical research documents and implementation commits remain intact.
+This checkpoint records the project state on 2026-10-05. It is historical and
+does not supersede the current 2026-10-30 project and workspace checkpoint above;
+historical research documents and implementation commits remain intact.
 
 Completed capabilities:
 

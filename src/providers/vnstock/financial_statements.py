@@ -4,7 +4,7 @@ import json
 import math
 import re
 from datetime import datetime, timezone
-from src.schemas.financials import FinancialLine, StatementObservation, StatementReceipt
+from src.schemas.financials import FinancialLine, FinancialSourceContext, StatementObservation, StatementReceipt
 
 SECTIONS = {'income': 'INCOME_STATEMENT', 'balance': 'BALANCE_SHEET', 'cash': 'CASH_FLOW'}
 MAP = {
@@ -42,6 +42,18 @@ MAP = {
 }
 NON_FINANCIAL_ONLY = {'revenue', 'gross_profit', 'current_assets', 'current_liabilities', 'inventory', 'cash_equivalents', 'short_debt', 'long_debt'}
 BANK_ONLY = {'operating_income', 'net_interest_income', 'customer_loans', 'customer_deposits'}
+
+
+def statement_line_unit(code, label):
+    """Use only explicit VCI labels for non-currency statement units."""
+    name = str(label or '').strip()
+    if code in ('isa23', 'isa24') and re.fullmatch(r'EPS\s+(?:basic|diluted)\s*\(VND\)', name, re.I):
+        return 'VND/share'
+    if re.fullmatch(r'(?:Outstanding Shares|Treasury stocks)\s*\(Volume\)', name, re.I):
+        return 'shares'
+    if re.search(r'\b(?:percentage|percent|ratio|yield|margin)\b|%', name, re.I):
+        return 'source_units'
+    return 'VND'
 
 
 def content_hash(data):
@@ -124,7 +136,7 @@ def normalize_statement(ticker, source, kind, payload, metadata, profile, *, obs
                 parent = definition.get('parent')
                 items.append(FinancialLine(code=code, name_en=str(definition.get('en_name') or code),
                     name_vi=str(definition.get('name') or code), parent=parent if isinstance(parent, str) else None,
-                    unit='VND/share' if code in ('isa23', 'isa24') else 'VND',
+                    unit=statement_line_unit(code, definition.get('en_name')),
                     value=None if conflicted else value, raw_value=value,
                     semantic_status='conflicted' if conflicted else 'reported', source_labels=alternatives[code]))
             # Quarterly flow convention was audited against annual totals and cash roll-forward.
@@ -135,10 +147,21 @@ def normalize_statement(ticker, source, kind, payload, metadata, profile, *, obs
             consolidation = raw.get('consolidation')
             if consolidation not in (None, 'consolidated', 'standalone'):
                 raise ValueError('Unrecognized consolidation basis')
+            # Missing currency/unit are recorded as missing source metadata even though
+            # this adapter retains its previously audited VND x1 transport contract.
+            # Raw audit/restatement flags are evidence only: their provider semantics
+            # and fiscal boundaries have not been qualified. Do not infer either.
+            context = FinancialSourceContext(fiscal_year=year, data_confidence='SOURCE_REPORTED',
+                fiscal_quarter=quarter if bucket == 'quarters' else None,
+                original_currency=raw.get('currency'), original_unit=raw.get('unit'),
+                record_sha256=content_hash(raw), original_metadata={key: raw[key] for key in
+                    ('consolidation', 'flowBasis', 'periodStart', 'periodEnd', 'isAudited',
+                     'auditStatus', 'isRestated', 'restatementStatus', 'publicDate', 'updateDate', 'createDate')
+                    if key in raw})
             result.append(StatementObservation(ticker=ticker, source=source, statement=kind, period=period,
                 frequency='annual' if bucket == 'years' else 'quarterly', basis=basis,
                 consolidation=consolidation, source_dates=source_dates, fields=fields, field_codes=codes,
-                items=items, diagnostics=diagnostics))
+                items=items, diagnostics=diagnostics, source_context=context))
     return StatementReceipt(statement=kind, status='healthy' if result else 'unavailable',
         observations=sorted(result, key=lambda row: row.period), observed_at=observed_at,
         content_sha256=content_hash(payload), source_url=source_url)

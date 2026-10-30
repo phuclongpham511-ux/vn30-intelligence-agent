@@ -1,0 +1,44 @@
+{
+  "recorded_at": "2026-10-21T08:47:53.636722+00:00",
+  "backend": {
+    "command": "uv run pytest -q",
+    "passed": 1600,
+    "subtests_passed": 32,
+    "failed": 0,
+    "seconds": 283.92,
+    "warnings": [
+      "Existing Starlette httpx deprecation"
+    ]
+  },
+  "frontend": {
+    "command": "npm test",
+    "passed": 334,
+    "skipped": 1,
+    "failed": 0
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "status": "PASS"
+  },
+  "production_build": {
+    "command": "npm run build -- --webpack",
+    "status": "PASS"
+  },
+  "real_contracts": {
+    "status": "PASS",
+    "stock_api_projections": 60,
+    "industry_categories": 61,
+    "dividend_responses": 10,
+    "company_peer_responses": 10,
+    "preferred_frontend_contracts": 30,
+    "provider_frontend_contracts": 30,
+    "financial_static_en_vi_views": 144,
+    "industry_static_views": 61,
+    "dividend_static_views": 10,
+    "includes_unavailable_view_fallbacks": true
+  },
+  "runtime_http": "RUNTIME_HTTP_ACCEPTANCE.json",
+  "browser": "V4_ACCEPTANCE.json",
+  "mobile": "PENDING",
+  "provider_requests_during_validation": 0
+}

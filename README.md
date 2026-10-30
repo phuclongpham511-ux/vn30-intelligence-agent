@@ -1,34 +1,38 @@
-# VN30 Intelligence Agent
+# Woofi
 
-Help active retail investors know which changes deserve attention across Vietnamese equities.
-The eventual product will rank material changes and show only the top 1–3 insights with inspectable evidence.
+Woofi is a research workspace for Vietnamese equities. It brings together
+available company fundamentals, financial statements and charts, corporate
+actions, and company news so investors can inspect changes and their supporting
+evidence.
 
-## Status: News refinement + Community Pulse V1; browser-local Watchlist monitoring
+Data availability varies by company, period, and source. Missing or unverified
+information stays visible as unavailable; Woofi does not fill gaps with invented
+values or issue buy/sell recommendations.
 
-News Top Stories shows one registry-selected representative per Story, with other
-reporting behind a disclosure. Independent publisher counts and ranking are unchanged.
-Filters select Stories and matching representatives; disclosures retain the other
-publishers' reporting for the selected Story.
-Optional thumbnails use explicit RSS/Atom media metadata only; absent or failed
-images render no placeholder. Sector tags remain available under Advanced filters
-with a partial-coverage label; the current company universe lacks sector metadata.
+## Current focus — 2026-10-30
 
-Community Pulse is a separate News workspace view and separate database evidence
-layer. It samples one public F319 listing at `https://newf319.com/`, at most 50
-listing entries, every 30 minutes. Robots restrictions are checked before each
-acquisition; failed checks stop acquisition. Only public thread metadata is stored.
-Ticker relevance requires registered company identity or explicit ticker context,
-not bare uppercase tokens. Counts measure distinct observed threads, and activity
-ordering uses lifetime replies then public last-activity time; it is not a growth
-rate, sentiment or Materiality score. Six discussions appear by default.
+Stock Research is the current development focus. Work builds on existing,
+authorized data and the financial services and UI already in Woofi. Vnstock
+Bronze-dependent work and a Vnstock v5 upgrade are paused while provider details
+about historical coverage, advanced metrics, and data-use rights are clarified.
+This describes development direction; a source change or GitHub commit does not
+mean it has been released to the canonical Woofi runtime.
 
-The read-only `/community/pulse` and `/community/sources` endpoints never crawl
-during a page request. Browser Refresh only reads persisted data and source status.
-Run `create_tables()` during explicit production schema deployment for the additive
-Community tables and nullable News thumbnail fields. Local development does this
-at startup. News and Community ingestion failures remain independent.
+## Project documentation
 
-## Data Update Reliability V1 — canonical collection worker
+- [Project context and domain decisions](CONTEXT.md)
+- [Documentation index](docs/README.md)
+- [Development workflow](docs/WOOFI_DEVELOPMENT_WORKFLOW.md)
+- [Project structure and naming](docs/WOOFI_PROJECT_STRUCTURE_GUIDE.md)
+- [Historical milestone catalog](docs/archive/README.md)
+
+## Historical implementation notes
+
+The dated engineering notes below are retained as project history. Their commands,
+deployment details, and status statements may no longer describe the current
+runtime; use the current operations documentation before acting on production.
+
+### Data Update Reliability V1 — canonical collection worker (2026-10-05)
 
 Run one worker alongside the FastAPI/web processes, against the same DATABASE_URL:
 
@@ -79,8 +83,8 @@ FireAnt returned a public shell without usable discussion metadata. Both are
 deferred; no authenticated or internal API was used. Community coverage is a
 bounded sample, and ticker matches depend on the registered company universe.
 
-The canonical [project checkpoint in CONTEXT.md](CONTEXT.md#current-architecture-stage)
-records completed capabilities, blockers and the next direction (2026-10-05).
+The historical project checkpoint in [CONTEXT.md](CONTEXT.md) records the
+capabilities, blockers, and direction at that time (2026-10-05).
 Foundation/data analytics, financial visualization, News V1, connected stock/news
 discovery, market briefing usability/readiness and Mascot UI V1 are complete.
 News uses 10 Vietnamese and 5 global sources without full article persistence or
@@ -100,6 +104,22 @@ The AI Product Layer and Unified Materiality /
 Personalized Attention Budget are later directions.
 
 ## Run locally
+
+For routine development alongside the stable Woofi runtime, run **one command
+from the active worktree root**:
+
+```powershell
+node scripts/dev.mjs
+```
+
+Open **http://127.0.0.1:3102/news**. This starts the matching backend on 8102,
+uses isolated DEMO data, and hot-reloads frontend edits. It leaves stable ports
+3000/8000 and the collector alone. No commit, push or release cutover is needed
+to preview work. Stop with Ctrl+C; restart after Python/config/dependency changes.
+See [development versus stable workflow](docs/WOOFI_DEVELOPMENT_WORKFLOW.md).
+
+The older individual setup commands below are for a standalone installation.
+Do not run them on occupied stable ports or point development at the stable DB.
 
 Requirements: Python 3.12+, uv, Node.js 24+ and npm (Node 24.16 tested; frontend tests use native TypeScript support). From repository root:
 
@@ -306,7 +326,7 @@ Full VN30 coverage and tick-level streaming remain outside the initial MVP.
 
 ## Documents
 
-- [Original product brief](docs/PRODUCT_BRIEF.md)
+- [Original product brief](docs/product/PRODUCT_BRIEF.md)
 - [Historical Day 0 report](docs/DAY0_REPORT.md)
 - [Section 1 report](docs/SECTION1_REPORT.md)
 - [UI refresh report and screenshots](docs/UI_REFRESH_REPORT.md)

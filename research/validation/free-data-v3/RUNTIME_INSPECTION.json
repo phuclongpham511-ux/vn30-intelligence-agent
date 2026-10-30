@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-10-21T04:34:20.6764206Z",
+  "ports_checked": [
+    3430,
+    3431,
+    3546,
+    3547,
+    8430,
+    8431,
+    8432,
+    8546
+  ],
+  "listener_count": 0,
+  "listeners": [],
+  "restart_attempted": false,
+  "runtime_status": "PENDING",
+  "browser_status": "PENDING",
+  "prior_failure": "CreateProcess rejected: blocked by policy"
+}

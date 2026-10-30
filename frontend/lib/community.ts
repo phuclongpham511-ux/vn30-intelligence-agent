@@ -1,5 +1,21 @@
 import { safeExternalUrl } from "./presentation.ts";
 
+export function readCommunityWindow(search: string): 'today' | 'last24h' {
+  return new URLSearchParams(search).get('window') === 'last24h' ? 'last24h' : 'today';
+}
+export function communityHref(ticker = '', window: 'today' | 'last24h' = 'today'): string {
+  const params = new URLSearchParams();
+  if (ticker.trim()) params.set('ticker', ticker.trim().toUpperCase());
+  if (window === 'last24h') params.set('window', window);
+  return '/community' + (params.size ? '?' + params : '');
+}
+// Preserve old bookmarks without carrying publisher filters into discussions.
+export function legacyCommunityHref(search: string): string | null {
+  const params = new URLSearchParams(search);
+  return params.get('view') === 'community'
+    ? communityHref(params.get('ticker') || '', readCommunityWindow(search)) : null;
+}
+
 export type CommunitySource = {
   source_id: string; name: string; url: string; enabled: boolean; qualification: string; reason: string | null; items_received: number | null;
   status: "healthy" | "stale" | "error" | "not_attempted" | "disabled";
@@ -47,7 +63,7 @@ export async function loadCommunityUpdates(symbols: string[], signal?: AbortSign
 export type CommunityItem = {
   id: string; revision_id: string; source_id: string; source_item_id: string; item_type: string;
   title: string | null; excerpt: string; url: string; author: string | null;
-  published_at: string; last_seen_at: string; tickers: string[];
+  published_at: string; first_seen_at?:string; last_seen_at: string; tickers: string[];
   replies: number | null; views: number | null; is_fixture: boolean;
 };
 export type CommunityPulseData = {

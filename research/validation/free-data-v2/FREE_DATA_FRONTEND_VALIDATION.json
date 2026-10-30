@@ -1,0 +1,51 @@
+{
+  "contract": "free-data-frontend-validation-v2",
+  "status": "PASS",
+  "industry_categories": 61,
+  "dividends": [
+    {
+      "ticker": "FPT",
+      "observations": 3
+    },
+    {
+      "ticker": "HPG",
+      "observations": 0
+    },
+    {
+      "ticker": "MWG",
+      "observations": 0
+    },
+    {
+      "ticker": "PNJ",
+      "observations": 0
+    },
+    {
+      "ticker": "REE",
+      "observations": 0
+    },
+    {
+      "ticker": "SSI",
+      "observations": 0
+    },
+    {
+      "ticker": "TCB",
+      "observations": 0
+    },
+    {
+      "ticker": "VCB",
+      "observations": 0
+    },
+    {
+      "ticker": "VHM",
+      "observations": 0
+    }
+  ],
+  "languages": [
+    "en",
+    "vi"
+  ],
+  "public_consumer_rejected": true,
+  "mode": "saved real API contracts and server rendering",
+  "browser": "PENDING",
+  "mobile_visual_acceptance": "PENDING"
+}

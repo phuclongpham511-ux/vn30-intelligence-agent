@@ -97,11 +97,13 @@ def test_fast_copy_preserves_complete_packet_and_detaches_every_mutable_graph(mo
     assert first == saved and first is not saved
     observation = first.reports['income'].observations[0]
     observation.fields['revenue'] = None
+    observation.source_context.original_metadata['updateDate'] = 'mutated'
     observation.items[0].source_labels.append({'name':'changed'})
     first.reports['balance'].observations.clear()
     second = provider.get_reports('ABC')
     assert second == saved
     assert second.reports['income'].observations[0].fields['revenue'] is not None
+    assert 'updateDate' not in second.reports['income'].observations[0].source_context.original_metadata
     assert second.reports['income'].observations[0].items[0].source_labels != observation.items[0].source_labels
 
 

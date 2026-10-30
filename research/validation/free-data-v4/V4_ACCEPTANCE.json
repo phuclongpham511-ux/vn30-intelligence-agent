@@ -1,0 +1,59 @@
+{
+  "recorded_at": "2026-10-21T08:47:53.636722+00:00",
+  "baseline": "d452f8e",
+  "browser": "Codex Integrated Browser",
+  "desktop_status": "PASS_FOR_EXERCISED_FLOWS",
+  "mobile_status": "PENDING",
+  "mobile_reason": "No exposed viewport resize/device emulation capability; no alternative browser used",
+  "screenshots": [
+    {
+      "file": ".local/v4-browser/bank-pair-desktop.jpg",
+      "sha256": "d3d7bf7a7aae3d133345d162d539aa312b085a7581f7ecb9d0e53ffb5376ba53",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "file": ".local/v4-browser/fpt-book-value-desktop.jpg",
+      "sha256": "59a434807485898efe646b98bae015fc46b2331083c46785679051b661a025f5",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "file": ".local/v4-browser/tcb-health-desktop.jpg",
+      "sha256": "1ab55b713cd203356ac3c2fc8bf3945c1b450df057a34bc1171d2a2da7e9e482",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    },
+    {
+      "file": ".local/v4-browser/vnm-vietnamese-light-desktop.jpg",
+      "sha256": "f84687f1d4fa4ec603181a7526cc612e9c936e02a19b79a8b21a697b737a0da3",
+      "format": "JPEG",
+      "width": 1265,
+      "height": 712
+    }
+  ],
+  "observed": [
+    "Financial deep links independent of absent market identity",
+    "Separate source/accounting/display counts",
+    "FPT revenue/growth, statements and period-specific original PDF links",
+    "FPT EPS/ordinary equity/shares/BVPS with units and unavailable price multiples",
+    "TCB balance/cash/profitability/health with gaps",
+    "Period selection and quarterly provider switching",
+    "FPT dividend navigation",
+    "TCB/VCB FY2025 pair: 2/22, 15 metrics, no ranks/percentiles",
+    "TCB-only NPL: 1/22, no distribution",
+    "VNM partial four-year annual view, EN/VI and light/dark",
+    "Distinct unknown saved-ticker coverage message and retry control"
+  ],
+  "pending": [
+    "Mobile/tablet visual and touch acceptance",
+    "Chart hover tooltips",
+    "Exhaustive service failure/interruption/retry completion",
+    "Full market/company/follow context: core backend absent",
+    "Broader all-issuer browser acceptance"
+  ],
+  "details": "../../DASHBOARD_VERIFICATION_V4.md"
+}

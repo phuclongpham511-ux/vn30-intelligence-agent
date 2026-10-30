@@ -7,7 +7,7 @@ import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
 const require=createRequire(import.meta.url);
 function component(file, overrides={}) {
-  overrides={'./stock/QuoteMap':()=>null,'../stock/LivePrice':{TickerMovement:()=>null},'./LivePrice':{LivePrices:({children})=>children},'./stock/LivePrice':{LivePrices:({children})=>children,LivePrice:()=>null},
+  overrides={'./ProvisionalEvidence':{__esModule:true,default:()=>null},'./TradingActivity':{__esModule:true,default:()=>null},'./stock/QuoteMap':()=>null,'../stock/LivePrice':{TickerMovement:()=>null},'./LivePrice':{LivePrices:({children})=>children},'./stock/LivePrice':{LivePrices:({children})=>children,LivePrice:()=>null},
     '@/lib/useLiveMarket':{useLiveIndex:()=>({data:null,failed:false})},...overrides};
   const code=transformSync(readFileSync(new URL(file,import.meta.url),'utf8'),{
     filename:file,module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
@@ -28,22 +28,23 @@ test('news rows retain valid stories when images are missing or unsafe',()=>{
 });
 test('Explore renders a bounded universe with direct research links and no add prerequisite',()=>{
   const rows=Array.from({length:60},(_,n)=>({symbol:`X${n}`,exchange:n%2?'HNX':'HOSE',display_name_en:'Issuer'}));
+  const Board=component('../app/components/stock/QuoteMap.tsx',{'./LivePrice':{useLivePrices:()=>({data:null,failed:false})}});
   const Picker=component('../app/components/TickerPicker.tsx',{
+    './stock/QuoteMap':Board,
     './stock/useRecentSearches':{useRecentSearches:()=>({recent:[],remember:()=>{}})},
     './stock/StockSearch':()=>React.createElement('input',{role:'combobox'}),
     './stock/LivePrice':{LivePrices:({children})=>children,LivePrice:({symbol,compact})=>React.createElement('span',{'data-live-symbol':symbol,'data-compact':String(compact)})},
     'next/navigation':{useRouter:()=>({push:()=>{}})},
-    '@/lib/useEquityPage':{useEquityPage:()=>({data:{items:rows.slice(0,10),total:60,total_universe:60,offset:0,limit:10,status:'healthy'},loading:false,error:false})},
+    '@/lib/useEquityPage':{useEquityPage:options=>{assert.equal(options.group,'VN30');assert.equal(options.size,30);return {data:{items:rows.slice(0,30),total:30,total_universe:60,offset:0,limit:30,status:'healthy',index_groups:{groups:{VN30:rows.slice(0,30).map(r=>r.symbol)},status:'healthy',source:'SSI:fixture'}},loading:false,error:false};}},
     './ui/button':{Button:({variant,...props})=>React.createElement('button',props)},
     './mascot/Mascot':{MascotState:({children})=>children}});
   const html=renderToStaticMarkup(React.createElement(Picker));
   assert.match(html,/Explore stocks/);
   assert.doesNotMatch(html,/Available stocks|Validate and add/);
-  assert.equal((html.match(/href="\/stocks\//g)||[]).length,10);
-  assert.equal((html.match(/data-compact="true"/g)||[]).length,10);
-  assert.equal((html.match(/aria-hidden="true"/g)||[]).length,10);
-  assert.match(html,/grid min-h-\[88px\] grid-cols-\[minmax\(0,1fr\)_auto_14px\] items-center/);
-  assert.match(html,/of 60 results/);
+  assert.equal((html.match(/href="\/stocks\//g)||[]).length,30);
+  assert.equal((html.match(/data-quote-row=/g)||[]).length,30);
+  assert.match(html,/Market board/);assert.match(html,/Heatmap/);
+  assert.match(html,/of 30 results/);
 });
 
 test('Explore does not present an unknown universe count as zero',()=>{
@@ -93,7 +94,7 @@ test('Hot Topics selects only same-cluster images without hiding no-image storie
 test('Explore preserves its index hero and exposes the requested VN-Index detail link',()=>{
  const Market=component('../app/components/ExploreMarket.tsx',{
   './mascot/Mascot':{MascotIllustration:({size})=>React.createElement('span',{'data-mascot-size':size}),MascotState:({children})=>children},
-  './news/TopStory':()=>null,'./news/MarketFocus':()=>null});
+  './news/HotTopics':()=>null,'./news/MarketFocus':()=>null});
  const html=renderToStaticMarkup(React.createElement(Market));
  assert.match(html,/<header/);assert.match(html,/VN-Index/);assert.match(html,/href="\/indices\/VNINDEX"/);assert.match(html,/data-mascot-size="128"/);
  assert.doesNotMatch(html,/SSI:FastConnect|Latest provider summary/);

@@ -5,7 +5,8 @@ import {createRequire} from 'node:module';
 import React from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {transformSync} from 'next/dist/build/swc/index.js';
-import {emptyNewsFilters,newsViewQuery,readCommunityWindow,readNewsFilters} from '../lib/news.ts';
+import {readNewsFilters} from '../lib/news.ts';
+import {communityHref,readCommunityWindow} from '../lib/community.ts';
 import {loadCommunity} from '../lib/community.ts';
 const require=createRequire(import.meta.url);
 function component(file,overrides){
@@ -19,7 +20,7 @@ test('Attention keeps the displayed last24h sample through its link, destination
  const html=renderToStaticMarkup(React.createElement(Pulse,{ticker:'',topic:'',attempt:0,compact:true,initialWindow:'last24h'}));
  assert.match(html,/value="last24h" selected=""/);
  assert.match(html,/Sample includes fixture data/);assert.match(html,/Original discussion · Fixture/);
- const href=html.match(/href="(\/news\?[^\"]+)"[^>]*>1 discussion/)[1].replaceAll('&amp;','&');
+ const href=html.match(/href="(\/community\?[^\"]+)"[^>]*>1 discussion/)[1].replaceAll('&amp;','&');
  assert.equal(readCommunityWindow(href.split('?')[1]),'last24h');
  assert.equal(readNewsFilters(href.split('?')[1]).ticker,'XYZ');
  const prior=globalThis.fetch;
@@ -32,14 +33,13 @@ test('Attention keeps the displayed last24h sample through its link, destination
 
 test('Community URL canonicalization preserves only valid windows and excludes them from publisher views',()=>{
  assert.equal(readCommunityWindow('window=unknown'),'today');
- assert.equal(readCommunityWindow(newsViewQuery(emptyNewsFilters,'community','last24h')),'last24h');
- assert.equal(new URLSearchParams(newsViewQuery(emptyNewsFilters,'industry','last24h')).has('window'),false);
- assert.equal(new URLSearchParams(newsViewQuery(emptyNewsFilters,'community')).has('window'),false);
+ assert.equal(readCommunityWindow(communityHref('', 'last24h').split('?')[1]),'last24h');
+ assert.equal(new URLSearchParams(communityHref().split('?')[1]).has('window'),false);
 });
 
 test('Index mascot cannot imply an active market for a stale active snapshot or unavailable initial load',()=>{
  const now=new Date();const snapshot={level:1735.09,change:0,change_percent:0,trading_date:new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit',day:'2-digit'}).format(now),updated_at:new Date(now.getTime()-180000).toISOString(),source:'Fixture:test',total_volume:null,total_value:null};
- const render=live=>{const Market=component('../app/components/ExploreMarket.tsx',{'@/lib/useLiveMarket':{useLiveIndex:()=>live},'./stock/LivePrice':{LivePrices:({children})=>children},'./news/TopStory':()=>null,'./news/MarketFocus':()=>null,'./mascot/Mascot':{MascotIllustration:({state})=>React.createElement('span',{'data-mascot':state}),MascotState:({children})=>children}});return renderToStaticMarkup(React.createElement(Market));};
+ const render=live=>{const Market=component('../app/components/ExploreMarket.tsx',{'@/lib/useLiveMarket':{useLiveIndex:()=>live},'./news/HotTopics':()=>null,'./news/MarketFocus':()=>null,'./mascot/Mascot':{MascotIllustration:({state})=>React.createElement('span',{'data-mascot':state}),MascotState:({children})=>children}});return renderToStaticMarkup(React.createElement(Market));};
  const stale=render({data:{snapshot,status:'fresh',session:'active'},failed:false});assert.match(stale,/data-mascot="marketUncertain"/);assert.match(stale,/Stale market data/);assert.match(stale,/unchanged/);
  assert.match(render({data:null,failed:true}),/data-mascot="marketUncertain"/);
  assert.match(render({data:{snapshot:{...snapshot,updated_at:now.toISOString()},status:'fresh',session:'active'},failed:false}),/data-mascot="marketWatching"/);

@@ -115,7 +115,7 @@ export default function TechnicalChart({ ticker, onRows, priceOnly=false }: { ti
   }, [rows, onRows]);
 
   const bar = selected ?? rows.at(-1);
-  return <section className="panel min-w-0 overflow-hidden" aria-label={t(priceOnly?'Price history':"Technical chart")}>
+  return <section className="panel min-w-0 overflow-hidden" data-price-history-status={loading?'loading':error?'error':rows.length?'available':'unavailable'} aria-label={t(priceOnly?'Price history':"Technical chart")}>
     <div className="space-y-3 border-b p-4 sm:p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2"><h2>{t(priceOnly?'Price history':"Technical Chart")}</h2><span className="text-xs text-muted-foreground">{t("Daily OHLCV · VND")}</span></div>
       <p className="text-[11px] text-muted-foreground">{t('Latest daily observation')} · {localDate(rows.at(-1)?.date)} · {t('Completed sessions; separate from the latest quote.')}</p>
@@ -123,8 +123,8 @@ export default function TechnicalChart({ ticker, onRows, priceOnly=false }: { ti
       <TechnicalLegend technical={!priceOnly} bar={bar} bb={!priceOnly&&indicators.BB}/>
     </div>
     <div className="relative">
-      <div ref={host} className={priceOnly?'stock-price-chart':'stock-technical-chart'} role="img" aria-label={t(priceOnly?'{ticker} completed daily price and volume':'{ticker} daily candlesticks, MA20, MA50, volume and RSI14; values are available in the technical data table',{ticker})}/>
-      {(loading || error || !rows.length) && <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card p-6" role="status">
+      <div ref={host} className={`${priceOnly?'stock-price-chart':'stock-technical-chart'} ${!loading&&!rows.length?'stock-chart-empty':''}`} style={{visibility:loading||error||!rows.length?'hidden':undefined}} aria-hidden={loading||error||!rows.length} role="img" aria-label={t(priceOnly?'{ticker} completed daily price and volume':'{ticker} daily candlesticks, MA20, MA50, volume and RSI14; values are available in the technical data table',{ticker})}/>
+      {(loading || error || !rows.length) && <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-card p-6" role="status">
         {loading ? <><Skeleton className="h-48 w-full"/><p className="text-sm text-muted-foreground">{t("Loading technical history…")}</p></> : error ? <><p>{t("Technical history is temporarily unavailable.")}</p><Button variant="outline" onClick={() => setAttempt(value => value + 1)}>{t("Retry chart")}</Button></> : <p>{t("No daily observations are available for this period.")}</p>}
       </div>}
     </div>

@@ -13,7 +13,7 @@ const react={...React,useState(initial){
   if(value instanceof Set)return [new Set(visited),()=>{}];
   return React.useState(initial);
 }};
-const marker=name=>({visible=true})=>visible?React.createElement('div',{'data-component':name}):null;
+const marker=name=>({visible=true,focus,summary})=>visible?React.createElement('div',{'data-component':name,'data-focus':focus,'data-summary':summary===undefined?undefined:String(summary)}):null;
 const exports={};
 const compiled=transformSync(readFileSync(new URL('../app/components/Explore.tsx',import.meta.url),'utf8'),{filename:'Explore.tsx',module:{type:'commonjs'},jsc:{parser:{syntax:'typescript',tsx:true},transform:{react:{runtime:'automatic'}}}}).code;
 new Function('require','exports',compiled)(name=>{
@@ -22,6 +22,7 @@ new Function('require','exports',compiled)(name=>{
   if(name==='./stock/StockStates')return {StockError:marker('Identity error')};
   if(name==='./ui/skeleton')return {Skeleton:marker('Skeleton')};
   if(name==='./ui/button')return {Button:marker('Button')};
+  if(name==='./market/WorkspaceNav')return {__esModule:true,default:marker('WorkspaceNav')};
   if(name.startsWith('./stock/'))return {__esModule:true,default:marker(name.slice(8))};
   return require(name.startsWith('@/lib/')?`../lib/${name.slice(6)}.ts`:name);
 },exports);
@@ -44,7 +45,44 @@ test('research tabs share one retained chart and defer unvisited annual financia
   assert.match(html,/aria-controls="stock-panel-price"/);
   assert.match(html,/separate assurance; no trading recommendation/);
 });
+test('overview and financial analysis share one financial loader with the right presentation',()=>{
+ for(const tab of ['overview','fundamentals']){
+  const html=render(tab,['overview','fundamentals']);
+  assert.equal((html.match(/data-component="FundamentalTrends"/g)||[]).length,1);
+  assert.match(html,new RegExp('data-component="FundamentalTrends" data-summary="'+String(tab==='overview')+'"'));
+  assert.equal((html.match(/id="stock-panel-fundamentals"/g)||[]).length,1);
+ }
+});
 test('a wrong ticker identity cannot render research for the prior company',()=>{
   const html=render('overview',['overview'],'OTHER');
   assert.match(html,/Identity error/);assert.doesNotMatch(html,/Original company name|TechnicalChart/);
+});
+test('one research integration replaces separate news/community loaders without changing primary tabs',()=>{
+ for(const section of ['overview','news']){
+  const html=render(section);
+  assert.equal((html.match(/data-component="StockIntelligence"/g)||[]).length,1);
+  assert.doesNotMatch(html,/data-component="StockNews|data-component="StockCommunity/);
+  assert.match(html,/id="stock-tab-fundamentals"/);assert.match(html,/id="stock-tab-actions"/);
+ }
+});
+test('Community is a direct research destination sharing one retained intelligence panel',()=>{
+ const html=render('community',['overview','news','community']);
+ assert.match(html,/id="stock-tab-community"[^>]*aria-controls="stock-panel-news"[^>]*aria-selected="true"/);
+ assert.match(html,/id="stock-panel-news"[^>]*aria-labelledby="stock-tab-community"[^>]*tabindex="0"/);
+ assert.equal((html.match(/data-component="StockIntelligence"/g)||[]).length,1);
+ assert.match(html,/data-focus="community"/);
+ assert.doesNotMatch(html,/data-component="FundamentalTrends"/);
+});
+
+
+test('authorized saved financial and dividend views survive unavailable market identity',()=>{
+ for(const [tab,component] of [['fundamentals','FundamentalTrends'],['actions','StockActions']]){
+  selected=tab;visited=[tab];reads=[];identity={items:[],last_synced_at:null};
+  const html=renderToStaticMarkup(React.createElement(exports.default,{ticker:'ABC',personalResearch:true}));
+  assert.match(html,new RegExp('data-component="'+component+'"'));
+  assert.match(html,/Market data unavailable/);
+  assert.doesNotMatch(html,/Identity error|Original company name|data-component="TechnicalChart"/);
+  const publicHtml=renderToStaticMarkup(React.createElement(exports.default,{ticker:'ABC'}));
+  assert.match(publicHtml,/Identity error/);
+ }
 });

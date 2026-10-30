@@ -17,21 +17,17 @@ export type NewsSource = {
 };
 export type NewsFilters = { ticker: string; sector: string; country: string; source: string; topic: string };
 export const emptyNewsFilters: NewsFilters = { ticker: "", sector: "", country: "", source: "", topic: "" };
-export type NewsView = "company" | "industry" | "briefing" | "community";
-export const newsSectionLabels = {industry: 'Industry', company: 'Company', briefing: 'Market', community: 'Community Pulse'};
+export type NewsView = "company" | "industry" | "briefing";
+export const newsSectionLabels = {industry: 'Industry', company: 'Company', briefing: 'Market'};
 export function readNewsView(search: string): { view: NewsView } {
   const value = new URLSearchParams(search).get("view");
-  const view = value === 'company' || value === 'briefing' || value === 'community' ? value : 'industry';
+  const view = value === 'company' || value === 'briefing' ? value : 'industry';
   return { view };
 }
-export function readCommunityWindow(search: string): 'today' | 'last24h' {
-  return new URLSearchParams(search).get('window') === 'last24h' ? 'last24h' : 'today';
-}
-export function newsViewQuery(filters: NewsFilters, view: NewsView, communityWindow: 'today' | 'last24h' = 'today'): string {
+export function newsViewQuery(filters: NewsFilters, view: NewsView): string {
   const params = new URLSearchParams(newsQuery(filters));
   const canonical = readNewsView(`view=${view}`).view;
   if (canonical !== 'industry') params.set("view", canonical);
-  if (canonical === 'community' && communityWindow === 'last24h') params.set('window', communityWindow);
   return params.toString();
 }
 export function readNewsFilters(search: string): NewsFilters {
@@ -47,6 +43,20 @@ export function newsQuery(filters: NewsFilters): string {
   return params.toString();
 }
 // Promotion deduplicates only its own list; category archives keep their stories.
+export function readNewsSearch(search:string):{query:string;view:NewsView|null} {
+  const params=new URLSearchParams(search);
+  const query=(params.get('q')||params.get('ticker')||params.get('topic')||params.get('sector')||'').trim().slice(0,120);
+  const raw=params.get('view');
+  const view=raw==='company'||raw==='briefing'||raw==='industry'?raw:query?null:'industry';
+  return {query,view};
+}
+export function newsSearchQuery(query:string,view:NewsView|null):string {
+  const params=new URLSearchParams();const text=query.trim().slice(0,120);
+  if(text)params.set('q',text);
+  if(view&&(view!=='industry'||text))params.set('view',view);
+  return params.toString();
+}
+
 export function uniqueHotTopics<T extends {story:{id:string}}>(rows:T[]):T[] {
   const seen=new Set<string>();
   return rows.filter(row=>{if(seen.has(row.story.id))return false;seen.add(row.story.id);return true;});

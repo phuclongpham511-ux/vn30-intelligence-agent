@@ -33,7 +33,9 @@ def refresh_cache(session, changed, *, now, observations=None):
     version = str(universe.last_success_at) if universe else None
     metadata = session.get(NewsReadCache, 'universe_version')
     changed = set(changed) | set(session.exec(select(NewsStory.id).where(NewsStory.read_cache_dirty == True)).all())
-    projection_version = [{'version': version, 'entity_policy': ENTITY_POLICY, 'research_policy': 'news-relevance-v2'}]
+    from src.news.registry import load_company_aliases
+    projection_version = [{'version': version, 'entity_policy': ENTITY_POLICY,
+        'research_policy': 'news-discovery-v3', 'aliases': load_company_aliases()}]
     rebuild = bootstrap or metadata is None or metadata.rows != projection_version
     if not changed and not rebuild and not observations:
         session.rollback()
@@ -46,6 +48,8 @@ def refresh_cache(session, changed, *, now, observations=None):
     from copy import deepcopy
     entries = {} if rebuild else {r['row']['story']['id']: r for r in deepcopy(cache.rows)
                                     if r['row']['story']['id'] not in changed}
+    from src.news.text_evidence import receipt_map
+    search_receipts = receipt_map(session, [a for row in rows for a in row.articles], now=now)
     for row in rows:
         kinds = {}
         text_admission = {}
@@ -55,12 +59,15 @@ def refresh_cache(session, changed, *, now, observations=None):
             tags = tagger.tag(article.title, article.category)
             article.tickers = sorted({p.symbol for p in row.ticker_associations if p.article_id == article.id})
             article.sectors = sorted(set(article.sectors) | set(tags.sectors))
-            kinds[article.id] = research_category(article, [eligible[s] for s in article.tickers])
+            kinds[article.id] = research_category(article, [eligible[s] for s in article.tickers], tagger.company_aliases)
             if kinds[article.id] is None and publisher_company_context([p for p in row.ticker_associations if p.article_id == article.id]):
                 kinds[article.id] = 'COMPANY'
                 text_admission[article.id] = min(p.text_observed_at for p in row.ticker_associations
                     if p.article_id == article.id and p.evidence_origin == 'publisher_text').isoformat()
-        entries[row.story.id] = {'row': row.model_dump(mode='json'), 'categories': kinds, 'text_admission': text_admission}
+        entries[row.story.id] = {'row': row.model_dump(mode='json'), 'categories': kinds, 'text_admission': text_admission,
+            'search_text': {key: {'text': value.text, 'observed_at': utc(value.observed_at).isoformat(),
+                'article_title': value.article_title, 'canonical_url': value.canonical_url}
+                for key in {article.id for article in row.articles} if (value := search_receipts.get(key))}}
     # Duplicate observations only update the image retry revision; no tagging,
     # Story aggregation or Hot ranking rebuild is needed.
     for entry in entries.values():
@@ -106,6 +113,13 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
         return []  # explicit empty cached state; pending intent does not mean completed
     cutoff = now-timedelta(hours=72)
     output = []
+    search = None
+    if options.get('q', '').strip():
+        from src.news.search import prepare_query
+        from src.news.service import equity_tagger
+        tagger = equity_tagger(session)
+        search = prepare_query(options['q'], tagger.stocks, tagger.company_aliases)
+    relevance = {}
     for entry in cache.rows:
         row = StoryResponse.model_validate(entry['row'])
         row.ticker_associations = [p for p in row.ticker_associations if p.evidence_origin == 'headline'
@@ -115,6 +129,7 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
         if not members:
             continue
         matching = []
+        best_score = 0
         for article in members:
             admitted = entry.get('text_admission', {}).get(article.id)
             if admitted and datetime.fromisoformat(admitted) > now:
@@ -133,6 +148,16 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
                 continue
             if options.get('financial_only') and not (article.topics or article.tickers or article.sectors):
                 continue
+            if search:
+                from src.news.search import match_score
+                receipt = entry.get('search_text', {}).get(article.id, {})
+                supplied = receipt.get('text', '') if (receipt.get('article_title') == article.title
+                    and receipt.get('canonical_url') == article.canonical_url
+                    and utc(datetime.fromisoformat(receipt['observed_at'])) <= now) else ''
+                score = match_score(search, article, qualified, supplied)
+                if not score:
+                    continue
+                best_score = max(best_score, score)
             matching.append(article)
         if not matching:
             continue
@@ -152,6 +177,10 @@ def research_rows(session, options, category=None, *, hot=False, attention=False
         row.ranking_reason = ('Independent publishers first, capped article activity, then latest activity' if hot or attention
                               else 'Latest publication first; earliest source represents each story')
         output.append(row)
+        relevance[row.story.id] = best_score
     # Recency/window filtering is lightweight and exact, including snapshot pagination.
     order = attention_order if hot or attention else lambda row: (-max(utc(a.published_at or a.first_seen_at).timestamp() for a in row.articles), row.story.id)
+    if search:
+        chronological = order
+        order = lambda row: (-relevance[row.story.id], chronological(row))
     return sorted(output, key=order)[offset:offset+options['limit']]

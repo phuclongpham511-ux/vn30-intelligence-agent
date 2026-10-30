@@ -1,5 +1,171 @@
 # VN30 Intelligence Agent — Frontend Design Contract
 
+## Stock Research overview — 29 October 2026
+
+While Bronze clarification and Vnstock v5 migration are paused, the company
+overview starts with a compact financial picture before price context and stored
+company developments. Reuse the existing validated financial display projection,
+metric qualification, period, unit and evidence disclosures. Overview and the
+financial analysis tab retain one loader, cache and frequency selection; switching
+presentation does not create a second financial consumer. Other research tabs
+remain lazy. Unknown values stay unavailable, source-reported personal data stays
+within its existing server-authorized scope, and DEMO remains visibly labelled.
+
+Use the existing theme tokens, three financial groups on desktop and stacked
+groups on mobile. Loading, transport failure, missing coverage and absent display
+qualification remain distinct. This is frontend source work; release activation
+and real-data acceptance are separate from offline preview checks.
+
+## Financial Intelligence V4 — current, 2026-10-21
+
+V4 supersedes the historical checkpoints below: **341 source/accounting and
+reporting-metadata-qualified observations (216 reported, 125 derived), 70 supported
+definitions out of 77 canonical definitions, ten saved issuers**. Qualified original
+histories cover FPT 2022–24, TCB 2023–25, VCB 2024–25, HPG 2024–25 flows/2025 balance
+and MWG pre-audit 2024. VNM/SSI remain useful partial provider coverage.
+Original captures and revisions remain preserved; metric-level gaps stay visible.
+FPT dated ordinary BVPS is supported for 2023/24; P/E/P/B/earnings yield remain
+unavailable without matched prices, shares and corporate-action evidence.
+The bank comparison is **TCB/VCB, 2/22 observed banks, 15 FY2025 metrics**;
+observed-industry ranks/percentiles are suppressed. Historical sector totals stay
+disabled. No WiData or paid subscription is required.
+
+Supported private launchers and live HTTP checks PASS. Actual integrated-browser
+desktop checks PASS for exercised flows; mobile, tooltips, exhaustive retries and
+full live-market context remain PENDING. Backend **1,600 + 32 subtests**, frontend
+**334 passed + one existing skip**, typecheck/build and real contracts/static
+rendering PASS. PIT/public-rights/fully-verified counts remain separately zero.
+See [V4 delivery](../research/FINANCIAL_INTELLIGENCE_V4_DELIVERY.md),
+[feature comparison](../research/SSTOCK_FEATURE_COMPARISON_V4.md),
+[acceptance and manual checklist](../research/DASHBOARD_VERIFICATION_V4.md),
+[coverage](../research/validation/free-data-v4/VERIFIED_METRIC_COVERAGE.csv), and
+[valuation decisions](../research/VALUATION_EVIDENCE_AUDIT.md).
+
+Use Woofi components and identity; keep private financial tabs usable independently of missing market identity. Show exact per-period original sources, units and separate verification counts. Preserve unavailable states and source-vintage warnings.
+
+## Historical context
+
+## Financial Intelligence V3 — historical checkpoint
+
+Financial Analysis uses a concise period-labelled highlight grid (two columns on
+small screens, three on wide screens), amount/growth charts first, dedicated
+balance/cash-flow/profitability/health destinations and shared source/period/unit
+controls. Hide unrelated empty module navigation while retaining source/missing
+evidence. Reuse the dividend action destination and pass company/period context
+into industry research. Bank credit quality uses explicitly named classified-loan
+and allowance populations; demand-deposit share is not labelled vendor CASA.
+Peer medians/ranks describe the covered compatible sample with visible missing
+counts, never all-industry totals. No empty P/E/P/B chart is added as a module.
+Static contracts/rendering pass; current Woofi visual/mobile acceptance PENDING.
+See research/FINANCIAL_INTELLIGENCE_V3_DELIVERY.md.
+
+## Personal Financial Research V6 — local development only
+
+Reuse the existing Financial Analysis destinations/tables/charts. The separate
+server-authorized personal scope has a visible Personal Research/SOURCE_REPORTED
+disclosure, UNKNOWN basis and inspectable unit/receipt evidence in EN/VI. Display
+the supported real source subset without filler rows; charts of reported amounts
+must not imply reconciled compositions or qualify unknown-basis ratios/growth.
+Default/public consumers reject personal payloads. No News/Board redesign.
+
+## Financial Research experience V2 — development, 19 October 2026
+
+Financial Analysis keeps one shared period/unit toolbar with five secondary
+destinations: Business picture, Growth drivers, Valuation, Financial statements,
+Documents and sources. Prefer paired chart frames on desktop and stacked frames
+on mobile, token-based colors and separate amount/rate axes. Missing qualification
+receives an explicit chart shell and inspectable reason; never an invented line.
+Partial compositions do not imply 100% coverage or reconstructed residuals.
+Source-coded statement parents may collapse; sticky labels/periods scroll inside
+the table. Evidence/receipts remain distinct from issuer filings. Preserve the
+existing per-input basis, provenance, rights and DEMO/live guards. Implementation
+and visual acceptance limits: docs/FINANCIAL_RESEARCH_EXPERIENCE_V2.md.
+
+## Owner correction — full-row market fills (19 October 2026)
+
+Latest owner preference supersedes the muted pastel experiment: restore the original mint green/red/gold/purple/cyan row hues with dark semibold numeric text in both themes; compact 28px desktop rows, 36px mobile. Qualified advancing/declining rows use a continuous percentage shading scale, capped at 7 percentage points for presentation only (not an inferred exchange limit). The corrected ramp starts near-neutral, reaches the approved original hue at 3%, then deepens to the 7% visual cap. 1% and 2% must have at least a 30-channel RGB separation in the presentation regression; the earlier narrow ramp was too subtle. Missing/inconsistent percentages use the light base; stale/missing/unknown/error remain neutral. Explicit hover retains the row fill. Ceiling/floor/reference retain the original purple/cyan/gold hues. Heatmap, data qualification and trading semantics remain unchanged.
+
+The owner's third reference screenshot supersedes the V2 movement-cell-only instruction: fill the entire stock row in the Board and Overview mover tables, with a compact gap and rounded outer corners. Reuse the centralized price-state resolver and contrast-safe theme palette. Stale/missing/unknown/error rows stay neutral. Heatmap, sorting, source dialogs and data contracts are unchanged. This source correction requires new visual acceptance; existing running preview builds do not update automatically.
+
+## Market Workspace UI refinement V2 — 2026-10-19
+
+Desktop primary navigation expands to icons + labels or collapses to labelled,
+focusable icon links with an explicit navigation toggle. Mobile always exposes
+all three destination labels, including after a desktop collapse. Keep the
+compact header, active underline and reduced-motion support; no wide sidebar.
+
+Homepage Hot Topics uses the existing same-Story thumbnail pipeline alongside
+headlines, with fixed 4:3 frames and a neutral reserved fallback. Retain 3/2 initial
+headlines, original source/links/ranking and no additional quote consumer.
+
+Board and overview mover tables fill only the movement cell, using the centralized
+qualified price state: ceiling purple, advance green, reference gold/yellow,
+decline red, floor cyan; uncertain/stale/missing/error remain neutral. Right-align
+tabular numbers; no whole-row tint or pills. Stock Detail keeps the same resolver.
+Heatmap bins, equal-area geometry, density, controls and data remain unchanged.
+
+Overview alone gives VN-Index a compact 32px desktop/28px mobile value, visible
+absolute/percentage movement and source/time/session/freshness. Reuse the approved
+mascot poses at 64px/48px: known fresh direction, loading, empty or unavailable;
+stale/unverified observations must not receive a fresh-direction expression.
+The artwork is an observation/UI cue, not a sentiment score or forecast.
+
+This supersedes the preceding V1 presentation details where they differ. Source
+validation is recorded in `docs/MARKET_WORKSPACE_UI_REFINEMENT_V2.md`; actual
+Cloud Browser acceptance remains PENDING. No local-browser fallback or deployment.
+
+## Approved Hot Topics and primary navigation integration — 2026-10-19
+
+Public routes share visible Market / News / Watchlist links (VI: Thị trường /
+Tin tức / Theo dõi), inline on desktop and a labelled second header row on mobile.
+No primary destination depends on a hamburger or the old wide sidebar. Existing
+News/Watchlist content, routes and browser-local review semantics are unchanged.
+
+Overview places one compact publisher-context area immediately after its sample
+summary, before mover details. Default Hot Topics reuses the original 72-hour,
+two-independent-publisher contract and server order; Market Focus retains its
+separate qualified 24-hour Company/Market Brief contract. Inactive options stop
+their existing read-refresh subscription and retain their own results. No merged
+feed or additional quote consumer. Initial Hot Topics visibility is three desktop
+headlines/two mobile, with an explicit expansion; source text/time and original
+publisher/ticker links remain separate. Board/Heatmap keep their full canvas.
+
+This supersedes the older public-route sidebar guidance below. Internal SSI shell
+and provisional data guards remain separate. Automated validation is recorded in
+`docs/HOT_TOPICS_NAVIGATION_V1.md`; Cloud Browser acceptance is unavailable, so
+source completion does not establish visual acceptance or authorize deployment.
+
+## Approved Unified V2.1 market workspace
+
+Targeted refinement: Overview uses compact sample/freshness context, paired
+session-comparable mover tables and content-sized persisted-News context rather
+than a sparse fixed right column. Workspace Heatmap defaults to small equal-area
+ticker/percentage cells with keyboard/touch source detail, plus optional detailed
+cells. Keep the ordinary Board architecture and Watchlist detailed default. Label
+coverage as the visible/loaded sample, never as full index breadth. See
+`docs/MARKET_WORKSPACE_V21_REFINEMENT.md`; user product acceptance remains pending.
+
+The user-approved Unified V2.1 package supersedes earlier Explore composition and
+market-route sidebar requirements: compact logo/search/locale/theme header,
+Overview / Board / Heatmap navigation and existing Stock Research. News and
+Watchlist retain their existing navigation/functionality. Market routes use the
+approved restrained slate/teal theme tokens; financial movement colors retain
+their independent meanings in both themes.
+
+Default Board is an ordinary sortable three-panel comparison. Optional Advancing,
+Declining, Unchanged and Stale / Missing organization uses the loaded filtered
+sample only. Counts stay unknown on failed initial transport. Stock maps use five
+source-percentage bins with boundaries -1, 0 and +1 percent, neutral stale/missing
+states and equal-area cells; no sector taxonomy or capitalization is implied.
+Source-time buttons open keyboard/touch accessible original evidence. Preserve
+all existing research tabs, qualified charts, financials and original News links;
+missing history has an explicit compact state rather than an invented path.
+
+Prototype values/arrays/articles are never product data. Future capabilities remain
+inactive behind a compact qualification disclosure. The visual baseline is the
+local `unified-v2-1` package; controlled application screenshots are separate from
+live-data qualification and from the user's final release authorization.
+
 This file is the visual and interaction contract for the production frontend.
 
 It is inspired by strong patterns from professional financial research products and OpenDesign references, but it is **not** a clone of Stripe, Binance, Kraken, Bloomberg, or any other product.
@@ -289,10 +455,38 @@ not an importance score. Show followed-stock context, source/time and limitation
 keep full stock rows, quiet stocks and Technical assurance below. Only an explicit
 review acknowledges the displayed ticker-item revisions; navigation never does.
 
-A Price map is a scoped alternative to reading the same quote list, not a market
-dashboard. Equal tile area has no financial weighting. Keep the loaded-page or
-followed-stock boundary explicit, original source values and times inspectable,
-and stale/missing backgrounds neutral. Direction remains labelled in text and
-symbols independently of freshness; zero and missing are distinct. The default
-Explore list and Watchlist attention hierarchy stay intact. Reuse the page quote
-context; presentation switches must not create another data lease or refresh.
+### Market board correction (source checkpoint; browser gate pending)
+
+Supersedes the failed tall-card Price map contract. Explore defaults to the
+qualified VN30 membership and one bounded30-symbol page; All equities, search,
+exchange/index filters and pagination remain explicit. Use compact financial rows
+in contiguous desktop columns, right-aligned source price/change, neutral source
+time controls, and a separate compact equal-area heatmap. Layout switches, sorting
+and evidence disclosures share the existing page quote context and never acquire
+again. Watchlist keeps its current followed-symbol lease and review hierarchy.
+
+Source-backed scopes are index memberships, not fabricated issuer sectors.
+Counts describe current observations in this loaded selection only, not exchange
+breadth. No capitalization sizing, strength, flow, sentiment or aggregate return.
+Missing prices never become zero. Pending requests must say loading; confirmed
+missing/stale observations remain neutral. Original date/session/source/reference
+must remain inspectable with keyboard and touch. Do not promote minute-bar volume
+to session volume. Keep methodology in one disclosure instead of repeated cards.
+Preserve VI/EN, both themes, research links, review semantics and unknown states.
+
+Source tests/build are not visual acceptance. Production release requires actual
+new-code desktop/mobile browser inspection, numerical comparison, no overlap,
+useful default coverage and bounded30-symbol cold/read lifecycle qualification.
+Preview execution was denied by automatic policy in this task; no alternative
+preview launcher or canonical deployment can substitute for that missing gate.
+
+### Financial intelligence comparison
+
+Financial Analysis retains its own component and evidence hierarchy. Additional
+cash-flow, profitability, liquidity/leverage and bank-funding panels reuse the
+canonical chart contract. Show multiples as × and fractions as percentages;
+amount-unit changes must not round a nonzero subunit amount to an apparent zero.
+Industry comparison shows metric-specific coverage, missing peers, source/method
+disclosures and effective taxonomy date/version. Numerical ranks and percentiles
+must not be described as investment merit. Wide tables scroll within their
+container; explicit synthetic fixtures are confined to the replay-only demo route.

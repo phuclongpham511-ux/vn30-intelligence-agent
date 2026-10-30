@@ -1,0 +1,26 @@
+metric_id,source,statement,source_code,availability,public_rights,fallback
+revenue,vnstock:VCI,income,isa3,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+gross_profit,vnstock:VCI,income,isa5,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+net_profit,vnstock:VCI,income,isa20,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+profit_parent,vnstock:VCI,income,isa22,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+eps_reported,vnstock:VCI,income,isa23,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+operating_income,vnstock:VCI,income,isb38,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+net_interest_income,vnstock:VCI,income,isb27,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+total_assets,vnstock:VCI,balance,bsa53,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+total_liabilities,vnstock:VCI,balance,bsa54,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+equity,vnstock:VCI,balance,bsa78,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+current_assets,vnstock:VCI,balance,bsa1,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+current_liabilities,vnstock:VCI,balance,bsa55,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+inventory,vnstock:VCI,balance,bsa15,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+cash_equivalents,vnstock:VCI,balance,bsa2,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+short_debt,vnstock:VCI,balance,bsa56,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+long_debt,vnstock:VCI,balance,bsa71,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+customer_loans,vnstock:VCI,balance,bsb104,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+customer_deposits,vnstock:VCI,balance,bsb113,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+cash_operating,vnstock:VCI,cash,cfa18,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+cash_investing,vnstock:VCI,cash,cfa26,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+cash_financing,vnstock:VCI,cash,cfa34,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+capex_signed,vnstock:VCI,cash,cfa19,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+cash_net_change,vnstock:VCI,cash,cfa35,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+cash_beginning,vnstock:VCI,cash,cfa36,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none
+cash_ending,vnstock:VCI,cash,cfa38,audited mapping; per-issuer coverage in DATA_COVERAGE_MATRIX.csv,unreviewed,none

@@ -1,0 +1,7461 @@
+{
+  "contract": "free-data-application-validation-v2",
+  "status": "PASS",
+  "recorded_at": "2026-10-21T08:45:19.946971+00:00",
+  "stock_api_projections": 60,
+  "provider_history_preserved": true,
+  "observed_industry_categories": 61,
+  "observed_memberships": 406,
+  "industry": [
+    {
+      "code": "8355",
+      "members": 22,
+      "saved_companies": 2,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "profit_parent": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "total_assets": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "total_liabilities": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "equity": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "operating_income": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "net_interest_income": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "customer_loans": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "customer_deposits": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "cash_operating": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "cash_investing": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "cash_financing": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "roa": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 2,
+          "comparable": 2
+        },
+        "demand_deposit_share": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 1,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "8633",
+      "members": 56,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3767",
+      "members": 2,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "8777",
+      "members": 21,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5379",
+      "members": 7,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "9537",
+      "members": 3,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "7535",
+      "members": 25,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "1757",
+      "members": 11,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3577",
+      "members": 11,
+      "saved_companies": 1,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 1,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5373",
+      "members": 4,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "8575",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "8536",
+      "members": 4,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2771",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "4533",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2723",
+      "members": 3,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2727",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "4577",
+      "members": 12,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "9533",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5755",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5751",
+      "members": 3,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5377",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5555",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2779",
+      "members": 4,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5553",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3763",
+      "members": 11,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2733",
+      "members": 3,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "9535",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "1775",
+      "members": 4,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2777",
+      "members": 13,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5753",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "1733",
+      "members": 5,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3357",
+      "members": 3,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2757",
+      "members": 3,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "1353",
+      "members": 15,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3573",
+      "members": 18,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "7577",
+      "members": 4,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5337",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "7573",
+      "members": 9,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5557",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "1357",
+      "members": 10,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3533",
+      "members": 3,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "1737",
+      "members": 5,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "0533",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3353",
+      "members": 7,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3726",
+      "members": 4,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "9578",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "0573",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "9574",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "4535",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2737",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3785",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "8773",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "8637",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2791",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2773",
+      "members": 9,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "5759",
+      "members": 3,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2353",
+      "members": 23,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "2357",
+      "members": 32,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3747",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3724",
+      "members": 1,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    },
+    {
+      "code": "3537",
+      "members": 2,
+      "saved_companies": 0,
+      "metrics": {
+        "revenue": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_profit": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "profit_parent": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_assets": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "total_liabilities": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "operating_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_interest_income": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_loans": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "customer_deposits": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_operating": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_investing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "cash_financing": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "free_cash_flow": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "inventory": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "gross_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "net_margin": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roe": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "roa": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "current_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "quick_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "debt_equity": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "loan_deposit_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "demand_deposit_share": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "npl_classified_ratio": {
+          "covered": 0,
+          "comparable": 0
+        },
+        "classified_loan_coverage": {
+          "covered": 0,
+          "comparable": 0
+        }
+      }
+    }
+  ],
+  "dividends": [
+    {
+      "ticker": "FPT",
+      "events": 3
+    },
+    {
+      "ticker": "HPG",
+      "events": 0
+    },
+    {
+      "ticker": "MWG",
+      "events": 0
+    },
+    {
+      "ticker": "PNJ",
+      "events": 0
+    },
+    {
+      "ticker": "REE",
+      "events": 0
+    },
+    {
+      "ticker": "SSI",
+      "events": 0
+    },
+    {
+      "ticker": "TCB",
+      "events": 0
+    },
+    {
+      "ticker": "VCB",
+      "events": 0
+    },
+    {
+      "ticker": "VHM",
+      "events": 0
+    },
+    {
+      "ticker": "VNM",
+      "events": 0
+    }
+  ],
+  "calculation_checks": [
+    {
+      "ticker": "FPT",
+      "period": "2022",
+      "checked": [
+        "current_ratio",
+        "debt_equity",
+        "free_cash_flow",
+        "gross_margin",
+        "net_margin",
+        "quick_ratio"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "FPT",
+      "period": "2023",
+      "checked": [
+        "bvps",
+        "current_ratio",
+        "debt_equity",
+        "free_cash_flow",
+        "gross_margin",
+        "net_margin",
+        "quick_ratio"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "FPT",
+      "period": "2024",
+      "checked": [
+        "bvps",
+        "current_ratio",
+        "debt_equity",
+        "free_cash_flow",
+        "gross_margin",
+        "net_margin",
+        "quick_ratio",
+        "roa",
+        "roe"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "TCB",
+      "period": "2023",
+      "checked": [
+        "loan_deposit_ratio"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "TCB",
+      "period": "2024",
+      "checked": [
+        "classified_loan_coverage",
+        "demand_deposit_share",
+        "loan_deposit_ratio",
+        "npl_classified_ratio"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "TCB",
+      "period": "2025",
+      "checked": [
+        "classified_loan_coverage",
+        "demand_deposit_share",
+        "loan_deposit_ratio",
+        "npl_classified_ratio",
+        "roa",
+        "roe"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "HPG",
+      "period": "2024",
+      "checked": [
+        "free_cash_flow",
+        "gross_margin",
+        "net_margin"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "HPG",
+      "period": "2025",
+      "checked": [
+        "current_ratio",
+        "debt_equity",
+        "free_cash_flow",
+        "gross_margin",
+        "net_margin",
+        "quick_ratio"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "VCB",
+      "period": "2024",
+      "checked": [
+        "loan_deposit_ratio"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "VCB",
+      "period": "2025",
+      "checked": [
+        "loan_deposit_ratio",
+        "roa",
+        "roe"
+      ],
+      "status": "PASS"
+    },
+    {
+      "ticker": "MWG",
+      "period": "2024",
+      "checked": [
+        "current_ratio",
+        "free_cash_flow",
+        "gross_margin",
+        "net_margin",
+        "quick_ratio"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "cafef_fpt_cross_checks": [
+    {
+      "period": "2022",
+      "field": "gross_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2022",
+      "field": "net_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2022",
+      "field": "profit_parent",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "gross_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "net_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "profit_parent",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "gross_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 84.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "net_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 444.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "profit_parent",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 178.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "gross_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 413.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "net_profit",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 266.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "profit_parent",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 499.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2022",
+      "field": "total_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2022",
+      "field": "total_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2022",
+      "field": "equity",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2022",
+      "field": "current_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2022",
+      "field": "current_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "total_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "total_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "equity",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "current_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2023",
+      "field": "current_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 0.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "total_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 380.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "total_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 180.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "equity",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 200.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "current_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 453.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2024",
+      "field": "current_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 260.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "total_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 375.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "total_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 86.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "equity",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 461.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "current_assets",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 92.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    },
+    {
+      "period": "2025",
+      "field": "current_liabilities",
+      "within_thousand_vnd": true,
+      "absolute_difference_vnd": 230.0,
+      "scope_transferred": false,
+      "original_units_transferred": false
+    }
+  ],
+  "provider_requests": 0,
+  "application_database_access": false,
+  "runtime": "PENDING",
+  "browser": "PENDING",
+  "transport": "in-process ASGI; no listener"
+}

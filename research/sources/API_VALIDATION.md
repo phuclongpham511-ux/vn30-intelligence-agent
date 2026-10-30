@@ -1,0 +1,9 @@
+# Endpoint validation
+
+FPT/HPG: reused saved, hash-pinned VCI observations rather than reacquiring unchanged evidence. TCB/SSI: requested the existing pinned VCI packet path once per issuer (metadata plus three statement sections; eight financial endpoint reads requested in total). SDK classification initialization is separate and was not instrumented as an HTTP-call census. No application retries or SDK upgrades were added. Each of the three receipts contained 42 statement observations for each issuer. Canonical packets and source/receipt hashes are private under .local/provider-validation/.
+
+No claim is made about raw HTTP status codes: the successful SDK envelope and canonical receipt status are what was observed. No SSI credential or pricing call was made. Company support beyond the measured sample is not inferred from documented API capability. See ../data/OBSERVED_SAMPLE.json for actual period ranges.
+
+KBS: public code paths and request schema were read, pinned by repository tree SHA. A single robots request returned 400, so automated financial collection stopped pending a documented access basis. vnfin/vietfin: docs/code-license review only; actual provider endpoints and payload consistency remain untested. The annual-report repository LICENSE path returned 404. The TiniX card is readable but its noncommercial restriction excludes a commercial runtime import.
+
+Cross-provider benchmark: minimum requested issuers were checked in VCI (saved FPT/HPG, new TCB/SSI), but a lawful, fully validated second-provider comparison is incomplete. The independent numerical comparison available is the saved official PNJ filing versus VCI: ten amount matches, zero numerical differences. Binary/page-image verification remains unresolved. Tests use synthetic or saved approved fixtures, not unrestricted live endpoints.

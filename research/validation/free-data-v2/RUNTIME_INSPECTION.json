@@ -1,0 +1,26 @@
+{
+  "contract": "runtime-inspection-v2",
+  "checked_at": "2026-10-21T03:31:43.0160566Z",
+  "method": "read-only Get-NetTCPConnection -State Listen",
+  "command_available": true,
+  "ports_checked": [
+    3430,
+    3431,
+    3546,
+    3547,
+    8430,
+    8431,
+    8432,
+    8546
+  ],
+  "listeners": [],
+  "restart_attempted": false,
+  "prior_failure": "CreateProcess rejected: blocked by policy",
+  "prior_target": "isolated Next preview 127.0.0.1:3547; BACKEND_URL unused 8546",
+  "prior_failure_before_application_start": true,
+  "more_specific_policy_reason_available": false,
+  "runtime_status": "PENDING",
+  "browser_status": "PENDING",
+  "mobile_status": "PENDING",
+  "policy_bypass_attempted": false
+}

@@ -6,6 +6,8 @@ from src.schemas.data import DataModel
 
 Frequency = Literal['annual', 'quarterly', 'ttm']
 StatementKind = Literal['income', 'balance', 'cash']
+FinancialConfidence = Literal['OFFICIAL_VERIFIED', 'RECONCILED', 'SOURCE_REPORTED', 'UNVERIFIED', 'INVALID']
+FinancialAccess = Literal['PERSONAL_RESEARCH', 'PUBLIC_DISPLAY_REVIEW_REQUIRED', 'PUBLIC_DISPLAY_APPROVED']
 
 
 class FinancialLine(DataModel):
@@ -13,11 +15,33 @@ class FinancialLine(DataModel):
     name_en: str
     name_vi: str
     parent: str | None = None
-    unit: Literal['VND', 'VND/share', 'source_units'] = 'VND'
+    unit: Literal['VND', 'VND/share', 'shares', 'source_units'] = 'VND'
     value: float | None = None
     raw_value: float | None = None
-    semantic_status: Literal['reported', 'conflicted'] = 'reported'
+    semantic_status: Literal['reported', 'conflicted', 'unqualified'] = 'reported'
     source_labels: list[dict[str, str | None]] = Field(default_factory=list)
+
+
+class FinancialSourceContext(DataModel):
+    """Evidence facts, not an issuer filing certification or a rights grant."""
+    contract: Literal['financial-source-context-v2'] = 'financial-source-context-v2'
+    data_confidence: FinancialConfidence = 'UNVERIFIED'
+    access_classification: FinancialAccess = 'PUBLIC_DISPLAY_REVIEW_REQUIRED'
+    fiscal_year: int
+    fiscal_quarter: int | None = None
+    period_start: str | None = None
+    period_end: str | None = None
+    original_currency: str | None = None
+    original_unit: str | None = None
+    amount_multiplier: Literal[1, 1000, 1000000, 1000000000] = 1
+    unit_evidence: Literal['audited_vci_adapter_contract', 'audited_cafef_adapter_contract', 'original_filing'] = 'audited_vci_adapter_contract'
+    record_sha256: str = Field(pattern=r'^[a-f0-9]{64}$')
+    audit_status: Literal['unknown'] = 'unknown'
+    restatement_status: Literal['unknown'] = 'unknown'
+    publication_time_qualified: Literal[False] = False
+    display_rights: Literal['unreviewed', 'permitted', 'prohibited'] = 'unreviewed'
+    display_rights_reference: str | None = None
+    original_metadata: dict = Field(default_factory=dict)
 
 
 class StatementObservation(DataModel):
@@ -34,6 +58,7 @@ class StatementObservation(DataModel):
     field_codes: dict[str, str]
     items: list[FinancialLine]
     diagnostics: list[str] = Field(default_factory=list)
+    source_context: FinancialSourceContext | None = None
 
 
 class StatementReceipt(DataModel):
@@ -90,7 +115,31 @@ class FinancialPeriod(DataModel):
     is_fixture: bool = False
 
 
+class FundamentalMetricDisplay(DataModel):
+    key: str
+    group: Literal['valuation', 'performance', 'profitability', 'health']
+    label: str
+    unit: Literal['VND', 'VND/share', 'fraction', 'multiple']
+    status: Literal['QUALIFIED', 'UNAVAILABLE', 'UNQUALIFIED', 'DEMO']
+    value: float | None = None
+    formula: str
+    reason: str | None = None
+    blockers: list[str] = Field(default_factory=list)
+    consolidation: str | None = None
+
+
+class FundamentalSummary(DataModel):
+    contract: Literal['fundamental-display-v1'] = 'fundamental-display-v1'
+    period: str | None
+    frequency: Frequency
+    consolidation: str | None
+    publication_date: str | None
+    metrics: list[FundamentalMetricDisplay]
+
+
 class FinancialEngineResponse(DataModel):
+    display_scope: Literal['public', 'internal_research'] = 'public'
+    internal_authorization_reference: str | None = None
     data_engine: Literal['financial-engine-v1'] = 'financial-engine-v1'
     ticker: str
     source: str
@@ -108,7 +157,7 @@ class FinancialEngineResponse(DataModel):
     metadata_sha256: str
     financial_identity_guard: bool
     read_at: datetime
-    read_kind: Literal['provider_or_process_cache'] = 'provider_or_process_cache'
+    read_kind: Literal['provider_or_process_cache', 'saved_filing_review'] = 'provider_or_process_cache'
     publication_date: str | None = None
     consolidation: str | None = None
     sector: str | None = None
@@ -116,3 +165,6 @@ class FinancialEngineResponse(DataModel):
     is_fixture: bool = False
     limitations: list[str]
     reconciliations: list[dict] = Field(default_factory=list)
+    fundamental_summary: FundamentalSummary | None = None
+    research_panels: list[dict] = Field(default_factory=list)
+    verification: dict | None = None

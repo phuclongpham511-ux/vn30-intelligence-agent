@@ -27,6 +27,41 @@ def test_trade_uses_same_day_reference_and_preserves_missing_value():
     assert row['open'] is None
 
 
+def test_activity_preserves_tick_evidence_but_does_not_invent_units_value_or_qualification():
+    now = datetime(2026, 10, 7, 10, 8, 35, tzinfo=VN)
+    row = normalize_trade({'s':'ABC', 't':'2026/10/07 10:08:32', 'p':'10000', 'q':'100', 'v':'1200000'},10000,now)
+    a = row['trading_activity']
+    assert a['volume']['raw_value'] == '1200000'
+    assert a['volume']['field'] == 'v'
+    assert a['volume']['unit'] is None
+    assert a['volume']['qualification'] == 'unverified_units'
+    assert a['value']['value'] is None
+    assert a['value']['field'] is None
+    assert a['session'] == 'trading_day' and a['cumulative']
+    assert a['symbol'] == 'ABC' and a['trading_date'] == '2026-10-07'
+    assert a['observed_at'] == row['updated_at']
+    assert a['includes_negotiated_trades'] is None
+    assert a['scope'] == 'unverified_matched'
+
+
+def test_cumulative_source_snapshots_replace_not_sum_and_keep_lower_corrections(index_source):
+    live, calls, state = index_source
+    live.read(['ABC'])
+    def tick(t, v, **extra):
+        return {'topic':'trade.ABC','data':{'s':'ABC','t':'2026/10/07 '+t,'p':10000,'v':v,**extra}}
+    live.accept(tick('10:08:30',1200)); live.accept(tick('10:08:30',1200))
+    assert live.read(['ABC'])['items']['ABC']['snapshot']['total_volume'] == 1200
+    live.accept(tick('10:08:29',5000))
+    assert live.read(['ABC'])['items']['ABC']['snapshot']['total_volume'] == 1200
+    live.accept(tick('10:08:31',1000))
+    assert live.read(['ABC'])['items']['ABC']['snapshot']['total_volume'] == 1000
+    live.accept(tick('10:08:32',9000,st='2026/10/07 10:08:00'))
+    assert live.read(['ABC'])['items']['ABC']['snapshot']['total_volume'] == 1000
+    live.accept(tick('10:08:33',0))
+    assert live.read(['ABC'])['items']['ABC']['snapshot']['total_volume'] == 0
+    assert not calls
+
+
 @pytest.mark.parametrize('hour,minute,day,expected', [
     (10,0,7,'active'), (12,0,7,'break'), (14,0,7,'active'),
     (16,0,7,'closed'), (8,0,7,'closed'), (10,0,10,'closed')])

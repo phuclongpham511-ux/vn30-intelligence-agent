@@ -19,6 +19,70 @@ from src.models.technical_eod import TechnicalEODJob
 SCAN_LIMIT = 300
 
 
+def financial_updates(symbol):
+    """Saved annual comparisons; the qualified V5.8 selection is a separate opt-in."""
+    import os
+    import sqlite3
+    from src.services.personal_financials import configured_research_packet, saved_financial_insights
+    from src.services.financial_journal import MetricJournal
+
+    profile = os.getenv('WOOFI_WATCHLIST_FINANCIAL_PROFILE', 'revenue-v1')
+    checks = []
+    def page(status, reasons, items=None):
+        result = dict(status=status, reasons=list(dict.fromkeys(reasons)), items=items or [], has_more=False, truncated=False)
+        if profile == 'qualified-v58':
+            result.update(profile=profile, checks=checks)
+        return result
+    try:
+        if profile not in ('revenue-v1', 'qualified-v58'):
+            raise ValueError('Unknown financial profile')
+        packet, digest = configured_research_packet(os.environ.get('WOOFI_PERSONAL_CAPTURES', ''),
+            symbol, frequency='annual', evidence='preferred')
+        journal_path = os.environ['WOOFI_PERSONAL_SQLITE']
+        candidates = [c for c in MetricJournal(journal_path, readonly=True).captures(ticker=symbol, source=packet.source)
+            if c['capture_sha256'] == digest]
+        if len(candidates) != 1:
+            raise ValueError('Ambiguous financial revision')
+        metrics = ['revenue']
+        if profile == 'qualified-v58':
+            metrics = {'bank':['customer_loans'], 'non_financial':['revenue','net_profit']}.get(packet.profile, metrics)
+        result = saved_financial_insights(journal_path, candidates[0]['capture_id'],
+            metrics=metrics, frequency='annual', comparison='yoy',
+            authorization_reference='private-watchlist-financial-v1')
+        if result.ticker != symbol or result.is_fixture:
+            raise ValueError('Invalid saved issuer')
+        items, reasons = [], []
+        for insight in result.insights:
+            statement = 'balance' if insight.metric == 'customer_loans' else 'income'
+            observed = {o.period:o.fields.get(insight.metric) for o in packet.reports[statement].observations
+                        if o.frequency == 'annual'}
+            status = ('MISSING_DATA' if observed.get(insight.current_period) is None or observed.get(insight.comparison_period) is None
+                else 'INSUFFICIENT_COMPARISON' if insight.qualification_status != 'COMPARABLE' else 'READY')
+            checks.append(dict(metric=insight.metric, status=status, current_period=insight.current_period,
+                comparison_period=insight.comparison_period, noteworthy=insight.attention_reason.noteworthy,
+                reasons=insight.missing_information))
+            reasons.extend(insight.missing_information)
+            if status != 'READY' or not insight.attention_reason.noteworthy:
+                continue
+            evidence = dict(source=result.source, frequency=result.frequency, comparison=result.comparison,
+                capture_id=result.capture_id, capture_sha256=result.capture_sha256,
+                packet_sha256=result.packet_sha256, limitations=result.limitations,
+                insight=insight.model_dump(mode='json'))
+            entity = revision(dict(symbol=symbol, source=result.source, frequency=result.frequency,
+                metric=insight.metric, current_period=insight.current_period,
+                comparison_period=insight.comparison_period))
+            items.append(dict(id='financial:'+entity, entity_id=entity, revision=revision(evidence), kind='financial',
+                title=f'{symbol} · {insight.metric} · {insight.current_period} / {insight.comparison_period}',
+                url='/stocks/'+symbol+'#stock-fundamentals', evidence=evidence))
+        status = ('READY' if any(c['status'] == 'READY' for c in checks) else
+            'INSUFFICIENT_COMPARISON' if any(c['status'] == 'INSUFFICIENT_COMPARISON' for c in checks) else 'MISSING_DATA')
+        return page(status, reasons, items)
+    except FileNotFoundError:
+        return page('MISSING_DATA', ['saved_financial_coverage_unavailable'])
+    except (KeyError, ValueError, TypeError, OSError, sqlite3.DatabaseError):
+        return page('UNAVAILABLE', ['saved_financial_evidence_invalid_or_ambiguous'])
+
+
 def revision(value):
     return sha256(json.dumps(value, sort_keys=True, ensure_ascii=False,
                             separators=(',', ':'), default=str).encode()).hexdigest()
@@ -97,7 +161,8 @@ def news_page(session, symbol, identity, now, offset, size, source_ids, body_evi
                 truncated=truncated, window_start=now-timedelta(hours=72))
 
 
-def community_page(session, symbol, now, offset, size, source_ids):
+def community_page(session, symbol, now, offset, size, source_ids, *, group_copies=False):
+    from src.community.themes import deduplicate
     rows = session.exec(select(CommunityEvidenceItem).where(
         CommunityEvidenceItem.published_at >= now-timedelta(hours=24),
         CommunityEvidenceItem.published_at <= now,
@@ -119,7 +184,10 @@ def community_page(session, symbol, now, offset, size, source_ids):
                 'published_at':utc(row.published_at).isoformat(),
                 'first_seen_at':utc(row.first_seen_at).isoformat(),
                 'last_seen_at':utc(row.last_seen_at).isoformat()}))
-    return dict(items=items, has_more=len(rows)>size, truncated=False,
+    # Reuse Pulse copy grouping only as display metadata. Native item IDs,
+    # revisions, pagination and Watchlist unread semantics remain unchanged.
+    grouped = dict(display_groups=[[row['id'] for row in group] for group in deduplicate([item['evidence'] for item in items])]) if group_copies else {}
+    return dict(items=items, **grouped, has_more=len(rows)>size, truncated=False,
                 window_start=now-timedelta(hours=24))
 
 
@@ -150,7 +218,7 @@ def technical_updates(session, symbol, now):
         last_checked_at=utc(job.last_checked_at) if job and job.last_checked_at else None)
 
 
-def intelligence(session, symbols, *, now=None, offset=0, size=12):
+def intelligence(session, symbols, *, now=None, offset=0, size=12, community_groups=False):
     now = utc(now or datetime.now(timezone.utc))
     if not symbols:
         return dict(as_of=now, offset=offset, page_size=size, stocks=[], news_sources=[], community_sources=[])
@@ -186,7 +254,7 @@ def intelligence(session, symbols, *, now=None, offset=0, size=12):
             display_name_en=identity.display_name_en if identity else None,
             exchange=identity.exchange if identity else None)
         row['news'] = news_page(session,symbol,identity,now,offset,size,news_ids,body_evidence[symbol]) if identity else None
-        row['community'] = community_page(session,symbol,now,offset,size,community_ids) if identity else None
+        row['community'] = community_page(session,symbol,now,offset,size,community_ids,group_copies=community_groups) if identity else None
         row['technical'] = technical_updates(session,symbol,now) if identity else None
         output.append(row)
     return dict(as_of=now, offset=offset, page_size=size, stocks=output,

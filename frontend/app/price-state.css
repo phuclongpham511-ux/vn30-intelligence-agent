@@ -1,0 +1,39 @@
+/* One financial palette; neutral observation states never imply a movement. */
+:root{--price-ceiling:#9639bd;--price-floor:#007b94}
+.dark{--price-ceiling:#dc9fff;--price-floor:#67dff4}
+.price-ceiling,.ceiling{color:var(--price-ceiling)}
+.price-advancing{color:var(--positive)}
+.price-reference{color:var(--unchanged)}
+.price-declining{color:var(--negative)}
+.price-floor,.floor{color:var(--price-floor)}
+.price-stale,.price-unavailable,.price-unknown,.price-error{color:var(--muted-foreground)}
+/* Full stock rows, following the owner-approved reference; unknown states stay neutral. */
+:root{--row-ink:#102336;--row-down-ink:#102336;--row-up-low:#a0edce;--row-up-medium:#83e9c0;--row-up-high:#65e4b2;--row-down-low:#ffc0ca;--row-down-medium:#ffa9b5;--row-down-high:#ff91a0;--row-ceiling:#dc9fff;--row-floor:#67dff4;--row-reference:#eed381;--row-special-ink:#102336}
+.quote-table:has(.quote-movement-row){border-collapse:separate;border-spacing:0 3px}
+.quote-table .quote-movement-row{--quote-row-fill:var(--muted);--quote-row-ink:var(--muted-foreground)}
+.quote-table .quote-movement-row.price-ceiling{--quote-row-fill:var(--row-ceiling);--quote-row-ink:var(--row-special-ink)}
+.quote-table .quote-movement-row.price-advancing{--quote-row-fill:var(--row-up-low);--quote-row-ink:var(--row-ink)}
+.quote-table .quote-movement-row.price-reference{--quote-row-fill:var(--row-reference);--quote-row-ink:var(--row-special-ink)}
+.quote-table .quote-movement-row.price-declining{--quote-row-fill:var(--row-down-low);--quote-row-ink:var(--row-down-ink)}
+.quote-table .quote-movement-row.price-floor{--quote-row-fill:var(--row-floor);--quote-row-ink:var(--row-special-ink)}
+.quote-table tbody .quote-movement-row>th,.quote-table tbody .quote-movement-row>td{background:var(--quote-row-fill);color:var(--quote-row-ink);border-bottom:0;font-weight:600;height:28px;font-size:13px}
+.quote-table .quote-movement-row>:first-child{border-radius:4px 0 0 4px}
+.quote-table .quote-movement-row>:last-child{border-radius:0 4px 4px 0}
+.quote-table .quote-movement-row>th a,.quote-table .quote-movement-row>th button,.quote-table .quote-movement-row .quote-source,.quote-table .quote-movement-row .quote-row-detail>span{color:var(--quote-row-ink)}
+.quote-table .quote-movement-row>td time{font-weight:400}
+.quote-table td.quote-movement-cell{text-align:right;font-variant-numeric:tabular-nums}
+/* Explicit hover selector beats the generic table hover without removing direction. */
+.quote-table tbody tr.quote-movement-row:hover>*{background:var(--quote-row-fill);color:var(--quote-row-ink)}
+.quote-table .quote-movement-row a{min-height:28px}
+.quote-table .quote-movement-row .quote-source{min-height:28px}
+.quote-table .quote-movement-row>th a{font-weight:700}
+@media(max-width:800px){.quote-table tbody .quote-movement-row>th,.quote-table tbody .quote-movement-row>td{height:36px}.quote-table .quote-movement-row a,.quote-table .quote-movement-row .quote-source{min-height:36px}}
+.price-demo{padding:16px 0;min-width:0}
+.price-demo h1{font-size:22px;margin:12px 0 4px}
+.price-demo-note{font-size:12px;color:var(--muted-foreground);margin:6px 0 12px;overflow-wrap:anywhere}
+.price-demo-controls{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.price-demo-controls button{padding:7px 10px;border:1px solid var(--border);border-radius:4px;background:var(--card)}
+.price-state-samples{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;margin:12px 0}
+.price-state-samples>div{border:1px solid var(--border);background:var(--card);padding:10px 7px;min-width:0}
+.price-state-samples b,.price-state-samples span{display:block;font-size:12px;overflow-wrap:anywhere}
+@media(max-width:800px){.price-state-samples{grid-template-columns:repeat(3,minmax(0,1fr))}.price-demo h1{font-size:19px}}

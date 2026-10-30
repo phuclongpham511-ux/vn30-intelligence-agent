@@ -1,6 +1,9 @@
 export type Session = 'active'|'break'|'closed'|'unknown';
 export type LiveStatus = 'fresh'|'stale'|'unavailable';
-export type LiveSnapshot = {ticker:string;last_price:number;reference_price:number|null;change:number|null;change_percent:number|null;open:number|null;high:number|null;low:number|null;total_volume:number|null;total_value:number|null;trading_date:string;updated_at:string;source:string;session:Session};
+export type TradingMetric={value:number|null;raw_value:string|number|null;field:string|null;unit:'shares'|'VND'|null;qualification:'qualified'|'unverified_units'|'unavailable'};
+export type TradingActivity={symbol:string;trading_date:string;observed_at:string;session:'trading_day';source:string;scope:'regular_matched'|'unverified_matched';cumulative:boolean;includes_negotiated_trades:boolean|null;volume:TradingMetric;value:TradingMetric};
+export type PriceLimits={symbol:string;trading_date:string;observed_at?:string|null;effectiveness?:'observation'|'trading_day';reference_price?:number;source:string;unit:'VND';qualification:'qualified';ceiling:number;floor:number;ceiling_field:string;floor_field:string};
+export type LiveSnapshot = {price_unit?:string|null;trading_activity?:TradingActivity;price_limits?:PriceLimits;ticker:string;last_price:number;reference_price:number|null;change:number|null;change_percent:number|null;open:number|null;high:number|null;low:number|null;total_volume:number|null;total_value:number|null;trading_date:string;updated_at:string;source:string;session:Session};
 export type LiveItem = {status:LiveStatus;snapshot:LiveSnapshot|null};
 export type LiveBatch = {items:Record<string,LiveItem>;session:Session;as_of:string};
 export type LiveIndex = {snapshot:(import('./marketIndex').IndexSnapshot & {updated_at:string;session:Session})|null;status:LiveStatus;session:Session;as_of:string};

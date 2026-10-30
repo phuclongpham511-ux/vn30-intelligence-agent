@@ -6,6 +6,7 @@ import {readWatchlist,followStock} from '../lib/watchlist.ts';
 test('stock sections accept research deep links and reject unknown fragments',()=>{
   assert.equal(stockSection('#stock-actions'),'actions');
   assert.equal(stockSection('#stock-fundamentals'),'fundamentals');
+  assert.equal(stockSection('#stock-community'),'community');
   assert.equal(stockSection('#untrusted'),'overview');
 });
 test('stock identity requires the selected cached equity, never another ticker',()=>{
@@ -13,7 +14,7 @@ test('stock identity requires the selected cached equity, never another ticker',
   assert.throws(()=>stockIdentity([{symbol:'XYZ',exchange:'HNX'}],'ABC'));
 });
 test('pending, withdrawn and fixture observations cannot present trusted event terms',()=>{
-  const row={verified:true,withdrawn:false,is_fixture:false};
+  const row={verified:true,withdrawn:false,is_fixture:false,source:'Synthetic source contract test'};
   assert.equal(trustedAction(row),true);
   for(const change of [{verified:false},{withdrawn:true},{is_fixture:true}])assert.equal(trustedAction({...row,...change}),false);
   assert.equal(actionStatus({...row,verified:false}),'Pending verification');
@@ -36,4 +37,11 @@ test('following from Stock Detail preserves explicit review receipts for existin
   assert.deepEqual(updated.seen,raw.seen);
   assert.deepEqual(updated.communitySeen,raw.communitySeen);
   assert.throws(()=>readWatchlist('{invalid'));
+});
+
+
+test('stock reads retain HTTP status so missing coverage differs from a service error',async()=>{
+ for(const status of [404,503]){
+  await assert.rejects(stockRead('/saved-financials',new AbortController().signal,async()=>({ok:false,status})),error=>error.status===status);
+ }
 });

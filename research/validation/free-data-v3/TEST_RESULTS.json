@@ -1,0 +1,61 @@
+{
+  "contract": "financial-intelligence-v3-tests",
+  "backend": {
+    "command": "uv run pytest -q",
+    "status": "PASS",
+    "passed": 1591,
+    "subtests_passed": 32,
+    "failed": 0,
+    "seconds": 321.9,
+    "warning": "Existing Starlette TestClient httpx deprecation"
+  },
+  "frontend": {
+    "command": "npm test",
+    "status": "PASS",
+    "passed": 331,
+    "skipped": 1,
+    "failed": 0,
+    "total": 332,
+    "explicit_null_chart_regression": "PASS"
+  },
+  "typecheck": {
+    "command": "npm run typecheck",
+    "status": "PASS"
+  },
+  "build": {
+    "command": "npm run build -- --webpack",
+    "status": "PASS"
+  },
+  "real_api": {
+    "status": "PASS",
+    "stock_projections": 54,
+    "populated_per_selection": 25,
+    "industry_categories": 61,
+    "dividend_pages": 9,
+    "company_peer_pages": 9,
+    "provider_requests_during_validation": 0,
+    "listener_started": false
+  },
+  "real_rendering": {
+    "status": "PASS",
+    "financial_view_cases": 80,
+    "languages": [
+      "en",
+      "vi"
+    ],
+    "industry_categories": 61,
+    "dividend_pages": 9,
+    "browser": "PENDING"
+  },
+  "runtime": "PENDING",
+  "browser": "PENDING",
+  "mobile_visual_acceptance": "PENDING",
+  "new_financial_source_requests": {
+    "official_pdf_reads": 3,
+    "successful": 1,
+    "access_errors": 2,
+    "restrictions_bypassed": false
+  },
+  "source_mutations": 0,
+  "paid_services": 0
+}
