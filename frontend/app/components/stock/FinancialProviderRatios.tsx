@@ -3,9 +3,10 @@ import {useEffect,useMemo,useState} from 'react';
 import {CartesianGrid,Line,LineChart,ResponsiveContainer,Tooltip,XAxis,YAxis} from 'recharts';
 import {useLocale} from '@/lib/i18n';
 import {useChartMotion} from '@/lib/chart-motion';
-import type {FinancialFrequency} from '@/lib/types';
+import {financialRatioSupplements} from '@/lib/financial-ratio-supplements.mjs';
+import type {FundamentalResearch,FinancialFrequency} from '@/lib/types';
 
-type RatioRow={metric_id:string;label:string|null;values:Record<string,number|null>};
+type RatioRow={metric_id:string;label:string|null;values:Record<string,number|null>;origin?:string;unit?:string};
 type RatioData={contract:'vnstock-ratio-response-v1';ticker:string;frequency:'annual'|'quarterly';source:'KBS';periods:string[];rows:RatioRow[]};
 
 function parseRatioData(value:unknown,ticker:string,frequency:'annual'|'quarterly'):RatioData{
@@ -22,7 +23,7 @@ function parseRatioData(value:unknown,ticker:string,frequency:'annual'|'quarterl
  return data;
 }
 
-export default function FinancialProviderRatios({ticker,frequency}:{ticker:string;frequency:FinancialFrequency}){
+export default function FinancialProviderRatios({ticker,frequency,engine}:{ticker:string;frequency:FinancialFrequency;engine?:FundamentalResearch}){
  const {t,number}=useLocale(),animate=useChartMotion();
  const [data,setData]=useState<RatioData|null>(null),[metricId,setMetricId]=useState(''),[loading,setLoading]=useState(false);
  useEffect(()=>{
@@ -34,18 +35,19 @@ export default function FinancialProviderRatios({ticker,frequency}:{ticker:strin
    .catch(()=>{if(!disposed)setData(null);}).finally(()=>{if(!disposed)setLoading(false);});
   return()=>{disposed=true;controller.abort();};
  },[ticker,frequency]);
- const periods=useMemo(()=>[...(data?.periods||[])].sort(),[data]);
- const selected=data?.rows.find(row=>row.metric_id===metricId)||data?.rows.find(row=>Object.values(row.values).some(value=>value!==null));
- const availableMetrics=data?.rows.filter(row=>Object.values(row.values).some(value=>value!==null)).length||0;
- const availablePeriods=periods.filter(period=>data?.rows.some(row=>row.values[period]!==null)).length;
+ const rows:RatioRow[]=useMemo(()=>[...(data?.rows||[]),...financialRatioSupplements(engine,ticker,frequency)],[data,engine,ticker,frequency]);
+ const selected=rows.find(row=>row.metric_id===metricId)||rows.find(row=>Object.values(row.values).some(value=>value!==null));
+ const periods=selected?.origin?Object.keys(selected.values).sort():[...(data?.periods||[])].sort();
+ const availableMetrics=rows.filter(row=>Object.values(row.values).some(value=>value!==null)).length;
+ const availablePeriods=periods.filter(period=>selected?.values[period]!==null&&selected?.values[period]!==undefined).length;
  const points=periods.map(period=>({period,value:selected?.values[period]??null}));
  if(frequency==='ttm')return null;
- return <section className="min-w-0 space-y-3 border-t pt-4" aria-label={t('Vnstock financial indicators')} aria-busy={loading}>
-  <header className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold">{t('Vnstock financial indicators')}</h3>{data&&<span className="text-[11px] text-muted-foreground">{data.source} · {availableMetrics} · {availablePeriods}</span>}</header>
-  {loading&&!data?<p className="financial-series-unavailable">{t('Loading financial statements')}</p>:!data||!selected?<p className="financial-series-unavailable">{t('Unavailable')}</p>:<>
+ return <section className="min-w-0 space-y-3 border-t pt-4" aria-label={t('Financial ratios')} aria-busy={loading}>
+  <header className="flex flex-wrap items-center justify-between gap-2"><h3 className="text-sm font-semibold">{t('Financial ratios')}</h3>{selected&&<span className="text-[11px] text-muted-foreground">{selected.origin||data?.source} {selected.unit} · {availableMetrics} · {availablePeriods}</span>}</header>
+  {loading&&!selected?<p className="financial-series-unavailable">{t('Loading financial statements')}</p>:!selected?<p className="financial-series-unavailable">{t('Unavailable')}</p>:<>
    <label className="sr-only" htmlFor={`ratio-metric-${ticker}`}>{t('Financial indicator')}</label>
    <select id={`ratio-metric-${ticker}`} className="max-w-full rounded-md border bg-background px-3 py-2 text-sm" value={selected.metric_id} onChange={event=>setMetricId(event.target.value)}>
-    {data.rows.map(row=><option key={row.metric_id} value={row.metric_id}>{row.label||row.metric_id}</option>)}
+    {rows.map(row=><option key={row.metric_id} value={row.metric_id}>{row.origin?t(row.label as "Free cash flow")+" · Woofi · "+row.unit:row.label||row.metric_id}</option>)}
    </select>
    <div className="financial-research-chart-canvas min-w-0" data-financial-chart="provider-ratio"><ResponsiveContainer width="100%" height="100%" minWidth={0}>
     <LineChart data={points} margin={{top:12,right:12,left:4,bottom:8}} accessibilityLayer><CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 5"/><XAxis dataKey="period" tick={{fill:'var(--muted-foreground)',fontSize:11}} axisLine={false} tickLine={false} minTickGap={10} tickMargin={9}/><YAxis tick={{fill:'var(--muted-foreground)',fontSize:11}} width={64} tickFormatter={value=>number(value)} axisLine={false} tickLine={false}/><Tooltip cursor={{stroke:'var(--border)',strokeDasharray:'3 4'}} filterNull content={({active,payload,label})=>!active||!payload?.length?null:<div className="financial-chart-tooltip" role="status"><p className="mb-1 font-semibold">{String(label)}</p><strong>{number(payload[0].value)}</strong></div>}/><Line dataKey="value" name={selected.label||selected.metric_id} stroke="var(--chart)" strokeWidth={2.5} dot={{r:2.5,strokeWidth:0}} activeDot={{r:5,stroke:'var(--card)',strokeWidth:2}} connectNulls={false} isAnimationActive={animate} animationDuration={560} animationEasing="ease-out"/></LineChart>
