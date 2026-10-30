@@ -1,5 +1,71 @@
 # Woofi — Domain Context
 
+## Current project and workspace checkpoint — 2026-10-30
+
+The current product-development focus is Stock Research using existing,
+authorized data and the financial data and UI already available. Vnstock Bronze
+and a Vnstock v5 upgrade remain paused pending clarification on historical
+coverage, advanced metrics, and data-use rights. Do not make Bronze-dependent
+work or paid-source assumptions part of unrelated improvements.
+
+The development Git root is `C:\Users\PC\Projects\woofi-dev`; it contains the
+feature development checkout and currently registers seven Codex task worktrees.
+Treat every worktree as an independent line of work: inspect its branch, HEAD,
+and status before integration or cleanup. The separate checkout at
+`C:\Users\PC\Downloads\vn30-intelligence-agent` remains present and is
+referenced by the canonical runtime for SSI configuration. It is not safe to
+delete or consolidate based on folder name or commit ancestry alone. The
+canonical runtime, its release pin, services, data, and credentials are separate
+from this development checkout; source changes do not become live without the
+documented release workflow.
+
+The development tree contains owner work in progress. Before any Git operation,
+inspect the exact working-tree changes and preserve them unless the owner
+explicitly authorizes a scoped operation. Do not infer that uncommitted work is
+redundant or abandoned from its age, path, or worktree name.
+
+## Owner direction — Stock Research priority while Bronze is pending, 2026-10-29
+
+Pause new features that depend on Vnstock Bronze and any Vnstock v5 upgrade
+while awaiting clarification on historical financial statements, advanced
+metrics and applicable data-use rights. Continue Stock Research using existing
+authorized data, saved captures, APIs, deterministic Financial Engine and UI
+components. Existing private/public evidence and display gates still apply.
+
+Prioritize a coherent company-research experience: help users understand the
+business, inspect financial changes and supporting evidence, and see coverage,
+period and freshness limits. Reuse the current research destinations, charts,
+statements, News and corporate-action contracts. Develop small useful slices;
+new sources, numerical definitions, acquisition or deployment are separate scope.
+
+## Owner direction — budget-constrained data and intelligence priority, 2026-10-22
+
+The owner has no budget for purchasing the missing data at this stage. Work with
+existing captures and legitimately accessible free sources; do not introduce paid
+data subscriptions or new service costs without a subsequent explicit owner
+decision. Improve data gradually within available resources. Completing the
+VN30/VN100 matrix or every acquisition task is not a release prerequisite, and
+coverage targets must not drive forced collection or invented completeness.
+
+Finish a small, bounded pass on the usability and reliability of available data,
+then return the main product effort to Woofi's original purpose: turn evidence
+into useful information about what changed, why it deserves attention and what
+remains uncertain. Data collection can continue incrementally alongside this
+work. A useful, verified subset is sufficient to start; absent data stays visible
+and narrows the claims rather than blocking unrelated useful analysis.
+
+Build the intelligence layer on the existing deterministic analytics, with
+inspectable source evidence and a clear distinction between observed facts,
+computed comparisons and interpretations. AI may explain those outputs but must
+not invent or silently recalculate financial facts. Preserve the existing
+Materiality, public/private access and no BUY/SELL/HOLD boundaries.
+
+ML and tool-using agents are later extensions of this foundation. ML needs
+appropriate historical evidence, labels and evaluation; agents need bounded
+tools, traceable actions and explicit cost/write permissions. This direction does
+not resume the paused Technical Materiality calibration or authorize unattended
+collection, new training runs or agent deployment.
+
 ## Financial collector V5.7 — controlled private pilot, 2026-10-22
 
 A bounded collector now consumes fingerprinted V5.6 P0 tasks and appends to the
@@ -809,10 +875,11 @@ AI explanation must remain grounded in inspectable evidence.
 
 ## Current architecture stage
 
-### Project checkpoint — 2026-10-05
+### Historical project checkpoint — 2026-10-05
 
-This is the canonical current project status. It supersedes earlier phase-status
-summaries; historical research documents and implementation commits remain intact.
+This checkpoint records the project state on 2026-10-05. It is historical and
+does not supersede the current 2026-10-30 project and workspace checkpoint above;
+historical research documents and implementation commits remain intact.
 
 Completed capabilities:
 

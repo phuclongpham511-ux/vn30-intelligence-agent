@@ -1,5 +1,28 @@
 # AGENTS.md
 
+## Workspace and Git safety
+
+- The development Git root is `C:\Users\PC\Projects\woofi-dev`. Check the
+  active branch, HEAD, and working-tree status before editing, committing, or
+  syncing. The root is currently used with `feature/financial-data-intelligence`.
+- Codex task worktrees registered under this Git root are independent working
+  lines. Inspect `git worktree list` and each worktree's branch/status before
+  integrating or cleaning anything; a worktree name or an old task is not proof
+  that its work was merged or is disposable.
+- `C:\Users\PC\Downloads\vn30-intelligence-agent` remains a separate checkout
+  and is still referenced by the canonical runtime for SSI configuration. Do
+  not remove, relocate, merge, or edit its credentials/runtime configuration as
+  part of ordinary development or repository cleanup. Follow the documented
+  runtime procedure for any explicitly authorized change.
+- Preserve existing uncommitted changes, untracked files, branches, worktrees,
+  and recovery data. Never stage broadly, reset, clean, or overwrite unrelated
+  work. Stage explicit paths and review the staged diff before committing.
+- Development source, GitHub branch state, and canonical Woofi runtime are
+  separate. A commit or push does not deploy; use the documented release and
+  rollback procedures for an authorized canonical integration.
+- Reply to the owner in Vietnamese, regardless of the language used in the
+  prompt, unless the owner explicitly changes this preference.
+
 ## Project operating rules
 
 Read `CONTEXT.md` before making product or backend changes. When touching the frontend, also read `frontend/DESIGN.md`.
